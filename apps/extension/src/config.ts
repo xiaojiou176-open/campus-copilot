@@ -1,0 +1,202 @@
+import { browser } from 'wxt/browser';
+import { z } from 'zod';
+import type { ProviderId } from '@campus-copilot/ai';
+import type { EdStemPathConfig } from '@campus-copilot/adapters-edstem';
+import type { ExportFormat } from '@campus-copilot/exporter';
+
+const EXTENSION_CONFIG_KEY = 'campusCopilotConfig';
+
+const ExportFormatSchema = z.enum(['markdown', 'csv', 'json', 'ics']);
+const ProviderConfigIdSchema = z.enum(['openai', 'gemini']);
+const DEFAULT_EXTENSION_CONFIG = {
+  defaultExportFormat: 'markdown',
+  ai: {
+    defaultProvider: 'openai',
+    models: {
+      openai: 'gpt-4.1-mini',
+      gemini: 'gemini-2.5-flash',
+    },
+  },
+  sites: {
+    edstem: {},
+  },
+} as const;
+
+const StoredExtensionConfigSchema = z
+  .object({
+    defaultExportFormat: ExportFormatSchema.optional(),
+    ai: z
+      .object({
+        bffBaseUrl: z.string().url().optional(),
+        defaultProvider: ProviderConfigIdSchema.optional(),
+        models: z
+          .object({
+            openai: z.string().min(1).optional(),
+            gemini: z.string().min(1).optional(),
+          })
+          .optional(),
+      })
+      .optional(),
+    sites: z
+      .object({
+        edstem: z
+          .object({
+            threadsPath: z.string().min(1).optional(),
+            unreadPath: z.string().min(1).optional(),
+            recentActivityPath: z.string().min(1).optional(),
+          })
+          .optional(),
+      })
+      .optional(),
+  })
+  .strict();
+
+const ExtensionConfigSchema = z
+  .object({
+    defaultExportFormat: ExportFormatSchema.default(DEFAULT_EXTENSION_CONFIG.defaultExportFormat),
+    ai: z
+      .object({
+        bffBaseUrl: z.string().url().optional(),
+        defaultProvider: ProviderConfigIdSchema.default(DEFAULT_EXTENSION_CONFIG.ai.defaultProvider),
+        models: z
+          .object({
+            openai: z.string().min(1).default(DEFAULT_EXTENSION_CONFIG.ai.models.openai),
+            gemini: z.string().min(1).default(DEFAULT_EXTENSION_CONFIG.ai.models.gemini),
+          })
+          .default(DEFAULT_EXTENSION_CONFIG.ai.models),
+      })
+      .default(DEFAULT_EXTENSION_CONFIG.ai),
+    sites: z
+      .object({
+        edstem: z
+          .object({
+            threadsPath: z.string().min(1).optional(),
+            unreadPath: z.string().min(1).optional(),
+            recentActivityPath: z.string().min(1).optional(),
+          })
+          .default({}),
+      })
+      .default(DEFAULT_EXTENSION_CONFIG.sites),
+  })
+  .strict();
+
+export type ExtensionConfig = z.infer<typeof ExtensionConfigSchema>;
+
+type StorageAreaLike = {
+  get(keys?: string | string[] | Record<string, unknown> | null): Promise<Record<string, unknown>>;
+  set(items: Record<string, unknown>): Promise<void>;
+};
+
+function normalizeConfig(value: unknown): ExtensionConfig {
+  const parsed = StoredExtensionConfigSchema.parse(value ?? {});
+  return ExtensionConfigSchema.parse({
+    defaultExportFormat: parsed.defaultExportFormat ?? DEFAULT_EXTENSION_CONFIG.defaultExportFormat,
+    ai: {
+      ...DEFAULT_EXTENSION_CONFIG.ai,
+      ...parsed.ai,
+      models: {
+        ...DEFAULT_EXTENSION_CONFIG.ai.models,
+        ...parsed.ai?.models,
+      },
+    },
+    sites: {
+      ...DEFAULT_EXTENSION_CONFIG.sites,
+      ...parsed.sites,
+      edstem: {
+        ...DEFAULT_EXTENSION_CONFIG.sites.edstem,
+        ...parsed.sites?.edstem,
+      },
+    },
+  });
+}
+
+export function getDefaultExtensionConfig(): ExtensionConfig {
+  return normalizeConfig(undefined);
+}
+
+export async function loadExtensionConfig(storageArea: StorageAreaLike = browser.storage.local) {
+  const stored = await storageArea.get(EXTENSION_CONFIG_KEY);
+  return normalizeConfig(stored[EXTENSION_CONFIG_KEY]);
+}
+
+export async function saveExtensionConfig(
+  nextConfig: ExtensionConfig,
+  storageArea: StorageAreaLike = browser.storage.local,
+) {
+  const parsed = ExtensionConfigSchema.parse(nextConfig);
+  await storageArea.set({
+    [EXTENSION_CONFIG_KEY]: parsed,
+  });
+  return parsed;
+}
+
+export function subscribeExtensionConfig(listener: (config: ExtensionConfig) => void) {
+  const handleChange = (
+    changes: Record<string, { newValue?: unknown }>,
+    areaName: string,
+  ) => {
+    if (areaName !== 'local' || !changes[EXTENSION_CONFIG_KEY]) {
+      return;
+    }
+
+    listener(normalizeConfig(changes[EXTENSION_CONFIG_KEY]?.newValue));
+  };
+
+  browser.storage.onChanged.addListener(handleChange);
+  return () => {
+    browser.storage.onChanged.removeListener(handleChange);
+  };
+}
+
+export function getProviderModel(config: ExtensionConfig, provider: ProviderId) {
+  return config.ai.models[provider];
+}
+
+export function getEdStemPathConfig(config: ExtensionConfig): EdStemPathConfig | undefined {
+  const { threadsPath, unreadPath, recentActivityPath } = config.sites.edstem;
+  if (!threadsPath) {
+    return undefined;
+  }
+
+  return {
+    threadsPath,
+    unreadPath,
+    recentActivityPath,
+  };
+}
+
+export function buildNextConfig(input: {
+  current: ExtensionConfig;
+  defaultExportFormat?: ExportFormat;
+  ai?: Partial<ExtensionConfig['ai']>;
+  sites?: Partial<ExtensionConfig['sites']>;
+}) {
+  return normalizeConfig({
+    ...input.current,
+    ...(input.defaultExportFormat ? { defaultExportFormat: input.defaultExportFormat } : {}),
+    ...(input.ai
+      ? {
+          ai: {
+            ...input.current.ai,
+            ...input.ai,
+            models: {
+              ...input.current.ai.models,
+              ...input.ai.models,
+            },
+          },
+        }
+      : {}),
+    ...(input.sites
+      ? {
+          sites: {
+            ...input.current.sites,
+            ...input.sites,
+            edstem: {
+              ...input.current.sites.edstem,
+              ...input.sites.edstem,
+            },
+          },
+        }
+      : {}),
+  });
+}
