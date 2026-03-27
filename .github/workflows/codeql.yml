@@ -50,17 +50,17 @@ jobs:
 
       - name: Initialize CodeQL
         if: steps.feature.outputs.enabled == 'true'
-        uses: github/codeql-action/init@38697555549f1db7851b81482ff19f1fa5c4fedc
+        uses: github/codeql-action/init@b8bb9f28b8d3f992092362369c57161b755dea45
         with:
           languages: ${{ matrix.language }}
 
       - name: Autobuild
         if: steps.feature.outputs.enabled == 'true'
-        uses: github/codeql-action/autobuild@38697555549f1db7851b81482ff19f1fa5c4fedc
+        uses: github/codeql-action/autobuild@b8bb9f28b8d3f992092362369c57161b755dea45
 
       - name: Analyze
         if: steps.feature.outputs.enabled == 'true'
-        uses: github/codeql-action/analyze@38697555549f1db7851b81482ff19f1fa5c4fedc
+        uses: github/codeql-action/analyze@b8bb9f28b8d3f992092362369c57161b755dea45
 
       - name: Report unavailable feature
         if: steps.feature.outputs.enabled != 'true'
