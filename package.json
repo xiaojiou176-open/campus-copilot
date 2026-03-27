@@ -1,0 +1,51 @@
+{
+  "name": "campus-copilot",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.22.0",
+  "scripts": {
+    "dev:extension": "pnpm --filter @campus-copilot/extension dev",
+    "dev:api": "pnpm --filter @campus-copilot/api dev",
+    "start:api": "pnpm --filter @campus-copilot/api start",
+    "build:extension": "pnpm --filter @campus-copilot/extension build",
+    "test:extension": "pnpm --filter @campus-copilot/extension test",
+    "test:smoke": "pnpm --filter @campus-copilot/extension test:smoke",
+    "test:api": "pnpm --filter @campus-copilot/api test",
+    "smoke:api": "bash scripts/api-healthcheck.sh",
+    "smoke:provider": "bash scripts/provider-roundtrip-smoke.sh",
+    "smoke:sidepanel": "node --env-file-if-exists=.env scripts/sidepanel-provider-smoke.mjs",
+    "smoke:support": "bash scripts/support-bundle-smoke.sh",
+    "cleanup:runtime": "bash scripts/cleanup-runtime.sh",
+    "preflight:live": "node --env-file-if-exists=.env scripts/live-preflight.mjs",
+    "diagnose:live": "pnpm cleanup:runtime && pnpm preflight:live",
+    "support:bundle": "node --env-file-if-exists=.env scripts/support-bundle.mjs",
+    "probe:live": "node --env-file-if-exists=.env scripts/live-site-probe.mjs",
+    "check:docs:ssot": "node scripts/check-docs-ssot.mjs",
+    "check:verification-claims": "node scripts/check-verification-claims.mjs",
+    "check:public-surface": "node scripts/check-public-surface.mjs",
+    "check:actions-pinning": "node scripts/check-actions-pinning.mjs",
+    "check:english-canonical": "node scripts/check-english-canonical.mjs",
+    "check:logging-schema": "node scripts/check-logging-schema.mjs",
+    "check:runtime-artifacts": "node scripts/check-runtime-artifacts.mjs",
+    "check:root-hygiene": "node scripts/check-root-hygiene.mjs",
+    "verify:governance": "pnpm check:docs:ssot && pnpm check:verification-claims && pnpm check:public-surface && pnpm check:actions-pinning && pnpm check:english-canonical",
+    "verify": "bash scripts/verify.sh",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "fake-indexeddb": "^6.1.0",
+    "msw": "^2.11.2",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "web-ext-run@0.2.4>multimatch": "^8.0.0"
+    }
+  }
+}
