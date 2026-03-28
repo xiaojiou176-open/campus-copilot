@@ -1,0 +1,37 @@
+# Canonical repo-root entries
+.agents
+.env
+.env.example
+.git
+.github
+.gitignore
+.runtime-cache
+AGENTS.md
+apps
+CHANGELOG.md
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+docs
+LICENSE
+package.json
+packages
+pnpm-lock.yaml
+pnpm-workspace.yaml
+policies
+README.md
+scripts
+SECURITY.md
+tsconfig.base.json
+
+# Tolerated local-only root entries
+.agent
+.cache
+.claude
+.codex
+.idea
+.pnpm-store
+.vscode
+logs
+node_modules
+temp
+tmp
