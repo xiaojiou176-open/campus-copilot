@@ -29,9 +29,9 @@ Think of it like a building inspection board:
 | `pnpm check:public-surface` | deterministic governance check | contributor / CI | Yes | public collaboration shell files exist and README avoids repo-external hard assertions | GitHub settings state |
 | `pnpm check:actions-pinning` | deterministic governance check | contributor / CI | Yes | workflow actions are pinned by commit SHA | runtime code quality |
 | `pnpm check:english-canonical` | deterministic governance check | contributor / CI | Yes | canonical collaboration docs stay in English | UI localization strategy |
-| `pnpm check:logging-schema` | deterministic governance check | local developer | No | support/live scripts keep `runId` and avoid absolute-path style exposure | full runtime observability maturity |
-| `pnpm check:runtime-artifacts` | deterministic hygiene check | local developer | No | top-level runtime artifact paths stay controlled | nested runtime output drift |
-| `pnpm check:root-hygiene` | deterministic hygiene check | local developer | No | obvious root noise such as `.DS_Store` stays out of the worktree | full output-path governance |
+| `pnpm check:logging-schema` | deterministic governance check | contributor / CI | Yes | support/live scripts keep `runId` and avoid absolute-path style exposure | full runtime observability maturity |
+| `pnpm check:runtime-artifacts` | deterministic hygiene check | contributor / CI | Yes | top-level runtime artifact paths stay controlled | nested runtime output drift |
+| `pnpm check:root-hygiene` | deterministic hygiene check | contributor / CI | Yes | repo-root entries stay inside the declared allowlist and obvious root noise stays out of the worktree | deep nested output-path governance |
 
 ## Command Classification Rules
 
@@ -85,6 +85,7 @@ That means:
 
 - do keep `verify`
 - do keep deterministic docs/governance checks
+- do keep deterministic hygiene checks that protect repo-root and runtime artifact boundaries
 - do keep security scans that do not depend on local secrets or manual browser sessions
 - do **not** add provider-key-dependent or Gemini/multimodal/manual live checks to required CI
 
