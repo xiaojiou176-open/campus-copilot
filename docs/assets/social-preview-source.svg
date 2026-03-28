@@ -5,24 +5,9 @@
   <text x="112" y="172" fill="#53729A" font-family="Arial, Helvetica, sans-serif" font-size="28" letter-spacing="2">CAMPUS COPILOT</text>
   <text x="112" y="276" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700">One local-first workspace</text>
   <text x="112" y="338" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700">for class work.</text>
-  <text x="112" y="410" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="34">Normalize Canvas, Gradescope, EdStem, and MyUW first.</text>
-  <text x="112" y="458" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="34">Explain with AI second.</text>
+  <text x="112" y="414" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="38">Bring class systems together. Explain with AI.</text>
 
-  <rect x="112" y="536" width="458" height="240" rx="28" fill="#F8FBFF" stroke="#D7E3F2"/>
-  <text x="146" y="602" fill="#173A64" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">What the repo proves today</text>
-  <text x="146" y="658" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="23">- shared schema + Dexie read models</text>
-  <text x="146" y="702" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="23">- deterministic repo verification</text>
-  <text x="146" y="746" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="23">- thin BFF for formal AI paths</text>
-
-  <rect x="618" y="536" width="470" height="240" rx="28" fill="#14345B"/>
-  <text x="652" y="602" fill="#F6FAFF" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">What it does not pretend</text>
-  <text x="652" y="658" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="23">- not every path is a public API</text>
-  <text x="652" y="702" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="23">- mocked smoke is not live proof</text>
-  <text x="652" y="746" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="23">- write automation stays outside scope</text>
-
-  <rect x="112" y="834" width="976" height="220" rx="28" fill="#F8FBFF" stroke="#D7E3F2"/>
-  <text x="150" y="900" fill="#173A64" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Current formal paths</text>
-  <text x="150" y="954" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- local-first workbench views</text>
-  <text x="150" y="994" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- export presets from normalized data</text>
-  <text x="150" y="1034" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- AI after structure through the formal BFF path</text>
+  <rect x="112" y="560" width="976" height="206" rx="28" fill="#14345B"/>
+  <text x="150" y="644" fill="#F6FAFF" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700">Read-only. Export-ready. AI explanations.</text>
+  <text x="150" y="704" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="28">Deadlines, updates, and site status in one desk.</text>
 </svg>

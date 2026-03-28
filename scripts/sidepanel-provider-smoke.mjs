@@ -18,6 +18,7 @@ const defaultModel = defaultProvider === 'gemini'
 const screenshotPath = process.env.CAPTURE_SCREENSHOT_PATH;
 const uiLanguage = process.env.SIDEPANEL_UI_LANGUAGE ?? (screenshotPath ? 'en' : 'auto');
 const browserLanguage = process.env.SIDEPANEL_BROWSER_LANGUAGE ?? 'en-US';
+const screenshotMode = screenshotPath ? 'public-proof' : 'runtime-smoke';
 const effectiveUiLanguage =
   uiLanguage === 'auto'
     ? browserLanguage.toLowerCase().startsWith('zh')
@@ -141,6 +142,269 @@ function validateProviderStatusHealth({ body }) {
   } catch {
     return false;
   }
+}
+
+function source(site, resourceId, resourceType) {
+  return {
+    site,
+    resourceId,
+    resourceType,
+  };
+}
+
+function buildPublicScreenshotFixture() {
+  const now = Date.now();
+  const minutes = (value) => value * 60 * 1000;
+  const hours = (value) => value * 60 * 60 * 1000;
+  const days = (value) => value * 24 * 60 * 60 * 1000;
+  const iso = (offset) => new Date(now + offset).toISOString();
+
+  const courses = [
+    {
+      id: 'canvas:course:cse142',
+      kind: 'course',
+      site: 'canvas',
+      source: source('canvas', 'cse142', 'course'),
+      title: 'CSE 142',
+    },
+    {
+      id: 'gradescope:course:math126',
+      kind: 'course',
+      site: 'gradescope',
+      source: source('gradescope', 'math126', 'course'),
+      title: 'MATH 126',
+    },
+  ];
+
+  const assignments = [
+    {
+      id: 'canvas:assignment:hw5',
+      kind: 'assignment',
+      site: 'canvas',
+      source: source('canvas', 'hw5', 'assignment'),
+      courseId: 'canvas:course:cse142',
+      title: 'Homework 5',
+      dueAt: iso(hours(26)),
+      createdAt: iso(-days(2)),
+      status: 'todo',
+      url: 'https://canvas.uw.edu/courses/cse142/assignments/hw5',
+    },
+    {
+      id: 'canvas:assignment:lab6',
+      kind: 'assignment',
+      site: 'canvas',
+      source: source('canvas', 'lab6', 'assignment'),
+      courseId: 'canvas:course:cse142',
+      title: 'Lab 6 reflection',
+      dueAt: iso(hours(8)),
+      createdAt: iso(-hours(18)),
+      status: 'todo',
+      url: 'https://canvas.uw.edu/courses/cse142/assignments/lab6',
+    },
+  ];
+
+  const announcements = [
+    {
+      id: 'canvas:announcement:checkpoint',
+      kind: 'announcement',
+      site: 'canvas',
+      source: source('canvas', 'checkpoint', 'announcement'),
+      courseId: 'canvas:course:cse142',
+      title: 'Project checkpoint updated',
+      postedAt: iso(-hours(5)),
+      url: 'https://canvas.uw.edu/courses/cse142/announcements/checkpoint',
+    },
+  ];
+
+  const grades = [
+    {
+      id: 'gradescope:grade:hw4',
+      kind: 'grade',
+      site: 'gradescope',
+      source: source('gradescope', 'hw4', 'grade'),
+      courseId: 'gradescope:course:math126',
+      assignmentId: 'gradescope:assignment:hw4',
+      title: 'Homework 4',
+      score: 95,
+      maxScore: 100,
+      releasedAt: iso(-hours(3)),
+      url: 'https://www.gradescope.com/courses/math126/assignments/hw4',
+    },
+  ];
+
+  const messages = [
+    {
+      id: 'edstem:message:lab5',
+      kind: 'message',
+      site: 'edstem',
+      source: source('edstem', 'lab5', 'thread'),
+      messageKind: 'thread',
+      title: 'Lab 5 clarification posted',
+      createdAt: iso(-hours(2)),
+      unread: true,
+      instructorAuthored: true,
+      url: 'https://edstem.org/us/courses/lab5/posts/clarification',
+    },
+  ];
+
+  const syncState = [
+    {
+      key: 'canvas',
+      site: 'canvas',
+      status: 'success',
+      lastSyncedAt: iso(-minutes(9)),
+      lastOutcome: 'success',
+    },
+    {
+      key: 'gradescope',
+      site: 'gradescope',
+      status: 'success',
+      lastSyncedAt: iso(-minutes(7)),
+      lastOutcome: 'success',
+    },
+    {
+      key: 'edstem',
+      site: 'edstem',
+      status: 'success',
+      lastSyncedAt: iso(-minutes(6)),
+      lastOutcome: 'success',
+    },
+    {
+      key: 'myuw',
+      site: 'myuw',
+      status: 'success',
+      lastSyncedAt: iso(-minutes(5)),
+      lastOutcome: 'success',
+    },
+  ];
+
+  const trackedEntities = [...courses, ...assignments, ...announcements, ...grades, ...messages];
+  const entityState = trackedEntities.map((entity) => ({
+    key: entity.id,
+    entityId: entity.id,
+    site: entity.site,
+    kind: entity.kind,
+    firstSeenAt: entity.createdAt ?? entity.postedAt ?? entity.releasedAt ?? iso(-hours(4)),
+    lastSyncedAt: iso(-minutes(4)),
+  }));
+
+  return {
+    courses,
+    assignments,
+    announcements,
+    grades,
+    messages,
+    events: [],
+    alerts: [],
+    sync_state: syncState,
+    entity_state: entityState,
+  };
+}
+
+async function seedPublicScreenshotData(page) {
+  const fixture = buildPublicScreenshotFixture();
+  await page.evaluate(async ({ fixture }) => {
+    const openDb = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('campus-copilot');
+      request.onerror = () => reject(new Error('open_indexeddb_failed'));
+      request.onsuccess = () => resolve(request.result);
+    });
+
+    const storeNames = ['courses', 'assignments', 'announcements', 'grades', 'messages', 'events', 'alerts', 'sync_state', 'entity_state'];
+    const tx = openDb.transaction(storeNames, 'readwrite');
+
+    for (const name of storeNames) {
+      tx.objectStore(name).clear();
+    }
+
+    for (const [name, records] of Object.entries(fixture)) {
+      const store = tx.objectStore(name);
+      for (const record of records) {
+        store.put(record);
+      }
+    }
+
+    await new Promise((resolve, reject) => {
+      tx.onerror = () => reject(tx.error ?? new Error('seed_transaction_failed'));
+      tx.onabort = () => reject(tx.error ?? new Error('seed_transaction_aborted'));
+      tx.oncomplete = () => resolve();
+    });
+
+    openDb.close();
+  }, { fixture });
+}
+
+async function capturePublicProofScreenshot(page, path) {
+  await page.addStyleTag({
+    content: `
+      .surface__card,
+      #public-proof-snapshot {
+        max-width: 1240px !important;
+        padding: 28px !important;
+      }
+      .surface__copy {
+        max-width: 860px !important;
+        font-size: 1.05rem !important;
+      }
+      .surface__hero-meta {
+        min-width: 220px !important;
+      }
+      .surface__grid--split {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      .surface__panel p,
+      .surface__panel li {
+        font-size: 0.98rem !important;
+      }
+      .surface__metric-value {
+        font-size: 2.3rem !important;
+      }
+    `,
+  });
+
+  await page.evaluate(() => {
+    document.getElementById('public-proof-snapshot')?.remove();
+
+    const sourceCard = document.querySelector('.surface__card');
+    const hero = sourceCard?.querySelector('.surface__hero');
+    const stats = sourceCard?.querySelector('.surface__grid--stats');
+    const firstSplit = sourceCard?.querySelector('.surface__grid--split');
+
+    if (!sourceCard || !hero || !stats || !firstSplit) {
+      throw new Error('public_proof_capture_blocks_missing');
+    }
+
+    const snapshot = document.createElement('section');
+    snapshot.id = 'public-proof-snapshot';
+    snapshot.className = 'surface__card';
+    snapshot.style.margin = '24px auto';
+    snapshot.style.display = 'grid';
+    snapshot.style.gap = '22px';
+
+    snapshot.append(hero.cloneNode(true), stats.cloneNode(true), firstSplit.cloneNode(true));
+
+    const heroCopy = snapshot.querySelector('.surface__copy');
+    if (heroCopy) {
+      heroCopy.textContent = 'One desk for deadlines, updates, site status, and AI explanations.';
+    }
+
+    const heroMeta = snapshot.querySelector('.surface__hero-meta');
+    heroMeta?.lastElementChild?.remove();
+
+    const panelDescriptions = snapshot.querySelectorAll('.surface__panel > p');
+    if (panelDescriptions[0]) {
+      panelDescriptions[0].textContent = 'Urgent work at a glance.';
+    }
+    if (panelDescriptions[1]) {
+      panelDescriptions[1].textContent = 'Sync, export, and continue.';
+    }
+
+    document.body.append(snapshot);
+  });
+
+  await page.locator('#public-proof-snapshot').screenshot({
+    path,
+  });
 }
 
 async function ensureServer(url, start, validate) {
@@ -383,7 +647,16 @@ try {
   }, validateSidepanelHealth);
 
   browser = await chromium.launch({ headless: true });
-  page = await browser.newPage();
+  page = await browser.newPage(
+    screenshotMode === 'public-proof'
+      ? {
+          viewport: {
+            width: 1480,
+            height: 1400,
+          },
+        }
+      : undefined,
+  );
   await page.addInitScript(buildChromeMocks(), {
     baseUrl: 'https://canvas.uw.edu/',
     bffBaseUrl,
@@ -401,11 +674,11 @@ try {
   }
   await providerReadyLabel.waitFor({ timeout: 20000 });
   if (screenshotPath) {
+    await seedPublicScreenshotData(page);
+    await page.reload();
+    await providerReadyLabel.waitFor({ timeout: 20000 });
     mkdirSync(dirname(screenshotPath), { recursive: true });
-    await page.screenshot({
-      path: screenshotPath,
-      fullPage: true,
-    });
+    await capturePublicProofScreenshot(page, screenshotPath);
   }
   await page.getByLabel(questionLabel).fill('Reply with the single word READY.');
   await page.getByRole('button', { name: askAiLabel }).click();
