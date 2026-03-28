@@ -455,12 +455,12 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
   async function handleAskAi() {
     if (!config.ai.bffBaseUrl) {
-      setAiError('还没有配置 BFF 地址，请先到 Options 填写。');
+      setAiError('BFF base URL is not configured yet. Set it in Options first.');
       return;
     }
 
     if (!providerStatus.providers[aiProvider]?.ready) {
-      setAiError(`${PROVIDER_OPTIONS.find((option) => option.value === aiProvider)?.label ?? aiProvider} 当前在 BFF 中还没有 ready。`);
+      setAiError(`${PROVIDER_OPTIONS.find((option) => option.value === aiProvider)?.label ?? aiProvider} is not ready in the BFF yet.`);
       await refreshProviderStatus();
       return;
     }
@@ -590,7 +590,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         filename: 'campus-copilot-diagnostics.json',
         saveAs: surface !== 'popup',
       });
-      setExportFeedback('campus-copilot-diagnostics.json 已准备下载。');
+      setExportFeedback('campus-copilot-diagnostics.json is ready to download.');
     } finally {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
@@ -718,7 +718,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
             <p>这块像运行时控制塔，不是告诉你“系统很多功能”，而是告诉你“当前真正卡住哪些前置条件”。</p>
             <div className="surface__stack">
               <p className="surface__meta">
-                当前状态：{diagnostics.healthy ? 'ready_to_continue' : 'blocked_by_environment_or_runtime'}
+                Current status: {diagnostics.healthy ? 'ready_to_continue' : 'blocked_by_environment_or_runtime'}
               </p>
               {diagnostics.blockers.length > 0 ? (
                 <ul className="surface__list">
@@ -727,7 +727,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   ))}
                 </ul>
               ) : (
-                <p>当前没有明显运行时阻塞，可以继续做更深一层的真实验收。</p>
+                <p>No obvious runtime blockers are active right now, so deeper validation can continue.</p>
               )}
               {diagnostics.nextActions.length > 0 ? (
                 <div className="surface__group">
@@ -741,7 +741,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               ) : null}
               <div className="surface__actions">
                 <button className="surface__button surface__button--ghost" onClick={() => void handleExportDiagnostics()}>
-                  导出诊断 JSON
+                  Export diagnostics JSON
                 </button>
               </div>
             </div>
@@ -956,7 +956,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     配置 BFF / Provider
                   </button>
                 </div>
-                {!config.ai.bffBaseUrl ? <p className="surface__feedback">当前还没配置 BFF 地址，所以 AI 入口只会诚实提示，不会静默失败。</p> : null}
+                {!config.ai.bffBaseUrl ? <p className="surface__feedback">BFF base URL is still missing, so the AI path should fail loudly instead of failing silently.</p> : null}
                 {aiError ? <p className="surface__feedback surface__feedback--error">{aiError}</p> : null}
                 {aiAnswer ? <div className="surface__answer">{aiAnswer}</div> : null}
               </article>
