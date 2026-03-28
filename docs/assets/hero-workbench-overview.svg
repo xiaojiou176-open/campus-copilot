@@ -1,0 +1,37 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="32" fill="#F3F7FB"/>
+  <rect x="40" y="40" width="1120" height="680" rx="28" fill="white" stroke="#D8E3F2"/>
+  <text x="84" y="108" fill="#53729A" font-family="Arial, Helvetica, sans-serif" font-size="26" letter-spacing="2">CAMPUS COPILOT</text>
+  <text x="84" y="170" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="700">One local-first workspace for class work.</text>
+  <text x="84" y="216" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">Normalize Canvas, Gradescope, EdStem, and MyUW first. Explain with AI second.</text>
+
+  <rect x="84" y="270" width="220" height="104" rx="22" fill="#F6FAFF" stroke="#D8E3F2"/>
+  <text x="110" y="314" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">Today Snapshot</text>
+  <text x="110" y="348" fill="#4B6A91" font-family="Arial, Helvetica, sans-serif" font-size="18">Deadlines, updates, and risk</text>
+
+  <rect x="326" y="270" width="220" height="104" rx="22" fill="#F6FAFF" stroke="#D8E3F2"/>
+  <text x="352" y="314" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">Structured Export</text>
+  <text x="352" y="348" fill="#4B6A91" font-family="Arial, Helvetica, sans-serif" font-size="18">Markdown, CSV, JSON, and ICS</text>
+
+  <rect x="568" y="270" width="220" height="104" rx="22" fill="#F6FAFF" stroke="#D8E3F2"/>
+  <text x="594" y="314" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">Diagnostics</text>
+  <text x="594" y="348" fill="#4B6A91" font-family="Arial, Helvetica, sans-serif" font-size="18">Show blockers instead of hiding them</text>
+
+  <rect x="810" y="270" width="220" height="104" rx="22" fill="#F6FAFF" stroke="#D8E3F2"/>
+  <text x="836" y="314" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">AI After Structure</text>
+  <text x="836" y="348" fill="#4B6A91" font-family="Arial, Helvetica, sans-serif" font-size="18">No raw DOM, HTML, or cookies</text>
+
+  <rect x="84" y="420" width="464" height="236" rx="24" fill="#FBFDFF" stroke="#D8E3F2"/>
+  <text x="116" y="470" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">What the repo proves today</text>
+  <text x="116" y="516" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="22">- shared schema plus Dexie read models</text>
+  <text x="116" y="552" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="22">- multi-site adapters with explicit boundary classes</text>
+  <text x="116" y="588" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="22">- deterministic repository verification through pnpm verify</text>
+  <text x="116" y="624" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="22">- thin BFF for formal OpenAI and Gemini API-key flows</text>
+
+  <rect x="580" y="420" width="450" height="236" rx="24" fill="#14345B"/>
+  <text x="612" y="470" fill="#F6FAFF" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">What the repo does not claim</text>
+  <text x="612" y="516" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="22">- not every site path is an official public API</text>
+  <text x="612" y="552" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="22">- mocked smoke is not full live end-to-end proof</text>
+  <text x="612" y="588" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="22">- OAuth, web_session, and auto-routing are not formal paths</text>
+  <text x="612" y="624" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="22">- write automation is outside the current product boundary</text>
+</svg>
