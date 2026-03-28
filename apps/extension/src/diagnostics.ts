@@ -42,11 +42,11 @@ export function formatProviderStatusError(error?: string) {
   }
 
   if (error === 'missing_bff_base_url') {
-    return '还没有配置 BFF 地址';
+    return 'BFF base URL is not configured yet';
   }
 
   if (error === 'provider_status_fetch_failed') {
-    return 'provider 状态拉取失败';
+    return 'provider status fetch failed';
   }
 
   return error;
@@ -80,21 +80,21 @@ export function buildDiagnosticsSummary(input: {
   const nextActions: string[] = [];
 
   if (!input.bffBaseUrl) {
-    blockers.push('BFF 地址尚未配置');
-    nextActions.push('先在 Options 中填写 BFF base URL，再刷新 provider 状态。');
+    blockers.push('BFF base URL is not configured');
+    nextActions.push('Set the BFF base URL in Options, then refresh provider status.');
   }
 
   const readyProviders = input.providerOptions.filter(
     (option) => input.providerStatus.providers[option.value]?.ready,
   );
   if (readyProviders.length === 0) {
-    blockers.push(`Provider 未 ready：${input.providerOptions.map((option) => option.label).join(', ')}`);
-    nextActions.push('如果要做真实 AI round-trip，请至少补一条正式 provider API key。');
+    blockers.push(`Provider not ready: ${input.providerOptions.map((option) => option.label).join(', ')}`);
+    nextActions.push('Add at least one formal provider API key before attempting a real AI round-trip.');
   } else if (!input.providerStatus.providers[input.defaultProvider]?.ready) {
     const defaultProviderLabel =
       input.providerOptions.find((option) => option.value === input.defaultProvider)?.label ?? input.defaultProvider;
-    blockers.push(`默认 Provider 未 ready：${defaultProviderLabel}`);
-    nextActions.push('切换到已 ready 的 provider，或补齐当前默认 provider 的正式 API key。');
+    blockers.push(`Default provider not ready: ${defaultProviderLabel}`);
+    nextActions.push('Switch to a ready provider or configure the current default provider API key.');
   }
 
   const siteIssues = input.orderedSiteStatus.filter(
@@ -102,14 +102,14 @@ export function buildDiagnosticsSummary(input: {
   );
   if (siteIssues.length > 0) {
     blockers.push(
-      `站点仍缺 live 条件：${siteIssues.map((entry) => input.siteLabels[entry.site]).join(', ')}`,
+      `Sites still missing live prerequisites: ${siteIssues.map((entry) => input.siteLabels[entry.site]).join(', ')}`,
     );
-    nextActions.push('先补真实登录态或在对应站点标签页中触发同步，再重试站点 live 验收。');
+    nextActions.push('Restore the real logged-in context or trigger sync from the correct site tab, then retry live validation.');
   }
 
   if (input.providerStatus.error === 'provider_status_fetch_failed') {
-    blockers.push('BFF provider 状态拉取失败');
-    nextActions.push('确认 BFF 服务在运行，随后点击“刷新 provider 状态”。');
+    blockers.push('BFF provider status fetch failed');
+    nextActions.push('Confirm that the BFF service is running, then refresh provider status.');
   }
 
   return {

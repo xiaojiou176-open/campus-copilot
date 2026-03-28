@@ -145,15 +145,15 @@ export function buildSiteBlockingHint(site: Site, input: {
   hasEdStemConfig?: boolean;
 }) {
   if (site === 'edstem' && input.outcome === 'unsupported_context' && !input.hasEdStemConfig) {
-    return '缺少 EdStem 私有请求路径，请先在 Options 里填写。';
+    return 'EdStem private request paths are missing. Fill them in through Options first.';
   }
 
   if (site === 'myuw' && input.outcome === 'unsupported_context') {
-    return '需要在 MyUW 页面标签页里触发，系统才能读取 page state 或 DOM。';
+    return 'Trigger sync from a MyUW page tab so the system can read page state or DOM context.';
   }
 
   if ((site === 'canvas' || site === 'gradescope' || site === 'edstem') && input.outcome === 'unsupported_context') {
-    return '需要在对应站点的活动标签页里手动触发同步。';
+    return 'Trigger sync manually from an active tab on the corresponding site.';
   }
 
   return undefined;
