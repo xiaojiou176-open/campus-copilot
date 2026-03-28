@@ -16,6 +16,11 @@ const defaultModel = defaultProvider === 'gemini'
   ? process.env.GEMINI_MODEL ?? 'gemini-2.5-flash'
   : process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
 const screenshotPath = process.env.CAPTURE_SCREENSHOT_PATH;
+const uiLanguage = process.env.SIDEPANEL_UI_LANGUAGE ?? (screenshotPath ? 'en' : 'auto');
+const browserLanguage = process.env.SIDEPANEL_BROWSER_LANGUAGE ?? 'en-US';
+const questionLabel = uiLanguage === 'zh-CN' ? '问题' : 'Question';
+const askAiLabel = uiLanguage === 'zh-CN' ? '问 AI' : 'Ask AI';
+const refreshProviderLabel = uiLanguage === 'zh-CN' ? '刷新 provider 状态' : 'Refresh provider status';
 
 if (!defaultProvider) {
   console.error(
@@ -191,14 +196,15 @@ async function collectFailureEvidence() {
 }
 
 function buildChromeMocks() {
-  return ({ baseUrl, bffBaseUrl, defaultProvider, defaultModel }) => {
+  return ({ baseUrl, bffBaseUrl, defaultProvider, defaultModel, uiLanguage, browserLanguage }) => {
     const CONFIG_KEY = 'campusCopilotConfig';
     const defaultConfig = {
-      [CONFIG_KEY]: {
-        defaultExportFormat: 'markdown',
-        ai: {
-          bffBaseUrl,
-          defaultProvider,
+        [CONFIG_KEY]: {
+          defaultExportFormat: 'markdown',
+          uiLanguage,
+          ai: {
+            bffBaseUrl,
+            defaultProvider,
           models: {
             openai: defaultProvider === 'openai' ? defaultModel : 'gpt-4.1-mini',
             gemini: defaultProvider === 'gemini' ? defaultModel : 'gemini-2.5-flash',
@@ -329,6 +335,15 @@ function buildChromeMocks() {
       },
     };
 
+    Object.defineProperty(window.navigator, 'language', {
+      configurable: true,
+      get: () => browserLanguage,
+    });
+    Object.defineProperty(window.navigator, 'languages', {
+      configurable: true,
+      get: () => [browserLanguage],
+    });
+
     Object.assign(window, { chrome, browser: chrome });
   };
 }
@@ -368,13 +383,15 @@ try {
     bffBaseUrl,
     defaultProvider,
     defaultModel,
+    uiLanguage,
+    browserLanguage,
   });
 
   await page.goto(sidepanelUrl);
   const providerLabel = defaultProvider === 'gemini' ? 'Gemini' : 'OpenAI';
   const providerReadyLabel = page.getByText(`${providerLabel} · ready · configured`);
   if (!(await providerReadyLabel.isVisible().catch(() => false))) {
-    await page.getByRole('button', { name: '刷新 provider 状态' }).click().catch(() => {});
+    await page.getByRole('button', { name: refreshProviderLabel }).click().catch(() => {});
   }
   await providerReadyLabel.waitFor({ timeout: 20000 });
   if (screenshotPath) {
@@ -384,8 +401,8 @@ try {
       fullPage: true,
     });
   }
-  await page.getByLabel('问题').fill('Reply with the single word READY.');
-  await page.getByRole('button', { name: '问 AI' }).click();
+  await page.getByLabel(questionLabel).fill('Reply with the single word READY.');
+  await page.getByRole('button', { name: askAiLabel }).click();
   await page.locator('.surface__answer').waitFor({ timeout: 20000 });
 
   const answerText = (await page.locator('.surface__answer').textContent())?.trim() ?? '';

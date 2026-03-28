@@ -19,6 +19,7 @@ describe('diagnostics helpers', () => {
     expect(formatProviderReason('missing_api_key')).toBe('missing_api_key');
     expect(formatProviderStatusError('missing_bff_base_url')).toBe('BFF base URL is not configured yet');
     expect(formatProviderStatusError('provider_status_fetch_failed')).toBe('provider status fetch failed');
+    expect(formatProviderStatusError('missing_bff_base_url', 'zh-CN')).toBe('还没有配置 BFF 地址');
   });
 
   it('builds blockers and next actions from runtime state', () => {
@@ -38,6 +39,7 @@ describe('diagnostics helpers', () => {
       providerOptions,
       defaultProvider: 'gemini',
       siteLabels,
+      locale: 'en',
     });
 
     expect(summary.healthy).toBe(false);
@@ -62,6 +64,7 @@ describe('diagnostics helpers', () => {
       providerOptions,
       defaultProvider: 'openai',
       siteLabels,
+      locale: 'en',
     });
 
     expect(report.generatedAt).toBe('2026-03-25T12:45:00Z');
@@ -83,6 +86,7 @@ describe('diagnostics helpers', () => {
       providerOptions,
       defaultProvider: 'gemini',
       siteLabels,
+      locale: 'en',
     });
 
     expect(summary.blockers).not.toContain('Provider not ready: OpenAI, Gemini');

@@ -1,6 +1,7 @@
 import type { ProviderId } from '@campus-copilot/ai';
 import type { SiteSyncOutcome } from '@campus-copilot/core';
 import type { Site } from '@campus-copilot/schema';
+import { getUiText, type ResolvedUiLanguage } from './i18n';
 
 export interface ProviderStatusLike {
   providers: Record<
@@ -36,17 +37,18 @@ export interface DiagnosticsReport extends DiagnosticsSummary {
   orderedSiteStatus: OrderedSiteStatusLike[];
 }
 
-export function formatProviderStatusError(error?: string) {
+export function formatProviderStatusError(error: string | undefined, locale: ResolvedUiLanguage = 'en') {
+  const text = getUiText(locale);
   if (!error) {
     return undefined;
   }
 
   if (error === 'missing_bff_base_url') {
-    return 'BFF base URL is not configured yet';
+    return text.diagnosticsMessages.missingBffBaseUrl;
   }
 
   if (error === 'provider_status_fetch_failed') {
-    return 'provider status fetch failed';
+    return text.diagnosticsMessages.providerStatusFetchFailed;
   }
 
   return error;
@@ -75,41 +77,42 @@ export function buildDiagnosticsSummary(input: {
   providerOptions: Array<{ value: ProviderId; label: string }>;
   defaultProvider: ProviderId;
   siteLabels: Record<Site, string>;
+  locale?: ResolvedUiLanguage;
 }): DiagnosticsSummary {
+  const locale = input.locale ?? 'en';
+  const text = getUiText(locale);
   const blockers: string[] = [];
   const nextActions: string[] = [];
 
   if (!input.bffBaseUrl) {
-    blockers.push('BFF base URL is not configured');
-    nextActions.push('Set the BFF base URL in Options, then refresh provider status.');
+    blockers.push(text.diagnosticsMessages.bffBaseUrlNotConfigured);
+    nextActions.push(text.diagnosticsMessages.nextActionSetBff);
   }
 
   const readyProviders = input.providerOptions.filter(
     (option) => input.providerStatus.providers[option.value]?.ready,
   );
   if (readyProviders.length === 0) {
-    blockers.push(`Provider not ready: ${input.providerOptions.map((option) => option.label).join(', ')}`);
-    nextActions.push('Add at least one formal provider API key before attempting a real AI round-trip.');
+    blockers.push(text.diagnosticsMessages.providerNotReady(input.providerOptions.map((option) => option.label).join(', ')));
+    nextActions.push(text.diagnosticsMessages.nextActionProviderKey);
   } else if (!input.providerStatus.providers[input.defaultProvider]?.ready) {
     const defaultProviderLabel =
       input.providerOptions.find((option) => option.value === input.defaultProvider)?.label ?? input.defaultProvider;
-    blockers.push(`Default provider not ready: ${defaultProviderLabel}`);
-    nextActions.push('Switch to a ready provider or configure the current default provider API key.');
+    blockers.push(text.diagnosticsMessages.defaultProviderNotReady(defaultProviderLabel));
+    nextActions.push(text.diagnosticsMessages.nextActionSwitchProvider);
   }
 
   const siteIssues = input.orderedSiteStatus.filter(
     (entry) => entry.hint || entry.sync?.lastOutcome === 'unsupported_context',
   );
   if (siteIssues.length > 0) {
-    blockers.push(
-      `Sites still missing live prerequisites: ${siteIssues.map((entry) => input.siteLabels[entry.site]).join(', ')}`,
-    );
-    nextActions.push('Restore the real logged-in context or trigger sync from the correct site tab, then retry live validation.');
+    blockers.push(text.diagnosticsMessages.sitesStillMissingLivePrerequisites(siteIssues.map((entry) => input.siteLabels[entry.site]).join(', ')));
+    nextActions.push(text.diagnosticsMessages.nextActionRestoreSiteContext);
   }
 
   if (input.providerStatus.error === 'provider_status_fetch_failed') {
-    blockers.push('BFF provider status fetch failed');
-    nextActions.push('Confirm that the BFF service is running, then refresh provider status.');
+    blockers.push(text.diagnosticsMessages.bffProviderStatusFetchFailed);
+    nextActions.push(text.diagnosticsMessages.nextActionRefreshProviderStatus);
   }
 
   return {
@@ -127,6 +130,7 @@ export function buildDiagnosticsReport(input: {
   providerOptions: Array<{ value: ProviderId; label: string }>;
   defaultProvider: ProviderId;
   siteLabels: Record<Site, string>;
+  locale?: ResolvedUiLanguage;
 }): DiagnosticsReport {
   const summary = buildDiagnosticsSummary(input);
   return {
