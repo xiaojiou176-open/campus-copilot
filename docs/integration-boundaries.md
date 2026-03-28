@@ -1,12 +1,23 @@
 # Integration Boundaries
 
-This file is the canonical registry for external integration risk.
+This file is the explanation layer for external integration risk.
 
-The point is simple:
+The machine-readable source of truth now lives in:
 
-> “Supported” does not always mean “official, stable, and low-risk.”
+- [`../policies/integration-boundaries.yaml`](../policies/integration-boundaries.yaml)
 
-Each integration path should be described honestly so the repository does not market deep-water paths as if they were permanent public contracts.
+Use this Markdown file when you need the human explanation.
+Use the YAML file when a script, policy check, or future automation needs canonical boundary facts.
+
+## Why This Registry Exists
+
+“Supported” does not always mean:
+
+- official
+- stable
+- low-risk
+
+The repository must describe deep-water paths honestly so that public docs, README copy, changelog text, and future automation do not quietly over-claim them.
 
 ## Boundary Classes
 
@@ -18,34 +29,34 @@ Each integration path should be described honestly so the repository does not ma
 | `state-fallback` | uses page bootstrap state or equivalent injected state |
 | `dom-fallback` | uses DOM parsing as a fallback layer |
 
-## Site Registry
+## Current Registry Summary
 
-| Site | Primary path | Boundary class | Current sensitivity | Validation expectation | Public-safe wording |
-| :-- | :-- | :-- | :-- | :-- | :-- |
-| Canvas | `/api/v1/*` | `official` | Medium | deterministic repo coverage + manual live validation when needed | “Canvas uses official API paths first, with filtering and fallbacks handled in the adapter.” |
-| Gradescope | `/internal/*` plus DOM discovery | `internal`, `dom-fallback` | High | deterministic adapter tests + manual live validation for current tenant behavior | “Gradescope currently depends on internal and fallback collection paths and should not be described as an official public integration.” |
-| EdStem | session-backed API requests plus DOM fallback | `internal`, `session-backed`, `dom-fallback` | High | deterministic adapter tests + manual live validation for current authenticated session | “EdStem uses authenticated session-backed requests and fallbacks; stability depends on the current site surface.” |
-| MyUW | page state / DOM bridge | `state-fallback`, `dom-fallback` | Medium to High | deterministic adapter tests + manual live validation from a matching tab context | “MyUW currently depends on page-state or DOM-derived context and should be treated as context-sensitive.” |
-| BFF provider status | local loopback API | `official` repo-local path | Low | deterministic repo gate | “The BFF exposes local status and proxy routes for formal API-key flows.” |
-| Provider round-trip | `OpenAI` / `Gemini` API-key flow | `official` external provider, environment-dependent | Medium | optional local smoke, not required CI | “Provider round-trip is an environment-dependent validation lane, not a default merge gate.” |
+| Site | Primary path | Boundary classes | Validation expectation |
+| :-- | :-- | :-- | :-- |
+| Canvas | `/api/v1/*` | `official` | deterministic repo coverage plus manual live validation when needed |
+| Gradescope | `/internal/*` plus DOM discovery | `internal`, `dom-fallback` | deterministic adapter tests plus manual live validation for current tenant behavior |
+| EdStem | session-backed API requests plus DOM fallback | `internal`, `session-backed`, `dom-fallback` | deterministic adapter tests plus manual live validation for the current authenticated session |
+| MyUW | page state / DOM bridge | `state-fallback`, `dom-fallback` | deterministic adapter tests plus manual live validation from a matching tab context |
+| BFF provider status | local loopback API | `official` | deterministic repo gate |
+| Provider round-trip | `OpenAI` / `Gemini` API-key flow | `official` | optional local smoke, not required CI |
 
-## Wording Rules
+## Public Honesty Rules
 
 Use wording like:
 
-- “official path”
-- “internal path”
-- “session-backed”
-- “state fallback”
-- “DOM fallback”
-- “manual live validation required”
+- official path
+- internal path
+- session-backed
+- state fallback
+- DOM fallback
+- manual live validation required
 
 Avoid wording like:
 
-- “stable forever”
-- “fully verified public integration”
-- “official” for private/internal/session-backed paths
+- stable forever
+- fully verified public integration
+- official for private/internal/session-backed paths
 
-## Review Rules
+## Review Rule
 
-If a README, changelog, or public note mentions a site capability, it must match the boundary class in this file.
+If README, changelog, or any public note mentions a site capability, it must stay consistent with the YAML registry.
