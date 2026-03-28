@@ -54,17 +54,18 @@ export function formatProviderStatusError(error: string | undefined, locale: Res
   return error;
 }
 
-export function formatProviderReason(reason?: string) {
+export function formatProviderReason(reason: string | undefined, locale: ResolvedUiLanguage = 'en') {
+  const text = getUiText(locale);
   if (!reason) {
-    return 'unknown';
+    return text.providerReasons.unknown;
   }
 
   if (reason === 'configured') {
-    return 'configured';
+    return text.providerReasons.configured;
   }
 
   if (reason === 'missing_api_key') {
-    return 'missing_api_key';
+    return text.providerReasons.missingApiKey;
   }
 
   return reason;

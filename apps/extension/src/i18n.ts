@@ -62,6 +62,11 @@ type UiText = {
     lastSync: string;
     missingFromView: string;
   };
+  providerReasons: {
+    unknown: string;
+    configured: string;
+    missingApiKey: string;
+  };
   metrics: {
     openAssignments: string;
     dueWithin48Hours: string;
@@ -123,6 +128,19 @@ type UiText = {
   siteStatus: {
     title: string;
     description: string;
+    labels: {
+      idle: string;
+      syncing: string;
+      success: string;
+      partialSuccess: string;
+      notLoggedIn: string;
+      unsupportedContext: string;
+      unauthorized: string;
+      requestFailed: string;
+      normalizeFailed: string;
+      collectorFailed: string;
+      error: string;
+    };
     resourceGaps: (value: string) => string;
     syncButton: (site: string) => string;
     syncing: string;
@@ -243,6 +261,11 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       lastSync: 'Last sync',
       missingFromView: 'Unseen in current view',
     },
+    providerReasons: {
+      unknown: 'unknown',
+      configured: 'configured',
+      missingApiKey: 'missing API key',
+    },
     metrics: {
       openAssignments: 'Open assignments',
       dueWithin48Hours: 'Due within 48 hours',
@@ -276,8 +299,8 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       title: 'Diagnostics',
       description: 'This area acts like a runtime control tower. It tells you what is actually blocked, not how many features exist.',
       nextActions: 'Next Actions',
-      readyToContinue: 'ready_to_continue',
-      blockedByEnvironmentOrRuntime: 'blocked_by_environment_or_runtime',
+      readyToContinue: 'Ready to continue',
+      blockedByEnvironmentOrRuntime: 'Blocked by environment or runtime',
       noBlockers: 'No obvious runtime blockers are active right now, so deeper validation can continue.',
       exportJson: 'Export diagnostics JSON',
       reportReady: 'campus-copilot-diagnostics.json is ready to download.',
@@ -304,6 +327,19 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     siteStatus: {
       title: 'Site Status',
       description: 'This area tells the truth about runtime state: which site is live, which is partial, and which one is blocked by context or configuration.',
+      labels: {
+        idle: 'idle',
+        syncing: 'syncing',
+        success: 'success',
+        partialSuccess: 'partial success',
+        notLoggedIn: 'not logged in',
+        unsupportedContext: 'unsupported context',
+        unauthorized: 'unauthorized',
+        requestFailed: 'request failed',
+        normalizeFailed: 'normalize failed',
+        collectorFailed: 'collector failed',
+        error: 'error',
+      },
       resourceGaps: (value) => `Remaining resource gaps: ${value}`,
       syncButton: (site) => `Sync ${site}`,
       syncing: 'Syncing...',
@@ -427,6 +463,11 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       lastSync: '最近同步',
       missingFromView: '当前视图未查看',
     },
+    providerReasons: {
+      unknown: '未知',
+      configured: '已配置',
+      missingApiKey: '缺少 API key',
+    },
     metrics: {
       openAssignments: '待办作业',
       dueWithin48Hours: '48 小时内截止',
@@ -454,7 +495,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       syncInProgress: (site) => `同步 ${site} 中…`,
       openExport: '打开导出',
       markUpdatesSeen: '标记更新已查看',
-      openOptions: '跳到 Options',
+      openOptions: '打开设置',
     },
     diagnostics: {
       title: '诊断',
@@ -480,7 +521,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       none: '当前筛选下还没有可展示的更新流。',
     },
     currentTasks: {
-      title: 'Current Tasks',
+      title: '当前任务',
       description: '这里先把当前视图里的任务稳定露出来，先做到能看、能导、能继续问，再谈复杂详情页。',
       none: '当前筛选下还没有结构化任务。先同步站点，任务列表才会长出来。',
       dueAt: (value) => `截止 ${value}`,
@@ -488,6 +529,19 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     siteStatus: {
       title: '站点状态',
       description: '这里像控制塔，专门讲真话：哪站已经 live，哪站只是部分成功，哪站现在卡在配置或上下文。',
+      labels: {
+        idle: '空闲',
+        syncing: '同步中',
+        success: '成功',
+        partialSuccess: '部分成功',
+        notLoggedIn: '未登录',
+        unsupportedContext: '上下文不支持',
+        unauthorized: '未授权',
+        requestFailed: '请求失败',
+        normalizeFailed: '标准化失败',
+        collectorFailed: '采集失败',
+        error: '错误',
+      },
       resourceGaps: (value) => `仍有资源缺口：${value}`,
       syncButton: (site) => `同步 ${site}`,
       syncing: '同步中…',
@@ -502,9 +556,9 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       question: '问题',
       placeholder: '例如：我现在最该关注什么？最近有什么变化？',
       ask: '问 AI',
-      configure: '配置 BFF / Provider',
+      configure: '配置 BFF / 服务商',
       missingBffFeedback: '当前还没配置 BFF 地址，所以 AI 入口只会诚实提示，不会静默失败。',
-      refreshProviderStatus: '刷新 provider 状态',
+      refreshProviderStatus: '刷新服务商状态',
       refreshingProviderStatus: '刷新中…',
     },
     popup: {
@@ -516,14 +570,14 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       siteConfiguration: '站点配置',
       siteConfigurationDescription:
         'EdStem 会优先尝试从当前课程标签页自动推导 threads 路径；只有自动推导不够时，才需要你手动覆盖。unread / recent activity 路径都是可选项。',
-      threadsPath: 'EdStem threads path',
-      unreadPath: 'EdStem unread path',
+      threadsPath: 'EdStem 讨论串路径',
+      unreadPath: 'EdStem 未读路径',
       unreadPathPlaceholder: '可选：留空表示不额外覆盖 unread 路径',
-      recentActivityPath: 'EdStem recent activity path',
+      recentActivityPath: 'EdStem 最近活动路径',
       recentActivityPathPlaceholder: '可选：留空表示不额外覆盖 recent activity 路径',
       aiBffConfiguration: 'AI / BFF 配置',
       bffBaseUrl: 'BFF 地址',
-      defaultProvider: '默认 Provider',
+      defaultProvider: '默认服务商',
       refreshBffStatus: '刷新 BFF 状态',
       refreshingBffStatus: '刷新中…',
       openAiModel: 'OpenAI 模型',
@@ -565,15 +619,15 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       missingBffBaseUrl: '还没有配置 BFF 地址',
       providerStatusFetchFailed: 'provider 状态拉取失败',
       bffBaseUrlNotConfigured: 'BFF 地址尚未配置',
-      providerNotReady: (providers) => `Provider 未 ready：${providers}`,
-      defaultProviderNotReady: (provider) => `默认 Provider 未 ready：${provider}`,
+      providerNotReady: (providers) => `服务商未就绪：${providers}`,
+      defaultProviderNotReady: (provider) => `默认服务商未就绪：${provider}`,
       sitesStillMissingLivePrerequisites: (sites) => `站点仍缺 live 条件：${sites}`,
       bffProviderStatusFetchFailed: 'BFF provider 状态拉取失败',
-      nextActionSetBff: '先在 Options 中填写 BFF base URL，再刷新 provider 状态。',
+      nextActionSetBff: '先在设置中填写 BFF 地址，再刷新服务商状态。',
       nextActionProviderKey: '如果要做真实 AI round-trip，请至少补一条正式 provider API key。',
       nextActionSwitchProvider: '切换到已 ready 的 provider，或补齐当前默认 provider 的正式 API key。',
       nextActionRestoreSiteContext: '先补真实登录态或在对应站点标签页中触发同步，再重试站点 live 验收。',
-      nextActionRefreshProviderStatus: '确认 BFF 服务在运行，随后点击“刷新 provider 状态”。',
+      nextActionRefreshProviderStatus: '确认 BFF 服务在运行，随后点击“刷新服务商状态”。',
     },
     blockingHints: {
       edstemMissingPaths: '缺少 EdStem 私有请求路径，请先在 Options 里填写。',

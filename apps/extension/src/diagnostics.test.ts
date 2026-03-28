@@ -16,7 +16,9 @@ const siteLabels = {
 describe('diagnostics helpers', () => {
   it('formats provider-specific reasons and UI errors', () => {
     expect(formatProviderReason('configured')).toBe('configured');
-    expect(formatProviderReason('missing_api_key')).toBe('missing_api_key');
+    expect(formatProviderReason('missing_api_key')).toBe('missing API key');
+    expect(formatProviderReason('configured', 'zh-CN')).toBe('已配置');
+    expect(formatProviderReason('missing_api_key', 'zh-CN')).toBe('缺少 API key');
     expect(formatProviderStatusError('missing_bff_base_url')).toBe('BFF base URL is not configured yet');
     expect(formatProviderStatusError('provider_status_fetch_failed')).toBe('provider status fetch failed');
     expect(formatProviderStatusError('missing_bff_base_url', 'zh-CN')).toBe('还没有配置 BFF 地址');
