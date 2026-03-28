@@ -381,22 +381,18 @@ test('shows provider not ready when selected provider is unavailable in bff stat
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
   await expect(page.getByText('Gemini is not ready in the BFF yet.')).toBeVisible();
-  await expect(page.getByText('Gemini · not ready · missing_api_key')).toBeVisible();
+  await expect(page.getByText('Gemini · not ready · missing API key')).toBeVisible();
 });
 
 test('switches to Chinese UI and shows partial-success plus site-filter behavior', async ({ page }) => {
   await page.goto('/options.html');
-  await page.evaluate((configKey) => {
-    const raw = window.localStorage.getItem('__extension_storage__');
-    const state = raw ? JSON.parse(raw) : {};
-    state[configKey] = {
-      ...state[configKey],
-      uiLanguage: 'zh-CN',
-    };
-    window.localStorage.setItem('__extension_storage__', JSON.stringify(state));
-  }, CONFIG_KEY);
+  await page.getByLabel('Interface language').selectOption('zh-CN');
+  await page.getByRole('button', { name: '保存配置' }).click();
+  await expect(page.getByText('配置已保存。')).toBeVisible();
   await page.goto('/sidepanel.html');
 
+  await expect(page.getByText('当前状态: 被环境或运行时阻塞')).toBeVisible();
+  await expect(page.getByText('OpenAI · 未就绪 · 缺少 API key')).toBeVisible();
   await page.getByRole('button', { name: 'MyUW', exact: true }).click();
   const myUwStatusCard = page
     .locator('article.surface__item')
