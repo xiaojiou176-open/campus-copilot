@@ -1,0 +1,62 @@
+version: 1
+canonical_registry: true
+
+boundary_classes:
+  official: documented public contract or clearly supported API surface
+  internal: private/internal endpoint or undocumented request surface
+  session-backed: depends on authenticated browser session state or page-local token material
+  state-fallback: uses page bootstrap state or equivalent injected state
+  dom-fallback: uses DOM parsing as a fallback layer
+
+registry:
+  - site: canvas
+    primary_path: /api/v1/*
+    boundary_classes:
+      - official
+    current_sensitivity: Medium
+    validation_expectation: deterministic repo coverage plus manual live validation when needed
+    public_safe_wording: Canvas uses official API paths first, with filtering and fallbacks handled in the adapter.
+
+  - site: gradescope
+    primary_path: /internal/* plus DOM discovery
+    boundary_classes:
+      - internal
+      - dom-fallback
+    current_sensitivity: High
+    validation_expectation: deterministic adapter tests plus manual live validation for current tenant behavior
+    public_safe_wording: Gradescope currently depends on internal and fallback collection paths and should not be described as an official public integration.
+
+  - site: edstem
+    primary_path: session-backed API requests plus DOM fallback
+    boundary_classes:
+      - internal
+      - session-backed
+      - dom-fallback
+    current_sensitivity: High
+    validation_expectation: deterministic adapter tests plus manual live validation for the current authenticated session
+    public_safe_wording: EdStem uses authenticated session-backed requests and fallbacks; stability depends on the current site surface.
+
+  - site: myuw
+    primary_path: page state / DOM bridge
+    boundary_classes:
+      - state-fallback
+      - dom-fallback
+    current_sensitivity: Medium to High
+    validation_expectation: deterministic adapter tests plus manual live validation from a matching tab context
+    public_safe_wording: MyUW currently depends on page-state or DOM-derived context and should be treated as context-sensitive.
+
+  - site: bff-provider-status
+    primary_path: local loopback API
+    boundary_classes:
+      - official
+    current_sensitivity: Low
+    validation_expectation: deterministic repo gate
+    public_safe_wording: The BFF exposes local status and proxy routes for formal API-key flows.
+
+  - site: provider-roundtrip
+    primary_path: OpenAI / Gemini API-key flow
+    boundary_classes:
+      - official
+    current_sensitivity: Medium
+    validation_expectation: optional local smoke, not required CI
+    public_safe_wording: Provider round-trip is an environment-dependent validation lane, not a default merge gate.

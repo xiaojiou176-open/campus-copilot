@@ -19,6 +19,7 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 policies
 README.md
+RELEASE.md
 scripts
 SECURITY.md
 tsconfig.base.json
