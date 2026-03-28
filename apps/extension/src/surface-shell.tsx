@@ -898,13 +898,13 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 </label>
                 <div className="surface__actions surface__actions--wrap">
                   <button className="surface__button" disabled={aiPending} onClick={() => void handleAskAi()}>
-                    {aiPending ? 'Asking…' : text.askAi.ask}
+                    {aiPending ? `${text.askAi.ask}…` : text.askAi.ask}
                   </button>
                   <button className="surface__button surface__button--ghost" onClick={() => void browser.runtime.openOptionsPage()}>
                     {text.askAi.configure}
                   </button>
                 </div>
-                {!config.ai.bffBaseUrl ? <p className="surface__feedback">BFF base URL is still missing, so the AI path should fail loudly instead of failing silently.</p> : null}
+                {!config.ai.bffBaseUrl ? <p className="surface__feedback">{text.askAi.missingBffFeedback}</p> : null}
                 {aiError ? <p className="surface__feedback surface__feedback--error">{aiError}</p> : null}
                 {aiAnswer ? <div className="surface__answer">{aiAnswer}</div> : null}
               </article>
