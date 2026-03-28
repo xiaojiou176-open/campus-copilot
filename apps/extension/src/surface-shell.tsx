@@ -38,7 +38,7 @@ import {
 } from './config';
 import './styles.css';
 import { buildAiProxyRequest } from './ai-request';
-import { formatDateTime, formatRelativeTime, getUiText, readBrowserLanguage, resolveUiLanguage } from './i18n';
+import { formatDateTime, formatRelativeTime, getUiText, readBrowserLanguage, resolveUiLanguage, type ResolvedUiLanguage } from './i18n';
 
 type SurfaceKind = 'sidepanel' | 'popup' | 'options';
 
@@ -113,16 +113,48 @@ function getSiteStatusTone(outcome?: SiteSyncOutcome, status?: 'idle' | 'syncing
   return 'neutral';
 }
 
-function getSiteStatusLabel(outcome?: SiteSyncOutcome, status?: 'idle' | 'syncing' | 'success' | 'error') {
+function getSiteStatusLabel(
+  outcome: SiteSyncOutcome | undefined,
+  status: 'idle' | 'syncing' | 'success' | 'error' | undefined,
+  locale: ResolvedUiLanguage,
+) {
+  const labels = getUiText(locale).siteStatus.labels;
   if (status === 'syncing') {
-    return 'syncing';
+    return labels.syncing;
   }
 
   if (outcome) {
-    return outcome;
+    switch (outcome) {
+      case 'success':
+        return labels.success;
+      case 'partial_success':
+        return labels.partialSuccess;
+      case 'not_logged_in':
+        return labels.notLoggedIn;
+      case 'unsupported_context':
+        return labels.unsupportedContext;
+      case 'unauthorized':
+        return labels.unauthorized;
+      case 'request_failed':
+        return labels.requestFailed;
+      case 'normalize_failed':
+        return labels.normalizeFailed;
+      case 'collector_failed':
+        return labels.collectorFailed;
+      default:
+        return outcome;
+    }
   }
 
-  return status ?? 'idle';
+  if (status === 'success') {
+    return labels.success;
+  }
+
+  if (status === 'error') {
+    return labels.error;
+  }
+
+  return labels.idle;
 }
 
 export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
@@ -389,6 +421,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     const nextConfig = buildNextConfig({
       current: config,
       defaultExportFormat: optionsDraft.defaultExportFormat,
+      uiLanguage: optionsDraft.uiLanguage,
       ai: optionsDraft.ai,
       sites: optionsDraft.sites,
     });
@@ -818,7 +851,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                         <span
                           className={`surface__badge surface__badge--${getSiteStatusTone(entry.sync?.lastOutcome, entry.sync?.status)}`}
                         >
-                          {getSiteStatusLabel(entry.sync?.lastOutcome, entry.sync?.status)}
+                          {getSiteStatusLabel(entry.sync?.lastOutcome, entry.sync?.status, uiLanguage)}
                         </span>
                       </div>
                       <p className="surface__meta">{text.siteStatus.counts(entry.counts)}</p>
@@ -874,7 +907,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 <div className="surface__stack">
                   {PROVIDER_OPTIONS.map((option) => (
                     <p className="surface__meta" key={option.value}>
-                      {option.label} · {providerStatus.providers[option.value]?.ready ? text.meta.ready : text.meta.notReady} · {formatProviderReason(providerStatus.providers[option.value]?.reason)}
+                      {option.label} · {providerStatus.providers[option.value]?.ready ? text.meta.ready : text.meta.notReady} · {formatProviderReason(providerStatus.providers[option.value]?.reason, uiLanguage)}
                     </p>
                   ))}
                   <p className="surface__meta">
@@ -1059,7 +1092,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               <div className="surface__stack">
                 {PROVIDER_OPTIONS.map((option) => (
                   <p className="surface__meta" key={option.value}>
-                    {option.label} · {providerStatus.providers[option.value]?.ready ? text.meta.ready : text.meta.notReady} · {formatProviderReason(providerStatus.providers[option.value]?.reason)}
+                    {option.label} · {providerStatus.providers[option.value]?.ready ? text.meta.ready : text.meta.notReady} · {formatProviderReason(providerStatus.providers[option.value]?.reason, uiLanguage)}
                   </p>
                 ))}
                 <p className="surface__meta">
