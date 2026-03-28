@@ -32,10 +32,11 @@ Today the repository already includes:
 - A thin BFF for `OpenAI` and `Gemini` API-key flows
 - Deterministic repository verification through `pnpm verify`
 
-![Campus Copilot sidepanel overview](docs/assets/sidepanel-overview.png)
+![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
 
 Public-facing evidence you can inspect in-repo:
 
+- [Hero/storefront asset inventory](docs/storefront-assets.md)
 - [Workbench screenshot inventory](docs/storefront-assets.md)
 - [Sample weekly assignments export](docs/assets/weekly-assignments-example.md)
 
