@@ -17,8 +17,8 @@ describe('diagnostics helpers', () => {
   it('formats provider-specific reasons and UI errors', () => {
     expect(formatProviderReason('configured')).toBe('configured');
     expect(formatProviderReason('missing_api_key')).toBe('missing_api_key');
-    expect(formatProviderStatusError('missing_bff_base_url')).toBe('还没有配置 BFF 地址');
-    expect(formatProviderStatusError('provider_status_fetch_failed')).toBe('provider 状态拉取失败');
+    expect(formatProviderStatusError('missing_bff_base_url')).toBe('BFF base URL is not configured yet');
+    expect(formatProviderStatusError('provider_status_fetch_failed')).toBe('provider status fetch failed');
   });
 
   it('builds blockers and next actions from runtime state', () => {
@@ -33,7 +33,7 @@ describe('diagnostics helpers', () => {
       },
       orderedSiteStatus: [
         { site: 'canvas', sync: { lastOutcome: 'unsupported_context' } },
-        { site: 'myuw', hint: '需要在 MyUW 页面标签页里触发' },
+        { site: 'myuw', hint: 'Trigger sync from a MyUW page tab.' },
       ],
       providerOptions,
       defaultProvider: 'gemini',
@@ -41,10 +41,10 @@ describe('diagnostics helpers', () => {
     });
 
     expect(summary.healthy).toBe(false);
-    expect(summary.blockers).toContain('BFF 地址尚未配置');
-    expect(summary.blockers).toContain('Provider 未 ready：OpenAI, Gemini');
-    expect(summary.blockers).toContain('站点仍缺 live 条件：Canvas, MyUW');
-    expect(summary.blockers).toContain('BFF provider 状态拉取失败');
+    expect(summary.blockers).toContain('BFF base URL is not configured');
+    expect(summary.blockers).toContain('Provider not ready: OpenAI, Gemini');
+    expect(summary.blockers).toContain('Sites still missing live prerequisites: Canvas, MyUW');
+    expect(summary.blockers).toContain('BFF provider status fetch failed');
     expect(summary.nextActions.some((item) => item.includes('API key'))).toBe(true);
   });
 
@@ -85,7 +85,7 @@ describe('diagnostics helpers', () => {
       siteLabels,
     });
 
-    expect(summary.blockers).not.toContain('Provider 未 ready：OpenAI, Gemini');
-    expect(summary.blockers).not.toContain('默认 Provider 未 ready：Gemini');
+    expect(summary.blockers).not.toContain('Provider not ready: OpenAI, Gemini');
+    expect(summary.blockers).not.toContain('Default provider not ready: Gemini');
   });
 });

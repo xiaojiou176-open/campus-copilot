@@ -319,8 +319,8 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await page.goto('/sidepanel.html');
 
   await expect(page.getByRole('heading', { name: 'Diagnostics' })).toBeVisible();
-  await expect(page.getByText('Provider 未 ready：OpenAI, Gemini')).toBeVisible();
-  await page.getByRole('button', { name: '导出诊断 JSON' }).click();
+  await expect(page.getByText('Provider not ready: OpenAI, Gemini')).toBeVisible();
+  await page.getByRole('button', { name: 'Export diagnostics JSON' }).click();
   const diagnosticsPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
   expect(diagnosticsPayload).toContain('campus-copilot-diagnostics.json');
   await expect(page.getByRole('heading', { name: 'Site Status' })).toBeVisible();
@@ -328,7 +328,7 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByRole('button', { name: '同步 Gradescope' })).toBeVisible();
   await expect(page.getByRole('button', { name: '同步 EdStem' })).toBeVisible();
   await expect(page.getByRole('button', { name: '同步 MyUW' })).toBeVisible();
-  await expect(page.getByText('当前还没配置 BFF 地址')).toBeVisible();
+  await expect(page.getByText('BFF base URL is still missing')).toBeVisible();
 });
 
 test('saves options config, syncs edstem, and records export downloads', async ({ page }) => {
@@ -370,7 +370,7 @@ test('shows provider not ready when selected provider is unavailable in bff stat
   await page.getByLabel('问题').fill('最近有什么消息？');
   await page.getByRole('button', { name: '问 AI' }).click();
 
-  await expect(page.getByText('Gemini 当前在 BFF 中还没有 ready。')).toBeVisible();
+  await expect(page.getByText('Gemini is not ready in the BFF yet.')).toBeVisible();
   await expect(page.getByText('Gemini · not ready · missing_api_key')).toBeVisible();
 });
 
