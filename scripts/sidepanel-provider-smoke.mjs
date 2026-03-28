@@ -18,9 +18,15 @@ const defaultModel = defaultProvider === 'gemini'
 const screenshotPath = process.env.CAPTURE_SCREENSHOT_PATH;
 const uiLanguage = process.env.SIDEPANEL_UI_LANGUAGE ?? (screenshotPath ? 'en' : 'auto');
 const browserLanguage = process.env.SIDEPANEL_BROWSER_LANGUAGE ?? 'en-US';
-const questionLabel = uiLanguage === 'zh-CN' ? '问题' : 'Question';
-const askAiLabel = uiLanguage === 'zh-CN' ? '问 AI' : 'Ask AI';
-const refreshProviderLabel = uiLanguage === 'zh-CN' ? '刷新 provider 状态' : 'Refresh provider status';
+const effectiveUiLanguage =
+  uiLanguage === 'auto'
+    ? browserLanguage.toLowerCase().startsWith('zh')
+      ? 'zh-CN'
+      : 'en'
+    : uiLanguage;
+const questionLabel = effectiveUiLanguage === 'zh-CN' ? '问题' : 'Question';
+const askAiLabel = effectiveUiLanguage === 'zh-CN' ? '问 AI' : 'Ask AI';
+const refreshProviderLabel = effectiveUiLanguage === 'zh-CN' ? '刷新 provider 状态' : 'Refresh provider status';
 
 if (!defaultProvider) {
   console.error(
