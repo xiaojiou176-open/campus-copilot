@@ -8,17 +8,17 @@
   <text x="112" y="410" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="34">Normalize Canvas, Gradescope, EdStem, and MyUW first.</text>
   <text x="112" y="458" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="34">Explain with AI second.</text>
 
-  <rect x="112" y="536" width="432" height="220" rx="28" fill="#F8FBFF" stroke="#D7E3F2"/>
-  <text x="150" y="602" fill="#173A64" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">What the repo proves today</text>
-  <text x="150" y="660" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- shared schema plus Dexie read models</text>
-  <text x="150" y="706" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- deterministic repository verification</text>
-  <text x="150" y="752" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- thin BFF for formal OpenAI/Gemini paths</text>
+  <rect x="112" y="536" width="458" height="220" rx="28" fill="#F8FBFF" stroke="#D7E3F2"/>
+  <text x="146" y="602" fill="#173A64" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">What the repo proves today</text>
+  <text x="146" y="660" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="23">- shared schema + Dexie read models</text>
+  <text x="146" y="706" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="23">- deterministic repo verification</text>
+  <text x="146" y="752" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="23">- thin BFF for formal AI paths</text>
 
-  <rect x="594" y="536" width="494" height="220" rx="28" fill="#14345B"/>
-  <text x="632" y="602" fill="#F6FAFF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">What it does not pretend</text>
-  <text x="632" y="660" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="26">- not every path is an official public API</text>
-  <text x="632" y="706" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="26">- mocked smoke is not full live proof</text>
-  <text x="632" y="752" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="26">- write automation stays outside this scope</text>
+  <rect x="618" y="536" width="470" height="220" rx="28" fill="#14345B"/>
+  <text x="652" y="602" fill="#F6FAFF" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">What it does not pretend</text>
+  <text x="652" y="660" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="23">- not every path is a public API</text>
+  <text x="652" y="706" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="23">- mocked smoke is not live proof</text>
+  <text x="652" y="752" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="23">- write automation stays outside scope</text>
 
   <rect x="112" y="834" width="976" height="204" rx="28" fill="#F8FBFF" stroke="#D7E3F2"/>
   <text x="150" y="900" fill="#173A64" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Current formal paths</text>

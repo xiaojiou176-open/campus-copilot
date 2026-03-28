@@ -398,7 +398,10 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
   await page.goto('/sidepanel.html');
 
   await page.getByRole('button', { name: 'MyUW', exact: true }).click();
-  const syncMyUwButton = page.getByRole('button', { name: '同步 MyUW' }).last();
+  const myUwStatusCard = page
+    .locator('article.surface__item')
+    .filter({ has: page.locator('strong', { hasText: /^MyUW$/ }) });
+  const syncMyUwButton = myUwStatusCard.getByRole('button', { name: '同步 MyUW' });
   await expect(syncMyUwButton).toBeVisible();
   await syncMyUwButton.click();
 

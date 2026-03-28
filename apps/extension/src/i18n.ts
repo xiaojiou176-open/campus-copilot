@@ -40,8 +40,14 @@ type UiText = {
     currentView: string;
   };
   hero: {
+    sidepanelEyebrow: string;
+    sidepanelTitle: string;
     sidepanelDescription: string;
+    popupEyebrow: string;
+    popupTitle: string;
     popupDescription: string;
+    optionsEyebrow: string;
+    optionsTitle: string;
     optionsDescription: string;
   };
   meta: {
@@ -88,6 +94,9 @@ type UiText = {
   diagnostics: {
     title: string;
     description: string;
+    nextActions: string;
+    readyToContinue: string;
+    blockedByEnvironmentOrRuntime: string;
     noBlockers: string;
     exportJson: string;
     reportReady: string;
@@ -95,6 +104,9 @@ type UiText = {
   priorityAlerts: {
     title: string;
     description: string;
+    critical: string;
+    high: string;
+    medium: string;
     none: string;
   };
   recentUpdates: {
@@ -206,10 +218,16 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       currentView: 'Export current view',
     },
     hero: {
+      sidepanelEyebrow: 'Campus Copilot Sidepanel',
+      sidepanelTitle: 'Academic workbench',
       sidepanelDescription:
         'This is not an empty chat box. It first turns four sites into one desk: what is happening today, what is blocked, and what changed recently.',
+      popupEyebrow: 'Campus Copilot Popup',
+      popupTitle: 'Quick pulse',
       popupDescription:
         'Popup stays lightweight and acts like a quick pulse check: sync status, priority counts, and the fastest way into the main workbench.',
+      optionsEyebrow: 'Campus Copilot Options',
+      optionsTitle: 'Connection and runtime controls',
       optionsDescription:
         'This page acts like a control cabinet: site configuration, the AI/BFF entry point, default export format, and boundary disclosure should all stay honest here.',
     },
@@ -257,6 +275,9 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     diagnostics: {
       title: 'Diagnostics',
       description: 'This area acts like a runtime control tower. It tells you what is actually blocked, not how many features exist.',
+      nextActions: 'Next Actions',
+      readyToContinue: 'ready_to_continue',
+      blockedByEnvironmentOrRuntime: 'blocked_by_environment_or_runtime',
       noBlockers: 'No obvious runtime blockers are active right now, so deeper validation can continue.',
       exportJson: 'Export diagnostics JSON',
       reportReady: 'campus-copilot-diagnostics.json is ready to download.',
@@ -264,6 +285,9 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     priorityAlerts: {
       title: 'Priority Alerts',
       description: 'This behaves like an on-call board. The point is not volume, but which items need attention first.',
+      critical: 'Critical',
+      high: 'High',
+      medium: 'Medium',
       none: 'No alerts exist yet. Sync at least one site so the system has real facts to rank.',
     },
     recentUpdates: {
@@ -381,8 +405,14 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       currentView: '导出当前视图',
     },
     hero: {
+      sidepanelEyebrow: 'Campus Copilot 侧边栏',
+      sidepanelTitle: '学习工作台',
       sidepanelDescription: '这里不是空聊天框，而是先把四个站点整理成一张桌面：今天有什么、哪里卡住了、哪些变化还没看。',
+      popupEyebrow: 'Campus Copilot 弹窗',
+      popupTitle: '快速体温计',
       popupDescription: 'Popup 保持轻量，负责给你一个很快的体温计：有没有同步、有没有高优先级数字、要不要立刻打开主工作台。',
+      optionsEyebrow: 'Campus Copilot 设置',
+      optionsTitle: '连接与运行时控制',
       optionsDescription: '这页像控制柜：站点配置、AI/BFF 入口、默认导出格式和边界披露，都应该在这里说真话。',
     },
     meta: {
@@ -409,7 +439,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       onlyUnseen: '仅看未查看更新',
     },
     todaySnapshot: {
-      title: 'Today Snapshot',
+      title: '今日快照',
       description: '这里像桌面上的今日便签。先告诉你今天有没有急事，再决定要不要继续钻进细节。',
       currentTodo: '当前待办',
       dueSoon: '即将到期',
@@ -417,7 +447,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       unseenInView: '当前视图未查看',
     },
     quickActions: {
-      title: 'Quick Actions',
+      title: '快捷动作',
       description: '这些按钮像办公桌最顺手的四个抽屉，让你不用绕路就能做高价值动作。',
       syncCurrentSite: (site) => `同步 ${site}`,
       selectSiteBeforeSync: '先选择站点再同步',
@@ -429,17 +459,23 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     diagnostics: {
       title: 'Diagnostics',
       description: '这块像运行时控制塔，不是告诉你“系统很多功能”，而是告诉你“当前真正卡住哪些前置条件”。',
+      nextActions: '下一步动作',
+      readyToContinue: '可继续验证',
+      blockedByEnvironmentOrRuntime: '被环境或运行时阻塞',
       noBlockers: '当前没有明显运行时阻塞，可以继续做更深一层的真实验收。',
       exportJson: '导出诊断 JSON',
       reportReady: 'campus-copilot-diagnostics.json 已准备下载。',
     },
     priorityAlerts: {
-      title: 'Priority Alerts',
+      title: '优先提醒',
       description: '这块像值班表，重点不是“条目多”，而是“哪几条现在最该先看”。',
+      critical: '严重',
+      high: '高',
+      medium: '中',
       none: '还没有生成提醒。先同步一个站点，系统才有事实可判断。',
     },
     recentUpdates: {
-      title: 'Recent Updates',
+      title: '最近更新',
       description: '这块回答“最近发生了什么”，而且允许你只盯住还没处理过的变化。',
       none: '当前筛选下还没有可展示的更新流。',
     },
@@ -450,7 +486,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       dueAt: (value) => `截止 ${value}`,
     },
     siteStatus: {
-      title: 'Site Status',
+      title: '站点状态',
       description: '这里像控制塔，专门讲真话：哪站已经 live，哪站只是部分成功，哪站现在卡在配置或上下文。',
       resourceGaps: (value) => `仍有资源缺口：${value}`,
       syncButton: (site) => `同步 ${site}`,
@@ -477,7 +513,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       currentView: '当前视图',
     },
     options: {
-      siteConfiguration: 'Site configuration',
+      siteConfiguration: '站点配置',
       siteConfigurationDescription:
         'EdStem 会优先尝试从当前课程标签页自动推导 threads 路径；只有自动推导不够时，才需要你手动覆盖。unread / recent activity 路径都是可选项。',
       threadsPath: 'EdStem threads path',
@@ -485,13 +521,13 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       unreadPathPlaceholder: '可选：留空表示不额外覆盖 unread 路径',
       recentActivityPath: 'EdStem recent activity path',
       recentActivityPathPlaceholder: '可选：留空表示不额外覆盖 recent activity 路径',
-      aiBffConfiguration: 'AI / BFF configuration',
-      bffBaseUrl: 'BFF base URL',
+      aiBffConfiguration: 'AI / BFF 配置',
+      bffBaseUrl: 'BFF 地址',
       defaultProvider: '默认 Provider',
       refreshBffStatus: '刷新 BFF 状态',
       refreshingBffStatus: '刷新中…',
-      openAiModel: 'OpenAI model',
-      geminiModel: 'Gemini model',
+      openAiModel: 'OpenAI 模型',
+      geminiModel: 'Gemini 模型',
       defaultExportFormat: '默认导出格式',
       saveConfiguration: '保存配置',
       configurationSaved: '配置已保存。',
