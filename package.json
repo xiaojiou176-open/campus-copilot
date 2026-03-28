@@ -28,7 +28,7 @@
     "check:logging-schema": "node scripts/check-logging-schema.mjs",
     "check:runtime-artifacts": "node scripts/check-runtime-artifacts.mjs",
     "check:root-hygiene": "node scripts/check-root-hygiene.mjs",
-    "verify:governance": "pnpm check:docs:ssot && pnpm check:verification-claims && pnpm check:public-surface && pnpm check:actions-pinning && pnpm check:english-canonical",
+    "verify:governance": "pnpm check:docs:ssot && pnpm check:verification-claims && pnpm check:public-surface && pnpm check:actions-pinning && pnpm check:english-canonical && pnpm check:logging-schema && pnpm check:runtime-artifacts && pnpm check:root-hygiene",
     "verify": "bash scripts/verify.sh",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test"
