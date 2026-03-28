@@ -8,14 +8,14 @@ Use it to avoid writing platform-side unknowns into `README.md` as if the reposi
 
 | Item | Where to check | Repo can prove it? | Last checked | Notes |
 | :-- | :-- | :--: | :-- | :-- |
-| Repository description | GitHub repository settings / page header | No |  |  |
-| Homepage / website URL | GitHub repository settings | No |  |  |
-| Topics | GitHub repository settings | No |  |  |
-| Social preview image | GitHub repository settings | No |  |  |
-| Discussions enabled | GitHub repository settings | No |  |  |
-| Branch protection | GitHub branch protection settings | No |  |  |
-| Code scanning visibility | GitHub security tab | No |  |  |
-| Private vulnerability reporting | GitHub security settings | No |  |  |
+| Repository description | GitHub repository settings / page header | No | 2026-03-27 | Matches the current README positioning: local-first academic information organizer for Canvas, Gradescope, EdStem, and MyUW. |
+| Homepage / website URL | GitHub repository settings | No | 2026-03-27 | Intentionally blank for the current GitHub-first storefront phase. Do not invent a homepage URL. |
+| Topics | GitHub repository settings | No | 2026-03-27 | Set to `browser-extension`, `canvas`, `education`, `gradescope`, `local-first`, `student-productivity`, `typescript`. |
+| Social preview image | GitHub repository settings | No | 2026-03-27 | Still uses the default repository Open Graph image. Custom social preview remains a follow-up item. |
+| Discussions enabled | GitHub repository settings | No | 2026-03-27 | Enabled. |
+| Branch protection | GitHub branch protection settings | No | 2026-03-27 | `Verify` and `CodeQL` required; `strict=true`; admins enforced; linear history required; force-push and deletion disabled. |
+| Code scanning visibility | GitHub security tab | No | 2026-03-27 | Open alerts API returns zero. Security-tab visibility was not separately verified beyond API reachability. |
+| Private vulnerability reporting | GitHub security settings | No | 2026-03-27 | Enabled via API check. |
 
 ## Repo-Tracked Signals
 
