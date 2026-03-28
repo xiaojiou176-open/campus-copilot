@@ -27,6 +27,34 @@ Before creating a tag or GitHub Release:
    - `policies/integration-boundaries.yaml`
 4. no manual live-only success should be promoted into the release notes as deterministic proof
 
+## Tag And Release Naming
+
+Until the repository adopts a stronger packaged-artifact channel, use a simple source-first convention:
+
+- tags should use `v<semver>` when the change is meant to represent a public release point
+- the GitHub Release title should match the tag
+- the release body should summarize user-facing changes, not dump raw git history
+- if a release point is still exploratory or internal, prefer no tag over a misleading tag
+
+## Operational Checklist
+
+Before opening a GitHub Release:
+
+1. confirm `main` is aligned with `origin/main`
+2. confirm open PRs and open Issues are intentionally at their current state
+3. confirm A/B/C security alert reads are zero or explicitly documented otherwise
+4. confirm the release note wording matches current README and boundary registry claims
+5. confirm no manual-only validation result is being described as CI-proven behavior
+
+## When Not To Cut A Release
+
+Do not create a tag or GitHub Release when:
+
+- the change is still sitting only on a draft PR
+- the branch protection gates are not green
+- the repository is in a temporary closure-repair or truth-reset phase
+- the only reason to cut a release is to make the project look more mature than it is
+
 ## What A Release Must Not Claim
 
 Do not claim:
