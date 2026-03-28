@@ -38,6 +38,7 @@ import {
 } from './config';
 import './styles.css';
 import { buildAiProxyRequest } from './ai-request';
+import { formatDateTime, formatRelativeTime, getUiText, readBrowserLanguage, resolveUiLanguage } from './i18n';
 
 type SurfaceKind = 'sidepanel' | 'popup' | 'options';
 
@@ -74,13 +75,6 @@ const SITE_LABELS: Record<Site, string> = {
   myuw: 'MyUW',
 };
 
-const EXPORT_PRESETS: Array<{ preset: ExportPreset; label: string }> = [
-  { preset: 'weekly_assignments', label: '导出本周作业' },
-  { preset: 'recent_updates', label: '导出最近更新' },
-  { preset: 'all_deadlines', label: '导出全部 deadlines' },
-  { preset: 'current_view', label: '导出当前视图' },
-];
-
 const EXPORT_FORMAT_OPTIONS: Array<{ value: ExportFormat; label: string }> = [
   { value: 'markdown', label: 'Markdown' },
   { value: 'csv', label: 'CSV' },
@@ -93,82 +87,10 @@ const PROVIDER_OPTIONS: Array<{ value: ProviderId; label: string }> = [
   { value: 'gemini', label: 'Gemini' },
 ];
 
-const SURFACE_COPY: Record<
-  SurfaceKind,
-  {
-    eyebrow: string;
-    title: string;
-    description: string;
-  }
-> = {
-  sidepanel: {
-    eyebrow: 'Campus Copilot Sidepanel',
-    title: 'Academic workbench',
-    description:
-      '这里不是空聊天框，而是先把四个站点整理成一张桌面：今天有什么、哪里卡住了、哪些变化还没看。',
-  },
-  popup: {
-    eyebrow: 'Campus Copilot Popup',
-    title: 'Quick pulse',
-    description: 'Popup 保持轻量，负责给你一个很快的体温计：有没有同步、有没有高优先级数字、要不要立刻打开主工作台。',
-  },
-  options: {
-    eyebrow: 'Campus Copilot Options',
-    title: 'Connection and runtime controls',
-    description:
-      '这页像控制柜：站点配置、AI/BFF 入口、默认导出格式和边界披露，都应该在这里说真话。',
-  },
-};
-
-function formatRelativeTime(iso?: string) {
-  if (!iso) {
-    return '还没有同步';
-  }
-
-  const deltaMs = Date.now() - new Date(iso).getTime();
-  const deltaMinutes = Math.max(1, Math.round(deltaMs / 60000));
-  if (deltaMinutes < 60) {
-    return `${deltaMinutes} 分钟前`;
-  }
-
-  const deltaHours = Math.round(deltaMinutes / 60);
-  if (deltaHours < 48) {
-    return `${deltaHours} 小时前`;
-  }
-
-  const deltaDays = Math.round(deltaHours / 24);
-  return `${deltaDays} 天前`;
-}
-
-function formatDateTime(iso?: string) {
-  if (!iso) {
-    return '未提供时间';
-  }
-
-  return new Intl.DateTimeFormat('zh-CN', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(iso));
-}
-
 function buildDownloadPayload(format: ExportFormat, content: string) {
   return new Blob([content], {
     type: format === 'json' ? 'application/json;charset=utf-8' : 'text/plain;charset=utf-8',
   });
-}
-
-function buildSyncMessage(site: Site, outcome: SiteSyncOutcome) {
-  if (outcome === 'success') {
-    return `${SITE_LABELS[site]} 同步成功，结构化数据已刷新。`;
-  }
-
-  if (outcome === 'partial_success') {
-    return `${SITE_LABELS[site]} 已部分同步成功，仍有资源需要后续补齐。`;
-  }
-
-  return `${SITE_LABELS[site]} 同步结果为 ${outcome}，请查看站点状态面板。`;
 }
 
 function getSiteStatusTone(outcome?: SiteSyncOutcome, status?: 'idle' | 'syncing' | 'success' | 'error') {
@@ -204,6 +126,7 @@ function getSiteStatusLabel(outcome?: SiteSyncOutcome, status?: 'idle' | 'syncin
 }
 
 export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
+  const browserLanguage = readBrowserLanguage();
   const [refreshKey, setRefreshKey] = useState(0);
   const [now, setNow] = useState(() => new Date().toISOString());
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('markdown');
@@ -242,7 +165,32 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     },
   });
 
-  const copy = SURFACE_COPY[surface];
+  const activeLanguagePreference = surface === 'options' ? optionsDraft.uiLanguage : config.uiLanguage;
+  const uiLanguage = resolveUiLanguage(activeLanguagePreference, browserLanguage);
+  const text = getUiText(uiLanguage);
+  const exportPresets: Array<{ preset: ExportPreset; label: string }> = [
+    { preset: 'weekly_assignments', label: text.exportPresets.weeklyAssignments },
+    { preset: 'recent_updates', label: text.exportPresets.recentUpdates },
+    { preset: 'all_deadlines', label: text.exportPresets.allDeadlines },
+    { preset: 'current_view', label: text.exportPresets.currentView },
+  ];
+  const copy = {
+    sidepanel: {
+      eyebrow: 'Campus Copilot Sidepanel',
+      title: 'Academic workbench',
+      description: text.hero.sidepanelDescription,
+    },
+    popup: {
+      eyebrow: 'Campus Copilot Popup',
+      title: 'Quick pulse',
+      description: text.hero.popupDescription,
+    },
+    options: {
+      eyebrow: 'Campus Copilot Options',
+      title: 'Connection and runtime controls',
+      description: text.hero.optionsDescription,
+    },
+  }[surface];
   const todaySnapshot = useTodaySnapshot(now, undefined, refreshKey);
   const priorityAlerts = usePriorityAlerts(now, undefined, refreshKey) ?? [];
   const siteCounts = useAllSiteEntityCounts(undefined, refreshKey) ?? [];
@@ -371,7 +319,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
       message: undefined,
     });
 
-    const response = (await browser.runtime.sendMessage({
+      const response = (await browser.runtime.sendMessage({
       type: SYNC_SITE_COMMAND,
       site,
     })) as SyncSiteCommandResponse;
@@ -380,7 +328,12 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     setSyncFeedback({
       inFlightSite: undefined,
       outcome: response.outcome,
-      message: buildSyncMessage(site, response.outcome),
+      message:
+        response.outcome === 'success'
+          ? text.feedback.syncSuccess(SITE_LABELS[site])
+          : response.outcome === 'partial_success'
+            ? text.feedback.syncPartial(SITE_LABELS[site])
+            : text.feedback.syncOutcome(SITE_LABELS[site], response.outcome),
     });
   }
 
@@ -394,12 +347,12 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     );
 
     if (entityIds.length === 0) {
-      setExportFeedback('当前筛选下没有需要标记的更新。');
+      setExportFeedback(text.feedback.noVisibleUpdatesToMark);
       return;
     }
 
     await markEntitiesSeen(entityIds, new Date().toISOString());
-    setExportFeedback('当前视图里的最近更新已标记为已查看。');
+    setExportFeedback(text.feedback.visibleUpdatesMarkedSeen);
     setRefreshKey((current) => current + 1);
   }
 
@@ -432,7 +385,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         filename: artifact.filename,
         saveAs: surface === 'sidepanel' || surface === 'options',
       });
-      setExportFeedback(`${artifact.filename} 已准备下载。`);
+      setExportFeedback(text.feedback.downloadReady(artifact.filename));
     } finally {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
@@ -449,24 +402,24 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     setConfig(saved);
     setOptionsDraft(saved);
     setSelectedFormat(saved.defaultExportFormat);
-    setOptionsFeedback('配置已保存。');
+    setOptionsFeedback(text.options.configurationSaved);
     await refreshProviderStatus();
   }
 
   async function handleAskAi() {
     if (!config.ai.bffBaseUrl) {
-      setAiError('BFF base URL is not configured yet. Set it in Options first.');
+      setAiError(text.feedback.bffMissingForAi);
       return;
     }
 
     if (!providerStatus.providers[aiProvider]?.ready) {
-      setAiError(`${PROVIDER_OPTIONS.find((option) => option.value === aiProvider)?.label ?? aiProvider} is not ready in the BFF yet.`);
+      setAiError(text.feedback.providerNotReadyInBff(PROVIDER_OPTIONS.find((option) => option.value === aiProvider)?.label ?? aiProvider));
       await refreshProviderStatus();
       return;
     }
 
     if (!aiQuestion.trim()) {
-      setAiError('先输入一个问题，AI 才知道要解释什么。');
+      setAiError(text.feedback.questionRequired);
       return;
     }
 
@@ -518,14 +471,14 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
       if (!response.ok || payload.ok === false || !payload.answerText) {
         setAiAnswer(undefined);
-        setAiError(payload.error ?? payload.answerText ?? 'BFF 已响应，但当前 provider 没有返回可展示的回答。');
+        setAiError(payload.error ?? payload.answerText ?? text.feedback.noDisplayableAnswer);
         return;
       }
 
       setAiAnswer(payload.answerText);
     } catch (error) {
       setAiAnswer(undefined);
-      setAiError(error instanceof Error ? error.message : 'AI 请求失败。');
+      setAiError(error instanceof Error ? error.message : text.feedback.aiRequestFailed);
     } finally {
       setAiPending(false);
     }
@@ -552,6 +505,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
       hint: buildSiteBlockingHint(site, {
         outcome: sync?.lastOutcome,
         hasEdStemConfig: Boolean(config.sites.edstem.threadsPath),
+        locale: uiLanguage,
       }),
     };
   });
@@ -568,6 +522,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     providerOptions: PROVIDER_OPTIONS,
     defaultProvider: config.ai.defaultProvider,
     siteLabels: SITE_LABELS,
+    locale: uiLanguage,
   });
 
   async function handleExportDiagnostics() {
@@ -579,6 +534,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
       providerOptions: PROVIDER_OPTIONS,
       defaultProvider: config.ai.defaultProvider,
       siteLabels: SITE_LABELS,
+      locale: uiLanguage,
     });
 
     const blob = buildDownloadPayload('json', JSON.stringify(report, null, 2));
@@ -590,7 +546,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         filename: 'campus-copilot-diagnostics.json',
         saveAs: surface !== 'popup',
       });
-      setExportFeedback('campus-copilot-diagnostics.json is ready to download.');
+      setExportFeedback(text.diagnostics.reportReady);
     } finally {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
@@ -606,31 +562,31 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
             <p className="surface__copy">{copy.description}</p>
           </div>
           <div className="surface__hero-meta">
-            <span>上次刷新：{formatRelativeTime(lastSuccessfulSync)}</span>
-            <span>默认导出：{EXPORT_FORMAT_OPTIONS.find((option) => option.value === selectedFormat)?.label}</span>
+            <span>{text.meta.lastRefresh}: {formatRelativeTime(uiLanguage, lastSuccessfulSync)}</span>
+            <span>{text.meta.defaultExport}: {EXPORT_FORMAT_OPTIONS.find((option) => option.value === selectedFormat)?.label}</span>
           </div>
         </div>
 
         <div className="surface__grid surface__grid--stats">
           <article className="surface__panel surface__metric">
             <span className="surface__metric-value">{todaySnapshot?.totalAssignments ?? 0}</span>
-            <span className="surface__metric-label">待办作业</span>
+            <span className="surface__metric-label">{text.metrics.openAssignments}</span>
           </article>
           <article className="surface__panel surface__metric">
             <span className="surface__metric-value">{todaySnapshot?.dueSoonAssignments ?? 0}</span>
-            <span className="surface__metric-label">48 小时内截止</span>
+            <span className="surface__metric-label">{text.metrics.dueWithin48Hours}</span>
           </article>
           <article className="surface__panel surface__metric">
             <span className="surface__metric-value">{currentRecentUpdates?.unseenCount ?? 0}</span>
-            <span className="surface__metric-label">未查看更新</span>
+            <span className="surface__metric-label">{text.metrics.unseenUpdates}</span>
           </article>
           <article className="surface__panel surface__metric">
             <span className="surface__metric-value">{todaySnapshot?.newGrades ?? 0}</span>
-            <span className="surface__metric-label">新成绩</span>
+            <span className="surface__metric-label">{text.metrics.newGrades}</span>
           </article>
           <article className="surface__panel surface__metric">
             <span className="surface__metric-value">{todaySnapshot?.syncedSites ?? 0}</span>
-            <span className="surface__metric-label">成功同步站点</span>
+            <span className="surface__metric-label">{text.metrics.syncedSites}</span>
           </article>
         </div>
 
@@ -641,7 +597,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 className={`surface__chip ${filters.site === 'all' ? 'surface__chip--active' : ''}`}
                 onClick={() => setFilters((current) => ({ ...current, site: 'all' }))}
               >
-                全部站点
+                {text.toolbar.allSites}
               </button>
               {SITE_ORDER.map((site) => (
                 <button
@@ -665,26 +621,26 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   }))
                 }
               />
-              <span>仅看未查看更新</span>
+              <span>{text.toolbar.onlyUnseen}</span>
             </label>
           </div>
         ) : null}
 
         <div className="surface__grid surface__grid--split">
           <article className="surface__panel">
-            <h2>Today Snapshot</h2>
-            <p>这里像桌面上的今日便签。先告诉你今天有没有急事，再决定要不要继续钻进细节。</p>
+            <h2>{text.todaySnapshot.title}</h2>
+            <p>{text.todaySnapshot.description}</p>
             <ul className="surface__list">
-              <li>当前待办：{todaySnapshot?.totalAssignments ?? 0}</li>
-              <li>即将到期：{todaySnapshot?.dueSoonAssignments ?? 0}</li>
-              <li>最近更新：{todaySnapshot?.recentUpdates ?? 0}</li>
-              <li>当前视图未查看：{currentRecentUpdates?.unseenCount ?? 0}</li>
+              <li>{text.todaySnapshot.currentTodo}: {todaySnapshot?.totalAssignments ?? 0}</li>
+              <li>{text.todaySnapshot.dueSoon}: {todaySnapshot?.dueSoonAssignments ?? 0}</li>
+              <li>{text.todaySnapshot.recentUpdates}: {todaySnapshot?.recentUpdates ?? 0}</li>
+              <li>{text.todaySnapshot.unseenInView}: {currentRecentUpdates?.unseenCount ?? 0}</li>
             </ul>
           </article>
 
           <article className="surface__panel">
-            <h2>Quick Actions</h2>
-            <p>这些按钮像办公桌最顺手的四个抽屉，让你不用绕路就能做高价值动作。</p>
+            <h2>{text.quickActions.title}</h2>
+            <p>{text.quickActions.description}</p>
             <div className="surface__actions surface__actions--wrap">
               <button
                 className="surface__button"
@@ -693,18 +649,18 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               >
                 {currentSiteSelection
                   ? syncFeedback.inFlightSite === currentSiteSelection
-                    ? `Syncing ${SITE_LABELS[currentSiteSelection]}…`
-                    : `同步 ${SITE_LABELS[currentSiteSelection]}`
-                  : '先选择站点再同步'}
+                    ? text.quickActions.syncInProgress(SITE_LABELS[currentSiteSelection])
+                    : text.quickActions.syncCurrentSite(SITE_LABELS[currentSiteSelection])
+                  : text.quickActions.selectSiteBeforeSync}
               </button>
               <button className="surface__button surface__button--secondary" onClick={() => void handleExport('current_view')}>
-                打开导出
+                {text.quickActions.openExport}
               </button>
               <button className="surface__button surface__button--secondary" onClick={() => void handleMarkVisibleUpdatesSeen()}>
-                标记更新已查看
+                {text.quickActions.markUpdatesSeen}
               </button>
               <button className="surface__button surface__button--ghost" onClick={() => void browser.runtime.openOptionsPage()}>
-                跳到 Options
+                {text.quickActions.openOptions}
               </button>
             </div>
             {syncFeedback.message ? <p className="surface__feedback">{syncFeedback.message}</p> : null}
@@ -714,11 +670,11 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
         {surface !== 'popup' ? (
           <article className="surface__panel">
-            <h2>Diagnostics</h2>
-            <p>这块像运行时控制塔，不是告诉你“系统很多功能”，而是告诉你“当前真正卡住哪些前置条件”。</p>
+            <h2>{text.diagnostics.title}</h2>
+            <p>{text.diagnostics.description}</p>
             <div className="surface__stack">
               <p className="surface__meta">
-                Current status: {diagnostics.healthy ? 'ready_to_continue' : 'blocked_by_environment_or_runtime'}
+                {text.meta.currentStatus}: {diagnostics.healthy ? 'ready_to_continue' : 'blocked_by_environment_or_runtime'}
               </p>
               {diagnostics.blockers.length > 0 ? (
                 <ul className="surface__list">
@@ -727,7 +683,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   ))}
                 </ul>
               ) : (
-                <p>No obvious runtime blockers are active right now, so deeper validation can continue.</p>
+                <p>{text.diagnostics.noBlockers}</p>
               )}
               {diagnostics.nextActions.length > 0 ? (
                 <div className="surface__group">
@@ -741,7 +697,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               ) : null}
               <div className="surface__actions">
                 <button className="surface__button surface__button--ghost" onClick={() => void handleExportDiagnostics()}>
-                  Export diagnostics JSON
+                  {text.diagnostics.exportJson}
                 </button>
               </div>
             </div>
@@ -752,8 +708,8 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
           <>
             <div className="surface__grid surface__grid--split">
               <article className="surface__panel">
-                <h2>Priority Alerts</h2>
-                <p>这块像值班表，重点不是“条目多”，而是“哪几条现在最该先看”。</p>
+                <h2>{text.priorityAlerts.title}</h2>
+                <p>{text.priorityAlerts.description}</p>
                 <div className="surface__stack">
                   {criticalAlerts.length > 0 ? (
                     <section className="surface__group">
@@ -766,7 +722,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                           </div>
                           <p>{alert.summary}</p>
                           <p className="surface__meta">
-                            {SITE_LABELS[alert.site]} · {formatDateTime(alert.triggeredAt)}
+                            {SITE_LABELS[alert.site]} · {formatDateTime(uiLanguage, alert.triggeredAt)}
                           </p>
                         </article>
                       ))}
@@ -783,7 +739,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                           </div>
                           <p>{alert.summary}</p>
                           <p className="surface__meta">
-                            {SITE_LABELS[alert.site]} · {formatDateTime(alert.triggeredAt)}
+                            {SITE_LABELS[alert.site]} · {formatDateTime(uiLanguage, alert.triggeredAt)}
                           </p>
                         </article>
                       ))}
@@ -800,19 +756,19 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                           </div>
                           <p>{alert.summary}</p>
                           <p className="surface__meta">
-                            {SITE_LABELS[alert.site]} · {formatDateTime(alert.triggeredAt)}
+                            {SITE_LABELS[alert.site]} · {formatDateTime(uiLanguage, alert.triggeredAt)}
                           </p>
                         </article>
                       ))}
                     </section>
                   ) : null}
-                  {priorityAlerts.length === 0 ? <p>还没有生成提醒。先同步一个站点，系统才有事实可判断。</p> : null}
+                  {priorityAlerts.length === 0 ? <p>{text.priorityAlerts.none}</p> : null}
                 </div>
               </article>
 
               <article className="surface__panel">
-                <h2>Recent Updates</h2>
-                <p>这块回答“最近发生了什么”，而且允许你只盯住还没处理过的变化。</p>
+                <h2>{text.recentUpdates.title}</h2>
+                <p>{text.recentUpdates.description}</p>
                 <div className="surface__stack">
                   {currentRecentUpdates?.items.length ? (
                     currentRecentUpdates.items.map((entry) => (
@@ -823,12 +779,12 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                         </div>
                         {entry.summary ? <p>{entry.summary}</p> : null}
                         <p className="surface__meta">
-                          {SITE_LABELS[entry.site]} · {formatDateTime(entry.occurredAt)}
+                          {SITE_LABELS[entry.site]} · {formatDateTime(uiLanguage, entry.occurredAt)}
                         </p>
                       </article>
                     ))
                   ) : (
-                    <p>当前筛选下还没有可展示的更新流。</p>
+                    <p>{text.recentUpdates.none}</p>
                   )}
                 </div>
               </article>
@@ -836,8 +792,8 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
             <div className="surface__grid surface__grid--split">
               <article className="surface__panel">
-                <h2>Current Tasks</h2>
-                <p>这里先把当前视图里的任务稳定露出来，先做到能看、能导、能继续问，再谈复杂详情页。</p>
+                <h2>{text.currentTasks.title}</h2>
+                <p>{text.currentTasks.description}</p>
                 <div className="surface__stack">
                   {currentAssignments.length ? (
                     currentAssignments.slice(0, surface === 'sidepanel' ? 8 : 4).map((assignment) => (
@@ -847,19 +803,19 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                           <span className="surface__badge surface__badge--neutral">{assignment.status}</span>
                         </div>
                         <p className="surface__meta">
-                          {SITE_LABELS[assignment.site]} · {assignment.dueAt ? `截止 ${formatDateTime(assignment.dueAt)}` : '未提供截止时间'}
+                          {SITE_LABELS[assignment.site]} · {assignment.dueAt ? text.currentTasks.dueAt(formatDateTime(uiLanguage, assignment.dueAt)) : text.meta.noTimeProvided}
                         </p>
                       </article>
                     ))
                   ) : (
-                    <p>当前筛选下还没有结构化任务。先同步站点，任务列表才会长出来。</p>
+                    <p>{text.currentTasks.none}</p>
                   )}
                 </div>
               </article>
 
               <article className="surface__panel">
-                <h2>Site Status</h2>
-                <p>这里像控制塔，专门讲真话：哪站已经 live，哪站只是部分成功，哪站现在卡在配置或上下文。</p>
+                <h2>{text.siteStatus.title}</h2>
+                <p>{text.siteStatus.description}</p>
                 <div className="surface__stack">
                   {orderedSiteStatus.map((entry) => (
                     <article className="surface__item" key={entry.site}>
@@ -871,12 +827,10 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                           {getSiteStatusLabel(entry.sync?.lastOutcome, entry.sync?.status)}
                         </span>
                       </div>
-                      <p className="surface__meta">
-                        作业 {entry.counts.assignments} · 公告 {entry.counts.announcements} · 成绩 {entry.counts.grades} · 消息 {entry.counts.messages}
-                      </p>
-                      <p className="surface__meta">最近同步：{formatRelativeTime(entry.sync?.lastSyncedAt)}</p>
+                      <p className="surface__meta">{text.siteStatus.counts(entry.counts)}</p>
+                      <p className="surface__meta">{text.meta.lastSync}: {formatRelativeTime(uiLanguage, entry.sync?.lastSyncedAt)}</p>
                       {entry.sync?.resourceFailures?.length ? (
-                        <p>仍有资源缺口：{entry.sync.resourceFailures.map((item) => item.resource).join(' / ')}</p>
+                        <p>{text.siteStatus.resourceGaps(entry.sync.resourceFailures.map((item) => item.resource).join(' / '))}</p>
                       ) : null}
                       {entry.sync?.errorReason ? <p>{entry.sync.errorReason}</p> : null}
                       {entry.hint ? <p>{entry.hint}</p> : null}
@@ -886,7 +840,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                           disabled={syncFeedback.inFlightSite === entry.site}
                           onClick={() => void handleSiteSync(entry.site)}
                         >
-                          {syncFeedback.inFlightSite === entry.site ? '同步中…' : `同步 ${SITE_LABELS[entry.site]}`}
+                          {syncFeedback.inFlightSite === entry.site ? text.siteStatus.syncing : text.siteStatus.syncButton(SITE_LABELS[entry.site])}
                         </button>
                       </div>
                     </article>
@@ -897,11 +851,11 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
             {surface === 'sidepanel' ? (
               <article className="surface__panel">
-                <h2>Ask AI</h2>
-                <p>AI 在这里不是主角，而是站在工作台结果后面做解释。它只吃结构化数据，不碰网页和 DOM。</p>
+                <h2>{text.askAi.title}</h2>
+                <p>{text.askAi.description}</p>
                 <div className="surface__grid surface__grid--split">
                   <label className="surface__field">
-                    <span>Provider</span>
+                    <span>{text.askAi.provider}</span>
                     <select
                       value={aiProvider}
                       onChange={(event) => {
@@ -919,41 +873,41 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   </label>
 
                   <label className="surface__field">
-                    <span>Model</span>
+                    <span>{text.askAi.model}</span>
                     <input value={aiModel} onChange={(event) => setAiModel(event.target.value)} />
                   </label>
                 </div>
                 <div className="surface__stack">
                   {PROVIDER_OPTIONS.map((option) => (
                     <p className="surface__meta" key={option.value}>
-                      {option.label} · {providerStatus.providers[option.value]?.ready ? 'ready' : 'not ready'} · {formatProviderReason(providerStatus.providers[option.value]?.reason)}
+                      {option.label} · {providerStatus.providers[option.value]?.ready ? text.meta.ready : text.meta.notReady} · {formatProviderReason(providerStatus.providers[option.value]?.reason)}
                     </p>
                   ))}
                   <p className="surface__meta">
-                    最近检查：{formatRelativeTime(providerStatus.checkedAt)}
-                    {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error)}` : ''}
+                    {text.meta.lastChecked}: {formatRelativeTime(uiLanguage, providerStatus.checkedAt)}
+                    {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error, uiLanguage)}` : ''}
                   </p>
                 </div>
                 <div className="surface__actions">
                   <button className="surface__button surface__button--ghost" disabled={providerStatusPending} onClick={() => void refreshProviderStatus()}>
-                    {providerStatusPending ? '刷新中…' : '刷新 provider 状态'}
+                    {providerStatusPending ? text.askAi.refreshingProviderStatus : text.askAi.refreshProviderStatus}
                   </button>
                 </div>
                 <label className="surface__field">
-                  <span>问题</span>
+                  <span>{text.askAi.question}</span>
                   <textarea
                     rows={4}
                     value={aiQuestion}
                     onChange={(event) => setAiQuestion(event.target.value)}
-                    placeholder="例如：我现在最该关注什么？最近有什么变化？"
+                    placeholder={text.askAi.placeholder}
                   />
                 </label>
                 <div className="surface__actions surface__actions--wrap">
                   <button className="surface__button" disabled={aiPending} onClick={() => void handleAskAi()}>
-                    {aiPending ? 'Asking…' : '问 AI'}
+                    {aiPending ? 'Asking…' : text.askAi.ask}
                   </button>
                   <button className="surface__button surface__button--ghost" onClick={() => void browser.runtime.openOptionsPage()}>
-                    配置 BFF / Provider
+                    {text.askAi.configure}
                   </button>
                 </div>
                 {!config.ai.bffBaseUrl ? <p className="surface__feedback">BFF base URL is still missing, so the AI path should fail loudly instead of failing silently.</p> : null}
@@ -967,13 +921,13 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         {surface === 'popup' ? (
           <div className="surface__grid">
             <article className="surface__panel">
-              <h2>Quick export</h2>
+              <h2>{text.popup.quickExport}</h2>
               <div className="surface__actions surface__actions--wrap">
                 <button className="surface__button surface__button--secondary" onClick={() => void handleExport('weekly_assignments')}>
-                  本周作业
+                  {text.popup.weeklyAssignments}
                 </button>
                 <button className="surface__button surface__button--ghost" onClick={() => void handleExport('current_view')}>
-                  当前视图
+                  {text.popup.currentView}
                 </button>
               </div>
             </article>
@@ -983,10 +937,10 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         {surface === 'options' ? (
           <div className="surface__grid surface__grid--split">
             <article className="surface__panel">
-              <h2>Site configuration</h2>
-              <p>EdStem 会优先尝试从当前课程标签页自动推导 threads 路径；只有自动推导不够时，才需要你手动覆盖。unread / recent activity 路径都是可选项。</p>
+              <h2>{text.options.siteConfiguration}</h2>
+              <p>{text.options.siteConfigurationDescription}</p>
               <label className="surface__field">
-                <span>EdStem threads path</span>
+                <span>{text.options.threadsPath}</span>
                 <input
                   value={optionsDraft.sites.edstem.threadsPath ?? ''}
                   onChange={(event) =>
@@ -1006,7 +960,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 />
               </label>
               <label className="surface__field">
-                <span>EdStem unread path</span>
+                <span>{text.options.unreadPath}</span>
                 <input
                   value={optionsDraft.sites.edstem.unreadPath ?? ''}
                   onChange={(event) =>
@@ -1022,11 +976,11 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       }),
                     )
                   }
-                  placeholder="可选：留空表示不额外覆盖 unread 路径"
+                  placeholder={text.options.unreadPathPlaceholder}
                 />
               </label>
               <label className="surface__field">
-                <span>EdStem recent activity path</span>
+                <span>{text.options.recentActivityPath}</span>
                 <input
                   value={optionsDraft.sites.edstem.recentActivityPath ?? ''}
                   onChange={(event) =>
@@ -1042,15 +996,15 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       }),
                     )
                   }
-                  placeholder="可选：留空表示不额外覆盖 recent activity 路径"
+                  placeholder={text.options.recentActivityPathPlaceholder}
                 />
               </label>
             </article>
 
             <article className="surface__panel">
-              <h2>AI / BFF configuration</h2>
+              <h2>{text.options.aiBffConfiguration}</h2>
               <label className="surface__field">
-                <span>BFF base URL</span>
+                <span>{text.options.bffBaseUrl}</span>
                 <input
                   value={optionsDraft.ai.bffBaseUrl ?? ''}
                   onChange={(event) =>
@@ -1068,7 +1022,25 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 />
               </label>
               <label className="surface__field">
-                <span>默认 Provider</span>
+                <span>{text.options.interfaceLanguage}</span>
+                <select
+                  value={optionsDraft.uiLanguage}
+                  onChange={(event) =>
+                    setOptionsDraft((current) =>
+                      buildNextConfig({
+                        current,
+                        uiLanguage: event.target.value as ExtensionConfig['uiLanguage'],
+                      }),
+                    )
+                  }
+                >
+                  <option value="auto">{text.options.followBrowser}</option>
+                  <option value="en">{text.options.english}</option>
+                  <option value="zh-CN">{text.options.chinese}</option>
+                </select>
+              </label>
+              <label className="surface__field">
+                <span>{text.options.defaultProvider}</span>
                 <select
                   value={optionsDraft.ai.defaultProvider}
                   onChange={(event) =>
@@ -1097,17 +1069,17 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   </p>
                 ))}
                 <p className="surface__meta">
-                  最近检查：{formatRelativeTime(providerStatus.checkedAt)}
-                  {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error)}` : ''}
+                  {text.meta.lastChecked}: {formatRelativeTime(uiLanguage, providerStatus.checkedAt)}
+                  {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error, uiLanguage)}` : ''}
                 </p>
               </div>
               <div className="surface__actions">
                 <button className="surface__button surface__button--ghost" disabled={providerStatusPending} onClick={() => void refreshProviderStatus()}>
-                  {providerStatusPending ? '刷新中…' : '刷新 BFF 状态'}
+                  {providerStatusPending ? text.options.refreshingBffStatus : text.options.refreshBffStatus}
                 </button>
               </div>
               <label className="surface__field">
-                <span>OpenAI model</span>
+                <span>{text.options.openAiModel}</span>
                 <input
                   value={optionsDraft.ai.models.openai}
                   onChange={(event) =>
@@ -1127,7 +1099,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 />
               </label>
               <label className="surface__field">
-                <span>Gemini model</span>
+                <span>{text.options.geminiModel}</span>
                 <input
                   value={optionsDraft.ai.models.gemini}
                   onChange={(event) =>
@@ -1147,7 +1119,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 />
               </label>
               <label className="surface__field">
-                <span>默认导出格式</span>
+                <span>{text.options.defaultExportFormat}</span>
                 <select
                   value={optionsDraft.defaultExportFormat}
                   onChange={(event) =>
@@ -1168,23 +1140,21 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               </label>
               <div className="surface__actions surface__actions--wrap">
                 <button className="surface__button" onClick={() => void handleSaveOptions()}>
-                  保存配置
+                  {text.options.saveConfiguration}
                 </button>
                 <button className="surface__button surface__button--secondary" onClick={() => void handleExport('current_view')}>
-                  导出当前视图
+                  {text.options.exportCurrentView}
                 </button>
               </div>
               {optionsFeedback ? <p className="surface__feedback">{optionsFeedback}</p> : null}
             </article>
 
             <article className="surface__panel">
-              <h2>Boundary disclosure</h2>
+              <h2>{text.boundaryDisclosure.title}</h2>
               <ul className="surface__list">
-                <li>当前产品仍以本地优先、手动同步、read-only 为主，不会静默后台扫站点。</li>
-                <li>EdStem path 由你明确配置，不做偷偷摸摸的 endpoint 猜测。</li>
-                <li>MyUW 依赖当前活动标签页里的 page state / DOM，上下文不对就应当诚实失败。</li>
-                <li>本轮 AI 只走 OpenAI / Gemini 的 API key 路线；Gemini OAuth、web_session、多 provider 自动路由仍未纳入正式路径。</li>
-                <li>AI 只消费统一 schema 和工作台读模型，不读取 raw DOM、cookie 或站点原始响应。</li>
+                {text.boundaryDisclosure.bullets.map((bullet) => (
+                  <li key={bullet}>{bullet}</li>
+                ))}
               </ul>
             </article>
           </div>

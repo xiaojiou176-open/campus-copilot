@@ -1,0 +1,28 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1200" rx="48" fill="#EEF4FB"/>
+  <rect x="52" y="52" width="1096" height="1096" rx="36" fill="#FFFFFF" stroke="#D7E3F2" stroke-width="2"/>
+
+  <text x="112" y="172" fill="#53729A" font-family="Arial, Helvetica, sans-serif" font-size="28" letter-spacing="2">CAMPUS COPILOT</text>
+  <text x="112" y="276" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700">One local-first workspace</text>
+  <text x="112" y="338" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="700">for class work.</text>
+  <text x="112" y="410" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="34">Normalize Canvas, Gradescope, EdStem, and MyUW first.</text>
+  <text x="112" y="458" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="34">Explain with AI second.</text>
+
+  <rect x="112" y="536" width="432" height="220" rx="28" fill="#F8FBFF" stroke="#D7E3F2"/>
+  <text x="150" y="602" fill="#173A64" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">What the repo proves today</text>
+  <text x="150" y="660" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- shared schema plus Dexie read models</text>
+  <text x="150" y="706" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- deterministic repository verification</text>
+  <text x="150" y="752" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- thin BFF for formal OpenAI/Gemini paths</text>
+
+  <rect x="594" y="536" width="494" height="220" rx="28" fill="#14345B"/>
+  <text x="632" y="602" fill="#F6FAFF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">What it does not pretend</text>
+  <text x="632" y="660" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="26">- not every path is an official public API</text>
+  <text x="632" y="706" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="26">- mocked smoke is not full live proof</text>
+  <text x="632" y="752" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="26">- write automation is outside the current boundary</text>
+
+  <rect x="112" y="834" width="976" height="204" rx="28" fill="#F8FBFF" stroke="#D7E3F2"/>
+  <text x="150" y="900" fill="#173A64" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Current formal paths</text>
+  <text x="150" y="956" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- local-first workbench views</text>
+  <text x="150" y="996" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- export presets from normalized data</text>
+  <text x="150" y="1036" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="26">- AI after structure through the formal BFF path</text>
+</svg>

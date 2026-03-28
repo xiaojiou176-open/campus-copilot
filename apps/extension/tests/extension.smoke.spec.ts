@@ -10,6 +10,7 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
       const defaultConfig = {
         [configKey]: {
           defaultExportFormat: 'markdown',
+          uiLanguage: 'auto',
           ai: {
             defaultProvider: 'openai',
             models: {
@@ -255,6 +256,15 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
         storage,
       };
 
+      Object.defineProperty(window.navigator, 'language', {
+        configurable: true,
+        get: () => 'en-US',
+      });
+      Object.defineProperty(window.navigator, 'languages', {
+        configurable: true,
+        get: () => ['en-US'],
+      });
+
       Object.assign(window, { chrome, browser: chrome });
 
       const originalFetch = window.fetch.bind(window);
@@ -324,10 +334,10 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   const diagnosticsPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
   expect(diagnosticsPayload).toContain('campus-copilot-diagnostics.json');
   await expect(page.getByRole('heading', { name: 'Site Status' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '同步 Canvas' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '同步 Gradescope' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '同步 EdStem' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '同步 MyUW' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sync Canvas' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sync Gradescope' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sync EdStem' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sync MyUW' })).toBeVisible();
   await expect(page.getByText('BFF base URL is still missing')).toBeVisible();
 });
 
@@ -336,14 +346,14 @@ test('saves options config, syncs edstem, and records export downloads', async (
 
   await page.getByLabel('EdStem threads path').fill('/api/courses/90031/threads?limit=30&sort=new');
   await page.getByLabel('BFF base URL').fill('http://127.0.0.1:8787');
-  await page.getByRole('button', { name: '保存配置' }).click();
-  await expect(page.getByText('配置已保存。')).toBeVisible();
+  await page.getByRole('button', { name: 'Save configuration' }).click();
+  await expect(page.getByText('Configuration saved.')).toBeVisible();
 
   await page.goto('/sidepanel.html');
-  await page.getByRole('button', { name: '同步 EdStem' }).click();
-  await expect(page.getByText('EdStem 同步成功')).toBeVisible();
+  await page.getByRole('button', { name: 'Sync EdStem' }).click();
+  await expect(page.getByText('EdStem sync succeeded')).toBeVisible();
 
-  await page.getByRole('button', { name: '打开导出' }).click();
+  await page.getByRole('button', { name: 'Open export' }).click();
   const downloadPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
   expect(downloadPayload).toContain('current-view');
 });
@@ -351,11 +361,11 @@ test('saves options config, syncs edstem, and records export downloads', async (
 test('asks ai after provider config exists', async ({ page }) => {
   await page.goto('/options.html');
   await page.getByLabel('BFF base URL').fill('http://127.0.0.1:8787');
-  await page.getByRole('button', { name: '保存配置' }).click();
+  await page.getByRole('button', { name: 'Save configuration' }).click();
 
   await page.goto('/sidepanel.html');
-  await page.getByLabel('问题').fill('我现在最该关注什么？');
-  await page.getByRole('button', { name: '问 AI' }).click();
+  await page.getByLabel('Question').fill('What should I pay attention to right now?');
+  await page.getByRole('button', { name: 'Ask AI' }).click();
 
   await expect(page.getByText('Campus Copilot AI answer')).toBeVisible();
 });
@@ -363,22 +373,34 @@ test('asks ai after provider config exists', async ({ page }) => {
 test('shows provider not ready when selected provider is unavailable in bff status', async ({ page }) => {
   await page.goto('/options.html');
   await page.getByLabel('BFF base URL').fill('http://127.0.0.1:8787');
-  await page.getByRole('button', { name: '保存配置' }).click();
+  await page.getByRole('button', { name: 'Save configuration' }).click();
 
   await page.goto('/sidepanel.html');
   await page.getByLabel('Provider').selectOption('gemini');
-  await page.getByLabel('问题').fill('最近有什么消息？');
-  await page.getByRole('button', { name: '问 AI' }).click();
+  await page.getByLabel('Question').fill('What changed recently?');
+  await page.getByRole('button', { name: 'Ask AI' }).click();
 
   await expect(page.getByText('Gemini is not ready in the BFF yet.')).toBeVisible();
   await expect(page.getByText('Gemini · not ready · missing_api_key')).toBeVisible();
 });
 
-test('shows partial-success and site-filter behavior in the sidepanel', async ({ page }) => {
+test('switches to Chinese UI and shows partial-success plus site-filter behavior', async ({ page }) => {
+  await page.goto('/options.html');
+  await page.evaluate((configKey) => {
+    const raw = window.localStorage.getItem('__extension_storage__');
+    const state = raw ? JSON.parse(raw) : {};
+    state[configKey] = {
+      ...state[configKey],
+      uiLanguage: 'zh-CN',
+    };
+    window.localStorage.setItem('__extension_storage__', JSON.stringify(state));
+  }, CONFIG_KEY);
   await page.goto('/sidepanel.html');
 
   await page.getByRole('button', { name: 'MyUW', exact: true }).click();
-  await page.locator('.surface__panel').filter({ hasText: 'Quick Actions' }).getByRole('button', { name: '同步 MyUW' }).click();
+  const syncMyUwButton = page.getByRole('button', { name: '同步 MyUW' }).last();
+  await expect(syncMyUwButton).toBeVisible();
+  await syncMyUwButton.click();
 
   await expect(page.getByText('MyUW 已部分同步成功')).toBeVisible();
   await expect(page.getByText('当前筛选下还没有结构化任务。')).toBeVisible();
