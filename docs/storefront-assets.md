@@ -13,6 +13,7 @@ The rule is simple:
 | Asset | Purpose | Source | Update policy |
 | :-- | :-- | :-- | :-- |
 | `docs/assets/hero-workbench-overview.svg` | Give GitHub visitors an English-first hero asset that explains the product shape before they inspect the deeper screenshot inventory | Maintainer-authored SVG overview backed by current formal product paths | Update when the public product shape or formal boundary wording changes materially |
+| `docs/assets/social-preview.png` | Provide a square PNG asset that can be uploaded as the repository's custom social preview image in GitHub settings | Rendered from the English-first hero overview and sized for repository social preview use | Re-render whenever the hero overview changes materially or the repository positioning changes |
 | `docs/assets/weekly-assignments-example.md` | Show a real export sample without requiring a live browser session | Generated from the exporter package fixture | Update if export format or wording changes materially |
 | `docs/assets/sidepanel-overview.png` | Show the workbench surface in a controlled, reproducible state | Captured from the built sidepanel page with extension mocks and a real local provider-ready state | Re-capture when the main workbench layout changes materially |
 
