@@ -3,13 +3,16 @@ import { z } from 'zod';
 import type { ProviderId } from '@campus-copilot/ai';
 import type { EdStemPathConfig } from '@campus-copilot/adapters-edstem';
 import type { ExportFormat } from '@campus-copilot/exporter';
+import { UI_LANGUAGE_PREFERENCES, type UiLanguagePreference } from './i18n';
 
 const EXTENSION_CONFIG_KEY = 'campusCopilotConfig';
 
 const ExportFormatSchema = z.enum(['markdown', 'csv', 'json', 'ics']);
 const ProviderConfigIdSchema = z.enum(['openai', 'gemini']);
+const UiLanguagePreferenceSchema = z.enum(UI_LANGUAGE_PREFERENCES);
 const DEFAULT_EXTENSION_CONFIG = {
   defaultExportFormat: 'markdown',
+  uiLanguage: 'auto',
   ai: {
     defaultProvider: 'openai',
     models: {
@@ -25,6 +28,7 @@ const DEFAULT_EXTENSION_CONFIG = {
 const StoredExtensionConfigSchema = z
   .object({
     defaultExportFormat: ExportFormatSchema.optional(),
+    uiLanguage: UiLanguagePreferenceSchema.optional(),
     ai: z
       .object({
         bffBaseUrl: z.string().url().optional(),
@@ -54,6 +58,7 @@ const StoredExtensionConfigSchema = z
 const ExtensionConfigSchema = z
   .object({
     defaultExportFormat: ExportFormatSchema.default(DEFAULT_EXTENSION_CONFIG.defaultExportFormat),
+    uiLanguage: UiLanguagePreferenceSchema.default(DEFAULT_EXTENSION_CONFIG.uiLanguage),
     ai: z
       .object({
         bffBaseUrl: z.string().url().optional(),
@@ -91,6 +96,7 @@ function normalizeConfig(value: unknown): ExtensionConfig {
   const parsed = StoredExtensionConfigSchema.parse(value ?? {});
   return ExtensionConfigSchema.parse({
     defaultExportFormat: parsed.defaultExportFormat ?? DEFAULT_EXTENSION_CONFIG.defaultExportFormat,
+    uiLanguage: parsed.uiLanguage ?? DEFAULT_EXTENSION_CONFIG.uiLanguage,
     ai: {
       ...DEFAULT_EXTENSION_CONFIG.ai,
       ...parsed.ai,
@@ -168,12 +174,14 @@ export function getEdStemPathConfig(config: ExtensionConfig): EdStemPathConfig |
 export function buildNextConfig(input: {
   current: ExtensionConfig;
   defaultExportFormat?: ExportFormat;
+  uiLanguage?: UiLanguagePreference;
   ai?: Partial<ExtensionConfig['ai']>;
   sites?: Partial<ExtensionConfig['sites']>;
 }) {
   return normalizeConfig({
     ...input.current,
     ...(input.defaultExportFormat ? { defaultExportFormat: input.defaultExportFormat } : {}),
+    ...(input.uiLanguage ? { uiLanguage: input.uiLanguage } : {}),
     ...(input.ai
       ? {
           ai: {

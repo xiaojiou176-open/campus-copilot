@@ -31,6 +31,7 @@ describe('extension config', () => {
     const config = await loadExtensionConfig(createStorageMock());
 
     expect(config.defaultExportFormat).toBe('markdown');
+    expect(config.uiLanguage).toBe('auto');
     expect(config.ai.defaultProvider).toBe('openai');
     expect(config.ai.models.gemini).toBe('gemini-2.5-flash');
   });
@@ -46,6 +47,7 @@ describe('extension config', () => {
           openai: 'gpt-4.1',
         },
       },
+      uiLanguage: 'zh-CN',
       sites: {
         edstem: {
           threadsPath: '/api/courses/90031/threads?limit=30&sort=new',
@@ -56,6 +58,7 @@ describe('extension config', () => {
     expect(next.ai.bffBaseUrl).toBe('http://127.0.0.1:8787');
     expect(next.ai.models.openai).toBe('gpt-4.1');
     expect(next.ai.models.gemini).toBe('gemini-2.5-flash');
+    expect(next.uiLanguage).toBe('zh-CN');
     expect(next.sites.edstem.threadsPath).toBe('/api/courses/90031/threads?limit=30&sort=new');
   });
 
@@ -65,6 +68,7 @@ describe('extension config', () => {
       buildNextConfig({
         current: getDefaultExtensionConfig(),
         defaultExportFormat: 'json',
+        uiLanguage: 'en',
         ai: {
           defaultProvider: 'gemini',
           bffBaseUrl: 'http://127.0.0.1:8787',
@@ -83,6 +87,7 @@ describe('extension config', () => {
     );
 
     expect(getProviderModel(saved, 'gemini')).toBe('gemini-2.5-pro');
+    expect(saved.uiLanguage).toBe('en');
     expect(getEdStemPathConfig(saved)).toEqual({
       threadsPath: '/api/courses/90031/threads?limit=30&sort=new',
       unreadPath: undefined,

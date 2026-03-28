@@ -113,5 +113,13 @@ describe('background runtime helpers', () => {
         hasEdStemConfig: false,
       }),
     ).toBe('EdStem private request paths are missing. Fill them in through Options first.');
+
+    expect(
+      buildSiteBlockingHint('edstem', {
+        outcome: 'unsupported_context',
+        hasEdStemConfig: false,
+        locale: 'zh-CN',
+      }),
+    ).toBe('缺少 EdStem 私有请求路径，请先在 Options 里填写。');
   });
 });

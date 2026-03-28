@@ -1,6 +1,7 @@
 import type { FetchMode, Site } from '@campus-copilot/schema';
 import type { SiteSyncOutcome } from '@campus-copilot/core';
 import { SyncResourceFailureSchema, type SyncResourceFailure } from '@campus-copilot/storage';
+import { getUiText, type ResolvedUiLanguage } from './i18n';
 
 const RESOURCE_NAMES = ['courses', 'assignments', 'announcements', 'grades', 'messages', 'events'] as const;
 type ResourceName = (typeof RESOURCE_NAMES)[number];
@@ -143,17 +144,19 @@ export function getSyncOutcomeForPersistence(result: SiteSyncResult): SiteSyncOu
 export function buildSiteBlockingHint(site: Site, input: {
   outcome?: SiteSyncOutcome;
   hasEdStemConfig?: boolean;
+  locale?: ResolvedUiLanguage;
 }) {
+  const text = getUiText(input.locale ?? 'en');
   if (site === 'edstem' && input.outcome === 'unsupported_context' && !input.hasEdStemConfig) {
-    return 'EdStem private request paths are missing. Fill them in through Options first.';
+    return text.blockingHints.edstemMissingPaths;
   }
 
   if (site === 'myuw' && input.outcome === 'unsupported_context') {
-    return 'Trigger sync from a MyUW page tab so the system can read page state or DOM context.';
+    return text.blockingHints.myuwTabRequired;
   }
 
   if ((site === 'canvas' || site === 'gradescope' || site === 'edstem') && input.outcome === 'unsupported_context') {
-    return 'Trigger sync manually from an active tab on the corresponding site.';
+    return text.blockingHints.activeTabRequired;
   }
 
   return undefined;
