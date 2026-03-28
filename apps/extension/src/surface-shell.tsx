@@ -170,18 +170,18 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const text = getUiText(uiLanguage);
   const copy = {
     sidepanel: {
-      eyebrow: 'Campus Copilot Sidepanel',
-      title: 'Academic workbench',
+      eyebrow: text.hero.sidepanelEyebrow,
+      title: text.hero.sidepanelTitle,
       description: text.hero.sidepanelDescription,
     },
     popup: {
-      eyebrow: 'Campus Copilot Popup',
-      title: 'Quick pulse',
+      eyebrow: text.hero.popupEyebrow,
+      title: text.hero.popupTitle,
       description: text.hero.popupDescription,
     },
     options: {
-      eyebrow: 'Campus Copilot Options',
-      title: 'Connection and runtime controls',
+      eyebrow: text.hero.optionsEyebrow,
+      title: text.hero.optionsTitle,
       description: text.hero.optionsDescription,
     },
   }[surface];
@@ -668,7 +668,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
             <p>{text.diagnostics.description}</p>
             <div className="surface__stack">
               <p className="surface__meta">
-                {text.meta.currentStatus}: {diagnostics.healthy ? 'ready_to_continue' : 'blocked_by_environment_or_runtime'}
+                {text.meta.currentStatus}: {diagnostics.healthy ? text.diagnostics.readyToContinue : text.diagnostics.blockedByEnvironmentOrRuntime}
               </p>
               {diagnostics.blockers.length > 0 ? (
                 <ul className="surface__list">
@@ -681,7 +681,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               )}
               {diagnostics.nextActions.length > 0 ? (
                 <div className="surface__group">
-                  <h3>Next Actions</h3>
+                  <h3>{text.diagnostics.nextActions}</h3>
                   <ul className="surface__list">
                     {diagnostics.nextActions.map((action) => (
                       <li key={action}>{action}</li>
@@ -707,7 +707,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 <div className="surface__stack">
                   {criticalAlerts.length > 0 ? (
                     <section className="surface__group">
-                      <h3>Critical</h3>
+                      <h3>{text.priorityAlerts.critical}</h3>
                       {criticalAlerts.map((alert) => (
                         <article className="surface__item" key={alert.id}>
                           <div className="surface__item-header">
@@ -724,7 +724,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   ) : null}
                   {highAlerts.length > 0 ? (
                     <section className="surface__group">
-                      <h3>High</h3>
+                      <h3>{text.priorityAlerts.high}</h3>
                       {highAlerts.map((alert) => (
                         <article className="surface__item" key={alert.id}>
                           <div className="surface__item-header">
@@ -741,7 +741,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   ) : null}
                   {mediumAlerts.length > 0 ? (
                     <section className="surface__group">
-                      <h3>Medium</h3>
+                      <h3>{text.priorityAlerts.medium}</h3>
                       {mediumAlerts.map((alert) => (
                         <article className="surface__item" key={alert.id}>
                           <div className="surface__item-header">
@@ -812,7 +812,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 <p>{text.siteStatus.description}</p>
                 <div className="surface__stack">
                   {orderedSiteStatus.map((entry) => (
-                    <article className="surface__item" key={entry.site}>
+                    <article className="surface__item" key={entry.site} aria-label={SITE_LABELS[entry.site]}>
                       <div className="surface__item-header">
                         <strong>{SITE_LABELS[entry.site]}</strong>
                         <span
@@ -1059,7 +1059,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               <div className="surface__stack">
                 {PROVIDER_OPTIONS.map((option) => (
                   <p className="surface__meta" key={option.value}>
-                    {option.label} · {providerStatus.providers[option.value]?.ready ? 'BFF ready' : 'BFF not ready'} · {formatProviderReason(providerStatus.providers[option.value]?.reason)}
+                    {option.label} · {providerStatus.providers[option.value]?.ready ? text.meta.ready : text.meta.notReady} · {formatProviderReason(providerStatus.providers[option.value]?.reason)}
                   </p>
                 ))}
                 <p className="surface__meta">
