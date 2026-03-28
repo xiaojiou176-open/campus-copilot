@@ -168,12 +168,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const activeLanguagePreference = surface === 'options' ? optionsDraft.uiLanguage : config.uiLanguage;
   const uiLanguage = resolveUiLanguage(activeLanguagePreference, browserLanguage);
   const text = getUiText(uiLanguage);
-  const exportPresets: Array<{ preset: ExportPreset; label: string }> = [
-    { preset: 'weekly_assignments', label: text.exportPresets.weeklyAssignments },
-    { preset: 'recent_updates', label: text.exportPresets.recentUpdates },
-    { preset: 'all_deadlines', label: text.exportPresets.allDeadlines },
-    { preset: 'current_view', label: text.exportPresets.currentView },
-  ];
   const copy = {
     sidepanel: {
       eyebrow: 'Campus Copilot Sidepanel',
