@@ -1,61 +1,56 @@
 # Documentation Index
 
-This file is the **documentation router**, not a second project manifesto.
+This file is the canonical docs router.
 
 Use it like a building directory:
 
-- the product story belongs in [`../README.md`](../README.md)
-- stable technical facts belong in the numbered docs below
-- live manual validation belongs in the runbook
-- collaboration rules belong in `CONTRIBUTING.md` and `SECURITY.md`
+- `README.md` is the public landing page
+- `CONTRIBUTING.md` is the contributor entry point
+- the numbered docs below are concise canonical briefs
+- `09-implementation-decisions.md` records current locked choices
+- `verification-matrix.md` records required vs optional vs manual validation lanes
+- `live-validation-runbook.md` records manual live procedure only
 
-## Canonical Routing
+## Canonical Reading Order
+
+If you are a maintainer or contributor, read in this order:
+
+1. [`../README.md`](../README.md)
+2. [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
+3. [`09-implementation-decisions.md`](09-implementation-decisions.md)
+4. [`verification-matrix.md`](verification-matrix.md)
+5. [`integration-boundaries.md`](integration-boundaries.md)
+6. [`diagnostics-and-logging.md`](diagnostics-and-logging.md)
+7. The relevant numbered brief below for the subsystem you are changing
+
+## Numbered Briefs
+
+| File | Role | Current use |
+| :-- | :-- | :-- |
+| [`01-product-prd.md`](01-product-prd.md) | product boundary brief | what the repo is and is not |
+| [`02-system-architecture.md`](02-system-architecture.md) | architecture brief | runtime chain and truth layers |
+| [`03-domain-schema.md`](03-domain-schema.md) | schema brief | canonical entities and modeling rules |
+| [`04-adapter-spec.md`](04-adapter-spec.md) | adapter brief | site collection contract and fallback order |
+| [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md) | AI/runtime brief | thin BFF and AI-after-structure rules |
+| [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md) | UX/export brief | sidepanel/popup/options/export surfaces |
+| [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md) | boundary brief | permissions, privacy, upload limits |
+| [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md) | execution-order brief | how to extend the repo without breaking its ordering |
+| [`09-implementation-decisions.md`](09-implementation-decisions.md) | locked choices | current formal implementation choices |
+
+## Supporting Governance Docs
 
 | Need | Canonical file |
 | :-- | :-- |
-| What the product is | [`01-product-prd.md`](01-product-prd.md) |
-| How the system is shaped | [`02-system-architecture.md`](02-system-architecture.md) |
-| What the normalized data model looks like | [`03-domain-schema.md`](03-domain-schema.md) |
-| How site adapters should behave | [`04-adapter-spec.md`](04-adapter-spec.md) |
-| How AI fits after structure | [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md) |
-| What users can see and export | [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md) |
-| Security / privacy / compliance boundaries | [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md) |
-| Phase ordering and repo writing brief | [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md) |
-| Current locked implementation decisions | [`09-implementation-decisions.md`](09-implementation-decisions.md) |
-| Manual live validation procedure | [`live-validation-runbook.md`](live-validation-runbook.md) |
-| Deterministic vs manual verification lanes | [`verification-matrix.md`](verification-matrix.md) |
-| Integration boundary registry | [`integration-boundaries.md`](integration-boundaries.md) |
-| Diagnostics and logging policy | [`diagnostics-and-logging.md`](diagnostics-and-logging.md) |
-| GitHub surface and manual settings checklist | [`github-surface-checklist.md`](github-surface-checklist.md) |
+| Deterministic vs manual validation | [`verification-matrix.md`](verification-matrix.md) |
+| Manual live procedure | [`live-validation-runbook.md`](live-validation-runbook.md) |
+| External boundary classes | [`integration-boundaries.md`](integration-boundaries.md) |
+| Diagnostics contract and output rules | [`diagnostics-and-logging.md`](diagnostics-and-logging.md) |
+| GitHub settings-only checklist | [`github-surface-checklist.md`](github-surface-checklist.md) |
+| Public asset inventory | [`storefront-assets.md`](storefront-assets.md) |
 
-## Reading Order
+## Rules
 
-If you are new to the repository, read in this order:
-
-1. [`01-product-prd.md`](01-product-prd.md)
-2. [`02-system-architecture.md`](02-system-architecture.md)
-3. [`03-domain-schema.md`](03-domain-schema.md)
-4. [`04-adapter-spec.md`](04-adapter-spec.md)
-5. [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md)
-6. [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
-7. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
-8. [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md)
-9. [`09-implementation-decisions.md`](09-implementation-decisions.md)
-
-Read [`live-validation-runbook.md`](live-validation-runbook.md) only when you are doing manual live checks.
-
-## Document Roles
-
-| File type | Role | Must not do |
-| :-- | :-- | :-- |
-| Numbered design docs | stable product / architecture / contract facts | must not become daily status reports |
-| `09-implementation-decisions.md` | current locked implementation choices | must not become a manual live evidence ledger |
-| `live-validation-runbook.md` | manual procedure and timestamped live notes | must not become the main product landing page |
-| `../README.md` | public-facing repository landing page | must not become a second runbook or GitHub settings diary |
-
-## Documentation Rules
-
-- One technical fact should be fully maintained in one canonical place.
-- Other docs may summarize or point to that fact, but should not hand-sync the full content.
-- If a document becomes stale, either update it or remove/redirect it.
-- Do not create another “master README” under `docs/`.
+- One technical fact must be fully maintained in one canonical place.
+- The numbered briefs are intentionally short. They are canonical summaries, not long historical essays.
+- Do not create parallel `*-en.md` or `README` clones under `docs/`.
+- If a fact belongs to runtime verification, move it to [`verification-matrix.md`](verification-matrix.md) or [`live-validation-runbook.md`](live-validation-runbook.md), not back into the numbered briefs.
