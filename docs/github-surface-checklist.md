@@ -11,7 +11,7 @@ Use it to avoid writing platform-side unknowns into `README.md` as if the reposi
 | Repository description | GitHub repository settings / page header | No | 2026-03-27 | Matches the current README positioning: local-first academic information organizer for Canvas, Gradescope, EdStem, and MyUW. |
 | Homepage / website URL | GitHub repository settings | No | 2026-03-27 | Intentionally blank for the current GitHub-first storefront phase. Do not invent a homepage URL. |
 | Topics | GitHub repository settings | No | 2026-03-27 | Set to `browser-extension`, `canvas`, `education`, `gradescope`, `local-first`, `student-productivity`, `typescript`. |
-| Social preview image | GitHub repository settings | No | 2026-03-27 | Still uses the default repository Open Graph image. `docs/assets/social-preview.png` has been regenerated from the square English source without clipped text; only the manual upload step remains. |
+| Social preview image | GitHub repository settings | No | 2026-03-27 | Custom social preview uploaded. GitHub now uses `docs/assets/social-preview.png` as the repository social preview image (`usesCustomOpenGraphImage=true`). |
 | Discussions enabled | GitHub repository settings | No | 2026-03-27 | Enabled. |
 | Branch protection | GitHub branch protection settings | No | 2026-03-27 | `Verify` and `CodeQL` required; `strict=true`; admins enforced; linear history required; force-push and deletion disabled. |
 | Code scanning visibility | GitHub security tab | No | 2026-03-27 | Open alerts API returns zero. Security-tab visibility was not separately verified beyond API reachability. |
