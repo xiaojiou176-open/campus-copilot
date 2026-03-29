@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   EdStemApiClient,
@@ -11,6 +12,14 @@ const paths: EdStemPathConfig = {
   unreadPath: '/configured/unread-activity',
   recentActivityPath: '/configured/recent-activity',
 };
+
+function readFixture(relativePath: string) {
+  return readFileSync(new URL(`./__fixtures__/live/${relativePath}`, import.meta.url), 'utf8');
+}
+
+function readJsonFixture<T>(relativePath: string): T {
+  return JSON.parse(readFixture(relativePath)) as T;
+}
 
 const okExecutor =
   (payloads: Record<string, unknown>): EdStemRequestExecutor =>
@@ -72,41 +81,9 @@ describe('EdStemApiClient', () => {
   it('parses threads, unread, and recent activity into unified messages', async () => {
     const client = new EdStemApiClient(
       okExecutor({
-        '/api/courses/11/threads?limit=30&sort=new': {
-          threads: [
-            {
-              id: 7,
-              course_id: 11,
-              title: 'Project kickoff',
-              created_at: '2026-03-24T09:00:00-07:00',
-              unread: false,
-              instructor_authored: true,
-              url: 'https://edstem.org/us/courses/11/discussion/7',
-            },
-          ],
-        },
-        '/configured/unread-activity': [
-          {
-            id: 8,
-            thread_id: 7,
-            course_id: 11,
-            title: 'Unread follow-up',
-            updated_at: '2026-03-24T10:00:00-07:00',
-            unread: true,
-            url: 'https://edstem.org/us/courses/11/discussion/7',
-          },
-        ],
-        '/configured/recent-activity': [
-          {
-            id: 9,
-            thread_id: 7,
-            course_id: 11,
-            title: 'Recent staff reply',
-            updated_at: '2026-03-24T11:00:00-07:00',
-            instructor_authored: true,
-            url: 'https://edstem.org/us/courses/11/discussion/7',
-          },
-        ],
+        '/api/courses/11/threads?limit=30&sort=new': readJsonFixture('/threads.json'),
+        '/configured/unread-activity': readJsonFixture('/unread-activity.json'),
+        '/configured/recent-activity': readJsonFixture('/recent-activity.json'),
       }),
       paths,
     );
@@ -194,16 +171,103 @@ describe('EdStemApiClient', () => {
       url: 'https://edstem.org/us/dashboard',
       site: 'edstem',
       now: '2026-03-24T18:00:00-07:00',
-      pageHtml:
-        '<a href="/us/courses/90031" class="dash-course"><div class="dash-course-header"><div class="dash-course-code">CSE 312 - 26wi</div><div class="dash-course-unread-count">99+</div></div><div><div class="dash-course-name">Foundations Of Computing II</div></div></a>',
+      pageHtml: readFixture('dashboard.html'),
     });
 
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.outcome).toBe('partial_success');
       expect(result.snapshot.messages?.[0]?.title).toContain('CSE 312 - 26wi');
-      expect(result.snapshot.messages?.[0]?.unread).toBe(true);
+      expect(result.snapshot.messages?.[0]?.messageKind).toBe('update');
       expect(result.health.code).toBe('partial_success');
+    }
+  });
+
+  it('replays the committed redacted live fixture set for regression coverage', async () => {
+    const client = new EdStemApiClient(
+      okExecutor({
+        '/api/courses/11/threads?limit=30&sort=new': readJsonFixture('/threads.json'),
+        '/configured/unread-activity': readJsonFixture('/unread-activity.json'),
+        '/configured/recent-activity': readJsonFixture('/recent-activity.json'),
+      }),
+      paths,
+    );
+
+    const adapter = createEdStemAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://edstem.org/us/courses/11/discussion/7',
+      site: 'edstem',
+      now: '2026-03-24T18:00:00-07:00',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.messages?.map((item) => item.id)).toEqual([
+        'edstem:message:7',
+        'edstem:message:8',
+        'edstem:message:9',
+      ]);
+    }
+  });
+
+  it('replays a redacted live dashboard capture from profile 13 for DOM fallback coverage', async () => {
+    const client = new EdStemApiClient(
+      async () => ({
+        ok: false,
+        code: 'unsupported_context',
+        message: 'EdStem session-backed request path is unavailable.',
+        status: 404,
+      }),
+      paths,
+    );
+
+    const adapter = createEdStemAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://edstem.org/us/dashboard',
+      site: 'edstem',
+      now: '2026-03-29T03:01:07.800Z',
+      pageHtml: readFixture('dashboard-profile13.html'),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outcome).toBe('partial_success');
+      expect(result.snapshot.messages?.map((item) => item.id)).toEqual([
+        'edstem:message:dashboard-course:855',
+        'edstem:message:dashboard-course:488',
+      ]);
+      expect(result.snapshot.messages?.map((item) => item.courseId)).toEqual([
+        'edstem:course:855',
+        'edstem:course:488',
+      ]);
+    }
+  });
+
+  it('replays a redacted live threads capture from profile 13 for private API coverage', async () => {
+    const client = new EdStemApiClient(
+      okExecutor({
+        '/api/courses/11/threads?limit=30&sort=new': readJsonFixture('/threads-profile13.json'),
+        '/configured/unread-activity': [],
+        '/configured/recent-activity': [],
+      }),
+      paths,
+    );
+
+    const adapter = createEdStemAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://edstem.org/us/courses/855/discussion',
+      site: 'edstem',
+      now: '2026-03-29T03:01:07.800Z',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outcome).toBe('success');
+      expect(result.snapshot.messages?.map((item) => item.id)).toEqual([
+        'edstem:message:7681100',
+        'edstem:message:6946835',
+      ]);
+      expect(result.snapshot.messages?.every((item) => item.courseId === 'edstem:course:855')).toBe(true);
     }
   });
 });

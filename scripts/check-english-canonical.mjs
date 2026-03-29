@@ -1,8 +1,11 @@
 import { readFileSync } from 'node:fs';
 
 const files = [
+  'CLAUDE.md',
+  'CHANGELOG.md',
   'README.md',
   'CONTRIBUTING.md',
+  '.env.example',
   'docs/01-product-prd.md',
   'docs/02-system-architecture.md',
   'docs/03-domain-schema.md',

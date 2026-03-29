@@ -130,6 +130,26 @@ What it does **not** prove:
 - long-term stability
 - a repeatable deterministic gate
 
+### Lane E — Manual live fixture preparation
+
+Use:
+
+```bash
+pnpm probe:live
+pnpm redact:live-fixture -- --kind <json|html> --input <raw-capture-path> --output .runtime-cache/live-fixtures/<site>/<name>.redacted.<ext>
+```
+
+What it proves:
+
+- a raw manually captured site sample can be transformed into a redacted candidate fixture
+- the repository has a repeatable path from live evidence to adapter-regression input material
+
+What it does **not** prove:
+
+- that the raw capture came from a currently authenticated, valid product-path session unless Lane D also passed
+- that the redacted candidate fixture is safe to commit without maintainer review
+- that the resulting fixture belongs in required CI
+
 ## How To Record A Manual Live Result
 
 When you record a manual live result, always include:
@@ -140,6 +160,7 @@ When you record a manual live result, always include:
 - environment dependency
 - what actually succeeded
 - what remains unknown
+- whether a redacted fixture candidate was produced, and where it was written
 
 Use wording like:
 
@@ -190,3 +211,23 @@ Do **not** move these back into `README.md` or `09-implementation-decisions.md`:
 - platform alert visibility
 
 Those belong in timestamped live validation notes, not in primary landing or decision docs.
+
+## How To Handle Redacted Fixture Candidates
+
+If a live session is good enough to produce adapter evidence:
+
+1. capture the raw sample outside canonical docs
+2. run `pnpm redact:live-fixture -- --kind ...` to write a redacted candidate under `.runtime-cache/live-fixtures/`
+3. review the candidate for secrets, personal data, and unnecessary page text
+4. only then promote the reviewed fixture into the relevant package fixture directory for regression tests
+
+Use wording like:
+
+- “captured from a manual live session on `<date>`”
+- “redacted candidate fixture written to `.runtime-cache/live-fixtures/...`”
+- “reviewed before promotion into repo-tracked regression fixtures”
+
+Avoid wording like:
+
+- “captured fixture automatically proves live support”
+- “fixture committed directly from an unreviewed browser dump”

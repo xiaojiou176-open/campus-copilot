@@ -1,5 +1,14 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { createMyUWAdapter } from './index';
+
+function readFixture(relativePath: string) {
+  return readFileSync(new URL(`./__fixtures__/live/${relativePath}`, import.meta.url), 'utf8');
+}
+
+function readJsonFixture<T>(relativePath: string): T {
+  return JSON.parse(readFixture(relativePath)) as T;
+}
 
 describe('MyUWAdapter', () => {
   it('parses notices and events from page state first', async () => {
@@ -8,26 +17,7 @@ describe('MyUWAdapter', () => {
       url: 'https://myuw.example.edu',
       site: 'myuw',
       now: '2026-03-24T18:00:00-07:00',
-      pageState: {
-        notices: [
-          {
-            id: 'notice-1',
-            title: 'Registration window opens',
-            postedAt: '2026-03-24T08:00:00-07:00',
-            url: 'https://myuw.example.edu/notices/1',
-          },
-        ],
-        events: [
-          {
-            id: 'event-1',
-            title: 'Advising session',
-            startAt: '2026-03-26T10:00:00-07:00',
-            endAt: '2026-03-26T11:00:00-07:00',
-            eventKind: 'class',
-            url: 'https://myuw.example.edu/events/1',
-          },
-        ],
-      },
+      pageState: readJsonFixture('/page-state.json'),
     });
 
     expect(result.ok).toBe(true);
@@ -45,14 +35,7 @@ describe('MyUWAdapter', () => {
       url: 'https://myuw.example.edu',
       site: 'myuw',
       now: '2026-03-24T18:00:00-07:00',
-      pageHtml: `
-        <script data-myuw-notices>
-          [{"id":"notice-2","title":"Campus update","postedAt":"2026-03-24T09:00:00-07:00","url":"https://myuw.example.edu/notices/2"}]
-        </script>
-        <script data-myuw-events>
-          [{"id":"event-2","title":"Registration deadline","startAt":"2026-03-28T09:00:00-07:00","endAt":"2026-03-28T09:30:00-07:00","eventKind":"deadline","url":"https://myuw.example.edu/events/2"}]
-        </script>
-      `,
+      pageHtml: readFixture('script-payload.html'),
     });
 
     expect(result.ok).toBe(true);
@@ -72,43 +55,7 @@ describe('MyUWAdapter', () => {
       url: 'https://my.uw.edu/',
       site: 'myuw',
       now: '2026-03-26T18:00:00-07:00',
-      pageHtml: `
-        <div>
-          <button
-            data-bs-target="#noticeCard-5dd8d3f0a49087fb8a7033a879b8aa4a-collapse-108"
-            aria-controls="noticeCard-5dd8d3f0a49087fb8a7033a879b8aa4a-collapse-108"
-            type="button"
-            class="btn btn-link p-0 border-0 align-top notice-link text-start myuw-text-md no-track-collapse collapsed track-collapse">
-            <span class="d-inline-block fw-bold text-danger me-1 notice-critical">Critical:</span>
-            <span><span class="notice-title">International Student Full-time Registration Reminder</span></span>
-          </button>
-        </div>
-        <div id="noticeCard-5dd8d3f0a49087fb8a7033a879b8aa4a-collapse-108" class="collapse" tabindex="0">
-          <div class="p-3 mt-2 bg-light text-dark notice-body myuw-text-md">
-            <div><span class="notice-body-with-title">Spring quarter registration reminder</span></div>
-          </div>
-        </div>
-
-        <div id="myuw-events">
-          <div class="card-body p-3">
-            <div class="myuw-card-body">
-              <p class="text-muted myuw-text-md">Showing events in the next 14 days.</p>
-              <ul class="list-unstyled mb-0 myuw-text-md">
-            <li class="mb-2">
-              <strong>Apr 6</strong>
-              <a
-                href="https://myuw.example.edu/events/1"
-                aria-label="Apr 6. 9:00 AM. Dissertation defense. Location not available"
-                class="d-block external-link">
-                <span class="text-dark fw-light d-inline-block me-1">9:00 AM</span>
-                <span>Dissertation defense</span>
-              </a>
-            </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      `,
+      pageHtml: readFixture('visible-dom.html'),
     });
 
     expect(result.ok).toBe(true);
@@ -140,10 +87,7 @@ describe('MyUWAdapter', () => {
       url: 'https://myuw.example.edu',
       site: 'myuw',
       now: '2026-03-24T18:00:00-07:00',
-      pageHtml: `
-        <script data-myuw-notices>not-json</script>
-        <script data-myuw-events>[]</script>
-      `,
+      pageHtml: readFixture('malformed-script-payload.html'),
     });
 
     expect(result.ok).toBe(true);
@@ -173,5 +117,22 @@ describe('MyUWAdapter', () => {
     expect(capabilities.resources.announcements?.preferredMode).toBe('state');
     expect(capabilities.resources.events?.preferredMode).toBe('dom');
     expect(health?.status).toBe('healthy');
+  });
+
+  it('replays the committed redacted live fixture set for regression coverage', async () => {
+    const adapter = createMyUWAdapter();
+    const result = await adapter.sync({
+      url: 'https://my.uw.edu/',
+      site: 'myuw',
+      now: '2026-03-26T18:00:00-07:00',
+      pageState: readJsonFixture('/page-state.json'),
+      pageHtml: readFixture('visible-dom.html'),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.announcements?.map((item) => item.id)).toContain('myuw:notice:notice-1');
+      expect(result.snapshot.events?.some((item) => item.id === 'myuw:event:event-1')).toBe(true);
+    }
   });
 });

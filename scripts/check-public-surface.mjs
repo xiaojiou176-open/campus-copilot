@@ -1,10 +1,14 @@
 import { existsSync, readFileSync } from 'node:fs';
 
 const requiredFiles = [
+  'AGENTS.md',
+  'CLAUDE.md',
   'LICENSE',
   'README.md',
+  'CHANGELOG.md',
   'CONTRIBUTING.md',
   'SECURITY.md',
+  '.env.example',
   'CODE_OF_CONDUCT.md',
   '.github/CODEOWNERS',
   '.github/PULL_REQUEST_TEMPLATE.md',

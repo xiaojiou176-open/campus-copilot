@@ -24,6 +24,7 @@ Think of it like a building inspection board:
 | `pnpm preflight:live` | manual environment probe | local developer | No | current machine/session readiness for live validation | site adapter correctness |
 | `pnpm diagnose:live` | manual environment probe | local developer | No | current environment blockers summary | stable product behavior |
 | `pnpm probe:live` | manual live probe | local developer | No | current browser session can be inspected | stable live sync support |
+| `pnpm redact:live-fixture -- --kind <json\|html> --input <raw-path> --output <redacted-path>` | manual fixture-prep lane | local developer | No | converts a raw manually captured site sample into a redacted candidate fixture for adapter regression work | prove a stable authenticated session by itself or bypass maintainer review before commit |
 | `pnpm check:docs:ssot` | deterministic governance check | contributor / CI | Yes | README/docs roles and forbidden live/platform drift are guarded | product runtime correctness |
 | `pnpm check:verification-claims` | deterministic governance check | contributor / CI | Yes | docs do not overclaim what `verify` covers | live site correctness |
 | `pnpm check:public-surface` | deterministic governance check | contributor / CI | Yes | public collaboration shell files exist and README avoids repo-external hard assertions | GitHub settings state |
@@ -52,6 +53,7 @@ Required means:
 
 - deterministic
 - repeatable on repository inputs
+- GitHub-hosted by default for public `pull_request` / `push` lanes
 - safe for default `pull_request` / `push` CI
 
 ### Optional
@@ -68,6 +70,7 @@ Manual means:
 
 - depends on a real browser session, local credentials, or current environment state
 - must never be confused with a default required CI lane
+- may produce a redacted candidate fixture or manual evidence artifact that still needs review before it becomes repo truth
 
 ## Claims Policy
 
@@ -79,6 +82,7 @@ The repository must not claim that `pnpm verify` covers:
 - `pnpm preflight:live`
 - `pnpm diagnose:live`
 - `pnpm probe:live`
+- `pnpm redact:live-fixture`
 - manual live site counts
 
 Those belong to optional/manual lanes unless they are explicitly promoted and wired into the required gate.
@@ -95,9 +99,11 @@ Default repository CI should prioritize:
 That means:
 
 - do keep `verify`
+- do keep default required lanes on GitHub-hosted infrastructure
 - do keep deterministic docs/governance checks
 - do keep deterministic hygiene checks that protect repo-root and runtime artifact boundaries
 - do keep security scans that do not depend on local secrets or manual browser sessions
+- do **not** add `self-hosted`, `shared-pool`, or equivalent private-runner lanes to default public CI
 - do **not** add provider-key-dependent or Gemini/multimodal/manual live checks to required CI
 
 ## Evidence Language
