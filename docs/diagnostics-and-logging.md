@@ -34,3 +34,4 @@ Every structured diagnostic payload should include:
 - Do not store secrets or local absolute paths in diagnostics payloads.
 - Support bundles may summarize environment state, but they must stay under `.runtime-cache/`.
 - Repository docs should summarize the validation lane, not embed raw local machine traces.
+- For full disk classification and cleanup lanes, see [`disk-governance.md`](disk-governance.md).

@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "packageManager": "pnpm@10.22.0",
   "scripts": {
+    "audit:disk": "node scripts/audit-disk.mjs",
+    "check:pnpm-store-health": "node scripts/check-pnpm-store-health.mjs",
     "dev:extension": "pnpm --filter @campus-copilot/extension dev",
     "dev:api": "pnpm --filter @campus-copilot/api dev",
     "start:api": "pnpm --filter @campus-copilot/api start",
@@ -15,6 +17,7 @@
     "smoke:provider": "bash scripts/provider-roundtrip-smoke.sh",
     "smoke:sidepanel": "node --env-file-if-exists=.env scripts/sidepanel-provider-smoke.mjs",
     "smoke:support": "bash scripts/support-bundle-smoke.sh",
+    "cleanup:repo:safe": "bash scripts/cleanup-repo-safe.sh",
     "cleanup:runtime": "bash scripts/cleanup-runtime.sh",
     "preflight:live": "node --env-file-if-exists=.env scripts/live-preflight.mjs",
     "diagnose:live": "pnpm cleanup:runtime && pnpm preflight:live",

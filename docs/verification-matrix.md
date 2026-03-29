@@ -33,6 +33,17 @@ Think of it like a building inspection board:
 | `pnpm check:runtime-artifacts` | deterministic hygiene check | contributor / CI | Yes | top-level runtime artifact paths stay controlled | nested runtime output drift |
 | `pnpm check:root-hygiene` | deterministic hygiene check | contributor / CI | Yes | repo-root entries stay inside the declared allowlist and obvious root noise stays out of the worktree | deep nested output-path governance |
 
+## Local Maintenance Commands
+
+These commands are part of the repository's local disk-governance surface.
+They are **not** verification lanes and they do **not** belong in the default PR gate.
+
+| Command | Type | Default owner | Required for PR gate | What it does | What it intentionally does not do |
+| :-- | :-- | :-- | :--: | :-- | :-- |
+| `pnpm audit:disk` | local audit | local developer | No | reports repo-internal, high-related external, and shared-layer footprint categories | delete anything |
+| `pnpm cleanup:repo:safe` | local cleanup | local developer | No | removes explicit low-risk repo-local intermediates | touch formal outputs, evidence/state directories, or external paths |
+| `pnpm check:pnpm-store-health` | local preflight | local developer | No | validates configured, effective, and recorded `pnpm` store references before deep dependency cleanup | repair drift automatically or imply `node_modules` cleanup is safe |
+
 ## Command Classification Rules
 
 ### Required

@@ -19,7 +19,8 @@ Read these first:
 3. [`docs/verification-matrix.md`](docs/verification-matrix.md)
 4. [`docs/integration-boundaries.md`](docs/integration-boundaries.md)
 5. [`docs/diagnostics-and-logging.md`](docs/diagnostics-and-logging.md)
-6. The relevant numbered brief in [`docs/README.md`](docs/README.md) for the subsystem you are touching
+6. [`docs/disk-governance.md`](docs/disk-governance.md)
+7. The relevant numbered brief in [`docs/README.md`](docs/README.md) for the subsystem you are touching
 
 The numbered docs under `docs/01-08` are now concise English canonical briefs.
 Do not treat them as free-form long essays, and do not create translated duplicates.
@@ -32,6 +33,7 @@ Do not treat them as free-form long essays, and do not create translated duplica
 - Do not silently expand extension permissions, especially around `cookies`.
 - Do not add a second hand-maintained source of truth for the same technical fact.
 - Do not add manual, provider-dependent, or multimodal checks to the default required CI lane.
+- Do not add repo-local or repo-external state/cache paths without documenting their cleanup class in [`docs/disk-governance.md`](docs/disk-governance.md).
 
 ## Required Verification
 
