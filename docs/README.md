@@ -21,7 +21,8 @@ If you are a maintainer or contributor, read in this order:
 4. [`verification-matrix.md`](verification-matrix.md)
 5. [`integration-boundaries.md`](integration-boundaries.md)
 6. [`diagnostics-and-logging.md`](diagnostics-and-logging.md)
-7. The relevant numbered brief below for the subsystem you are changing
+7. [`disk-governance.md`](disk-governance.md)
+8. The relevant numbered brief below for the subsystem you are changing
 
 ## Numbered Briefs
 
@@ -45,6 +46,7 @@ If you are a maintainer or contributor, read in this order:
 | Manual live procedure | [`live-validation-runbook.md`](live-validation-runbook.md) |
 | External boundary classes | [`integration-boundaries.md`](integration-boundaries.md) |
 | Diagnostics contract and output rules | [`diagnostics-and-logging.md`](diagnostics-and-logging.md) |
+| Disk footprint governance and cleanup lanes | [`disk-governance.md`](disk-governance.md) |
 | GitHub settings-only checklist | [`github-surface-checklist.md`](github-surface-checklist.md) |
 | Public asset inventory | [`storefront-assets.md`](storefront-assets.md) |
 
