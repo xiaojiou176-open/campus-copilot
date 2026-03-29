@@ -76,8 +76,24 @@ export interface ProviderProxyRequest {
 }
 
 function extractCodeFenceBody(raw: string) {
-  const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  return match?.[1];
+  const openingFenceIndex = raw.indexOf('```');
+  if (openingFenceIndex < 0) {
+    return undefined;
+  }
+
+  const afterOpeningFence = raw.slice(openingFenceIndex + 3);
+  const closingFenceIndex = afterOpeningFence.indexOf('```');
+  if (closingFenceIndex < 0) {
+    return undefined;
+  }
+
+  let body = afterOpeningFence.slice(0, closingFenceIndex);
+  const trimmedLeading = body.trimStart();
+  if (trimmedLeading.toLowerCase().startsWith('json')) {
+    body = trimmedLeading.slice(4);
+  }
+
+  return body.trim();
 }
 
 function extractFirstJsonObject(raw: string) {
