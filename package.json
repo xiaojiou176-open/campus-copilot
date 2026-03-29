@@ -23,6 +23,7 @@
     "diagnose:live": "pnpm cleanup:runtime && pnpm preflight:live",
     "support:bundle": "node --env-file-if-exists=.env scripts/support-bundle.mjs",
     "probe:live": "node --env-file-if-exists=.env scripts/live-site-probe.mjs",
+    "redact:live-fixture": "node scripts/redact-live-adapter-fixture.mjs",
     "check:docs:ssot": "node scripts/check-docs-ssot.mjs",
     "check:verification-claims": "node scripts/check-verification-claims.mjs",
     "check:public-surface": "node scripts/check-public-surface.mjs",

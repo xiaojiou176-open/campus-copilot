@@ -2,7 +2,7 @@
 
 > A local-first study workspace that consolidates Canvas, Gradescope, EdStem, and MyUW into one structured view, then lets AI explain the results instead of scraping the web directly.
 
-[Docs](docs/README.md) · [Quickstart](#quickstart) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [License](LICENSE)
+[Docs](docs/README.md) · [Quickstart](#quickstart) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [AI Collaboration](CLAUDE.md) · [Security](SECURITY.md) · [License](LICENSE)
 
 ## Why This Exists
 
@@ -82,6 +82,8 @@ http://127.0.0.1:8787
 
 Not every validation lane means the same thing. Some checks are deterministic repository gates, while others are manual or environment-dependent probes.
 
+For public collaboration, the default PR lane stays GitHub-hosted, deterministic, and secret-free. Manual live or provider-dependent checks remain outside the required gate unless the repository explicitly promotes them.
+
 Use [docs/verification-matrix.md](docs/verification-matrix.md) as the single source of truth for:
 
 - required repository gates
@@ -150,6 +152,7 @@ This repository already contains some real governance anchors:
 - [MIT License](LICENSE)
 - [Security policy](SECURITY.md)
 - [Contribution guide](CONTRIBUTING.md)
+- [AI collaborator contract](CLAUDE.md)
 - [Verification workflow](.github/workflows/verify.yml)
 - [CodeQL workflow](.github/workflows/codeql.yml)
 - [Dependabot configuration](.github/dependabot.yml)

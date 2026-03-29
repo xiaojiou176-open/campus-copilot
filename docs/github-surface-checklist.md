@@ -13,7 +13,9 @@ Use it to avoid writing platform-side unknowns into `README.md` as if the reposi
 | Topics | GitHub repository settings | No | 2026-03-27 | Set to `browser-extension`, `canvas`, `education`, `gradescope`, `local-first`, `student-productivity`, `typescript`. |
 | Social preview image | GitHub repository settings | No | 2026-03-27 | Custom social preview uploaded. GitHub now uses `docs/assets/social-preview.png` as the repository social preview image (`usesCustomOpenGraphImage=true`). |
 | Discussions enabled | GitHub repository settings | No | 2026-03-27 | Enabled. |
-| Branch protection | GitHub branch protection settings | No | 2026-03-27 | `Verify` and `CodeQL` required; `strict=true`; admins enforced; linear history required; force-push and deletion disabled. |
+| Branch protection | GitHub branch protection settings | No | 2026-03-29 | `Verify` and `CodeQL` required; `strict=true`; admins enforced; linear history required; conversation resolution required; force-push and deletion disabled. |
+| Default workflow permissions | GitHub Actions settings | No | 2026-03-29 | `default_workflow_permissions=read`; `can_approve_pull_request_reviews=false`. |
+| Fork PR contributor approval policy | GitHub Actions settings | No | 2026-03-29 | `approval_policy=first_time_contributors_new_to_github`. |
 | Code scanning visibility | GitHub security tab | No | 2026-03-27 | Open alerts API returns zero. Security-tab visibility was not separately verified beyond API reachability. |
 | Private vulnerability reporting | GitHub security settings | No | 2026-03-27 | Enabled via API check. |
 
@@ -23,6 +25,7 @@ These are the things the repository itself can prove:
 
 - `LICENSE`
 - `CONTRIBUTING.md`
+- `CLAUDE.md`
 - `SECURITY.md`
 - `CODEOWNERS`
 - issue templates

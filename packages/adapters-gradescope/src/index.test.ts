@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   GradescopeApiClient,
@@ -10,6 +11,14 @@ const paths: GradescopePathConfig = {
   assignmentsPath: '/internal/assignments',
   gradesPath: '/internal/grades',
 };
+
+function readFixture(relativePath: string) {
+  return readFileSync(new URL(`./__fixtures__/live/${relativePath}`, import.meta.url), 'utf8');
+}
+
+function readJsonFixture<T>(relativePath: string): T {
+  return JSON.parse(readFixture(relativePath)) as T;
+}
 
 const okExecutor =
   (payloads: Record<string, unknown>): GradescopeRequestExecutor =>
@@ -72,27 +81,8 @@ describe('GradescopeApiClient', () => {
   it('parses assignments and grades from private/internal payloads', async () => {
     const client = new GradescopeApiClient(
       okExecutor({
-        '/internal/assignments': [
-          {
-            id: 9,
-            course_id: 17,
-            title: 'Problem Set 1',
-            due_at: '2026-03-27T23:59:00-07:00',
-            submission_status: 'submitted',
-            url: 'https://www.gradescope.com/courses/17/assignments/9',
-          },
-        ],
-        '/internal/grades': [
-          {
-            assignment_id: 9,
-            course_id: 17,
-            title: 'Problem Set 1',
-            score: 92,
-            max_score: 100,
-            released_at: '2026-03-28T10:00:00-07:00',
-            url: 'https://www.gradescope.com/courses/17/assignments/9/submissions/1',
-          },
-        ],
+        '/internal/assignments': readJsonFixture('/internal-assignments.json'),
+        '/internal/grades': readJsonFixture('/internal-grades.json'),
       }),
       paths,
     );
@@ -168,8 +158,7 @@ describe('GradescopeApiClient', () => {
       okExecutor({
         '/internal/assignments': undefined,
         '/internal/grades': undefined,
-        '/courses/1211108':
-          '<tr role="row"><th scope="row" class="table--primaryLink"><a href="/courses/1211108/assignments/7421057/submissions/380090124">Section Participation</a></th><td class="submissionStatus"><div class="submissionStatus--score">1.0 / 9.0</div></td><td><time datetime="2026-03-26 09:00:00 -0700">Mar 26 at 9:00AM</time></td></tr>',
+        '/courses/1211108': readFixture('course-page-row.html'),
       } as unknown as Record<string, unknown>),
       paths,
     );
@@ -179,8 +168,7 @@ describe('GradescopeApiClient', () => {
       url: 'https://www.gradescope.com/account',
       site: 'gradescope',
       now: '2026-03-24T18:00:00-07:00',
-      pageHtml:
-        '<a class="courseBox" href="/courses/1211108"><h3 class="courseBox--shortname">CSE 312 - 26Wi</h3><div class="courseBox--name">Foundations of Computing II</div><div class="courseBox--assignments"><div class="left">62 assignments</div></div></a>',
+      pageHtml: readFixture('dashboard-course-boxes.html'),
     });
 
     expect(result.ok).toBe(true);
@@ -197,28 +185,8 @@ describe('GradescopeApiClient', () => {
   it('derives the current course from the sidebar when live validation starts on a course dashboard page', async () => {
     const client = new GradescopeApiClient(
       okExecutor({
-        '/internal/assignments': [
-          {
-            id: 7421057,
-            course_id: 1211108,
-            title: 'Section Participation',
-            due_at: '2026-03-26T09:00:00-07:00',
-            submission_status: 'graded',
-            score: 1,
-            max_score: 9,
-            url: 'https://www.gradescope.com/courses/1211108/assignments/7421057/submissions/380090124',
-          },
-        ],
-        '/internal/grades': [
-          {
-            assignment_id: 7421057,
-            course_id: 1211108,
-            title: 'Section Participation',
-            score: 1,
-            max_score: 9,
-            url: 'https://www.gradescope.com/courses/1211108/assignments/7421057/submissions/380090124',
-          },
-        ],
+        '/internal/assignments': readJsonFixture('/course-internal-assignments.json'),
+        '/internal/grades': readJsonFixture('/course-internal-grades.json'),
       }),
       paths,
     );
@@ -228,8 +196,7 @@ describe('GradescopeApiClient', () => {
       url: 'https://www.gradescope.com/courses/1211108',
       site: 'gradescope',
       now: '2026-03-24T18:00:00-07:00',
-      pageHtml:
-        '<div class="sidebar--title sidebar--title-course"><a href="/courses/1211108">CSE 312 - 26Wi</a><span class="sr-only"> Navigation</span></div><div class="sidebar--subtitle">Foundations of Computing II</div>',
+      pageHtml: readFixture('course-sidebar.html'),
     });
 
     expect(result.ok).toBe(true);
@@ -254,15 +221,7 @@ describe('GradescopeApiClient', () => {
       url: 'https://www.gradescope.com/courses/1211108',
       site: 'gradescope',
       now: '2026-03-24T18:00:00-07:00',
-      pageHtml: `
-        <tr role="row">
-          <th scope="row" class="table--primaryLink">
-            <a href="/courses/1211108/assignments/7421057/submissions/380090124">Section Participation</a>
-          </th>
-          <td class="submissionStatus"><div class="submissionStatus--score">1.0 / 9.0</div></td>
-          <td><time datetime="2026-03-26 09:00:00 -0700">Mar 26 at 9:00AM</time></td>
-        </tr>
-      `,
+      pageHtml: readFixture('course-page-row.html'),
     });
 
     expect(result.ok).toBe(true);
@@ -272,6 +231,31 @@ describe('GradescopeApiClient', () => {
       expect(result.snapshot.assignments?.[0]?.status).toBe('graded');
       expect(result.snapshot.grades?.[0]?.score).toBe(1);
       expect(result.snapshot.grades?.[0]?.maxScore).toBe(9);
+    }
+  });
+
+  it('replays the committed redacted live fixture set for regression coverage', async () => {
+    const client = new GradescopeApiClient(
+      okExecutor({
+        '/internal/assignments': readJsonFixture('/course-internal-assignments.json'),
+        '/internal/grades': readJsonFixture('/course-internal-grades.json'),
+      }),
+      paths,
+    );
+
+    const adapter = createGradescopeAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://www.gradescope.com/courses/1211108',
+      site: 'gradescope',
+      now: '2026-03-24T18:00:00-07:00',
+      pageHtml: `${readFixture('course-sidebar.html')}\n${readFixture('course-page-row.html')}`,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.courses?.[0]?.id).toBe('gradescope:course:1211108');
+      expect(result.snapshot.assignments?.[0]?.id).toBe('gradescope:assignment:7421057');
+      expect(result.snapshot.grades?.[0]?.assignmentId).toBe('gradescope:assignment:7421057');
     }
   });
 });

@@ -15,12 +15,13 @@ That means contributions must protect this ordering:
 Read these first:
 
 1. [`README.md`](README.md)
-2. [`docs/09-implementation-decisions.md`](docs/09-implementation-decisions.md)
-3. [`docs/verification-matrix.md`](docs/verification-matrix.md)
-4. [`docs/integration-boundaries.md`](docs/integration-boundaries.md)
-5. [`docs/diagnostics-and-logging.md`](docs/diagnostics-and-logging.md)
-6. [`docs/disk-governance.md`](docs/disk-governance.md)
-7. The relevant numbered brief in [`docs/README.md`](docs/README.md) for the subsystem you are touching
+2. [`CLAUDE.md`](CLAUDE.md) if you use an AI coding or review assistant
+3. [`docs/09-implementation-decisions.md`](docs/09-implementation-decisions.md)
+4. [`docs/verification-matrix.md`](docs/verification-matrix.md)
+5. [`docs/integration-boundaries.md`](docs/integration-boundaries.md)
+6. [`docs/diagnostics-and-logging.md`](docs/diagnostics-and-logging.md)
+7. [`docs/disk-governance.md`](docs/disk-governance.md)
+8. The relevant numbered brief in [`docs/README.md`](docs/README.md) for the subsystem you are touching
 
 The numbered docs under `docs/01-08` are now concise English canonical briefs.
 Do not treat them as free-form long essays, and do not create translated duplicates.
@@ -33,6 +34,7 @@ Do not treat them as free-form long essays, and do not create translated duplica
 - Do not silently expand extension permissions, especially around `cookies`.
 - Do not add a second hand-maintained source of truth for the same technical fact.
 - Do not add manual, provider-dependent, or multimodal checks to the default required CI lane.
+- Do not add `self-hosted`, `shared-pool`, or equivalent repo-private runner assumptions back into the default public PR lane.
 - Do not add repo-local or repo-external state/cache paths without documenting their cleanup class in [`docs/disk-governance.md`](docs/disk-governance.md).
 
 ## Required Verification

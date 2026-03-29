@@ -1,0 +1,18 @@
+{
+  "threads": [
+    {
+      "id": 7681100,
+      "course_id": 855,
+      "title": "<redacted-title>",
+      "updated_at": "2026-03-29T13:27:51.622544+11:00",
+      "is_seen": false
+    },
+    {
+      "id": 6946835,
+      "course_id": 855,
+      "title": "<redacted-title>",
+      "updated_at": "2026-03-29T12:46:21.147037+11:00",
+      "is_seen": true
+    }
+  ]
+}

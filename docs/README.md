@@ -17,12 +17,13 @@ If you are a maintainer or contributor, read in this order:
 
 1. [`../README.md`](../README.md)
 2. [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
-3. [`09-implementation-decisions.md`](09-implementation-decisions.md)
-4. [`verification-matrix.md`](verification-matrix.md)
-5. [`integration-boundaries.md`](integration-boundaries.md)
-6. [`diagnostics-and-logging.md`](diagnostics-and-logging.md)
-7. [`disk-governance.md`](disk-governance.md)
-8. The relevant numbered brief below for the subsystem you are changing
+3. [`../CLAUDE.md`](../CLAUDE.md) for the public AI collaborator contract
+4. [`09-implementation-decisions.md`](09-implementation-decisions.md)
+5. [`verification-matrix.md`](verification-matrix.md)
+6. [`integration-boundaries.md`](integration-boundaries.md)
+7. [`diagnostics-and-logging.md`](diagnostics-and-logging.md)
+8. [`disk-governance.md`](disk-governance.md)
+9. The relevant numbered brief below for the subsystem you are changing
 
 ## Numbered Briefs
 
@@ -42,6 +43,7 @@ If you are a maintainer or contributor, read in this order:
 
 | Need | Canonical file |
 | :-- | :-- |
+| Public AI collaborator contract | [`../CLAUDE.md`](../CLAUDE.md) |
 | Deterministic vs manual validation | [`verification-matrix.md`](verification-matrix.md) |
 | Manual live procedure | [`live-validation-runbook.md`](live-validation-runbook.md) |
 | External boundary classes | [`integration-boundaries.md`](integration-boundaries.md) |
