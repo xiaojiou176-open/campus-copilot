@@ -483,7 +483,7 @@ function normalizeOverlay(
     pinnedAt: input.pinnedAt === null ? undefined : input.pinnedAt ?? existing?.pinnedAt,
     snoozeUntil: input.snoozeUntil === null ? undefined : input.snoozeUntil ?? existing?.snoozeUntil,
     dismissUntil: input.dismissUntil === null ? undefined : input.dismissUntil ?? existing?.dismissUntil,
-    note: sanitizeNote(input.note ?? existing?.note),
+    note: input.note === null ? undefined : sanitizeNote(input.note ?? existing?.note),
     updatedAt,
   };
 
@@ -541,25 +541,6 @@ function endOfUtcDay(value: Date) {
 
 function getEntityTitle(entity: TrackedEntity) {
   return entity.title;
-}
-
-function getEntityTimestamp(entity: TrackedEntity) {
-  if (entity.kind === 'assignment') {
-    return entity.updatedAt ?? entity.createdAt ?? entity.dueAt;
-  }
-  if (entity.kind === 'announcement') {
-    return entity.postedAt;
-  }
-  if (entity.kind === 'grade') {
-    return entity.releasedAt ?? entity.gradedAt;
-  }
-  if (entity.kind === 'message') {
-    return entity.createdAt;
-  }
-  if (entity.kind === 'event') {
-    return entity.updatedAt ?? entity.startAt ?? entity.endAt;
-  }
-  return undefined;
 }
 
 function makeSyncRunId(site: Site, startedAt: string, completedAt: string) {
@@ -1491,7 +1472,8 @@ export async function getLatestSyncRuns(limit = 8, db = campusCopilotDb) {
 
 export async function getLatestSyncRunBySite(site: Site, db = campusCopilotDb) {
   const runs = await db.sync_runs.where('site').equals(site).toArray();
-  return runs.sort((left, right) => compareNewest(left.completedAt, right.completedAt))[0];
+  const latestRun = runs.sort((left, right) => compareNewest(left.completedAt, right.completedAt))[0];
+  return latestRun ? SyncRunSchema.parse(latestRun) : undefined;
 }
 
 export async function getRecentChangeEvents(limit = 20, db = campusCopilotDb) {
