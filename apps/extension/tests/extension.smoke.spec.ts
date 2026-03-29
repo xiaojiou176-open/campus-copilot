@@ -300,7 +300,32 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
           return new Response(
             JSON.stringify({
               ok: true,
-              answerText: 'Campus Copilot AI answer',
+              answerText: JSON.stringify({
+                summary: 'Campus Copilot AI answer',
+                bullets: ['Homework 5 is still due soon', 'Canvas still shows it as open'],
+                citations: [
+                  {
+                    entityId: 'canvas:assignment:1',
+                    kind: 'assignment',
+                    site: 'canvas',
+                    title: 'Homework 5',
+                    url: 'https://canvas.example.edu/courses/1/assignments/1',
+                  },
+                ],
+              }),
+              structuredAnswer: {
+                summary: 'Campus Copilot AI answer',
+                bullets: ['Homework 5 is still due soon', 'Canvas still shows it as open'],
+                citations: [
+                  {
+                    entityId: 'canvas:assignment:1',
+                    kind: 'assignment',
+                    site: 'canvas',
+                    title: 'Homework 5',
+                    url: 'https://canvas.example.edu/courses/1/assignments/1',
+                  },
+                ],
+              },
             }),
             {
               status: 200,
@@ -329,6 +354,9 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await page.goto('/sidepanel.html');
 
   await expect(page.getByRole('heading', { name: 'Diagnostics' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Focus Queue' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Weekly Load' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Change Journal' })).toBeVisible();
   await expect(page.getByText('Provider not ready: OpenAI, Gemini')).toBeVisible();
   await page.getByRole('button', { name: 'Export diagnostics JSON' }).click();
   const diagnosticsPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
@@ -368,6 +396,9 @@ test('asks ai after provider config exists', async ({ page }) => {
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
   await expect(page.getByText('Campus Copilot AI answer')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Key points' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Citations' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Homework 5' })).toBeVisible();
 });
 
 test('shows provider not ready when selected provider is unavailable in bff status', async ({ page }) => {
@@ -392,6 +423,9 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
   await page.goto('/sidepanel.html');
 
   await expect(page.getByText('当前状态: 被环境或运行时阻塞')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '专注队列' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '本周负荷' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '变化账本' })).toBeVisible();
   await expect(page.getByText('OpenAI · 未就绪 · 缺少 API key')).toBeVisible();
   await page.getByRole('button', { name: 'MyUW', exact: true }).click();
   const myUwStatusCard = page

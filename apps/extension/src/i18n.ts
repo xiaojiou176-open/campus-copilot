@@ -96,6 +96,33 @@ type UiText = {
     markUpdatesSeen: string;
     openOptions: string;
   };
+  focusQueue: {
+    title: string;
+    description: string;
+    none: string;
+    pin: string;
+    unpin: string;
+    snoozeUntilTomorrow: string;
+    dismissUntilTomorrow: string;
+    addNote: string;
+    editNote: string;
+    notePrompt: (title: string) => string;
+  };
+  weeklyLoad: {
+    title: string;
+    description: string;
+    none: string;
+    assignments: string;
+    overdue: string;
+    dueSoon: string;
+    pinned: string;
+    score: string;
+  };
+  changeJournal: {
+    title: string;
+    description: string;
+    none: string;
+  };
   diagnostics: {
     title: string;
     description: string;
@@ -158,6 +185,8 @@ type UiText = {
     missingBffFeedback: string;
     refreshProviderStatus: string;
     refreshingProviderStatus: string;
+    keyPoints: string;
+    citations: string;
   };
   popup: {
     quickExport: string;
@@ -205,6 +234,12 @@ type UiText = {
     bffMissingForAi: string;
     providerNotReadyInBff: (provider: string) => string;
     partialSuccess: (site: string) => string;
+    overlayPinned: string;
+    overlayUnpinned: string;
+    overlaySnoozed: string;
+    overlayDismissed: string;
+    overlayNoteSaved: string;
+    overlayNoteCleared: string;
   };
   diagnosticsMessages: {
     missingBffBaseUrl: string;
@@ -295,6 +330,33 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       markUpdatesSeen: 'Mark updates as seen',
       openOptions: 'Open Options',
     },
+    focusQueue: {
+      title: 'Focus Queue',
+      description: 'This is the first formal answer to “what should I do first?” It combines structure with your own local judgment.',
+      none: 'No focus items are active right now. Sync a site or pin an item to build the queue.',
+      pin: 'Pin',
+      unpin: 'Unpin',
+      snoozeUntilTomorrow: 'Snooze 24h',
+      dismissUntilTomorrow: 'Dismiss 24h',
+      addNote: 'Add note',
+      editNote: 'Edit note',
+      notePrompt: (title) => `Add or edit a local note for "${title}". Leave it blank to clear the note.`,
+    },
+    weeklyLoad: {
+      title: 'Weekly Load',
+      description: 'This behaves like a short-range workload forecast for the next seven days.',
+      none: 'No dated workload is visible yet.',
+      assignments: 'Assignments',
+      overdue: 'Overdue',
+      dueSoon: 'Due soon',
+      pinned: 'Pinned',
+      score: 'Load score',
+    },
+    changeJournal: {
+      title: 'Change Journal',
+      description: 'This acts like a sync receipt: what changed, not just whether sync finished.',
+      none: 'No recorded sync changes exist yet.',
+    },
     diagnostics: {
       title: 'Diagnostics',
       description: 'This area acts like a runtime control tower. It tells you what is actually blocked, not how many features exist.',
@@ -358,6 +420,8 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       missingBffFeedback: 'BFF base URL is still missing, so the AI path should fail loudly instead of silently.',
       refreshProviderStatus: 'Refresh provider status',
       refreshingProviderStatus: 'Refreshing...',
+      keyPoints: 'Key points',
+      citations: 'Citations',
     },
     popup: {
       quickExport: 'Quick export',
@@ -412,6 +476,12 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       bffMissingForAi: 'BFF base URL is not configured yet. Set it in Options first.',
       providerNotReadyInBff: (provider) => `${provider} is not ready in the BFF yet.`,
       partialSuccess: (site) => `${site} partially succeeded.`,
+      overlayPinned: 'Pinned for focus.',
+      overlayUnpinned: 'Removed from pinned focus.',
+      overlaySnoozed: 'Snoozed for the next 24 hours.',
+      overlayDismissed: 'Dismissed for the next 24 hours.',
+      overlayNoteSaved: 'Local note saved.',
+      overlayNoteCleared: 'Local note cleared.',
     },
     diagnosticsMessages: {
       missingBffBaseUrl: 'BFF base URL is not configured yet',
@@ -497,6 +567,33 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       markUpdatesSeen: '标记更新已查看',
       openOptions: '打开设置',
     },
+    focusQueue: {
+      title: '专注队列',
+      description: '这里是“我现在先做什么”的正式答案，会把结构化事实和你的本地判断放在一起排序。',
+      none: '当前还没有激活的专注项。先同步站点，或者先 pin 一条事项。',
+      pin: '置顶',
+      unpin: '取消置顶',
+      snoozeUntilTomorrow: '延后 24 小时',
+      dismissUntilTomorrow: '忽略 24 小时',
+      addNote: '添加备注',
+      editNote: '编辑备注',
+      notePrompt: (title) => `给“${title}”添加或编辑本地备注。留空表示清除备注。`,
+    },
+    weeklyLoad: {
+      title: '本周负荷',
+      description: '这里像未来 7 天的短期负荷预报，不是单纯的任务列表。',
+      none: '当前还没有可见的日期负荷。',
+      assignments: '作业',
+      overdue: '逾期',
+      dueSoon: '即将到期',
+      pinned: '置顶',
+      score: '负荷分数',
+    },
+    changeJournal: {
+      title: '变化账本',
+      description: '这里像同步收据，重点不是“有没有同步”，而是“这次到底变了什么”。',
+      none: '当前还没有记录到同步变化。',
+    },
     diagnostics: {
       title: '诊断',
       description: '这块像运行时控制塔，不是告诉你“系统很多功能”，而是告诉你“当前真正卡住哪些前置条件”。',
@@ -560,6 +657,8 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       missingBffFeedback: '当前还没配置 BFF 地址，所以 AI 入口只会诚实提示，不会静默失败。',
       refreshProviderStatus: '刷新服务商状态',
       refreshingProviderStatus: '刷新中…',
+      keyPoints: '要点',
+      citations: '引用',
     },
     popup: {
       quickExport: '快速导出',
@@ -614,6 +713,12 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       bffMissingForAi: '当前还没配置 BFF 地址，所以 AI 入口只会诚实提示，不会静默失败。',
       providerNotReadyInBff: (provider) => `${provider} 当前在 BFF 中还没有 ready。`,
       partialSuccess: (site) => `${site} 已部分同步成功。`,
+      overlayPinned: '已加入专注置顶。',
+      overlayUnpinned: '已取消专注置顶。',
+      overlaySnoozed: '已延后 24 小时。',
+      overlayDismissed: '已忽略 24 小时。',
+      overlayNoteSaved: '本地备注已保存。',
+      overlayNoteCleared: '本地备注已清除。',
     },
     diagnosticsMessages: {
       missingBffBaseUrl: '还没有配置 BFF 地址',

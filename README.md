@@ -21,15 +21,23 @@ The product strategy is intentionally narrow:
 - **AI after structure**: AI can summarize or explain the workbench result, but it does not read raw DOM, raw HTML, or cookies.
 - **Export is a first-class feature**: Markdown, CSV, JSON, and ICS are part of the core product, not an afterthought.
 
+Campus Copilot now includes a **learning decision layer** on top of that workbench:
+
+- local user judgment through pin / snooze / note / dismiss overlays
+- derived decision views such as Focus Queue, Weekly Load, and Change Journal
+- cited AI answers that point back to structured entities instead of raw pages
+
 ## Current Product Shape
 
 Today the repository already includes:
 
 - A multi-site extension runtime for `Canvas`, `Gradescope`, `EdStem`, and `MyUW`
 - A local canonical data layer backed by shared schema + Dexie read models
+- A learning decision layer with local overlay, Focus Queue, Weekly Load, and Change Journal
 - A workbench surface for sidepanel / popup / options
-- Export presets for current view, weekly assignments, recent updates, and deadlines
+- Export presets for current view, weekly assignments, recent updates, deadlines, focus queue, and weekly load
 - A thin BFF for `OpenAI` and `Gemini` API-key flows
+- Cited AI responses over structured workbench outputs
 - Deterministic repository verification through `pnpm verify`
 
 ![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
@@ -104,9 +112,11 @@ pnpm verify
 
 - Local-first read-only workflow
 - Shared schema + Dexie read models
+- Local user-state overlay and derived decision views
 - Manual sync from supported sites
 - Export from normalized data
 - Thin BFF for `OpenAI` and `Gemini` API-key flows
+- Cited AI answers over structured results
 
 ### Not formal product paths
 
@@ -188,9 +198,9 @@ The weakest parts are:
 
 The current top priorities are:
 
-1. keep one technical source of truth instead of hand-syncing the same facts across multiple docs
-2. separate deterministic gates from manual live evidence
-3. harden the public collaboration shell and supply-chain posture
+1. sharpen the first-wave decision layer with better focus ordering, weekly load heuristics, and clearer change receipts
+2. deepen cited AI and export alignment around structured decision outputs
+3. continue improving live validation honesty without expanding the formal boundary first
 
 ## Security and Collaboration
 
@@ -204,4 +214,4 @@ If this project is useful to you, the best reason to star it is not “it alread
 
 The reason to star it now is:
 
-> it already has the hard part — a real local-first data model and multi-site integration skeleton — and the next stage is about turning that strong engineering core into a cleaner public collaboration surface.
+> it already has the hard part — a real local-first data model and multi-site integration skeleton — and the next stage is about turning that strong engineering core into a stronger learning decision workspace.

@@ -11,6 +11,24 @@ Its user-facing shape is a workbench with export and AI as parallel formal paths
 - `options`
 - export presets
 - AI explanation after structure
+- `Focus Queue`
+- `Weekly Load`
+- `Change Journal`
+- cited AI explanation
+
+## Current Formal Surface Direction
+
+The current formal surface goal is a **learning decision layer**, not a broader chat shell.
+
+That direction should materialize as:
+
+- `sidepanel` as the primary home for decision views
+- `Focus Queue` as the first-class “what should I do first?” surface
+- `Weekly Load` as the first-class planning surface
+- `Change Journal` as the first-class “what changed?” surface
+- cited AI explanations that point back to structured entities
+
+These are part of the current formal surface shape.
 
 ## Surface Rules
 
@@ -19,6 +37,8 @@ Its user-facing shape is a workbench with export and AI as parallel formal paths
 - use sidepanel as the main workbench surface
 - keep export first-class, not hidden behind AI
 - keep diagnostics honest about missing prerequisites
+- derive decision surfaces from storage read models and local overlay, not from raw site responses
+- do not expand the formal surface area by adding new sites, provider/auth paths, or write operations first
 
 ## Current Export Presets
 
@@ -26,12 +46,16 @@ Its user-facing shape is a workbench with export and AI as parallel formal paths
 - weekly assignments
 - recent updates
 - all deadlines
+- focus queue
+- weekly load
 
 ## Why This Matters
 
 The repository's value is:
 
 - one local structured view
+- one local layer for user judgment
+- one derived layer for decision-making
 - lower switching cost
 - lower noise
 - easier export

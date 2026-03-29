@@ -102,7 +102,19 @@ describe('api thin bff', () => {
           choices: [
             {
               message: {
-                content: 'Structured answer',
+                content: JSON.stringify({
+                  summary: '先完成 Homework 5。',
+                  bullets: ['明晚截止', 'Canvas 显示仍未提交'],
+                  citations: [
+                    {
+                      entityId: 'assignment:hw5',
+                      kind: 'assignment',
+                      site: 'canvas',
+                      title: 'Homework 5',
+                      url: 'https://canvas.example.com/courses/1/assignments/5',
+                    },
+                  ],
+                }),
               },
             },
           ],
@@ -123,7 +135,21 @@ describe('api thin bff', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.body).toContain('Structured answer');
+    const body = JSON.parse(response.body);
+    expect(body.answerText).toContain('"summary":"先完成 Homework 5。"');
+    expect(body.structuredAnswer).toEqual({
+      summary: '先完成 Homework 5。',
+      bullets: ['明晚截止', 'Canvas 显示仍未提交'],
+      citations: [
+        {
+          entityId: 'assignment:hw5',
+          kind: 'assignment',
+          site: 'canvas',
+          title: 'Homework 5',
+          url: 'https://canvas.example.com/courses/1/assignments/5',
+        },
+      ],
+    });
     expect(response.body).not.toContain('providerPayload');
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(fetchSpy.mock.calls[0]?.[0]).toContain('/chat/completions');
@@ -223,5 +249,42 @@ describe('api thin bff', () => {
     expect(response.status).toBe(200);
     expect(response.body).not.toContain('providerPayload');
     expect(response.body).toContain('READY');
+  });
+
+  it('keeps plain text answers compatible when no structured answer can be parsed', async () => {
+    const fetchSpy = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      text: async () =>
+        JSON.stringify({
+          candidates: [
+            {
+              content: {
+                parts: [{ text: '先看 Homework 5，它明晚截止。' }],
+              },
+            },
+          ],
+        }),
+    }));
+
+    const response = await handleApiRequest(
+      createRequest('/api/providers/gemini/chat', 'POST', {
+        provider: 'gemini',
+        authMode: 'api_key',
+        model: 'gemini-test',
+        messages: [{ role: 'user', content: 'hello' }],
+      }),
+      loadApiEnv({
+        GEMINI_API_KEY: 'gemini-key',
+      }),
+      fetchSpy,
+    );
+
+    const body = JSON.parse(response.body);
+
+    expect(response.status).toBe(200);
+    expect(body.answerText).toBe('先看 Homework 5，它明晚截止。');
+    expect(body.structuredAnswer).toBeUndefined();
+    expect(response.body).not.toContain('candidates');
   });
 });

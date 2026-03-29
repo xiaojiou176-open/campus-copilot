@@ -26,6 +26,26 @@ export const ToolResultSchema = z.object({
 });
 export type ToolResult = z.infer<typeof ToolResultSchema>;
 
+export const AiCitationSchema = z
+  .object({
+    entityId: z.string().trim().min(1),
+    kind: z.string().trim().min(1),
+    site: z.string().trim().min(1),
+    title: z.string().trim().min(1),
+    url: z.string().trim().min(1).optional(),
+  })
+  .strict();
+export type AiCitation = z.infer<typeof AiCitationSchema>;
+
+export const AiStructuredAnswerSchema = z
+  .object({
+    summary: z.string().trim().min(1),
+    bullets: z.array(z.string().trim().min(1)),
+    citations: z.array(AiCitationSchema),
+  })
+  .strict();
+export type AiStructuredAnswer = z.infer<typeof AiStructuredAnswerSchema>;
+
 export const AiRuntimeRequestSchema = z.object({
   provider: ProviderIdSchema,
   authMode: AuthModeSchema,
@@ -53,6 +73,102 @@ export interface ProviderProxyRequest {
     model: string;
     messages: ChatMessage[];
   };
+}
+
+function extractCodeFenceBody(raw: string) {
+  const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return match?.[1];
+}
+
+function extractFirstJsonObject(raw: string) {
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = 0; index < raw.length; index += 1) {
+    const char = raw[index];
+
+    if (start === -1) {
+      if (char === '{') {
+        start = index;
+        depth = 1;
+      }
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+
+      if (char === '\\') {
+        escaped = true;
+        continue;
+      }
+
+      if (char === '"') {
+        inString = false;
+      }
+
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (char === '{') {
+      depth += 1;
+      continue;
+    }
+
+    if (char === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        return raw.slice(start, index + 1);
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function parseStructuredAnswerCandidate(candidate: string | undefined) {
+  if (!candidate) {
+    return undefined;
+  }
+
+  const trimmed = candidate.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    return undefined;
+  }
+}
+
+export function parseAiStructuredAnswer(raw: string): AiStructuredAnswer | undefined {
+  const directValue = parseStructuredAnswerCandidate(raw);
+  const fencedBody = extractCodeFenceBody(raw);
+  const fencedValue = parseStructuredAnswerCandidate(fencedBody);
+  const extractedValue =
+    parseStructuredAnswerCandidate(extractFirstJsonObject(raw)) ??
+    parseStructuredAnswerCandidate(extractFirstJsonObject(fencedBody ?? ''));
+
+  for (const value of [directValue, fencedValue, extractedValue]) {
+    const result = AiStructuredAnswerSchema.safeParse(value);
+    if (result.success) {
+      return result.data;
+    }
+  }
+
+  return undefined;
 }
 
 const TOOL_DEFINITIONS: ToolDefinition[] = [
@@ -98,6 +214,9 @@ export function buildAiRuntimeMessages(input: AiRuntimeRequest): AiRuntimeMessag
       'You are Campus Copilot AI.',
       'You operate strictly after structure: use only unified schema, read-model, and export results.',
       'Never request raw DOM, raw HTML, cookies, or site-specific payloads.',
+      'Return a JSON object with keys "summary", "bullets", and "citations".',
+      'Each citation must include "entityId", "kind", "site", "title", and optional "url".',
+      'Do not expose raw provider metadata or raw tool payloads in the answer.',
       'When information is missing, say so clearly instead of inventing facts.',
     ].join(' '),
     userPrompt: [`Question: ${request.question}`, 'Structured tool results:', toolSummary].join('\n'),
