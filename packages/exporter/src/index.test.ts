@@ -119,6 +119,70 @@ const baseInput = {
       relatedEntities: [],
     },
   ],
+  focusQueue: [
+    {
+      id: 'focus:assignment:1',
+      kind: 'assignment',
+      site: 'canvas',
+      title: 'Homework 5',
+      score: 210,
+      pinned: true,
+      note: 'Start this tonight',
+      dueAt: '2026-03-26T23:59:00-07:00',
+      entityId: 'canvas:assignment:1',
+      entity: {
+        id: 'canvas:assignment:1',
+        kind: 'assignment',
+        site: 'canvas',
+      },
+      reasons: [
+        {
+          code: 'due_soon',
+          label: '48 hours remaining',
+          importance: 'high',
+        },
+      ],
+      blockedBy: [],
+    },
+  ],
+  weeklyLoad: [
+    {
+      dateKey: '2026-03-26',
+      startsAt: '2026-03-26T00:00:00.000Z',
+      endsAt: '2026-03-26T23:59:59.999Z',
+      assignmentCount: 1,
+      eventCount: 0,
+      overdueCount: 0,
+      dueSoonCount: 1,
+      pinnedCount: 1,
+      totalScore: 210,
+    },
+  ],
+  syncRuns: [
+    {
+      id: 'sync-run:canvas:1',
+      site: 'canvas',
+      status: 'success',
+      outcome: 'partial_success',
+      startedAt: '2026-03-24T17:59:00-07:00',
+      completedAt: '2026-03-24T18:00:00-07:00',
+      changeCount: 2,
+      errorReason: 'announcements collector failed',
+    },
+  ],
+  changeEvents: [
+    {
+      id: 'change-event:1',
+      site: 'canvas',
+      changeType: 'due_changed',
+      occurredAt: '2026-03-24T18:00:00-07:00',
+      title: 'Homework 5 due date changed',
+      summary: 'Due date moved by one day.',
+      entityId: 'canvas:assignment:1',
+      previousValue: '2026-03-25T23:59:00-07:00',
+      nextValue: '2026-03-26T23:59:00-07:00',
+    },
+  ],
 };
 
 describe('exporter package', () => {
@@ -172,5 +236,33 @@ describe('exporter package', () => {
     expect(artifact.content).toContain('"title": "Status board"');
     expect(artifact.content).toContain('"assignments": 1');
     expect(artifact.content).toContain('"timelineEntries": 1');
+    expect(artifact.content).toContain('"focusQueue": 1');
+    expect(artifact.content).toContain('"weeklyLoad": 1');
+  });
+
+  it('builds focus queue as markdown without re-deriving scores', () => {
+    const artifact = createExportArtifact({
+      preset: 'focus_queue',
+      format: 'markdown',
+      input: baseInput,
+    });
+
+    expect(artifact.filename).toContain('focus-queue');
+    expect(artifact.content).toContain('# Focus queue');
+    expect(artifact.content).toContain('Homework 5');
+    expect(artifact.content).toContain('score 210');
+  });
+
+  it('builds weekly load as csv rows', () => {
+    const artifact = createExportArtifact({
+      preset: 'weekly_load',
+      format: 'csv',
+      input: baseInput,
+    });
+
+    expect(artifact.filename).toContain('weekly-load');
+    expect(artifact.content).toContain('dateKey');
+    expect(artifact.content).toContain('2026-03-26');
+    expect(artifact.content).toContain('assignments=1');
   });
 });

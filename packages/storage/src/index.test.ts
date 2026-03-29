@@ -3,10 +3,15 @@ import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Alert, Announcement, Assignment, Course, Grade, Message } from '@campus-copilot/schema';
 import {
+  clearLocalEntityOverlayField,
   createCampusCopilotDb,
+  getFocusQueue,
+  getLatestSyncRuns,
   getTodaySnapshot,
   getPriorityAlerts,
+  getRecentChangeEvents,
   getRecentUpdates,
+  getWeeklyLoad,
   getWorkbenchView,
   getAssignmentsBySite,
   getEntityCounts,
@@ -18,6 +23,7 @@ import {
   putCourses,
   recordSiteSyncError,
   replaceSiteSnapshot,
+  upsertLocalEntityOverlay,
 } from './index';
 
 Dexie.dependencies.indexedDB = indexedDB;
@@ -448,5 +454,287 @@ describe('storage package', () => {
 
     expect(view.recentUpdates.items).toHaveLength(0);
     expect(view.recentUpdates.unseenCount).toBe(0);
+  });
+
+  it('stores local overlay data without mutating canonical site facts', async () => {
+    const assignment: Assignment = {
+      id: 'canvas:assignment:overlay-1',
+      kind: 'assignment',
+      site: 'canvas',
+      source,
+      title: 'Overlay target',
+      dueAt: '2026-03-26T18:00:00-07:00',
+      status: 'todo',
+    };
+
+    await replaceSiteSnapshot(
+      'canvas',
+      {
+        assignments: [assignment],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: '2026-03-24T18:33:00-07:00',
+      },
+      db,
+    );
+
+    await upsertLocalEntityOverlay(
+      {
+        entityId: assignment.id,
+        site: assignment.site,
+        kind: assignment.kind,
+        pinnedAt: '2026-03-24T18:34:00-07:00',
+        note: 'Start with the database section',
+      },
+      db,
+    );
+
+    const storedAssignment = await db.assignments.get(assignment.id);
+    const overlay = await db.local_entity_overlay.get(assignment.id);
+
+    expect(storedAssignment?.title).toBe('Overlay target');
+    expect(storedAssignment).not.toHaveProperty('note');
+    expect(overlay?.pinnedAt).toBeTruthy();
+    expect(overlay?.note).toBe('Start with the database section');
+  });
+
+  it('builds a focus queue from canonical facts plus local overlay', async () => {
+    const assignment: Assignment = {
+      id: 'canvas:assignment:focus-1',
+      kind: 'assignment',
+      site: 'canvas',
+      source,
+      title: 'Homework 7',
+      dueAt: '2026-03-25T09:00:00-07:00',
+      status: 'todo',
+    };
+    const message: Message = {
+      id: 'edstem:message:focus-1',
+      kind: 'message',
+      site: 'edstem',
+      source: { ...source, site: 'edstem', resourceId: 'focus-thread', resourceType: 'thread' },
+      messageKind: 'thread',
+      title: 'Instructor follow-up',
+      createdAt: '2026-03-24T10:00:00-07:00',
+      unread: true,
+      instructorAuthored: true,
+    };
+
+    await replaceSiteSnapshot(
+      'canvas',
+      {
+        assignments: [assignment],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: '2026-03-24T18:40:00-07:00',
+      },
+      db,
+    );
+    await replaceSiteSnapshot(
+      'edstem',
+      {
+        messages: [message],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: '2026-03-24T18:41:00-07:00',
+      },
+      db,
+    );
+    await db.sync_state.put({
+      key: 'gradescope',
+      site: 'gradescope',
+      status: 'success',
+      lastSyncedAt: '2026-03-24T18:42:00-07:00',
+      lastOutcome: 'partial_success',
+      resourceFailures: [
+        {
+          resource: 'courses',
+          errorReason: 'missing_courses',
+          attemptedModes: ['private_api'],
+          attemptedCollectors: ['GradescopeCoursesCollector'],
+        },
+      ],
+    });
+
+    await upsertLocalEntityOverlay(
+      {
+        entityId: assignment.id,
+        site: assignment.site,
+        kind: assignment.kind,
+        pinnedAt: '2026-03-24T18:43:00-07:00',
+        note: 'Start this before lunch',
+      },
+      db,
+    );
+
+    const queue = await getFocusQueue('2026-03-24T18:45:00-07:00', db);
+    expect(queue[0]?.entityRef?.id).toBe(assignment.id);
+    expect(queue[0]?.pinned).toBe(true);
+    expect(queue[0]?.note).toBe('Start this before lunch');
+    expect(queue.some((item) => item.entityRef?.id === message.id)).toBe(true);
+    expect(queue.some((item) => item.kind === 'sync_state')).toBe(true);
+  });
+
+  it('builds weekly load buckets for the next seven days', async () => {
+    await replaceSiteSnapshot(
+      'canvas',
+      {
+        assignments: [
+          {
+            id: 'canvas:assignment:week-1',
+            kind: 'assignment',
+            site: 'canvas',
+            source,
+            title: 'Homework 8',
+            dueAt: '2026-03-25T10:00:00-07:00',
+            status: 'todo',
+          },
+          {
+            id: 'canvas:assignment:week-2',
+            kind: 'assignment',
+            site: 'canvas',
+            source,
+            title: 'Homework 9',
+            dueAt: '2026-03-27T10:00:00-07:00',
+            status: 'todo',
+          },
+        ],
+        events: [
+          {
+            id: 'myuw:event:week-1',
+            kind: 'event',
+            site: 'myuw',
+            source: { ...source, site: 'myuw', resourceId: 'event-week-1', resourceType: 'event' },
+            eventKind: 'deadline',
+            title: 'Registration reminder',
+            startAt: '2026-03-27T09:00:00-07:00',
+          },
+        ],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: '2026-03-24T18:50:00-07:00',
+      },
+      db,
+    );
+
+    const weeklyLoad = await getWeeklyLoad('2026-03-24T18:55:00-07:00', db);
+    expect(weeklyLoad).toHaveLength(7);
+    expect(weeklyLoad.find((entry) => entry.dateKey === '2026-03-25')?.assignmentCount).toBe(1);
+    expect(weeklyLoad.find((entry) => entry.dateKey === '2026-03-27')?.assignmentCount).toBe(1);
+    expect(weeklyLoad.find((entry) => entry.dateKey === '2026-03-25')?.dueSoonCount).toBe(1);
+  });
+
+  it('writes sync runs and change events alongside snapshot replacement', async () => {
+    const assignmentBefore: Assignment = {
+      id: 'canvas:assignment:ledger-1',
+      kind: 'assignment',
+      site: 'canvas',
+      source,
+      title: 'Project checkpoint',
+      dueAt: '2026-03-26T12:00:00-07:00',
+      status: 'todo',
+    };
+    const assignmentAfter: Assignment = {
+      ...assignmentBefore,
+      dueAt: '2026-03-27T12:00:00-07:00',
+      status: 'missing',
+    };
+
+    await replaceSiteSnapshot(
+      'canvas',
+      {
+        assignments: [assignmentBefore],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: '2026-03-24T19:00:00-07:00',
+      },
+      db,
+    );
+
+    await replaceSiteSnapshot(
+      'canvas',
+      {
+        assignments: [assignmentAfter],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: '2026-03-24T19:05:00-07:00',
+        lastOutcome: 'partial_success',
+        resourceFailures: [
+          {
+            resource: 'announcements',
+            errorReason: 'collector_failed',
+            attemptedModes: ['official_api'],
+            attemptedCollectors: ['CanvasAnnouncementsCollector'],
+          },
+        ],
+      },
+      db,
+    );
+
+    const runs = await getLatestSyncRuns(4, db);
+    const changes = await getRecentChangeEvents(12, db);
+
+    expect(runs[0]?.site).toBe('canvas');
+    expect(runs[0]?.changeCount).toBeGreaterThan(0);
+    expect(changes.some((event) => event.changeType === 'status_changed')).toBe(true);
+    expect(changes.some((event) => event.changeType === 'due_changed')).toBe(true);
+    expect(changes.some((event) => event.changeType === 'sync_partial')).toBe(true);
+  });
+
+  it('suppresses focus items when they are snoozed or dismissed', async () => {
+    const assignment: Assignment = {
+      id: 'canvas:assignment:focus-hidden',
+      kind: 'assignment',
+      site: 'canvas',
+      source,
+      title: 'Hidden homework',
+      dueAt: '2026-03-25T09:00:00-07:00',
+      status: 'todo',
+    };
+
+    await replaceSiteSnapshot(
+      'canvas',
+      {
+        assignments: [assignment],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: '2026-03-24T19:10:00-07:00',
+      },
+      db,
+    );
+
+    await upsertLocalEntityOverlay(
+      {
+        entityId: assignment.id,
+        site: assignment.site,
+        kind: assignment.kind,
+        snoozeUntil: '2026-03-26T19:10:00-07:00',
+      },
+      db,
+    );
+
+    let queue = await getFocusQueue('2026-03-24T19:11:00-07:00', db);
+    expect(queue.some((item) => item.entityRef?.id === assignment.id)).toBe(false);
+
+    await clearLocalEntityOverlayField(assignment.id, 'snoozeUntil', db);
+    await upsertLocalEntityOverlay(
+      {
+        entityId: assignment.id,
+        site: assignment.site,
+        kind: assignment.kind,
+        dismissUntil: '2026-03-26T19:12:00-07:00',
+      },
+      db,
+    );
+
+    queue = await getFocusQueue('2026-03-24T19:13:00-07:00', db);
+    expect(queue.some((item) => item.entityRef?.id === assignment.id)).toBe(false);
   });
 });

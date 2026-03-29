@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
-import { type ProviderId } from '@campus-copilot/ai';
+import { AiStructuredAnswerSchema, type ProviderId, type AiStructuredAnswer } from '@campus-copilot/ai';
 import type { ExportFormat, ExportPreset } from '@campus-copilot/exporter';
 import { createExportArtifact } from '@campus-copilot/exporter';
 import {
@@ -9,14 +9,20 @@ import {
   type SiteSyncOutcome,
   type SyncSiteCommandResponse,
 } from '@campus-copilot/core';
-import type { Site } from '@campus-copilot/schema';
+import type { EntityKind, Site } from '@campus-copilot/schema';
 import {
+  clearLocalEntityOverlayField,
   markEntitiesSeen,
+  upsertLocalEntityOverlay,
+  useFocusQueue,
+  useLatestSyncRuns,
   type WorkbenchFilter,
   useAllSiteEntityCounts,
   usePriorityAlerts,
+  useRecentChangeEvents,
   useSiteSyncStates,
   useTodaySnapshot,
+  useWeeklyLoad,
   useWorkbenchView,
 } from '@campus-copilot/storage';
 import { buildSiteBlockingHint } from './background-runtime';
@@ -45,6 +51,7 @@ type SurfaceKind = 'sidepanel' | 'popup' | 'options';
 type AiResponsePayload = {
   ok?: boolean;
   answerText?: string;
+  structuredAnswer?: unknown;
   error?: string;
 };
 
@@ -179,6 +186,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const [aiModel, setAiModel] = useState('gpt-4.1-mini');
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState<string>();
+  const [aiStructuredAnswer, setAiStructuredAnswer] = useState<AiStructuredAnswer>();
   const [aiError, setAiError] = useState<string>();
   const [aiPending, setAiPending] = useState(false);
   const [providerStatusPending, setProviderStatusPending] = useState(false);
@@ -218,6 +226,10 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     },
   }[surface];
   const todaySnapshot = useTodaySnapshot(now, undefined, refreshKey);
+  const focusQueue = useFocusQueue(now, undefined, refreshKey) ?? [];
+  const weeklyLoad = useWeeklyLoad(now, undefined, refreshKey) ?? [];
+  const recentChangeEvents = useRecentChangeEvents(8, undefined, refreshKey) ?? [];
+  const latestSyncRuns = useLatestSyncRuns(4, undefined, refreshKey) ?? [];
   const priorityAlerts = usePriorityAlerts(now, undefined, refreshKey) ?? [];
   const siteCounts = useAllSiteEntityCounts(undefined, refreshKey) ?? [];
   const siteSyncStates = useSiteSyncStates(undefined, refreshKey) ?? [];
@@ -363,6 +375,105 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     });
   }
 
+  async function handleOverlayUpdate(input: {
+    entityId: string;
+    site: Site;
+    kind: EntityKind;
+    pinnedAt?: string | null;
+    snoozeUntil?: string | null;
+    dismissUntil?: string | null;
+    note?: string | null;
+  }, feedbackMessage: string) {
+    await upsertLocalEntityOverlay(input);
+    setExportFeedback(feedbackMessage);
+    setRefreshKey((current) => current + 1);
+  }
+
+  async function handleTogglePin(input: {
+    entityId: string;
+    site: Site;
+    kind: EntityKind;
+    pinned: boolean;
+  }) {
+    await handleOverlayUpdate(
+      {
+        entityId: input.entityId,
+        site: input.site,
+        kind: input.kind,
+        pinnedAt: input.pinned ? null : new Date().toISOString(),
+      },
+      input.pinned ? text.feedback.overlayUnpinned : text.feedback.overlayPinned,
+    );
+  }
+
+  async function handleSnooze(input: {
+    entityId: string;
+    site: Site;
+    kind: EntityKind;
+  }) {
+    const snoozeUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    await handleOverlayUpdate(
+      {
+        entityId: input.entityId,
+        site: input.site,
+        kind: input.kind,
+        snoozeUntil,
+      },
+      text.feedback.overlaySnoozed,
+    );
+  }
+
+  async function handleDismiss(input: {
+    entityId: string;
+    site: Site;
+    kind: EntityKind;
+  }) {
+    const dismissUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    await handleOverlayUpdate(
+      {
+        entityId: input.entityId,
+        site: input.site,
+        kind: input.kind,
+        dismissUntil,
+      },
+      text.feedback.overlayDismissed,
+    );
+  }
+
+  async function handleNote(input: {
+    entityId: string;
+    site: Site;
+    kind: EntityKind;
+    title: string;
+    note?: string;
+  }) {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const nextNote = window.prompt(text.focusQueue.notePrompt(input.title), input.note ?? '');
+    if (nextNote === null) {
+      return;
+    }
+
+    if (!nextNote.trim()) {
+      await clearLocalEntityOverlayField(input.entityId, 'note');
+      setExportFeedback(text.feedback.overlayNoteCleared);
+      setRefreshKey((current) => current + 1);
+      return;
+    }
+
+    await handleOverlayUpdate(
+      {
+        entityId: input.entityId,
+        site: input.site,
+        kind: input.kind,
+        note: nextNote,
+      },
+      text.feedback.overlayNoteSaved,
+    );
+  }
+
   async function handleMarkVisibleUpdatesSeen() {
     const entityIds = Array.from(
       new Set(
@@ -452,6 +563,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
     setAiPending(true);
     setAiError(undefined);
+    setAiStructuredAnswer(undefined);
 
     try {
       const exportArtifact = createExportArtifact({
@@ -484,6 +596,9 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         },
         recentUpdates: currentRecentUpdates?.items ?? [],
         alerts: currentAlerts,
+        focusQueue,
+        weeklyLoad,
+        recentChanges: recentChangeEvents,
         currentViewExport: exportArtifact,
       });
 
@@ -498,13 +613,17 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
       if (!response.ok || payload.ok === false || !payload.answerText) {
         setAiAnswer(undefined);
+        setAiStructuredAnswer(undefined);
         setAiError(payload.error ?? payload.answerText ?? text.feedback.noDisplayableAnswer);
         return;
       }
 
       setAiAnswer(payload.answerText);
+      const parsedStructuredAnswer = AiStructuredAnswerSchema.safeParse(payload.structuredAnswer);
+      setAiStructuredAnswer(parsedStructuredAnswer.success ? parsedStructuredAnswer.data : undefined);
     } catch (error) {
       setAiAnswer(undefined);
+      setAiStructuredAnswer(undefined);
       setAiError(error instanceof Error ? error.message : text.feedback.aiRequestFailed);
     } finally {
       setAiPending(false);
@@ -542,6 +661,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const mediumAlerts = priorityAlerts.filter((alert) => !['critical', 'high'].includes(alert.importance));
   const lastSuccessfulSync = siteSyncStates.find((entry) => entry.status === 'success')?.lastSyncedAt;
   const currentSiteSelection = filters.site === 'all' ? undefined : filters.site;
+  const latestSyncRun = latestSyncRuns[0];
   const diagnostics = buildDiagnosticsSummary({
     bffBaseUrl: config.ai.bffBaseUrl,
     providerStatus: providerStatus as ProviderStatusLike,
@@ -735,6 +855,113 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
           <>
             <div className="surface__grid surface__grid--split">
               <article className="surface__panel">
+                <h2>{text.focusQueue.title}</h2>
+                <p>{text.focusQueue.description}</p>
+                <div className="surface__stack">
+                  {focusQueue.length ? (
+                    focusQueue.slice(0, 6).map((item) => (
+                      <article className="surface__item" key={item.id}>
+                        <div className="surface__item-header">
+                          <strong>{item.title}</strong>
+                          <span className="surface__badge surface__badge--neutral">{item.score}</span>
+                        </div>
+                        <p>{item.reasons.map((reason) => reason.label).join(' · ')}</p>
+                        {item.note ? <p className="surface__meta">{text.focusQueue.editNote}: {item.note}</p> : null}
+                        <p className="surface__meta">
+                          {SITE_LABELS[item.site]}
+                          {item.dueAt ? ` · ${text.currentTasks.dueAt(formatDateTime(uiLanguage, item.dueAt))}` : ''}
+                        </p>
+                        {item.blockedBy.length ? <p className="surface__meta">{item.blockedBy.join(' / ')}</p> : null}
+                        {item.entityId && item.entityRef ? (
+                          <div className="surface__actions surface__actions--wrap">
+                            <button
+                              className="surface__button surface__button--ghost"
+                              onClick={() =>
+                                void handleTogglePin({
+                                  entityId: item.entityId!,
+                                  site: item.site,
+                                  kind: item.entityRef!.kind,
+                                  pinned: item.pinned,
+                                })
+                              }
+                            >
+                              {item.pinned ? text.focusQueue.unpin : text.focusQueue.pin}
+                            </button>
+                            <button
+                              className="surface__button surface__button--ghost"
+                              onClick={() =>
+                                void handleSnooze({
+                                  entityId: item.entityId!,
+                                  site: item.site,
+                                  kind: item.entityRef!.kind,
+                                })
+                              }
+                            >
+                              {text.focusQueue.snoozeUntilTomorrow}
+                            </button>
+                            <button
+                              className="surface__button surface__button--ghost"
+                              onClick={() =>
+                                void handleDismiss({
+                                  entityId: item.entityId!,
+                                  site: item.site,
+                                  kind: item.entityRef!.kind,
+                                })
+                              }
+                            >
+                              {text.focusQueue.dismissUntilTomorrow}
+                            </button>
+                            <button
+                              className="surface__button surface__button--ghost"
+                              onClick={() =>
+                                void handleNote({
+                                  entityId: item.entityId!,
+                                  site: item.site,
+                                  kind: item.entityRef!.kind,
+                                  title: item.title,
+                                  note: item.note,
+                                })
+                              }
+                            >
+                              {item.note ? text.focusQueue.editNote : text.focusQueue.addNote}
+                            </button>
+                          </div>
+                        ) : null}
+                      </article>
+                    ))
+                  ) : (
+                    <p>{text.focusQueue.none}</p>
+                  )}
+                </div>
+              </article>
+
+              <article className="surface__panel">
+                <h2>{text.weeklyLoad.title}</h2>
+                <p>{text.weeklyLoad.description}</p>
+                <div className="surface__stack">
+                  {weeklyLoad.length ? (
+                    weeklyLoad.map((entry) => (
+                      <article className="surface__item" key={entry.dateKey}>
+                        <div className="surface__item-header">
+                          <strong>{entry.dateKey}</strong>
+                          <span className={`surface__badge surface__badge--${entry.totalScore >= 200 ? 'critical' : entry.totalScore >= 120 ? 'warning' : 'neutral'}`}>
+                            {text.weeklyLoad.score}: {entry.totalScore}
+                          </span>
+                        </div>
+                        <p className="surface__meta">
+                          {text.weeklyLoad.assignments} {entry.assignmentCount} · {text.weeklyLoad.dueSoon} {entry.dueSoonCount} · {text.weeklyLoad.overdue} {entry.overdueCount} · {text.weeklyLoad.pinned} {entry.pinnedCount}
+                        </p>
+                      </article>
+                    ))
+                  ) : (
+                    <p>{text.weeklyLoad.none}</p>
+                  )}
+                </div>
+              </article>
+            </div>
+
+            <div className="surface__grid surface__grid--split">
+              <article className="surface__panel">
                 <h2>{text.priorityAlerts.title}</h2>
                 <p>{text.priorityAlerts.description}</p>
                 <div className="surface__stack">
@@ -876,6 +1103,34 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               </article>
             </div>
 
+            <article className="surface__panel">
+              <h2>{text.changeJournal.title}</h2>
+              <p>{text.changeJournal.description}</p>
+              {latestSyncRun ? (
+                <p className="surface__meta">
+                  {SITE_LABELS[latestSyncRun.site]} · {formatDateTime(uiLanguage, latestSyncRun.completedAt)} · {latestSyncRun.outcome}
+                </p>
+              ) : null}
+              <div className="surface__stack">
+                {recentChangeEvents.length ? (
+                  recentChangeEvents.map((event) => (
+                    <article className="surface__item" key={event.id}>
+                      <div className="surface__item-header">
+                        <strong>{event.title}</strong>
+                        <span className="surface__badge surface__badge--neutral">{event.changeType}</span>
+                      </div>
+                      <p>{event.summary}</p>
+                      <p className="surface__meta">
+                        {SITE_LABELS[event.site]} · {formatDateTime(uiLanguage, event.occurredAt)}
+                      </p>
+                    </article>
+                  ))
+                ) : (
+                  <p>{text.changeJournal.none}</p>
+                )}
+              </div>
+            </article>
+
             {surface === 'sidepanel' ? (
               <article className="surface__panel">
                 <h2>{text.askAi.title}</h2>
@@ -939,7 +1194,40 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 </div>
                 {!config.ai.bffBaseUrl ? <p className="surface__feedback">{text.askAi.missingBffFeedback}</p> : null}
                 {aiError ? <p className="surface__feedback surface__feedback--error">{aiError}</p> : null}
-                {aiAnswer ? <div className="surface__answer">{aiAnswer}</div> : null}
+                {aiStructuredAnswer ? (
+                  <div className="surface__answer">
+                    <p>{aiStructuredAnswer.summary}</p>
+                    {aiStructuredAnswer.bullets.length ? (
+                      <div className="surface__group">
+                        <h3>{text.askAi.keyPoints}</h3>
+                        <ul className="surface__list">
+                          {aiStructuredAnswer.bullets.map((bullet) => (
+                            <li key={bullet}>{bullet}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                    {aiStructuredAnswer.citations.length ? (
+                      <div className="surface__group">
+                        <h3>{text.askAi.citations}</h3>
+                        <ul className="surface__list">
+                          {aiStructuredAnswer.citations.map((citation) => (
+                            <li key={`${citation.entityId}:${citation.title}`}>
+                              {citation.url ? (
+                                <a href={citation.url} target="_blank" rel="noreferrer">
+                                  {citation.title}
+                                </a>
+                              ) : (
+                                citation.title
+                              )}{' '}
+                              · {citation.site} · {citation.kind}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : aiAnswer ? <div className="surface__answer">{aiAnswer}</div> : null}
               </article>
             ) : null}
           </>

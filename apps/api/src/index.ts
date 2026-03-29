@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { AuthModeSchema, ChatMessageSchema } from '@campus-copilot/ai';
+import { AuthModeSchema, ChatMessageSchema, parseAiStructuredAnswer } from '@campus-copilot/ai';
 
 const ApiEnvSchema = z.object({
   PORT: z.string().optional(),
@@ -259,12 +259,15 @@ export async function handleProviderProxy(
     }
 
     const answerText = extractProviderAnswer(payload.provider, responseJson);
+    const structuredAnswer =
+      typeof answerText === 'string' ? parseAiStructuredAnswer(answerText) : undefined;
 
     return jsonResponse(response.status, {
       ok: response.ok,
       provider: payload.provider,
       forwardedStatus: response.status,
       answerText,
+      structuredAnswer,
       error: response.ok ? undefined : 'provider_upstream_error',
     });
   } catch (error) {

@@ -13,10 +13,10 @@ Think of it like a building inspection board:
 | Command / Lane | Type | Default owner | Required for PR gate | What it proves | What it does not prove |
 | :-- | :-- | :-- | :--: | :-- | :-- |
 | `pnpm typecheck` | deterministic repo gate | contributor / CI | Yes | workspace type validity | live site behavior |
-| `pnpm test` | deterministic repo gate | contributor / CI | Yes | repository tests across packages | real authenticated browser sessions |
+| `pnpm test` | deterministic repo gate | contributor / CI | Yes | repository tests across packages, including local overlay, decision read models, citation-aware AI contract, and structured export behavior | real authenticated browser sessions |
 | `pnpm smoke:api` | deterministic local smoke | contributor / CI | Yes | local BFF health and provider status endpoint wiring | real provider round-trip |
 | `pnpm --filter @campus-copilot/extension build` | deterministic repo gate | contributor / CI | Yes | extension can build | real extension install/use |
-| `pnpm --filter @campus-copilot/extension exec playwright test` | deterministic repo smoke | contributor / CI | Yes | built extension UI contract under controlled mocks | real site sync or full extension E2E |
+| `pnpm --filter @campus-copilot/extension exec playwright test` | deterministic repo smoke | contributor / CI | Yes | built extension UI contract under controlled mocks, including decision surfaces and citation-aware answer rendering | real site sync or full extension E2E |
 | `pnpm verify` | deterministic umbrella gate | contributor / CI | Yes | required repository gate bundle | manual live or provider proofs not included in `verify` |
 | `pnpm smoke:provider` | environment-dependent smoke | local developer | No | current environment can complete a provider round-trip | stable provider coverage or required CI proof |
 | `pnpm smoke:sidepanel` | environment-dependent smoke | local developer | No | built sidepanel page can talk to current BFF/provider path | full extension E2E |

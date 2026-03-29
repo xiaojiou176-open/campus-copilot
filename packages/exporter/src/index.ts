@@ -16,8 +16,79 @@ import {
   type TimelineEntry,
 } from '@campus-copilot/schema';
 
-export type ExportPreset = 'weekly_assignments' | 'recent_updates' | 'all_deadlines' | 'current_view';
+export type ExportPreset =
+  | 'weekly_assignments'
+  | 'recent_updates'
+  | 'all_deadlines'
+  | 'current_view'
+  | 'focus_queue'
+  | 'weekly_load';
 export type ExportFormat = 'json' | 'csv' | 'markdown' | 'ics';
+
+export interface FocusQueueExportItem {
+  id: string;
+  kind: string;
+  site: string;
+  title: string;
+  score: number;
+  pinned?: boolean;
+  note?: string;
+  dueAt?: string;
+  updatedAt?: string;
+  entityId?: string;
+  entity?: {
+    id: string;
+    kind: string;
+    site: string;
+  };
+  entityRef?: {
+    id: string;
+    kind: string;
+    site: string;
+  };
+  reasons: Array<{
+    code: string;
+    label: string;
+    importance: string;
+    detail?: string;
+  }>;
+  blockedBy?: string[];
+}
+
+export interface WeeklyLoadExportEntry {
+  dateKey: string;
+  startsAt: string;
+  endsAt: string;
+  assignmentCount: number;
+  eventCount?: number;
+  overdueCount?: number;
+  dueSoonCount?: number;
+  pinnedCount?: number;
+  totalScore?: number;
+}
+
+export interface SyncRunExportEntry {
+  id?: string;
+  site: string;
+  status: string;
+  outcome: string;
+  startedAt: string;
+  completedAt: string;
+  changeCount: number;
+  errorReason?: string;
+}
+
+export interface ChangeEventExportEntry {
+  id?: string;
+  site: string;
+  changeType: string;
+  occurredAt: string;
+  title: string;
+  summary: string;
+  entityId?: string;
+  previousValue?: string;
+  nextValue?: string;
+}
 
 export interface ExportInput {
   generatedAt: string;
@@ -29,6 +100,10 @@ export interface ExportInput {
   events?: Event[];
   alerts?: Alert[];
   timelineEntries?: TimelineEntry[];
+  focusQueue?: FocusQueueExportItem[];
+  weeklyLoad?: WeeklyLoadExportEntry[];
+  syncRuns?: SyncRunExportEntry[];
+  changeEvents?: ChangeEventExportEntry[];
 }
 
 export interface ExportArtifact {
@@ -49,6 +124,10 @@ interface NormalizedExportInput {
   events: Event[];
   alerts: Alert[];
   timelineEntries: TimelineEntry[];
+  focusQueue: FocusQueueExportItem[];
+  weeklyLoad: WeeklyLoadExportEntry[];
+  syncRuns: SyncRunExportEntry[];
+  changeEvents: ChangeEventExportEntry[];
 }
 
 interface ExportDataset extends NormalizedExportInput {
@@ -69,6 +148,11 @@ interface CsvRow {
   score: string;
   maxScore: string;
   importance: string;
+  dateKey: string;
+  reasons: string;
+  blockedBy: string;
+  outcome: string;
+  changeCount: string;
   summary: string;
   url: string;
 }
@@ -85,6 +169,8 @@ const PRESET_LABELS: Record<ExportPreset, string> = {
   recent_updates: 'recent-updates',
   all_deadlines: 'all-deadlines',
   current_view: 'current-view',
+  focus_queue: 'focus-queue',
+  weekly_load: 'weekly-load',
 };
 
 function normalizeInput(input: ExportInput): NormalizedExportInput {
@@ -99,6 +185,10 @@ function normalizeInput(input: ExportInput): NormalizedExportInput {
     events: (input.events ?? []).map((record) => EventSchema.parse(record)),
     alerts: (input.alerts ?? []).map((record) => AlertSchema.parse(record)),
     timelineEntries: (input.timelineEntries ?? []).map((record) => TimelineEntrySchema.parse(record)),
+    focusQueue: [...(input.focusQueue ?? [])],
+    weeklyLoad: [...(input.weeklyLoad ?? [])],
+    syncRuns: [...(input.syncRuns ?? [])],
+    changeEvents: [...(input.changeEvents ?? [])],
   };
 }
 
@@ -138,6 +228,10 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         events: [],
         alerts: [],
         timelineEntries: [],
+        focusQueue: [],
+        weeklyLoad: [],
+        syncRuns: [],
+        changeEvents: [],
       };
     case 'recent_updates':
       return {
@@ -150,6 +244,10 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         events: [],
         alerts: input.alerts.filter((item) => isWithinWindow(item.triggeredAt, recentStart, input.generatedAt)),
         timelineEntries: input.timelineEntries.filter((item) => isWithinWindow(item.occurredAt, recentStart, input.generatedAt)),
+        focusQueue: [],
+        weeklyLoad: [],
+        syncRuns: [],
+        changeEvents: [],
       };
     case 'all_deadlines':
       return {
@@ -162,6 +260,41 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         events: input.events.filter((item) => item.eventKind === 'deadline' || Boolean(item.startAt) || Boolean(item.endAt)),
         alerts: [],
         timelineEntries: [],
+        focusQueue: [],
+        weeklyLoad: [],
+        syncRuns: [],
+        changeEvents: [],
+      };
+    case 'focus_queue':
+      return {
+        ...input,
+        title: 'Focus queue',
+        assignments: [],
+        announcements: [],
+        messages: [],
+        grades: [],
+        events: [],
+        alerts: [],
+        timelineEntries: [],
+        focusQueue: input.focusQueue,
+        weeklyLoad: [],
+        syncRuns: [],
+        changeEvents: [],
+      };
+    case 'weekly_load':
+      return {
+        ...input,
+        title: 'Weekly load',
+        assignments: [],
+        announcements: [],
+        messages: [],
+        grades: [],
+        events: [],
+        alerts: [],
+        timelineEntries: [],
+        focusQueue: [],
+        syncRuns: [],
+        changeEvents: [],
       };
     case 'current_view':
     default:
@@ -205,6 +338,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       score: '',
       maxScore: '',
       importance: '',
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
       summary: '',
       url: formatOptionalString(assignment.url),
     });
@@ -225,6 +363,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       score: '',
       maxScore: '',
       importance: '',
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
       summary: '',
       url: formatOptionalString(announcement.url),
     });
@@ -245,6 +388,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       score: '',
       maxScore: '',
       importance: '',
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
       summary: message.messageKind,
       url: formatOptionalString(message.url),
     });
@@ -265,6 +413,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       score: formatOptionalNumber(grade.score),
       maxScore: formatOptionalNumber(grade.maxScore),
       importance: '',
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
       summary: '',
       url: formatOptionalString(grade.url),
     });
@@ -285,6 +438,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       score: '',
       maxScore: '',
       importance: '',
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
       summary: '',
       url: formatOptionalString(event.url),
     });
@@ -305,6 +463,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       score: '',
       maxScore: '',
       importance: alert.importance,
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
       summary: alert.summary,
       url: formatOptionalString(alert.url),
     });
@@ -325,8 +488,113 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       score: '',
       maxScore: '',
       importance: '',
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
       summary: formatOptionalString(entry.summary),
       url: formatOptionalString(entry.url),
+    });
+  }
+
+  for (const item of dataset.focusQueue) {
+    rows.push({
+      kind: 'focus_item',
+      site: item.site,
+      title: item.title,
+      courseId: '',
+      assignmentId: item.entity?.id ?? item.entityRef?.id ?? item.entityId ?? '',
+      status: item.pinned ? 'pinned' : '',
+      occurredAt: '',
+      dueAt: formatOptionalString(item.dueAt),
+      startAt: '',
+      endAt: '',
+      score: String(item.score),
+      maxScore: '',
+      importance: item.reasons[0]?.importance ?? '',
+      dateKey: '',
+      reasons: item.reasons.map((reason) => reason.label).join(' | '),
+      blockedBy: (item.blockedBy ?? []).join(' | '),
+      outcome: '',
+      changeCount: '',
+      summary: item.note ?? '',
+      url: '',
+    });
+  }
+
+  for (const entry of dataset.weeklyLoad) {
+    rows.push({
+      kind: 'weekly_load',
+      site: '',
+      title: `Load for ${entry.dateKey}`,
+      courseId: '',
+      assignmentId: '',
+      status: '',
+      occurredAt: '',
+      dueAt: '',
+      startAt: entry.startsAt,
+      endAt: entry.endsAt,
+      score: formatOptionalNumber(entry.totalScore),
+      maxScore: '',
+      importance: '',
+      dateKey: entry.dateKey,
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
+      summary: `assignments=${entry.assignmentCount}, events=${entry.eventCount ?? 0}, overdue=${entry.overdueCount ?? 0}`,
+      url: '',
+    });
+  }
+
+  for (const run of dataset.syncRuns) {
+    rows.push({
+      kind: 'sync_run',
+      site: run.site,
+      title: `${run.site} sync`,
+      courseId: '',
+      assignmentId: '',
+      status: run.status,
+      occurredAt: run.completedAt,
+      dueAt: '',
+      startAt: run.startedAt,
+      endAt: run.completedAt,
+      score: '',
+      maxScore: '',
+      importance: '',
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: run.outcome,
+      changeCount: String(run.changeCount),
+      summary: run.errorReason ?? '',
+      url: '',
+    });
+  }
+
+  for (const event of dataset.changeEvents) {
+    rows.push({
+      kind: 'change_event',
+      site: event.site,
+      title: event.title,
+      courseId: '',
+      assignmentId: event.entityId ?? '',
+      status: event.changeType,
+      occurredAt: event.occurredAt,
+      dueAt: '',
+      startAt: '',
+      endAt: '',
+      score: '',
+      maxScore: '',
+      importance: '',
+      dateKey: '',
+      reasons: '',
+      blockedBy: '',
+      outcome: '',
+      changeCount: '',
+      summary: event.summary,
+      url: '',
     });
   }
 
@@ -346,6 +614,10 @@ function renderJson(dataset: ExportDataset) {
         events: dataset.events.length,
         alerts: dataset.alerts.length,
         timelineEntries: dataset.timelineEntries.length,
+        focusQueue: dataset.focusQueue.length,
+        weeklyLoad: dataset.weeklyLoad.length,
+        syncRuns: dataset.syncRuns.length,
+        changeEvents: dataset.changeEvents.length,
       },
       data: dataset,
     },
@@ -370,6 +642,11 @@ function renderCsv(dataset: ExportDataset) {
     'score',
     'maxScore',
     'importance',
+    'dateKey',
+    'reasons',
+    'blockedBy',
+    'outcome',
+    'changeCount',
     'summary',
     'url',
   ];
@@ -436,6 +713,43 @@ function renderMarkdown(dataset: ExportDataset) {
     renderMarkdownSection(
       'Timeline',
       dataset.timelineEntries.map((entry) => `- ${entry.occurredAt}: ${entry.title} (${entry.timelineKind})`),
+    ),
+  );
+
+  sections.push(
+    renderMarkdownSection(
+      'Focus Queue',
+      dataset.focusQueue.map((item) => {
+        const reasons = item.reasons.map((reason) => reason.label).join(', ');
+        const note = item.note ? ` - note: ${item.note}` : '';
+        return `- ${item.title} (${item.site}, score ${item.score}) - ${reasons}${note}`;
+      }),
+    ),
+  );
+
+  sections.push(
+    renderMarkdownSection(
+      'Weekly Load',
+      dataset.weeklyLoad.map((entry) => {
+        return `- ${entry.dateKey}: assignments=${entry.assignmentCount}, events=${entry.eventCount ?? 0}, totalScore=${entry.totalScore ?? 0}`;
+      }),
+    ),
+  );
+
+  sections.push(
+    renderMarkdownSection(
+      'Sync Runs',
+      dataset.syncRuns.map((run) => {
+        const suffix = run.errorReason ? ` - ${run.errorReason}` : '';
+        return `- ${run.completedAt}: ${run.site} ${run.outcome} (${run.changeCount} changes)${suffix}`;
+      }),
+    ),
+  );
+
+  sections.push(
+    renderMarkdownSection(
+      'Change Events',
+      dataset.changeEvents.map((event) => `- ${event.occurredAt}: ${event.title} (${event.changeType}) - ${event.summary}`),
     ),
   );
 

@@ -5,7 +5,7 @@ import {
 } from '@campus-copilot/ai';
 import type { ExportArtifact } from '@campus-copilot/exporter';
 import type { Alert, TimelineEntry } from '@campus-copilot/schema';
-import type { TodaySnapshot } from '@campus-copilot/storage';
+import type { ChangeEvent, FocusQueueItem, TodaySnapshot, WeeklyLoadEntry } from '@campus-copilot/storage';
 
 export function buildAiProxyRequest(input: {
   provider: ProviderId;
@@ -14,6 +14,9 @@ export function buildAiProxyRequest(input: {
   todaySnapshot: TodaySnapshot;
   recentUpdates: TimelineEntry[];
   alerts: Alert[];
+  focusQueue: FocusQueueItem[];
+  weeklyLoad: WeeklyLoadEntry[];
+  recentChanges: ChangeEvent[];
   currentViewExport: ExportArtifact;
 }) {
   const runtimeMessages = buildAiRuntimeMessages({
@@ -40,6 +43,11 @@ export function buildAiProxyRequest(input: {
           filename: input.currentViewExport.filename,
           format: input.currentViewExport.format,
           content: input.currentViewExport.content,
+          decisionContext: {
+            focusQueue: input.focusQueue,
+            weeklyLoad: input.weeklyLoad,
+            recentChanges: input.recentChanges,
+          },
         },
       },
     ],
