@@ -3,9 +3,6 @@ import { z } from 'zod';
 export const ProviderIdSchema = z.enum(['openai', 'gemini']);
 export type ProviderId = z.infer<typeof ProviderIdSchema>;
 
-export const AuthModeSchema = z.enum(['api_key', 'oauth', 'web_session']);
-export type AuthMode = z.infer<typeof AuthModeSchema>;
-
 export const ToolNameSchema = z.enum([
   'get_today_snapshot',
   'get_recent_updates',
@@ -48,7 +45,6 @@ export type AiStructuredAnswer = z.infer<typeof AiStructuredAnswerSchema>;
 
 export const AiRuntimeRequestSchema = z.object({
   provider: ProviderIdSchema,
-  authMode: AuthModeSchema,
   model: z.string().min(1),
   question: z.string().min(1),
   toolResults: z.array(ToolResultSchema).default([]),
@@ -69,7 +65,6 @@ export interface ProviderProxyRequest {
   route: '/api/providers/openai/chat' | '/api/providers/gemini/chat';
   body: {
     provider: ProviderId;
-    authMode: AuthMode;
     model: string;
     messages: ChatMessage[];
   };
@@ -206,14 +201,6 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
 ];
 
-export function getOfficialAuthModes(provider: ProviderId): AuthMode[] {
-  return provider === 'openai' ? ['api_key'] : ['api_key'];
-}
-
-export function getDefaultAuthMode(provider: ProviderId): AuthMode {
-  return provider === 'openai' ? 'api_key' : 'api_key';
-}
-
 export function getToolDefinitions() {
   return [...TOOL_DEFINITIONS];
 }
@@ -241,18 +228,15 @@ export function buildAiRuntimeMessages(input: AiRuntimeRequest): AiRuntimeMessag
 
 export function createProviderProxyRequest(input: {
   provider: ProviderId;
-  authMode?: AuthMode;
   model: string;
   messages: ChatMessage[];
 }): ProviderProxyRequest {
-  const authMode = input.authMode ?? getDefaultAuthMode(input.provider);
   const messages = z.array(ChatMessageSchema).parse(input.messages);
 
   return {
     route: input.provider === 'openai' ? '/api/providers/openai/chat' : '/api/providers/gemini/chat',
     body: {
       provider: input.provider,
-      authMode,
       model: input.model,
       messages,
     },

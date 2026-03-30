@@ -25,14 +25,12 @@ describe('api thin bff', () => {
     const env = loadApiEnv({
       OPENAI_API_KEY: '',
       GEMINI_API_KEY: 'gemini-key',
-      GEMINI_ACCESS_TOKEN: '   ',
       OPENAI_BASE_URL: '',
       GEMINI_BASE_URL: '   ',
     });
 
     expect(env.OPENAI_API_KEY).toBeUndefined();
     expect(env.GEMINI_API_KEY).toBe('gemini-key');
-    expect(env.GEMINI_ACCESS_TOKEN).toBeUndefined();
     expect(env.OPENAI_BASE_URL).toBeUndefined();
     expect(env.GEMINI_BASE_URL).toBeUndefined();
   });
@@ -57,12 +55,10 @@ describe('api thin bff', () => {
       providers: {
         openai: {
           ready: true,
-          authMode: 'api_key',
           reason: 'configured',
         },
         gemini: {
           ready: false,
-          authMode: 'api_key',
           reason: 'missing_api_key',
         },
       },
@@ -88,7 +84,6 @@ describe('api thin bff', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toContain('"ready":true');
-    expect(response.body).toContain('"authMode":"api_key"');
     expect(response.body).toContain('"reason":"configured"');
     expect(response.body).toContain('"requestId"');
   });
@@ -124,7 +119,6 @@ describe('api thin bff', () => {
     const response = await handleApiRequest(
       createRequest('/api/providers/openai/chat', 'POST', {
         provider: 'openai',
-        authMode: 'api_key',
         model: 'gpt-test',
         messages: [{ role: 'user', content: 'hello' }],
       }),
@@ -159,7 +153,6 @@ describe('api thin bff', () => {
     const response = await handleApiRequest(
       createRequest('/api/providers/gemini/chat', 'POST', {
         provider: 'gemini',
-        authMode: 'api_key',
         model: 'gemini-test',
         messages: [{ role: 'user', content: 'hello' }],
       }),
@@ -180,7 +173,6 @@ describe('api thin bff', () => {
     const response = await handleApiRequest(
       createRequest('/api/providers/openai/chat', 'POST', {
         provider: 'openai',
-        authMode: 'api_key',
         model: 'gpt-test',
         messages: [{ role: 'user', content: 'hello' }],
       }),
@@ -202,7 +194,6 @@ describe('api thin bff', () => {
     const response = await handleApiRequest(
       createRequest('/api/providers/gemini/chat', 'POST', {
         provider: 'gemini',
-        authMode: 'api_key',
         model: 'gemini-test',
         messages: [{ role: 'user', content: 'hello' }],
       }),
@@ -236,7 +227,6 @@ describe('api thin bff', () => {
     const response = await handleApiRequest(
       createRequest('/api/providers/gemini/chat', 'POST', {
         provider: 'gemini',
-        authMode: 'api_key',
         model: 'gemini-test',
         messages: [{ role: 'user', content: 'hello' }],
       }),
@@ -270,7 +260,6 @@ describe('api thin bff', () => {
     const response = await handleApiRequest(
       createRequest('/api/providers/gemini/chat', 'POST', {
         provider: 'gemini',
-        authMode: 'api_key',
         model: 'gemini-test',
         messages: [{ role: 'user', content: 'hello' }],
       }),

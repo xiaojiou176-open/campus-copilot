@@ -11,6 +11,7 @@ The repository's AI rule is:
 - thin BFF in `apps/api`
 - `OpenAI` API-key flow
 - `Gemini` API-key flow
+- request and provider-status contracts only carry `provider`, `model`, readiness, and reason; the formal path does not keep extra auth-mode branches in runtime payloads
 - tool-result style prompts based on normalized local data
 
 ## Current Non-Formal AI Paths
@@ -24,7 +25,8 @@ The repository's AI rule is:
 
 - AI does not read raw DOM, raw HTML, raw adapter payloads, or cookies
 - AI consumes structured workbench outputs and export-ready data
-- provider-specific auth and transport logic stay behind the thin BFF boundary
+- provider-specific transport logic stays behind the thin BFF boundary
+- `.env.example` only exposes formal API-key env vars plus optional base-URL overrides; reserved OAuth-style env placeholders are not part of the default runtime entry
 
 ## Why This Layer Exists
 

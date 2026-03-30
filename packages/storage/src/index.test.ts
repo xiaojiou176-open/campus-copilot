@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { Alert, Announcement, Assignment, Course, Grade, Message } from '@campus-copilot/schema';
+import type { Announcement, Assignment, Course, Grade, Message } from '@campus-copilot/schema';
 import {
   clearLocalEntityOverlayField,
   createCampusCopilotDb,
@@ -17,7 +17,6 @@ import {
   getEntityCounts,
   getSiteEntityCounts,
   markEntitiesSeen,
-  putAlerts,
   putAnnouncements,
   putAssignments,
   putCourses,
@@ -70,23 +69,10 @@ describe('storage package', () => {
       title: 'Section moved',
       postedAt: '2026-03-24T10:00:00-07:00',
     };
-    const alert: Alert = {
-      id: 'alert-1',
-      kind: 'alert',
-      site: 'canvas',
-      source: { ...source, resourceType: 'alert' },
-      alertKind: 'deadline_risk',
-      title: 'Homework 1 due soon',
-      summary: 'Due within 24 hours.',
-      importance: 'high',
-      relatedEntities: [],
-      triggeredAt: '2026-03-24T18:00:00-07:00',
-    };
 
     await putCourses([course], db);
     await putAssignments([assignment], db);
     await putAnnouncements([announcement], db);
-    await putAlerts([alert], db);
     await replaceSiteSnapshot(
       'canvas',
       {
@@ -107,7 +93,6 @@ describe('storage package', () => {
       announcements: 1,
       messages: 0,
       events: 0,
-      alerts: 1,
     });
   });
 
@@ -182,7 +167,6 @@ describe('storage package', () => {
       grades: 0,
       messages: 0,
       events: 0,
-      alerts: 0,
     });
   });
 
@@ -197,7 +181,6 @@ describe('storage package', () => {
       grades: 0,
       messages: 0,
       events: 0,
-      alerts: 0,
     });
   });
 

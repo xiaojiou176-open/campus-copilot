@@ -93,7 +93,7 @@ const baseInput = {
       source: {
         site: 'canvas' as const,
         resourceId: '6',
-        resourceType: 'alert',
+        resourceType: 'derived_alert',
       },
       alertKind: 'due_soon' as const,
       title: 'Homework 5 due soon',

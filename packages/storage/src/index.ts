@@ -1,5 +1,4 @@
 import Dexie, { type Table } from 'dexie';
-import { useLiveQuery } from 'dexie-react-hooks';
 import { z } from 'zod';
 import {
   RESOURCE_NAMES,
@@ -196,7 +195,6 @@ const SiteEntityCountsSchema = z
     grades: z.number().int().nonnegative(),
     messages: z.number().int().nonnegative(),
     events: z.number().int().nonnegative(),
-    alerts: z.number().int().nonnegative(),
   })
   .strict();
 export type SiteEntityCounts = z.infer<typeof SiteEntityCountsSchema>;
@@ -208,7 +206,6 @@ const EntityCountsSchema = z
     announcements: z.number().int().nonnegative(),
     messages: z.number().int().nonnegative(),
     events: z.number().int().nonnegative(),
-    alerts: z.number().int().nonnegative(),
   })
   .strict();
 export type EntityCounts = z.infer<typeof EntityCountsSchema>;
@@ -262,7 +259,6 @@ export class CampusCopilotDB extends Dexie {
   grades!: Table<Grade, string>;
   messages!: Table<Message, string>;
   events!: Table<Event, string>;
-  alerts!: Table<Alert, string>;
   sync_state!: Table<SyncState, string>;
   entity_state!: Table<EntityState, string>;
   local_entity_overlay!: Table<LocalEntityOverlay, string>;
@@ -277,7 +273,6 @@ export class CampusCopilotDB extends Dexie {
       announcements: '&id, site, courseId, postedAt',
       messages: '&id, site, courseId, createdAt, unread',
       events: '&id, site, eventKind, startAt, endAt',
-      alerts: '&id, site, importance, triggeredAt',
       sync_state: '&key, site, status, lastSyncedAt',
     });
     this.version(2).stores({
@@ -287,7 +282,6 @@ export class CampusCopilotDB extends Dexie {
       grades: '&id, site, courseId, assignmentId, releasedAt, gradedAt',
       messages: '&id, site, courseId, createdAt, unread',
       events: '&id, site, eventKind, startAt, endAt',
-      alerts: '&id, site, importance, triggeredAt',
       sync_state: '&key, site, status, lastSyncedAt',
     });
     this.version(3).stores({
@@ -297,7 +291,6 @@ export class CampusCopilotDB extends Dexie {
       grades: '&id, site, courseId, assignmentId, releasedAt, gradedAt',
       messages: '&id, site, courseId, createdAt, unread',
       events: '&id, site, eventKind, startAt, endAt',
-      alerts: '&id, site, importance, triggeredAt',
       sync_state: '&key, site, status, lastSyncedAt',
       entity_state: '&key, site, kind, firstSeenAt, lastSyncedAt, seenAt',
     });
@@ -308,7 +301,6 @@ export class CampusCopilotDB extends Dexie {
       grades: '&id, site, courseId, assignmentId, releasedAt, gradedAt',
       messages: '&id, site, courseId, createdAt, unread',
       events: '&id, site, eventKind, startAt, endAt',
-      alerts: '&id, site, importance, triggeredAt',
       sync_state: '&key, site, status, lastSyncedAt, lastOutcome',
       entity_state: '&key, site, kind, firstSeenAt, lastSyncedAt, seenAt',
     });
@@ -319,7 +311,20 @@ export class CampusCopilotDB extends Dexie {
       grades: '&id, site, courseId, assignmentId, releasedAt, gradedAt',
       messages: '&id, site, courseId, createdAt, unread',
       events: '&id, site, eventKind, startAt, endAt',
-      alerts: '&id, site, importance, triggeredAt',
+      sync_state: '&key, site, status, lastSyncedAt, lastOutcome',
+      entity_state: '&key, site, kind, firstSeenAt, lastSyncedAt, seenAt',
+      local_entity_overlay: '&entityId, site, kind, updatedAt, pinnedAt, snoozeUntil, dismissUntil',
+      sync_runs: '&id, site, completedAt, startedAt, outcome',
+      change_events: '&id, runId, site, entityId, changeType, occurredAt',
+    });
+    this.version(6).stores({
+      courses: '&id, site, title, code',
+      assignments: '&id, site, courseId, dueAt, status',
+      announcements: '&id, site, courseId, postedAt',
+      grades: '&id, site, courseId, assignmentId, releasedAt, gradedAt',
+      messages: '&id, site, courseId, createdAt, unread',
+      events: '&id, site, eventKind, startAt, endAt',
+      alerts: null,
       sync_state: '&key, site, status, lastSyncedAt, lastOutcome',
       entity_state: '&key, site, kind, firstSeenAt, lastSyncedAt, seenAt',
       local_entity_overlay: '&entityId, site, kind, updatedAt, pinnedAt, snoozeUntil, dismissUntil',
@@ -817,301 +822,6 @@ function buildChangeEvents(
   return events.sort((left, right) => compareNewest(left.occurredAt, right.occurredAt));
 }
 
-function matchesSiteFilter<T extends { site: Site }>(records: T[], site: WorkbenchFilter['site']) {
-  return site === 'all' ? records : records.filter((record) => record.site === site);
-}
-
-function isEntryUnseen(entry: TimelineEntry, stateMap: Map<string, EntityState>) {
-  const entityId = entry.relatedEntities[0]?.id;
-  if (!entityId) {
-    return true;
-  }
-
-  const state = stateMap.get(entityId);
-  if (!state?.seenAt) {
-    return true;
-  }
-
-  const seenAt = toTimestamp(state.seenAt);
-  const occurredAt = toTimestamp(entry.occurredAt);
-  return seenAt === undefined || occurredAt === undefined ? true : seenAt < occurredAt;
-}
-
-function buildRecentChangeMap(changeEvents: ChangeEvent[]) {
-  const map = new Map<string, ChangeEvent>();
-  for (const event of changeEvents) {
-    if (event.entityId && !map.has(event.entityId)) {
-      map.set(event.entityId, event);
-    }
-  }
-  return map;
-}
-
-function buildAssignmentFocusItem(
-  assignment: Assignment,
-  overlay: LocalEntityOverlay | undefined,
-  now: string,
-  recentChangeEvent: ChangeEvent | undefined,
-) {
-  if (!isAssignmentOpen(assignment)) {
-    return undefined;
-  }
-  if (isOverlayDismissed(overlay, now)) {
-    return undefined;
-  }
-  if (isOverlaySnoozed(overlay, now) && !overlay?.pinnedAt) {
-    return undefined;
-  }
-
-  const entityRef = toEntityRef(assignment);
-  const reasons: PriorityReason[] = [];
-  let score = 0;
-
-  if (overlay?.pinnedAt) {
-    reasons.push(makePriorityReason('manual', '你已手动置顶', 'high', entityRef));
-    score += 120;
-  }
-
-  if (assignment.dueAt && isPast(assignment.dueAt, now)) {
-    reasons.push(makePriorityReason('overdue', '截止时间已过', 'critical', entityRef));
-    score += assignment.status === 'missing' ? 260 : 230;
-  } else if (assignment.dueAt && isWithinUpcomingHours(assignment.dueAt, now, 48)) {
-    const importance = assignment.status === 'missing' ? 'critical' : 'high';
-    reasons.push(makePriorityReason('due_soon', '48 小时内到期', importance, entityRef));
-    score += assignment.status === 'missing' ? 210 : 180;
-  } else if (assignment.dueAt && isWithinUpcomingHours(assignment.dueAt, now, 24 * 7)) {
-    reasons.push(makePriorityReason('due_soon', '本周内到期', 'medium', entityRef));
-    score += 90;
-  }
-
-  if (recentChangeEvent) {
-    reasons.push(makePriorityReason('recently_updated', '最近同步里有变化', 'medium', entityRef));
-    score += 25;
-  }
-
-  if (reasons.length === 0) {
-    return undefined;
-  }
-
-  return FocusQueueItemSchema.parse({
-    id: `focus:${assignment.id}`,
-    entityId: assignment.id,
-    entityRef,
-    entity: entityRef,
-    kind: assignment.kind,
-    site: assignment.site,
-    title: assignment.title,
-    score,
-    reasons,
-    dueAt: assignment.dueAt,
-    updatedAt: overlay?.updatedAt ?? assignment.updatedAt ?? assignment.createdAt,
-    pinned: Boolean(overlay?.pinnedAt),
-    note: overlay?.note,
-    blockedBy: [],
-  });
-}
-
-function buildAnnouncementFocusItem(
-  announcement: Announcement,
-  overlay: LocalEntityOverlay | undefined,
-  now: string,
-  recentChangeEvent: ChangeEvent | undefined,
-) {
-  if (isOverlayDismissed(overlay, now)) {
-    return undefined;
-  }
-  if (isOverlaySnoozed(overlay, now) && !overlay?.pinnedAt) {
-    return undefined;
-  }
-
-  const entityRef = toEntityRef(announcement);
-  const reasons: PriorityReason[] = [];
-  let score = 0;
-
-  if (overlay?.pinnedAt) {
-    reasons.push(makePriorityReason('manual', '你已手动置顶', 'high', entityRef));
-    score += 120;
-  }
-  if (isWithinHours(announcement.postedAt, now, 48)) {
-    reasons.push(makePriorityReason('important_announcement', '最近有新公告', 'medium', entityRef));
-    score += 80;
-  }
-  if (recentChangeEvent) {
-    reasons.push(makePriorityReason('recently_updated', '最近同步里有变化', 'medium', entityRef));
-    score += 20;
-  }
-
-  if (reasons.length === 0) {
-    return undefined;
-  }
-
-  return FocusQueueItemSchema.parse({
-    id: `focus:${announcement.id}`,
-    entityId: announcement.id,
-    entityRef,
-    entity: entityRef,
-    kind: announcement.kind,
-    site: announcement.site,
-    title: announcement.title,
-    score,
-    reasons,
-    updatedAt: overlay?.updatedAt ?? announcement.postedAt,
-    pinned: Boolean(overlay?.pinnedAt),
-    note: overlay?.note,
-    blockedBy: [],
-  });
-}
-
-function buildMessageFocusItem(
-  message: Message,
-  overlay: LocalEntityOverlay | undefined,
-  now: string,
-  recentChangeEvent: ChangeEvent | undefined,
-) {
-  if (isOverlayDismissed(overlay, now)) {
-    return undefined;
-  }
-  if (isOverlaySnoozed(overlay, now) && !overlay?.pinnedAt) {
-    return undefined;
-  }
-
-  const entityRef = toEntityRef(message);
-  const reasons: PriorityReason[] = [];
-  let score = 0;
-
-  if (overlay?.pinnedAt) {
-    reasons.push(makePriorityReason('manual', '你已手动置顶', 'high', entityRef));
-    score += 120;
-  }
-  if (message.instructorAuthored && isWithinHours(message.createdAt, now, 72)) {
-    reasons.push(makePriorityReason('important_announcement', '老师最近有新动态', 'high', entityRef));
-    score += 150;
-  } else if (message.unread && isWithinHours(message.createdAt, now, 72)) {
-    reasons.push(makePriorityReason('unread_activity', '近期有未读讨论', 'medium', entityRef));
-    score += 110;
-  }
-  if (recentChangeEvent) {
-    reasons.push(makePriorityReason('recently_updated', '最近同步里有变化', 'medium', entityRef));
-    score += 20;
-  }
-
-  if (reasons.length === 0) {
-    return undefined;
-  }
-
-  return FocusQueueItemSchema.parse({
-    id: `focus:${message.id}`,
-    entityId: message.id,
-    entityRef,
-    entity: entityRef,
-    kind: message.kind,
-    site: message.site,
-    title: message.title ?? '讨论区新动态',
-    score,
-    reasons,
-    updatedAt: overlay?.updatedAt ?? message.createdAt,
-    pinned: Boolean(overlay?.pinnedAt),
-    note: overlay?.note,
-    blockedBy: [],
-  });
-}
-
-function buildGradeFocusItem(
-  grade: Grade,
-  overlay: LocalEntityOverlay | undefined,
-  now: string,
-  recentChangeEvent: ChangeEvent | undefined,
-) {
-  if (isOverlayDismissed(overlay, now)) {
-    return undefined;
-  }
-  if (isOverlaySnoozed(overlay, now) && !overlay?.pinnedAt) {
-    return undefined;
-  }
-
-  const entityRef = toEntityRef(grade);
-  const reasons: PriorityReason[] = [];
-  let score = 0;
-
-  if (overlay?.pinnedAt) {
-    reasons.push(makePriorityReason('manual', '你已手动置顶', 'high', entityRef));
-    score += 120;
-  }
-  if (isWithinHours(grade.releasedAt ?? grade.gradedAt, now, 24 * 7)) {
-    reasons.push(makePriorityReason('new_grade', '最近出了新成绩', 'medium', entityRef));
-    score += 100;
-  }
-  if (recentChangeEvent) {
-    reasons.push(makePriorityReason('recently_updated', '最近同步里有变化', 'medium', entityRef));
-    score += 20;
-  }
-
-  if (reasons.length === 0) {
-    return undefined;
-  }
-
-  return FocusQueueItemSchema.parse({
-    id: `focus:${grade.id}`,
-    entityId: grade.id,
-    entityRef,
-    entity: entityRef,
-    kind: grade.kind,
-    site: grade.site,
-    title: grade.title,
-    score,
-    reasons,
-    updatedAt: overlay?.updatedAt ?? grade.releasedAt ?? grade.gradedAt,
-    pinned: Boolean(overlay?.pinnedAt),
-    note: overlay?.note,
-    blockedBy: [],
-  });
-}
-
-function buildSyncFocusItem(syncState: SyncState, now: string) {
-  if (syncState.status !== 'error' && syncState.lastOutcome !== 'partial_success') {
-    return undefined;
-  }
-
-  const blockedBy = (syncState.resourceFailures ?? []).map((item) => item.resource);
-  const importance = syncState.lastOutcome === 'partial_success' ? 'low' : 'medium';
-  const score = syncState.lastOutcome === 'partial_success' ? 70 : 130;
-  const label = syncState.lastOutcome === 'partial_success' ? '同步部分成功' : '同步状态异常';
-  const title =
-    syncState.lastOutcome === 'partial_success'
-      ? `${syncState.site} 有部分资源未同步`
-      : `${syncState.site} 最近一次同步失败`;
-
-  return FocusQueueItemSchema.parse({
-    id: `focus:sync:${syncState.site}`,
-    kind: 'sync_state',
-    site: syncState.site,
-    title,
-    score,
-    reasons: [makePriorityReason('sync_stale', label, importance)],
-    blockedBy,
-    updatedAt: syncState.lastSyncedAt ?? now,
-    pinned: false,
-  });
-}
-
-function compareFocusQueueItems(left: FocusQueueItem, right: FocusQueueItem) {
-  if (right.score !== left.score) {
-    return right.score - left.score;
-  }
-  if ((left.pinned ? 1 : 0) !== (right.pinned ? 1 : 0)) {
-    return (right.pinned ? 1 : 0) - (left.pinned ? 1 : 0);
-  }
-  const dueComparison = compareOldest(left.dueAt, right.dueAt);
-  if (dueComparison !== 0) {
-    return dueComparison;
-  }
-  const updatedComparison = compareNewest(left.updatedAt, right.updatedAt);
-  if (updatedComparison !== 0) {
-    return updatedComparison;
-  }
-  return left.title.localeCompare(right.title);
-}
-
 export async function putCourses(records: Course[], db = campusCopilotDb) {
   await db.courses.bulkPut(parseArray(CourseSchema, records));
 }
@@ -1134,10 +844,6 @@ export async function putMessages(records: Message[], db = campusCopilotDb) {
 
 export async function putEvents(records: Event[], db = campusCopilotDb) {
   await db.events.bulkPut(parseArray(EventSchema, records));
-}
-
-export async function putAlerts(records: Alert[], db = campusCopilotDb) {
-  await db.alerts.bulkPut(parseArray(AlertSchema, records));
 }
 
 export async function putSyncState(record: SyncState, db = campusCopilotDb) {
@@ -1444,7 +1150,6 @@ export async function getEntityCounts(db = campusCopilotDb): Promise<EntityCount
     announcements: await db.announcements.count(),
     messages: await db.messages.count(),
     events: await db.events.count(),
-    alerts: await db.alerts.count(),
   });
 }
 
@@ -1490,7 +1195,6 @@ export async function getSiteEntityCounts(site: Site, db = campusCopilotDb): Pro
     grades: await db.grades.where('site').equals(site).count(),
     messages: await db.messages.where('site').equals(site).count(),
     events: await db.events.where('site').equals(site).count(),
-    alerts: await db.alerts.where('site').equals(site).count(),
   });
 }
 
@@ -1548,655 +1252,5 @@ export async function markEntitiesSeen(entityIds: string[], seenAt: string, db =
   }
 }
 
-export async function getPriorityAlerts(now: string, db = campusCopilotDb): Promise<Alert[]> {
-  const [assignments, announcements, messages, grades, syncStates] = await Promise.all([
-    db.assignments.toArray(),
-    db.announcements.toArray(),
-    db.messages.toArray(),
-    db.grades.toArray(),
-    db.sync_state.toArray(),
-  ]);
-
-  const alerts: Alert[] = [];
-
-  for (const assignment of assignments) {
-    if (!isAssignmentOpen(assignment)) {
-      continue;
-    }
-
-    if (assignment.dueAt && isPast(assignment.dueAt, now)) {
-      alerts.push(
-        AlertSchema.parse({
-          id: `derived:alert:${assignment.id}:overdue`,
-          kind: 'alert',
-          site: assignment.site,
-          source: {
-            site: assignment.site,
-            resourceId: assignment.id,
-            resourceType: 'derived_alert',
-          },
-          alertKind: 'overdue',
-          title: `${assignment.title} 已逾期`,
-          summary: '这个任务已经过了截止时间，应该被优先处理。',
-          importance: 'critical',
-          relatedEntities: [toEntityRef(assignment)],
-          triggeredAt: now,
-          reasons: [
-            makePriorityReason('overdue', '截止时间已过', 'critical', toEntityRef(assignment)),
-          ],
-        }),
-      );
-      continue;
-    }
-
-    if (assignment.dueAt && isWithinUpcomingHours(assignment.dueAt, now, 48)) {
-      alerts.push(
-        AlertSchema.parse({
-          id: `derived:alert:${assignment.id}:due_soon`,
-          kind: 'alert',
-          site: assignment.site,
-          source: {
-            site: assignment.site,
-            resourceId: assignment.id,
-            resourceType: 'derived_alert',
-          },
-          alertKind: 'due_soon',
-          title: `${assignment.title} 48 小时内截止`,
-          summary: '这是近期要优先确认的任务。',
-          importance: assignment.status === 'missing' ? 'critical' : 'high',
-          relatedEntities: [toEntityRef(assignment)],
-          triggeredAt: now,
-          reasons: [
-            makePriorityReason(
-              'due_soon',
-              '即将到期',
-              assignment.status === 'missing' ? 'critical' : 'high',
-              toEntityRef(assignment),
-            ),
-          ],
-        }),
-      );
-    }
-  }
-
-  for (const grade of grades) {
-    const gradeTime = grade.releasedAt ?? grade.gradedAt;
-    if (!isWithinHours(gradeTime, now, 24 * 7)) {
-      continue;
-    }
-
-    alerts.push(
-      AlertSchema.parse({
-        id: `derived:alert:${grade.id}:new_grade`,
-        kind: 'alert',
-        site: grade.site,
-        source: {
-          site: grade.site,
-          resourceId: grade.id,
-          resourceType: 'derived_alert',
-        },
-        alertKind: 'new_grade',
-        title: `${grade.title} 出了新成绩`,
-        summary: '最近有新的评分结果可查看。',
-        importance: 'medium',
-        relatedEntities: [toEntityRef(grade)],
-        triggeredAt: now,
-        reasons: [makePriorityReason('new_grade', '近期新增成绩', 'medium', toEntityRef(grade))],
-      }),
-    );
-  }
-
-  for (const announcement of announcements) {
-    if (!isWithinHours(announcement.postedAt, now, 48)) {
-      continue;
-    }
-
-    alerts.push(
-      AlertSchema.parse({
-        id: `derived:alert:${announcement.id}:announcement`,
-        kind: 'alert',
-        site: announcement.site,
-        source: {
-          site: announcement.site,
-          resourceId: announcement.id,
-          resourceType: 'derived_alert',
-        },
-        alertKind: 'important_announcement',
-        title: announcement.title,
-        summary: '最近有新的课程公告，可能影响任务安排。',
-        importance: 'medium',
-        relatedEntities: [toEntityRef(announcement)],
-        triggeredAt: now,
-        reasons: [
-          makePriorityReason('important_announcement', '近期有公告更新', 'medium', toEntityRef(announcement)),
-        ],
-      }),
-    );
-  }
-
-  for (const message of messages) {
-    if ((!message.unread && !message.instructorAuthored) || !isWithinHours(message.createdAt, now, 72)) {
-      continue;
-    }
-
-    alerts.push(
-      AlertSchema.parse({
-        id: `derived:alert:${message.id}:message`,
-        kind: 'alert',
-        site: message.site,
-        source: {
-          site: message.site,
-          resourceId: message.id,
-          resourceType: 'derived_alert',
-        },
-        alertKind: message.instructorAuthored ? 'instructor_activity' : 'unread_mention',
-        title: message.title ?? '有新的讨论更新',
-        summary: message.instructorAuthored ? '老师最近在讨论区发了新内容。' : '你有未读的近期讨论更新。',
-        importance: message.instructorAuthored ? 'high' : 'medium',
-        relatedEntities: [toEntityRef(message)],
-        triggeredAt: now,
-        reasons: [
-          makePriorityReason(
-            message.instructorAuthored ? 'important_announcement' : 'unread_activity',
-            message.instructorAuthored ? '老师有新动态' : '近期有未读更新',
-            message.instructorAuthored ? 'high' : 'medium',
-            toEntityRef(message),
-          ),
-        ],
-      }),
-    );
-  }
-
-  for (const syncState of syncStates) {
-    if (syncState.status !== 'error' && syncState.lastOutcome !== 'partial_success') {
-      continue;
-    }
-
-    alerts.push(
-      AlertSchema.parse({
-        id: `derived:alert:sync:${syncState.site}`,
-        kind: 'alert',
-        site: syncState.site,
-        source: {
-          site: syncState.site,
-          resourceId: syncState.site,
-          resourceType: 'sync_state',
-        },
-        alertKind: 'attention_needed',
-        title: `${syncState.site} ${syncState.lastOutcome === 'partial_success' ? '部分同步成功' : '同步失败'}`,
-        summary:
-          syncState.lastOutcome === 'partial_success'
-            ? `部分资源仍有缺口：${summarizeResourceFailures(syncState.resourceFailures)}`
-            : syncState.errorReason ?? '最近一次同步没有成功。',
-        importance: syncState.lastOutcome === 'partial_success' ? 'low' : 'medium',
-        relatedEntities: [],
-        triggeredAt: syncState.lastSyncedAt ?? now,
-        reasons: [
-          makePriorityReason(
-            'sync_stale',
-            syncState.lastOutcome === 'partial_success' ? '同步部分成功' : '同步状态异常',
-            syncState.lastOutcome === 'partial_success' ? 'low' : 'medium',
-          ),
-        ],
-      }),
-    );
-  }
-
-  return alerts.sort((left, right) => compareNewest(left.triggeredAt, right.triggeredAt)).slice(0, 6);
-}
-
-export async function getRecentUpdates(
-  now: string,
-  limit = 8,
-  db = campusCopilotDb,
-): Promise<RecentUpdatesFeed> {
-  const [announcements, assignments, grades, messages, events, entityStates] = await Promise.all([
-    db.announcements.toArray(),
-    db.assignments.toArray(),
-    db.grades.toArray(),
-    db.messages.toArray(),
-    db.events.toArray(),
-    db.entity_state.toArray(),
-  ]);
-
-  const stateMap = new Map(entityStates.map((state) => [state.entityId, state]));
-  const items: TimelineEntry[] = [];
-
-  for (const announcement of announcements) {
-    const occurredAt = announcement.postedAt ?? stateMap.get(announcement.id)?.firstSeenAt;
-    if (!isWithinHours(occurredAt, now, 24 * 7)) {
-      continue;
-    }
-
-    items.push(
-      TimelineEntrySchema.parse({
-        id: `timeline:${announcement.id}`,
-        kind: 'timeline_entry',
-        site: announcement.site,
-        source: announcement.source,
-        url: announcement.url,
-        timelineKind: 'announcement_posted',
-        occurredAt,
-        title: announcement.title,
-        relatedEntities: [toEntityRef(announcement)],
-        summary: '近期有新的课程公告。',
-      }),
-    );
-  }
-
-  for (const assignment of assignments) {
-    const occurredAt = assignment.createdAt ?? stateMap.get(assignment.id)?.firstSeenAt;
-    if (!isWithinHours(occurredAt, now, 24 * 7)) {
-      continue;
-    }
-
-    items.push(
-      TimelineEntrySchema.parse({
-        id: `timeline:${assignment.id}`,
-        kind: 'timeline_entry',
-        site: assignment.site,
-        source: assignment.source,
-        url: assignment.url,
-        timelineKind: 'assignment_created',
-        occurredAt,
-        title: assignment.title,
-        relatedEntities: [toEntityRef(assignment)],
-        summary: '最近出现了新的任务。',
-      }),
-    );
-  }
-
-  for (const grade of grades) {
-    const occurredAt = grade.releasedAt ?? grade.gradedAt ?? stateMap.get(grade.id)?.firstSeenAt;
-    if (!isWithinHours(occurredAt, now, 24 * 7)) {
-      continue;
-    }
-
-    items.push(
-      TimelineEntrySchema.parse({
-        id: `timeline:${grade.id}`,
-        kind: 'timeline_entry',
-        site: grade.site,
-        source: grade.source,
-        url: grade.url,
-        timelineKind: 'grade_released',
-        occurredAt,
-        title: grade.title,
-        relatedEntities: [toEntityRef(grade)],
-        summary: '最近有新的评分结果发布。',
-      }),
-    );
-  }
-
-  for (const message of messages) {
-    const occurredAt = message.createdAt ?? stateMap.get(message.id)?.firstSeenAt;
-    if (!isWithinHours(occurredAt, now, 24 * 7)) {
-      continue;
-    }
-
-    items.push(
-      TimelineEntrySchema.parse({
-        id: `timeline:${message.id}`,
-        kind: 'timeline_entry',
-        site: message.site,
-        source: message.source,
-        url: message.url,
-        timelineKind: 'discussion_replied',
-        occurredAt,
-        title: message.title ?? '讨论区有新动态',
-        relatedEntities: [toEntityRef(message)],
-        summary: message.instructorAuthored ? '老师最近参与了讨论。' : '近期有新的讨论更新。',
-      }),
-    );
-  }
-
-  for (const event of events) {
-    const occurredAt = event.updatedAt ?? event.startAt ?? stateMap.get(event.id)?.firstSeenAt;
-    if (!isWithinHours(occurredAt, now, 24 * 7)) {
-      continue;
-    }
-
-    items.push(
-      TimelineEntrySchema.parse({
-        id: `timeline:${event.id}`,
-        kind: 'timeline_entry',
-        site: event.site,
-        source: event.source,
-        url: event.url,
-        timelineKind: 'schedule_updated',
-        occurredAt,
-        title: event.title,
-        relatedEntities: [toEntityRef(event)],
-        summary: '近期有时间相关事项更新。',
-      }),
-    );
-  }
-
-  const sortedItems = items.sort((left, right) => compareNewest(left.occurredAt, right.occurredAt)).slice(0, limit);
-  const unseenCount = sortedItems.filter((entry) => {
-    const state = stateMap.get(entry.relatedEntities[0]?.id ?? '');
-    if (!state?.seenAt) {
-      return true;
-    }
-    const seenAt = toTimestamp(state.seenAt);
-    const occurredAt = toTimestamp(entry.occurredAt);
-    return seenAt === undefined || occurredAt === undefined ? true : seenAt < occurredAt;
-  }).length;
-
-  return RecentUpdatesFeedSchema.parse({
-    items: sortedItems,
-    unseenCount,
-  });
-}
-
-export async function getFocusQueue(now: string, db = campusCopilotDb): Promise<FocusQueueItem[]> {
-  const [assignments, announcements, messages, grades, syncStates, overlays, recentChangeEvents] = await Promise.all([
-    db.assignments.toArray(),
-    db.announcements.toArray(),
-    db.messages.toArray(),
-    db.grades.toArray(),
-    db.sync_state.toArray(),
-    db.local_entity_overlay.toArray(),
-    getRecentChangeEvents(200, db),
-  ]);
-
-  const overlayMap = new Map(overlays.map((overlay) => [overlay.entityId, overlay]));
-  const recentChangeMap = buildRecentChangeMap(
-    recentChangeEvents.filter((event) => isWithinHours(event.occurredAt, now, 24 * 7)),
-  );
-  const items: FocusQueueItem[] = [];
-
-  for (const assignment of assignments) {
-    const item = buildAssignmentFocusItem(assignment, overlayMap.get(assignment.id), now, recentChangeMap.get(assignment.id));
-    if (item) {
-      items.push(item);
-    }
-  }
-
-  for (const announcement of announcements) {
-    const item = buildAnnouncementFocusItem(
-      announcement,
-      overlayMap.get(announcement.id),
-      now,
-      recentChangeMap.get(announcement.id),
-    );
-    if (item) {
-      items.push(item);
-    }
-  }
-
-  for (const message of messages) {
-    const item = buildMessageFocusItem(message, overlayMap.get(message.id), now, recentChangeMap.get(message.id));
-    if (item) {
-      items.push(item);
-    }
-  }
-
-  for (const grade of grades) {
-    const item = buildGradeFocusItem(grade, overlayMap.get(grade.id), now, recentChangeMap.get(grade.id));
-    if (item) {
-      items.push(item);
-    }
-  }
-
-  for (const syncState of syncStates) {
-    const item = buildSyncFocusItem(syncState, now);
-    if (item) {
-      items.push(item);
-    }
-  }
-
-  return items.sort(compareFocusQueueItems);
-}
-
-export async function getWeeklyLoad(now: string, db = campusCopilotDb): Promise<WeeklyLoadEntry[]> {
-  const [assignments, events, overlays] = await Promise.all([
-    db.assignments.toArray(),
-    db.events.toArray(),
-    db.local_entity_overlay.toArray(),
-  ]);
-  const overlayMap = new Map(overlays.map((overlay) => [overlay.entityId, overlay]));
-  const bucketStarts = Array.from({ length: 7 }, (_, index) => startOfUtcDay(now, index));
-  const buckets = bucketStarts.map((start) => {
-    return {
-      dateKey: start.toISOString().slice(0, 10),
-      startsAt: start.toISOString(),
-      endsAt: endOfUtcDay(start).toISOString(),
-      assignmentCount: 0,
-      eventCount: 0,
-      overdueCount: 0,
-      dueSoonCount: 0,
-      pinnedCount: 0,
-      totalScore: 0,
-      items: [] as EntityRef[],
-    };
-  });
-  const bucketMap = new Map(buckets.map((bucket) => [bucket.dateKey, bucket]));
-  const todayBucket = buckets[0];
-
-  for (const assignment of assignments) {
-    if (!isAssignmentOpen(assignment)) {
-      continue;
-    }
-
-    const overlay = overlayMap.get(assignment.id);
-    if (isOverlayDismissed(overlay, now)) {
-      continue;
-    }
-    if (isOverlaySnoozed(overlay, now) && !overlay?.pinnedAt) {
-      continue;
-    }
-    if (!assignment.dueAt) {
-      continue;
-    }
-
-    const bucketKey = isPast(assignment.dueAt, now) ? todayBucket.dateKey : toDateKey(assignment.dueAt);
-    const bucket = bucketMap.get(bucketKey);
-    if (!bucket) {
-      continue;
-    }
-
-    bucket.assignmentCount += 1;
-    bucket.items.push(toEntityRef(assignment));
-    if (overlay?.pinnedAt) {
-      bucket.pinnedCount += 1;
-      bucket.totalScore += 120;
-    }
-    if (isPast(assignment.dueAt, now)) {
-      bucket.overdueCount += 1;
-      bucket.totalScore += assignment.status === 'missing' ? 260 : 230;
-    } else if (isWithinUpcomingHours(assignment.dueAt, now, 48)) {
-      bucket.dueSoonCount += 1;
-      bucket.totalScore += assignment.status === 'missing' ? 210 : 180;
-    } else {
-      bucket.totalScore += 90;
-    }
-  }
-
-  for (const event of events) {
-    const overlay = overlayMap.get(event.id);
-    if (isOverlayDismissed(overlay, now)) {
-      continue;
-    }
-    if (isOverlaySnoozed(overlay, now) && !overlay?.pinnedAt) {
-      continue;
-    }
-
-    const eventAt = event.startAt ?? event.endAt;
-    if (!eventAt) {
-      continue;
-    }
-
-    const bucketKey = isPast(eventAt, now) ? todayBucket.dateKey : toDateKey(eventAt);
-    const bucket = bucketMap.get(bucketKey);
-    if (!bucket) {
-      continue;
-    }
-
-    bucket.eventCount += 1;
-    bucket.items.push(
-      EntityRefSchema.parse({
-        id: event.id,
-        kind: event.kind,
-        site: event.site,
-      }),
-    );
-    bucket.totalScore += overlay?.pinnedAt ? 70 : 40;
-    if (overlay?.pinnedAt) {
-      bucket.pinnedCount += 1;
-    }
-  }
-
-  return buckets.map((bucket) => WeeklyLoadEntrySchema.parse(bucket));
-}
-
-export async function getTodaySnapshot(now: string, db = campusCopilotDb): Promise<TodaySnapshot> {
-  const [assignments, grades, syncStates, recentUpdates, alerts] = await Promise.all([
-    db.assignments.toArray(),
-    db.grades.toArray(),
-    db.sync_state.toArray(),
-    getRecentUpdates(now, 20, db),
-    getPriorityAlerts(now, db),
-  ]);
-
-  const openAssignments = assignments.filter((assignment) => isAssignmentOpen(assignment));
-  const dueSoonAssignments = openAssignments.filter((assignment) => isWithinUpcomingHours(assignment.dueAt, now, 48));
-  const newGrades = grades.filter((grade) => isWithinHours(grade.releasedAt ?? grade.gradedAt, now, 24 * 7));
-  const syncedSites = syncStates.filter((state) => state.status === 'success').length;
-
-  return TodaySnapshotSchema.parse({
-    totalAssignments: openAssignments.length,
-    dueSoonAssignments: dueSoonAssignments.length,
-    recentUpdates: recentUpdates.items.length,
-    newGrades: newGrades.length,
-    riskAlerts: alerts.length,
-    syncedSites,
-  });
-}
-
-export async function getWorkbenchView(
-  now: string,
-  filters: WorkbenchFilter,
-  db = campusCopilotDb,
-): Promise<WorkbenchView> {
-  const parsedFilters = WorkbenchFilterSchema.parse(filters);
-  const [assignments, announcements, messages, grades, events, alerts, recentUpdates, entityStates] = await Promise.all([
-    getAllAssignments(db),
-    getAllAnnouncements(db),
-    getAllMessages(db),
-    getAllGrades(db),
-    getAllEvents(db),
-    getPriorityAlerts(now, db),
-    getRecentUpdates(now, 20, db),
-    db.entity_state.toArray(),
-  ]);
-
-  const stateMap = new Map(entityStates.map((state) => [state.entityId, state]));
-  const filteredRecentUpdates = recentUpdates.items.filter((entry) => {
-    const matchesSite = parsedFilters.site === 'all' || entry.site === parsedFilters.site;
-    if (!matchesSite) {
-      return false;
-    }
-
-    return parsedFilters.onlyUnseenUpdates ? isEntryUnseen(entry, stateMap) : true;
-  });
-
-  return WorkbenchViewSchema.parse({
-    filters: parsedFilters,
-    assignments: matchesSiteFilter(assignments, parsedFilters.site),
-    announcements: matchesSiteFilter(announcements, parsedFilters.site),
-    messages: matchesSiteFilter(messages, parsedFilters.site),
-    grades: matchesSiteFilter(grades, parsedFilters.site),
-    events: matchesSiteFilter(events, parsedFilters.site),
-    alerts: matchesSiteFilter(alerts, parsedFilters.site),
-    recentUpdates: {
-      items: filteredRecentUpdates,
-      unseenCount: filteredRecentUpdates.filter((entry) => isEntryUnseen(entry, stateMap)).length,
-    },
-  });
-}
-
-export function useEntityCounts(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getEntityCounts(db), [db, refreshKey]);
-}
-
-export function useSyncState(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getLatestSyncState(db), [db, refreshKey]);
-}
-
-export function useSiteSyncStates(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getSiteSyncStates(db), [db, refreshKey]);
-}
-
-export function useLatestSyncRuns(limit = 8, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getLatestSyncRuns(limit, db), [limit, db, refreshKey]);
-}
-
-export function useLatestSyncRunBySite(site: Site, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getLatestSyncRunBySite(site, db), [site, db, refreshKey]);
-}
-
-export function useAllAssignments(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getAllAssignments(db), [db, refreshKey]);
-}
-
-export function useAllAnnouncements(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getAllAnnouncements(db), [db, refreshKey]);
-}
-
-export function useAllMessages(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getAllMessages(db), [db, refreshKey]);
-}
-
-export function useAllGrades(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getAllGrades(db), [db, refreshKey]);
-}
-
-export function useAllEvents(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getAllEvents(db), [db, refreshKey]);
-}
-
-export function useSiteEntityCounts(site: Site, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getSiteEntityCounts(site, db), [site, db, refreshKey]);
-}
-
-export function useAllSiteEntityCounts(db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getAllSiteEntityCounts(db), [db, refreshKey]);
-}
-
-export function useSiteSyncState(site: Site, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getSyncStateBySite(site, db), [site, db, refreshKey]);
-}
-
-export function useTodaySnapshot(now: string, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getTodaySnapshot(now, db), [now, db, refreshKey]);
-}
-
-export function usePriorityAlerts(now: string, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getPriorityAlerts(now, db), [now, db, refreshKey]);
-}
-
-export function useRecentUpdates(now: string, limit = 8, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getRecentUpdates(now, limit, db), [now, limit, db, refreshKey]);
-}
-
-export function useRecentChangeEvents(limit = 20, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getRecentChangeEvents(limit, db), [limit, db, refreshKey]);
-}
-
-export function useFocusQueue(now: string, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getFocusQueue(now, db), [now, db, refreshKey]);
-}
-
-export function useWeeklyLoad(now: string, db = campusCopilotDb, refreshKey?: number) {
-  return useLiveQuery(() => getWeeklyLoad(now, db), [now, db, refreshKey]);
-}
-
-export function useWorkbenchView(
-  now: string,
-  filters: WorkbenchFilter,
-  db = campusCopilotDb,
-  refreshKey?: number,
-) {
-  return useLiveQuery(() => getWorkbenchView(now, filters, db), [now, filters.site, filters.onlyUnseenUpdates, db, refreshKey]);
-}
+export * from './derived';
+export * from './hooks';

@@ -32,6 +32,8 @@ If you need manual live results, use [`live-validation-runbook.md`](live-validat
 - **site facts, local user-state overlay, and derived decision views are separate layers**
 - **decision logic stays centralized in storage/read models, not in surface-level UI conditionals**
 - **`Alert` is treated as a derived read model unless a later contract explicitly promotes it**
+- **`Alert` is derived at read time and is not stored as a separate canonical Dexie table in the current repo-local path**
+- **formal provider runtime keeps only API-key routes and does not preserve dormant auth-mode branches or reserved OAuth env placeholders**
 
 ### Extension permission posture
 

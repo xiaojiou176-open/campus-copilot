@@ -295,7 +295,6 @@ function buildPublicScreenshotFixture() {
     grades,
     messages,
     events: [],
-    alerts: [],
     sync_state: syncState,
     entity_state: entityState,
   };
@@ -310,7 +309,7 @@ async function seedPublicScreenshotData(page) {
       request.onsuccess = () => resolve(request.result);
     });
 
-    const storeNames = ['courses', 'assignments', 'announcements', 'grades', 'messages', 'events', 'alerts', 'sync_state', 'entity_state'];
+    const storeNames = ['courses', 'assignments', 'announcements', 'grades', 'messages', 'events', 'sync_state', 'entity_state'];
     const tx = openDb.transaction(storeNames, 'readwrite');
 
     for (const name of storeNames) {
@@ -509,7 +508,6 @@ function buildChromeMocks() {
       grades: 0,
       messages: 0,
       events: 0,
-      alerts: 0,
     });
 
     const chrome = {

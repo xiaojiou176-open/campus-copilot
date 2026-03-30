@@ -14,6 +14,7 @@ Its user-facing shape is a workbench with export and AI as parallel formal paths
 - `Focus Queue`
 - `Weekly Load`
 - `Change Journal`
+- derived priority alerts
 - cited AI explanation
 
 ## Current Formal Surface Direction
@@ -38,6 +39,7 @@ These are part of the current formal surface shape.
 - keep export first-class, not hidden behind AI
 - keep diagnostics honest about missing prerequisites
 - derive decision surfaces from storage read models and local overlay, not from raw site responses
+- keep priority alerts derived from current structured facts and sync state instead of treating them as a separate persisted source of truth
 - do not expand the formal surface area by adding new sites, provider/auth paths, or write operations first
 
 ## Current Export Presets

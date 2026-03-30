@@ -1,20 +1,18 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { AuthModeSchema, ChatMessageSchema, parseAiStructuredAnswer } from '@campus-copilot/ai';
+import { ChatMessageSchema, parseAiStructuredAnswer } from '@campus-copilot/ai';
 
 const ApiEnvSchema = z.object({
   PORT: z.string().optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
   GEMINI_API_KEY: z.string().min(1).optional(),
-  GEMINI_ACCESS_TOKEN: z.string().min(1).optional(),
   OPENAI_BASE_URL: z.string().url().optional(),
   GEMINI_BASE_URL: z.string().url().optional(),
 });
 
 const ProviderProxyPayloadSchema = z.object({
   provider: z.enum(['openai', 'gemini']),
-  authMode: AuthModeSchema,
   model: z.string().min(1),
   messages: z.array(ChatMessageSchema).min(1),
 });
@@ -51,7 +49,6 @@ export function loadApiEnv(source: NodeJS.ProcessEnv = process.env): ApiEnv {
     ...source,
     OPENAI_API_KEY: normalizeOptionalEnvValue(source.OPENAI_API_KEY),
     GEMINI_API_KEY: normalizeOptionalEnvValue(source.GEMINI_API_KEY),
-    GEMINI_ACCESS_TOKEN: normalizeOptionalEnvValue(source.GEMINI_ACCESS_TOKEN),
     OPENAI_BASE_URL: normalizeOptionalEnvValue(source.OPENAI_BASE_URL),
     GEMINI_BASE_URL: normalizeOptionalEnvValue(source.GEMINI_BASE_URL),
   });
@@ -71,12 +68,10 @@ export function createProviderStatusPayload(env: ApiEnv) {
     providers: {
       openai: {
         ready: Boolean(env.OPENAI_API_KEY),
-        authMode: 'api_key',
         reason: env.OPENAI_API_KEY ? 'configured' : 'missing_api_key',
       },
       gemini: {
         ready: Boolean(env.GEMINI_API_KEY),
-        authMode: 'api_key',
         reason: env.GEMINI_API_KEY ? 'configured' : 'missing_api_key',
       },
     },
@@ -166,22 +161,6 @@ function buildProviderEndpoint(payload: ProviderProxyPayload, env: ApiEnv): Prov
       body: {
         model: payload.model,
         messages: payload.messages,
-      },
-    };
-  }
-
-  if (payload.authMode === 'oauth') {
-    return {
-      url: `${env.GEMINI_BASE_URL ?? 'https://generativelanguage.googleapis.com'}/v1beta/models/${payload.model}:generateContent`,
-      token: env.GEMINI_ACCESS_TOKEN,
-      headers: {
-        Authorization: `Bearer ${env.GEMINI_ACCESS_TOKEN ?? ''}`,
-      },
-      body: {
-        contents: payload.messages.map((message) => ({
-          role: message.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: message.content }],
-        })),
       },
     };
   }

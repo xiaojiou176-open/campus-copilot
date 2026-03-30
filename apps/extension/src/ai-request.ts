@@ -21,7 +21,6 @@ export function buildAiProxyRequest(input: {
 }) {
   const runtimeMessages = buildAiRuntimeMessages({
     provider: input.provider,
-    authMode: 'api_key',
     model: input.model,
     question: input.question,
     toolResults: [
@@ -55,7 +54,6 @@ export function buildAiProxyRequest(input: {
 
   return createProviderProxyRequest({
     provider: input.provider,
-    authMode: 'api_key',
     model: input.model,
     messages: [
       {
