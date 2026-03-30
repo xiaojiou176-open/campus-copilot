@@ -9,7 +9,6 @@ describe('core contracts', () => {
       announcements: 3,
       messages: 0,
       events: 0,
-      alerts: 1,
     });
 
     expect(snapshot.surface).toBe('sidepanel');

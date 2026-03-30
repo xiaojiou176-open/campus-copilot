@@ -37,6 +37,7 @@ The layers must not collapse into each other:
 - local user-state does not mutate canonical site facts
 - decision views are derived outputs, not a backdoor for raw site payloads
 - `Alert` is treated as a derived decision view unless a later contract explicitly promotes it
+- current repository implementation derives `Alert` at read time from canonical entities plus sync state; it is not a separate durable Dexie fact table
 
 ## Current Truth Boundary
 

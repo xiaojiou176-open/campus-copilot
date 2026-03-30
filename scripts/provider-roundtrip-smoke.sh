@@ -54,7 +54,6 @@ curl -fsS \
   "${BFF_URL}/api/providers/${PROVIDER}/chat" \
   -d "{
     \"provider\": \"${PROVIDER}\",
-    \"authMode\": \"api_key\",
     \"model\": \"${MODEL}\",
     \"messages\": [{\"role\": \"user\", \"content\": \"Reply with the single word READY.\"}]
   }" >"$RESPONSE_FILE"

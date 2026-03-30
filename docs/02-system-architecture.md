@@ -5,7 +5,7 @@ Campus Copilot is not a browser-extension shell with a few page scrapers attache
 Its current architecture is:
 
 ```text
-site adapter -> normalized schema -> Dexie local entities/read models -> sidepanel/popup/options/export/AI -> thin BFF for formal provider paths
+site adapter -> normalized schema -> Dexie local entities + ledger -> derived read models (alerts/focus/weekly/change) -> sidepanel/popup/options/export/AI -> thin BFF for formal provider API-key paths
 ```
 
 ## Canonical Truth Layers
@@ -24,6 +24,7 @@ site adapter -> normalized schema -> Dexie local entities/read models -> sidepan
 - AI comes **after structure**
 - adapters own collection and fallback logic
 - Dexie-backed local entities are canonical for the workbench
+- derived alerts and decision views are computed from canonical entities + local overlay, not persisted as a separate canonical alert table
 - exports and AI consume normalized results, not raw site payloads
 - runtime evidence must stay separate from canonical product docs
 

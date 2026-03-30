@@ -29,8 +29,8 @@ describe('diagnostics helpers', () => {
       bffBaseUrl: undefined,
       providerStatus: {
         providers: {
-          openai: { ready: false, authMode: 'api_key', reason: 'missing_api_key' },
-          gemini: { ready: false, authMode: 'api_key', reason: 'missing_api_key' },
+          openai: { ready: false, reason: 'missing_api_key' },
+          gemini: { ready: false, reason: 'missing_api_key' },
         },
         error: 'provider_status_fetch_failed',
       },
@@ -58,8 +58,8 @@ describe('diagnostics helpers', () => {
       bffBaseUrl: 'http://127.0.0.1:8787',
       providerStatus: {
         providers: {
-          openai: { ready: true, authMode: 'api_key', reason: 'configured' },
-          gemini: { ready: false, authMode: 'api_key', reason: 'missing_api_key' },
+          openai: { ready: true, reason: 'configured' },
+          gemini: { ready: false, reason: 'missing_api_key' },
         },
       },
       orderedSiteStatus: [{ site: 'canvas', sync: { lastOutcome: 'success' } }],
@@ -80,8 +80,8 @@ describe('diagnostics helpers', () => {
       bffBaseUrl: 'http://127.0.0.1:8787',
       providerStatus: {
         providers: {
-          openai: { ready: false, authMode: 'api_key', reason: 'missing_api_key' },
-          gemini: { ready: true, authMode: 'api_key', reason: 'configured' },
+          openai: { ready: false, reason: 'missing_api_key' },
+          gemini: { ready: true, reason: 'configured' },
         },
       },
       orderedSiteStatus: [],

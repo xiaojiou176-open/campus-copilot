@@ -4,8 +4,6 @@ import {
   AiStructuredAnswerSchema,
   buildAiRuntimeMessages,
   createProviderProxyRequest,
-  getDefaultAuthMode,
-  getOfficialAuthModes,
   getToolDefinitions,
   parseAiStructuredAnswer,
 } from './index';
@@ -55,12 +53,6 @@ describe('ai runtime contracts', () => {
     });
   });
 
-  it('locks official auth modes by provider', () => {
-    expect(getOfficialAuthModes('openai')).toEqual(['api_key']);
-    expect(getOfficialAuthModes('gemini')).toEqual(['api_key']);
-    expect(getDefaultAuthMode('gemini')).toBe('api_key');
-  });
-
   it('exposes the minimal structured tool registry', () => {
     const toolNames = getToolDefinitions().map((tool) => tool.name);
     expect(toolNames).toEqual([
@@ -74,7 +66,6 @@ describe('ai runtime contracts', () => {
   it('builds prompts that enforce AI-after-structure boundaries', () => {
     const messages = buildAiRuntimeMessages({
       provider: 'openai',
-      authMode: 'api_key',
       model: 'gpt-test',
       question: '我现在最该关注什么？',
       toolResults: [
@@ -146,7 +137,6 @@ Here is the structured answer:
     });
 
     expect(request.route).toBe('/api/providers/gemini/chat');
-    expect(request.body.authMode).toBe('api_key');
     expect(request.body.messages).toHaveLength(1);
   });
 });

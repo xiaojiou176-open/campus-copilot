@@ -38,7 +38,6 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
             grades: 1,
             messages: 0,
             events: 0,
-            alerts: 0,
           },
         },
         gradescope: {
@@ -63,7 +62,6 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
             grades: 2,
             messages: 0,
             events: 0,
-            alerts: 0,
           },
         },
         edstem: {
@@ -80,7 +78,6 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
             grades: 0,
             messages: 0,
             events: 0,
-            alerts: 0,
           },
         },
         myuw: {
@@ -94,7 +91,6 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
             grades: 0,
             messages: 0,
             events: 0,
-            alerts: 0,
           },
         },
       };
@@ -278,12 +274,10 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
               providers: {
                 openai: {
                   ready: Boolean(config?.ai?.bffBaseUrl),
-                  authMode: 'api_key',
                   reason: config?.ai?.bffBaseUrl ? 'configured' : 'missing_api_key',
                 },
                 gemini: {
                   ready: false,
-                  authMode: 'api_key',
                   reason: 'missing_api_key',
                 },
               },

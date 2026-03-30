@@ -126,7 +126,6 @@ describe('ai request wiring', () => {
     });
 
     expect(request.route).toBe('/api/providers/openai/chat');
-    expect(request.body.authMode).toBe('api_key');
     expect(request.body.messages[0]?.content).toContain('Never request raw DOM');
     expect(request.body.messages[1]?.content).toContain('Homework 5 48 小时内截止');
     expect(request.body.messages[1]?.content).toContain('current-view.md');

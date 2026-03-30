@@ -183,53 +183,73 @@ function probeExistingChromeTabs(targets) {
 
 function probeCdp(url) {
   return new Promise((resolve) => {
-    try {
-      const versionUrl = new URL('/json/version/', url);
-      const req = request(
-        versionUrl,
-        {
-          method: 'GET',
-          timeout: 1500,
-        },
-        (res) => {
-          const chunks = [];
-          res.on('data', (chunk) => chunks.push(chunk));
-          res.on('end', () => {
-            const body = Buffer.concat(chunks).toString('utf8');
-            let webSocketDebuggerUrl;
-            try {
-              webSocketDebuggerUrl = JSON.parse(body).webSocketDebuggerUrl;
-            } catch {
-              webSocketDebuggerUrl = undefined;
-            }
+    const endpoints = ['/json/version', '/json/version/'];
+    let index = 0;
 
-            resolve({
-              ok: res.statusCode === 200 && typeof webSocketDebuggerUrl === 'string' && webSocketDebuggerUrl.length > 0,
-              statusCode: res.statusCode,
-              body,
+    const attemptNext = (lastResult) => {
+      if (index >= endpoints.length) {
+        resolve(lastResult ?? { ok: false, error: 'cdp_probe_no_response' });
+        return;
+      }
+
+      try {
+        const versionUrl = new URL(endpoints[index], url);
+        index += 1;
+        const req = request(
+          versionUrl,
+          {
+            method: 'GET',
+            timeout: 1500,
+          },
+          (res) => {
+            const chunks = [];
+            res.on('data', (chunk) => chunks.push(chunk));
+            res.on('end', () => {
+              const body = Buffer.concat(chunks).toString('utf8');
+              let webSocketDebuggerUrl;
+              try {
+                webSocketDebuggerUrl = JSON.parse(body).webSocketDebuggerUrl;
+              } catch {
+                webSocketDebuggerUrl = undefined;
+              }
+
+              const result = {
+                ok: res.statusCode === 200 && typeof webSocketDebuggerUrl === 'string' && webSocketDebuggerUrl.length > 0,
+                statusCode: res.statusCode,
+                body,
+              };
+
+              if (result.ok) {
+                resolve(result);
+                return;
+              }
+
+              attemptNext(result);
             });
-          });
-        },
-      );
+          },
+        );
 
-      req.on('error', (error) => {
-        resolve({
+        req.on('error', (error) => {
+          attemptNext({
+            ok: false,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        });
+
+        req.on('timeout', () => {
+          req.destroy(new Error('cdp_probe_timeout'));
+        });
+
+        req.end();
+      } catch (error) {
+        attemptNext({
           ok: false,
           error: error instanceof Error ? error.message : String(error),
         });
-      });
+      }
+    };
 
-      req.on('timeout', () => {
-        req.destroy(new Error('cdp_probe_timeout'));
-      });
-
-      req.end();
-    } catch (error) {
-      resolve({
-        ok: false,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
+    attemptNext();
   });
 }
 

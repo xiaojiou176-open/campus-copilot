@@ -8,7 +8,6 @@ export interface ProviderStatusLike {
     ProviderId,
     {
       ready: boolean;
-      authMode: 'api_key';
       reason: string;
     }
   >;
