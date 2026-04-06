@@ -1,0 +1,47 @@
+name: CodeQL
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'codex/**'
+  schedule:
+    - cron: '23 11 * * 1'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions: {}
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read # CodeQL reads workflow metadata while preparing the analysis bundle.
+      contents: read # Checkout and autobuild only need repository contents.
+      security-events: write # Analyze uploads SARIF results into GitHub code scanning.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@c10b8064de6f491fea524254123dbe5e09572f13
+        with:
+          languages: javascript-typescript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@c10b8064de6f491fea524254123dbe5e09572f13
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@c10b8064de6f491fea524254123dbe5e09572f13
