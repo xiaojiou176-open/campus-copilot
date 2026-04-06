@@ -1,0 +1,30 @@
+{
+  "name": "@campus-copilot/web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4175",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4175",
+    "preview:test": "vite preview --host 127.0.0.1 --port 4175",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "test:interaction": "pnpm build && playwright test -c playwright.config.ts"
+  },
+  "dependencies": {
+    "@campus-copilot/ai": "workspace:*",
+    "@campus-copilot/exporter": "workspace:*",
+    "@campus-copilot/schema": "workspace:*",
+    "@campus-copilot/storage": "workspace:*",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.5"
+  }
+}

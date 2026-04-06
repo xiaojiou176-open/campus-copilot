@@ -1,0 +1,268 @@
+import type { ImportedWorkbenchSnapshot } from '@campus-copilot/storage';
+
+export const DEMO_IMPORTED_SNAPSHOT: ImportedWorkbenchSnapshot = {
+  generatedAt: '2026-04-03T09:00:00-07:00',
+  resources: [
+    {
+      id: 'edstem:resource:guide-1',
+      kind: 'resource',
+      site: 'edstem',
+      source: {
+        site: 'edstem',
+        resourceId: 'guide-1',
+        resourceType: 'resource',
+        url: 'https://edstem.org/us/courses/11/resources',
+      },
+      url: 'https://edstem.org/us/courses/11/resources',
+      courseId: 'edstem:course:cse312',
+      resourceKind: 'file',
+      title: 'Week 8 review sheet',
+      summary: 'Homework',
+      detail: 'PDF · 452 KB',
+      fileExtension: '.pdf',
+      sizeBytes: 452000,
+      releasedAt: '2026-04-02T09:00:00-07:00'
+    }
+  ],
+  assignments: [
+    {
+      id: 'canvas:assignment:hw5',
+      kind: 'assignment',
+      site: 'canvas',
+      source: {
+        site: 'canvas',
+        resourceId: 'hw5',
+        resourceType: 'assignment',
+        url: 'https://canvas.example.edu/courses/42/assignments/hw5',
+      },
+      url: 'https://canvas.example.edu/courses/42/assignments/hw5',
+      courseId: 'canvas:course:cse142',
+      title: 'Homework 5',
+      summary: 'Submitted · 92 / 100',
+      dueAt: '2026-04-04T23:59:00-07:00',
+      submittedAt: '2026-04-03T18:22:00-07:00',
+      status: 'submitted',
+      score: 92,
+      maxScore: 100,
+    },
+    {
+      id: 'gradescope:assignment:ps3',
+      kind: 'assignment',
+      site: 'gradescope',
+      source: {
+        site: 'gradescope',
+        resourceId: 'ps3',
+        resourceType: 'assignment',
+        url: 'https://www.gradescope.com/courses/17/assignments/ps3',
+      },
+      url: 'https://www.gradescope.com/courses/17/assignments/ps3',
+      courseId: 'gradescope:course:cse312',
+      title: 'Problem Set 3',
+      summary: 'CSE 312 · Graded 18 / 20',
+      detail: 'Q1 8 / 10 · Logic proof; Q2 10 / 10 · Correct',
+      dueAt: '2026-04-05T17:00:00-07:00',
+      status: 'graded',
+      score: 18,
+      maxScore: 20,
+    }
+  ],
+  announcements: [
+    {
+      id: 'canvas:announcement:milestone',
+      kind: 'announcement',
+      site: 'canvas',
+      source: {
+        site: 'canvas',
+        resourceId: 'milestone',
+        resourceType: 'announcement',
+        url: 'https://canvas.example.edu/courses/42/discussion_topics/77',
+      },
+      url: 'https://canvas.example.edu/courses/42/discussion_topics/77',
+      courseId: 'canvas:course:cse142',
+      title: 'Milestone update',
+      summary: 'Milestones and acceptance criteria were updated this week.',
+      postedAt: '2026-04-03T08:15:00-07:00',
+    }
+  ],
+  messages: [
+    {
+      id: 'edstem:message:office-hours',
+      kind: 'message',
+      site: 'edstem',
+      source: {
+        site: 'edstem',
+        resourceId: 'office-hours',
+        resourceType: 'thread',
+        url: 'https://edstem.org/us/courses/11/discussion/office-hours',
+      },
+      url: 'https://edstem.org/us/courses/11/discussion/office-hours',
+      courseId: 'edstem:course:cse312',
+      messageKind: 'thread',
+      threadId: 'office-hours',
+      title: 'Office hours follow-up',
+      summary: 'General / Logistics · Staff posted the updated review checklist.',
+      category: 'General',
+      subcategory: 'Logistics',
+      createdAt: '2026-04-03T07:40:00-07:00',
+      updatedAt: '2026-04-03T08:10:00-07:00',
+      instructorAuthored: true,
+      unread: true,
+    }
+  ],
+  grades: [
+    {
+      id: 'gradescope:grade:ps3',
+      kind: 'grade',
+      site: 'gradescope',
+      source: {
+        site: 'gradescope',
+        resourceId: 'ps3',
+        resourceType: 'grade',
+        url: 'https://www.gradescope.com/courses/17/assignments/ps3/submissions/99',
+      },
+      url: 'https://www.gradescope.com/courses/17/assignments/ps3/submissions/99',
+      courseId: 'gradescope:course:cse312',
+      assignmentId: 'gradescope:assignment:ps3',
+      title: 'Problem Set 3',
+      score: 18,
+      maxScore: 20,
+      gradedAt: '2026-04-03T08:35:00-07:00',
+      releasedAt: '2026-04-03T08:35:00-07:00',
+    }
+  ],
+  events: [
+    {
+      id: 'myuw:event:cse312-lecture',
+      kind: 'event',
+      site: 'myuw',
+      source: {
+        site: 'myuw',
+        resourceId: 'cse312-lecture',
+        resourceType: 'schedule_meeting',
+        url: 'https://canvas.uw.edu/courses/1883261',
+      },
+      url: 'https://canvas.uw.edu/courses/1883261',
+      courseId: 'myuw:course:cse312a',
+      eventKind: 'class',
+      title: 'CSE 312 A lecture',
+      summary: 'FOUNDATIONS COMP II',
+      location: 'Kane Hall · KNE · 110',
+      startAt: '2026-04-04T09:30:00-07:00',
+      endAt: '2026-04-04T10:20:00-07:00',
+      detail: 'lecture · Kane Hall · KNE · 110',
+    },
+    {
+      id: 'myuw:event:cse312-final',
+      kind: 'event',
+      site: 'myuw',
+      source: {
+        site: 'myuw',
+        resourceId: 'cse312-final',
+        resourceType: 'schedule_final_exam',
+        url: 'https://canvas.uw.edu/courses/1883261',
+      },
+      url: 'https://canvas.uw.edu/courses/1883261',
+      courseId: 'myuw:course:cse312a',
+      eventKind: 'exam',
+      title: 'CSE 312 A final exam',
+      summary: 'FOUNDATIONS COMP II',
+      location: 'Kane Hall · KNE · 110',
+      startAt: '2026-06-10T08:30:00-07:00',
+      endAt: '2026-06-10T10:20:00-07:00',
+      detail: 'final exam · Kane Hall · KNE · 110',
+    }
+  ],
+  syncRuns: [
+    {
+      id: 'sync-run:canvas:1',
+      site: 'canvas',
+      status: 'success',
+      outcome: 'success',
+      startedAt: '2026-04-03T08:00:00-07:00',
+      completedAt: '2026-04-03T08:02:00-07:00',
+      changeCount: 3,
+    },
+    {
+      id: 'sync-run:gradescope:1',
+      site: 'gradescope',
+      status: 'success',
+      outcome: 'success',
+      startedAt: '2026-04-03T08:05:00-07:00',
+      completedAt: '2026-04-03T08:06:00-07:00',
+      changeCount: 2,
+    },
+    {
+      id: 'sync-run:edstem:1',
+      site: 'edstem',
+      status: 'success',
+      outcome: 'success',
+      startedAt: '2026-04-03T08:08:00-07:00',
+      completedAt: '2026-04-03T08:09:00-07:00',
+      changeCount: 1,
+    },
+    {
+      id: 'sync-run:myuw:1',
+      site: 'myuw',
+      status: 'success',
+      outcome: 'success',
+      startedAt: '2026-04-03T08:10:00-07:00',
+      completedAt: '2026-04-03T08:12:00-07:00',
+      changeCount: 2,
+    }
+  ],
+  changeEvents: [
+    {
+      id: 'change-event:canvas:hw5',
+      runId: 'sync-run:canvas:1',
+      site: 'canvas',
+      changeType: 'status_changed',
+      occurredAt: '2026-04-03T08:02:00-07:00',
+      title: 'Homework 5 status changed',
+      summary: 'Submitted draft is already in Canvas.',
+      entityId: 'canvas:assignment:hw5',
+    },
+    {
+      id: 'change-event:edstem:office-hours',
+      runId: 'sync-run:edstem:1',
+      site: 'edstem',
+      changeType: 'message_unread',
+      occurredAt: '2026-04-03T08:09:00-07:00',
+      title: 'New EdStem update',
+      summary: 'Staff posted the updated review checklist.',
+      entityId: 'edstem:message:office-hours',
+    }
+  ],
+};
+
+export function snapshotFromImportedJson(raw: string): ImportedWorkbenchSnapshot {
+  const parsed = JSON.parse(raw) as {
+    generatedAt?: string;
+    data?: Partial<ImportedWorkbenchSnapshot>;
+  } & Partial<ImportedWorkbenchSnapshot>;
+
+  if (parsed.data && typeof parsed.data === 'object') {
+    return {
+      generatedAt: parsed.generatedAt ?? parsed.data.generatedAt ?? new Date().toISOString(),
+      resources: parsed.data.resources,
+      assignments: parsed.data.assignments,
+      announcements: parsed.data.announcements,
+      messages: parsed.data.messages,
+      grades: parsed.data.grades,
+      events: parsed.data.events,
+      syncRuns: parsed.data.syncRuns,
+      changeEvents: parsed.data.changeEvents,
+    };
+  }
+
+  return {
+    generatedAt: parsed.generatedAt ?? new Date().toISOString(),
+    resources: parsed.resources,
+    assignments: parsed.assignments,
+    announcements: parsed.announcements,
+    messages: parsed.messages,
+    grades: parsed.grades,
+    events: parsed.events,
+    syncRuns: parsed.syncRuns,
+    changeEvents: parsed.changeEvents,
+  };
+}

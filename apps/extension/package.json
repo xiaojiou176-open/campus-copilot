@@ -1,0 +1,30 @@
+{
+  "name": "@campus-copilot/extension",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt dev",
+    "build": "rm -rf .output dist/chrome-mv3 && wxt build --level error && bash ../../scripts/export-extension-build.sh",
+    "typecheck": "wxt prepare && tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts --passWithNoTests",
+    "test:smoke": "bash ../../scripts/run-extension-smoke.sh"
+  },
+  "dependencies": {
+    "@campus-copilot/adapters-canvas": "workspace:*",
+    "@campus-copilot/adapters-edstem": "workspace:*",
+    "@campus-copilot/adapters-gradescope": "workspace:*",
+    "@campus-copilot/adapters-myuw": "workspace:*",
+    "@campus-copilot/ai": "workspace:*",
+    "@campus-copilot/core": "workspace:*",
+    "@campus-copilot/exporter": "workspace:*",
+    "@campus-copilot/schema": "workspace:*",
+    "@campus-copilot/storage": "workspace:*",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "wxt": "^0.21.0"
+  }
+}

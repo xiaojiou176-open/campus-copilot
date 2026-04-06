@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Campus Copilot favicon</title>
+  <desc id="desc">A rounded green badge with a light academic ledger mark.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f5d4b"/>
+      <stop offset="100%" stop-color="#27483d"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#bg)"/>
+  <path d="M41 34h25c11 0 18 6 18 16 0 7-4 12-10 14 8 2 13 8 13 16 0 11-8 18-21 18H41V34zm20 27c8 0 12-3 12-9 0-5-4-8-11-8H52v17h9zm3 27c8 0 12-3 12-9 0-6-5-9-13-9H52v18h12z" fill="#f5f4ee"/>
+  <path d="M91 37v54" stroke="#dce8e1" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+  <circle cx="91" cy="95" r="6" fill="#dce8e1"/>
+</svg>
