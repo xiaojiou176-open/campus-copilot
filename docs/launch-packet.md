@@ -104,7 +104,6 @@ That pair keeps two things separate:
 
 These are still outside repo-local completion:
 
-- custom GitHub social preview upload in repository settings
 - package publishing / release-channel decision
 - GitHub release page click-through
 - demo/video recording and publication

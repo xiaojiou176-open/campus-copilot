@@ -48,7 +48,7 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run verify
+      - name: Run hosted verify
         env:
           CI: true
-        run: pnpm verify
+        run: pnpm verify:hosted

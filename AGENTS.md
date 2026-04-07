@@ -40,16 +40,19 @@
 
 ## 当前推荐门禁
 
-任何声称“本地已完成”的改动，至少要附带这些新鲜结果：
+任何声称“本地默认 gate 已完成”的改动，至少要附带这些新鲜结果：
 
 ```bash
-pnpm typecheck
-pnpm test
-pnpm --filter @campus-copilot/extension build
-pnpm --filter @campus-copilot/extension exec playwright test
+pnpm verify
 ```
 
-如果碰到 BFF 或 API 入口，再补：
+如果改动触及 extension 的用户可见交互，或你要对齐 GitHub-hosted required lane，再补：
+
+```bash
+pnpm verify:hosted
+```
+
+如果碰到 BFF 或 API 入口，再补 targeted 证据：
 
 ```bash
 pnpm --filter @campus-copilot/api test

@@ -159,11 +159,32 @@ Use [docs/verification-matrix.md](docs/verification-matrix.md) as the single sou
 Manual live/browser diagnostics only inspect the repo-owned Chrome lane through CDP or DevTools target surfaces.
 They do **not** fall back to AppleScript, GUI automation, or arbitrary desktop Chrome windows.
 
-The deterministic repository gate is:
+The default local deterministic gate is:
 
 ```bash
 pnpm verify
 ```
+
+That local gate intentionally stays lighter than the hosted PR lane:
+
+- it covers governance, typecheck, tests, local BFF health, and the build contracts for the web and extension surfaces
+- it does **not** require a local Playwright browser download just to keep the default pre-push path usable
+
+The GitHub-hosted required lane re-runs the heavier browser contract through:
+
+```bash
+pnpm verify:hosted
+```
+
+Use this five-layer split as the default operating model:
+
+| Layer | Default entry | What it owns |
+| :-- | :-- | :-- |
+| `pre-commit` | `pnpm verify:governance` + `actionlint` | fast governance and workflow hygiene |
+| `pre-push` | `pnpm verify` + history secret scans | local deterministic repo gate without hosted-only browser setup |
+| `hosted` | GitHub `Verify` / `Security Hygiene` / `Dependency Review` / `CodeQL` on PRs | required remote re-checks on GitHub-hosted runners |
+| `nightly` | `pnpm verify:nightly` plus scheduled `CodeQL` | heavier deterministic drift checks without slowing every push |
+| `manual` | `pnpm proof:public`, provider/browser proof lanes, storefront audit | environment-dependent proof and owner-side closeout |
 
 If you want the same closeout lane to run before local commits and pushes, install the repo-owned hooks:
 
@@ -171,7 +192,7 @@ If you want the same closeout lane to run before local commits and pushes, insta
 pnpm hooks:install
 ```
 
-Those hooks intentionally split the work into two layers:
+Those hooks intentionally split the local hook path into two layers:
 
 - `pre-commit`: `pnpm verify:governance` plus `actionlint`
 - `pre-push`: `pnpm verify` plus reachable-git-history secret scans through `gitleaks` and `trufflehog`

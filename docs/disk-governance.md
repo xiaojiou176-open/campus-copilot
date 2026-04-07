@@ -170,10 +170,8 @@ The required sequence is:
 3. Delete `node_modules`
 4. Re-run `pnpm install --frozen-lockfile`
 5. Re-run the deterministic verification bundle:
-   - `pnpm typecheck`
-   - `pnpm test`
-   - `pnpm --filter @campus-copilot/extension build`
-   - `pnpm --filter @campus-copilot/extension exec playwright test`
+   - `pnpm verify`
+   - if you also need the GitHub-hosted browser contract on the same machine, install the managed Playwright browser and run `pnpm verify:hosted`
 
 Current policy:
 

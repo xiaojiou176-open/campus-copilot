@@ -76,6 +76,8 @@
     "check:root-hygiene": "node scripts/check-root-hygiene.mjs",
     "verify:governance": "node scripts/check-docs-ssot.mjs && node scripts/check-consumer-surfaces.mjs && node scripts/check-verification-claims.mjs && node scripts/check-public-surface.mjs && node scripts/check-actions-pinning.mjs && node scripts/check-english-canonical.mjs && node scripts/check-logging-schema.mjs && node scripts/check-host-safety-contract.mjs && node scripts/check-sensitive-surface.mjs && node scripts/check-sensitive-history.mjs && node scripts/check-runtime-artifacts.mjs && node scripts/check-root-hygiene.mjs",
     "verify": "bash scripts/verify.sh",
+    "verify:hosted": "bash scripts/verify-hosted.sh",
+    "verify:nightly": "bash scripts/verify-nightly.sh",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm test:workspaces && pnpm test:repo"
   },

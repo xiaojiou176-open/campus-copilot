@@ -57,13 +57,19 @@ Use:
 pnpm verify
 ```
 
+If you need the hosted PR-equivalent gate on a machine that already has the managed Playwright browser installed, use:
+
+```bash
+pnpm verify:hosted
+```
+
 What it proves:
 
 - repository typecheck
 - unit/integration tests in the repo
 - local BFF health smoke
 - extension build
-- deterministic Playwright smoke
+- and, on the hosted lane, deterministic Playwright smoke
 
 What it does **not** prove:
 

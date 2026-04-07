@@ -8,6 +8,18 @@ Think of it like a building inspection board:
 - some checks are manual specialist inspections
 - some checks are useful local probes, but not merge blockers
 
+## Five-Layer Contract
+
+Use this split before you decide where a new check belongs:
+
+| Layer | Default entry | Purpose |
+| :-- | :-- | :-- |
+| `pre-commit` | `pnpm verify:governance` + `actionlint` | keep docs/governance/workflow drift out of local commits |
+| `pre-push` | `pnpm verify` + `pnpm scan:git-history:secrets` | keep the default local path deterministic and lighter than hosted CI |
+| `hosted` | GitHub `Verify`, `Security Hygiene`, `Dependency Review`, and PR `CodeQL` | required GitHub-hosted re-checks for pull requests |
+| `nightly` | `pnpm verify:nightly` plus scheduled `CodeQL` | recurring deep analysis without bloating every PR lane |
+| `manual` | `pnpm proof:public`, `pnpm smoke:*`, live/browser lanes, storefront audit | environment-dependent, operator-dependent, or owner-side proof |
+
 ## Verification Lanes
 
 | Command / Lane | Type | Default owner | Required for PR gate | What it proves | What it does not prove |
@@ -17,8 +29,10 @@ Think of it like a building inspection board:
 | `pnpm test:coverage` | optional local coverage audit | local developer | No | aggregated workspace Vitest coverage summary for repo-local code paths, plus automated test-pyramid context counts for workspace Vitest, repo `node:test`, and extension Playwright smoke | live site behavior or a guaranteed full-system coverage percentage |
 | `pnpm smoke:api` | deterministic local smoke | contributor / CI | Yes | local BFF health and provider status endpoint wiring | real provider round-trip |
 | `pnpm --filter @campus-copilot/extension build` | deterministic repo gate | contributor / CI | Yes | extension can build | real extension install/use |
-| `pnpm --filter @campus-copilot/extension exec playwright test` | deterministic repo smoke | contributor / CI | Yes | built extension UI contract under controlled mocks, including decision surfaces and citation-aware answer rendering on the repo-owned headless Chromium lane | real site sync, the maintainer's real Chrome profile, or full extension E2E |
-| `pnpm verify` | deterministic umbrella gate | contributor / CI | Yes | required repository gate bundle | manual live or provider proofs not included in `verify` |
+| `pnpm --filter @campus-copilot/extension exec playwright test` | deterministic hosted browser smoke | contributor / CI | Yes | built extension UI contract under controlled mocks, including decision surfaces and citation-aware answer rendering on the repo-owned headless Chromium lane | real site sync, the maintainer's real Chrome profile, or full extension E2E |
+| `pnpm verify` | deterministic local default gate | contributor | No | governance, typecheck, repository tests, local BFF health smoke, web build, and extension build on the current machine | hosted-only browser smoke, manual live proofs, or provider-dependent smoke |
+| `pnpm verify:hosted` | deterministic hosted gate | CI | Yes | the full required PR gate on GitHub-hosted runners, including the default local gate plus extension Playwright smoke after managed browser install | manual live or provider proofs not explicitly promoted into hosted CI |
+| `pnpm verify:nightly` | deterministic scheduled gate | CI | No | hosted verify plus coverage audit, repo-public proof, and standalone web interaction smoke on managed Chromium | live/browser/provider/manual evidence or owner-only publication steps |
 | `pnpm smoke:provider` | environment-dependent smoke | local developer | No | current environment can complete a provider round-trip | stable provider coverage or required CI proof |
 | `pnpm smoke:sidepanel` | environment-dependent smoke | local developer | No | built sidepanel page can talk to current BFF/provider path | full extension E2E |
 | `pnpm --filter @campus-copilot/web build` | deterministic repo gate | contributor / CI | Yes | standalone web surface bundles on the same workspace contract | real user interaction or live browser/session behavior |
@@ -91,6 +105,7 @@ Manual means:
 
 The repository must not claim that `pnpm verify` covers:
 
+- `pnpm --filter @campus-copilot/extension exec playwright test`
 - `pnpm smoke:provider`
 - `pnpm smoke:sidepanel`
 - `pnpm smoke:support`
@@ -119,7 +134,9 @@ Default repository CI should prioritize:
 
 That means:
 
-- do keep `verify`
+- do keep a lighter local `pnpm verify` as the default pre-push gate
+- do keep `pnpm verify:hosted` as the GitHub-hosted required lane
+- do keep `pnpm verify:nightly` for scheduled deterministic drift checks that are worth running, but not worth blocking every PR
 - do keep default required lanes on GitHub-hosted infrastructure
 - do keep deterministic docs/governance checks
 - do keep deterministic hygiene checks that protect repo-root and runtime artifact boundaries
