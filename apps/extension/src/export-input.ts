@@ -12,16 +12,12 @@ import type {
 import { getUiText, type ResolvedUiLanguage } from './i18n';
 import { SITE_LABELS } from './surface-shell-model';
 import {
-  formatAlertSummary,
-  formatAlertTitle,
-  formatChangeEventSummary,
-  formatChangeEventTitle,
-  formatFocusReason,
-  formatTimelineSummary,
-  formatWeeklyLoadHighlights,
-  formatWeeklyLoadSummary,
-  localizeResourceList,
-} from './surface-shell-view-helpers';
+  buildLocalizedAlertPresentation,
+  buildLocalizedChangeEventPresentation,
+  buildLocalizedFocusQueuePresentation,
+  buildLocalizedRecentUpdatesPresentation,
+  buildLocalizedWeeklyLoadPresentation,
+} from './workbench-presentation';
 
 type BuildWorkbenchExportInputArgs = {
   preset: ExportPreset;
@@ -84,34 +80,11 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
     changeEvents: args.changeEvents,
     presentation: {
       viewTitle: buildViewTitle(args.preset, args.filters, text),
-      alerts: args.alerts.map((alert) => ({
-        ...alert,
-        title: formatAlertTitle(alert, args.uiLanguage),
-        summary: formatAlertSummary(alert, args.uiLanguage),
-      })),
-      recentUpdates: (args.recentUpdates?.items ?? []).map((entry) => ({
-        ...entry,
-        summary: formatTimelineSummary(entry, args.uiLanguage) ?? entry.summary,
-      })),
-      focusQueue: args.focusQueue.map((item) => ({
-        ...item,
-        reasons: item.reasons.map((reason) => ({
-          ...reason,
-          label: text.priorityReasonLabels[reason.code],
-          detail: formatFocusReason(reason, item, args.uiLanguage),
-        })),
-        blockedBy: localizeResourceList(item.blockedBy, args.uiLanguage),
-      })),
-      weeklyLoad: args.weeklyLoad.map((entry) => ({
-        ...entry,
-        highlights: formatWeeklyLoadHighlights(entry, args.uiLanguage),
-        summary: formatWeeklyLoadSummary(entry, args.uiLanguage),
-      })),
-      changeEvents: args.changeEvents.map((event) => ({
-        ...event,
-        title: formatChangeEventTitle(event, args.uiLanguage),
-        summary: formatChangeEventSummary(event, args.uiLanguage, text),
-      })),
+      alerts: buildLocalizedAlertPresentation(args.alerts, args.uiLanguage),
+      recentUpdates: buildLocalizedRecentUpdatesPresentation(args.recentUpdates?.items ?? [], args.uiLanguage),
+      focusQueue: buildLocalizedFocusQueuePresentation(args.focusQueue, args.uiLanguage),
+      weeklyLoad: buildLocalizedWeeklyLoadPresentation(args.weeklyLoad, args.uiLanguage),
+      changeEvents: buildLocalizedChangeEventPresentation(args.changeEvents, args.uiLanguage),
     },
   });
 }
