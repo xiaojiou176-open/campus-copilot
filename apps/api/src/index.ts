@@ -4,7 +4,7 @@ import { z } from 'zod';
 import {
   CampusAiAskRequestSchema,
   ChatMessageSchema,
-  parseAiStructuredAnswer,
+  resolveAiAnswer,
   type CampusAiAskRequest,
   type SwitchyardRuntimeProvider,
 } from '@campus-copilot/ai';
@@ -303,17 +303,18 @@ export async function handleProviderProxy(
       });
     }
 
-    const answerText = extractProviderAnswer(payload.provider, responseJson);
-    const structuredAnswer =
-      typeof answerText === 'string' ? parseAiStructuredAnswer(answerText) : undefined;
+    const resolvedAnswer = resolveAiAnswer({
+      answerText: extractProviderAnswer(payload.provider, responseJson),
+    });
 
     return jsonResponse(response.status, {
       ok: response.ok,
       provider: payload.provider,
       runtimePath: 'direct',
       forwardedStatus: response.status,
-      answerText,
-      structuredAnswer,
+      answerText: resolvedAnswer.answerText,
+      structuredAnswer: resolvedAnswer.structuredAnswer,
+      citationCoverage: resolvedAnswer.citationCoverage,
       error: response.ok ? undefined : 'provider_upstream_error',
     });
   } catch (error) {
@@ -365,14 +366,14 @@ export async function handleSwitchyardProxy(
       });
     }
 
-    const answerText =
-      responseJson &&
-      typeof responseJson === 'object' &&
-      typeof (responseJson as { outputText?: unknown }).outputText === 'string'
-        ? (responseJson as { outputText: string }).outputText
-        : undefined;
-    const structuredAnswer =
-      typeof answerText === 'string' ? parseAiStructuredAnswer(answerText) : undefined;
+    const resolvedAnswer = resolveAiAnswer({
+      answerText:
+        responseJson &&
+        typeof responseJson === 'object' &&
+        typeof (responseJson as { outputText?: unknown }).outputText === 'string'
+          ? (responseJson as { outputText: string }).outputText
+          : undefined,
+    });
 
     return jsonResponse(response.status, {
       ok: response.ok,
@@ -381,8 +382,9 @@ export async function handleSwitchyardProxy(
       runtimeProvider: payload.provider,
       lane: payload.lane ?? 'web',
       forwardedStatus: response.status,
-      answerText,
-      structuredAnswer,
+      answerText: resolvedAnswer.answerText,
+      structuredAnswer: resolvedAnswer.structuredAnswer,
+      citationCoverage: resolvedAnswer.citationCoverage,
       error: response.ok ? undefined : 'provider_upstream_error',
     });
   } catch (error) {

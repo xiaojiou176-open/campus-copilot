@@ -90,6 +90,55 @@ for (const [path, snippet] of requiredMentions) {
   }
 }
 
+const orderedHeadingGroups = [
+  {
+    path: 'README.md',
+    headings: [
+      '## Start Here In 60 Seconds',
+      '## Why This Exists',
+      '## What Changes After The First Sync',
+      '## What To Do First',
+      '## Current Product Shape',
+      '## Repo-Local Proof Path',
+      '## Student Questions This Repo Tries To Answer',
+      '## Quickstart',
+      '## Builder Quick Paths',
+    ],
+  },
+  {
+    path: 'docs/README.md',
+    headings: [
+      '## Start Here By Intent',
+      '## Default Newcomer Route',
+      '## Proof And Launch Lane',
+      '## Builder Lane',
+    ],
+  },
+];
+
+for (const group of orderedHeadingGroups) {
+  if (!existsSync(group.path)) {
+    failures.push(`missing_required_doc:${group.path}`);
+    continue;
+  }
+
+  const content = readFileSync(group.path, 'utf8');
+  let lastIndex = -1;
+  for (const heading of group.headings) {
+    const index = content.indexOf(heading);
+    if (index < 0) {
+      failures.push(`missing_required_heading:${group.path}:${heading}`);
+      continue;
+    }
+
+    if (index <= lastIndex) {
+      failures.push(`heading_order_drift:${group.path}:${heading}`);
+    }
+
+    lastIndex = Math.max(lastIndex, index);
+  }
+}
+
 if (existsSync('docs/🧩 校园学习平台 AI 插件方案与网页私有 API 逆向工作流.md')) {
   failures.push('orphan_doc_still_present:docs/🧩 校园学习平台 AI 插件方案与网页私有 API 逆向工作流.md');
 }

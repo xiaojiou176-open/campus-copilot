@@ -1,12 +1,24 @@
 # Public Distribution Scoreboard
 
-This file is the canonical public-distribution truth board for Campus Copilot.
+This file is the canonical public-distribution truth board for Campus Copilot's
+supporting publication layer.
+
+It is not a front-door overview of the product.
+
+Read it after the product identity, workbench proof, or builder surface is
+already understood.
 
 Think of it like the label on a shipping dock:
 
 - it tells you which surfaces are already packed with a real repo-local install path
 - which ones are still only preview-grade inside this repository
 - and which claims would require an external carrier before anyone can say they are delivered
+
+In other words:
+
+- repo-local proof lives here
+- owner-only publication and official-listing boundaries live here
+- this file should reduce overclaiming, not become the main story visitors see first
 
 ## Threshold Rules
 
@@ -69,4 +81,6 @@ Latest checked against official sources on `2026-04-05 PDT`.
 | Claude Code official IDE/public face | Yes | [docs.anthropic.com/en/docs/claude-code/ide-integrations](https://docs.anthropic.com/en/docs/claude-code/ide-integrations) | The repo already ships strong generic MCP and sidecar bundles for Claude Code / Claude Desktop style workflows. | I did not confirm an official third-party marketplace/listing lane for this generic repo bundle from Anthropic's current official docs. |
 | OpenClaw ClawHub / bundle face | Yes | [docs.openclaw.ai/tools/clawhub](https://docs.openclaw.ai/tools/clawhub) and [Plugin Manifest](https://docs.openclaw.ai/plugins/manifest) | The repo already ships a compatible Claude-style bundle layout via its existing `skills/` root and read-only OpenClaw route. | No official OpenClaw / ClawHub publication has been completed yet, so the truthful state is still repo bundle rather than officially listed. |
 
-If the question is no longer “which surfaces are real?” but “which one should leave the repository first, and what exact owner step remains?”, continue with [`15-publication-submission-packet.md`](15-publication-submission-packet.md).
+If the question is no longer "which surfaces are real?" but "which one should
+leave the repository first, and what exact owner step remains?", continue with
+[`15-publication-submission-packet.md`](15-publication-submission-packet.md).

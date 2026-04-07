@@ -1,15 +1,29 @@
 # Publication Submission Packet
 
-This file turns the current public-distribution truth into an owner-ready submission packet.
+This file turns the current public-distribution truth into an owner-ready
+submission packet.
+
+It is an owner-action follow-up document, not a general front-door explainer.
 
 Think of it like the shipping manifest after the loading dock has already been audited:
 
 - [`14-public-distribution-scoreboard.md`](14-public-distribution-scoreboard.md) says which boxes are real
 - this file says which box should go out first, where it could go, and what still requires an owner-controlled action
 
+Use it only after the repo-local proof and distribution scoreboard are already
+understood.
+
 Use this file when the question is no longer "is the package real?" but:
 
 > Which public-ready surface should leave the repository first, and what exact owner work is still required?
+
+## Role Boundary
+
+This packet is for owner-only publication sequencing:
+
+- repo-local proof belongs in the scoreboard
+- official listing or marketplace outcomes belong to upstream platforms
+- this file only narrows the remaining owner-controlled submission path
 
 ## Current Candidate Set
 

@@ -97,6 +97,9 @@ importers:
       '@campus-copilot/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@campus-copilot/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@campus-copilot/exporter':
         specifier: workspace:*
         version: link:../../packages/exporter
@@ -203,6 +206,12 @@ importers:
       '@campus-copilot/adapters-base':
         specifier: workspace:*
         version: link:../adapters-base
+      '@campus-copilot/ai':
+        specifier: workspace:*
+        version: link:../ai
+      '@campus-copilot/exporter':
+        specifier: workspace:*
+        version: link:../exporter
       '@campus-copilot/schema':
         specifier: workspace:*
         version: link:../schema

@@ -9,6 +9,7 @@
     "types": ["node", "react", "react-dom/client"],
     "paths": {
       "@campus-copilot/ai": ["packages/ai/src/index.ts"],
+      "@campus-copilot/core": ["packages/core/src/index.ts"],
       "@campus-copilot/exporter": ["packages/exporter/src/index.ts"],
       "@campus-copilot/schema": ["packages/schema/src/index.ts"],
       "@campus-copilot/storage": ["packages/storage/src/index.ts"]

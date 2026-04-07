@@ -14,6 +14,7 @@ export type AiResponsePayload = {
   ok?: boolean;
   answerText?: string;
   structuredAnswer?: unknown;
+  citationCoverage?: 'structured_citations' | 'uncited_fallback' | 'no_answer';
   error?: string;
 };
 

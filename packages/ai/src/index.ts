@@ -62,6 +62,8 @@ export const AiStructuredAnswerSchema = z
   })
   .strict();
 export type AiStructuredAnswer = z.infer<typeof AiStructuredAnswerSchema>;
+export const AiCitationCoverageSchema = z.enum(['structured_citations', 'uncited_fallback', 'no_answer']);
+export type AiCitationCoverage = z.infer<typeof AiCitationCoverageSchema>;
 
 export const HealthPayloadSchema = z
   .object({
@@ -126,6 +128,7 @@ export const CampusAiAskResponseSchema = z
     forwardedStatus: z.number().int().optional(),
     answerText: z.string().optional(),
     structuredAnswer: AiStructuredAnswerSchema.optional(),
+    citationCoverage: AiCitationCoverageSchema.optional(),
     error: z.string().optional(),
     message: z.string().optional(),
     requestId: z.string().optional(),
@@ -157,6 +160,12 @@ export interface ProviderProxyRequest {
         messages: ChatMessage[];
         lane?: SwitchyardLane;
       };
+}
+
+export interface ResolvedAiAnswer {
+  answerText?: string;
+  structuredAnswer?: AiStructuredAnswer;
+  citationCoverage: AiCitationCoverage;
 }
 
 function extractCodeFenceBody(raw: string) {
@@ -269,6 +278,33 @@ export function parseAiStructuredAnswer(raw: string): AiStructuredAnswer | undef
   }
 
   return undefined;
+}
+
+export function resolveAiAnswer(input: {
+  answerText?: string;
+  structuredAnswer?: unknown;
+  citationCoverage?: unknown;
+}): ResolvedAiAnswer {
+  const answerText = typeof input.answerText === 'string' && input.answerText.trim() ? input.answerText : undefined;
+  const explicitStructured = AiStructuredAnswerSchema.safeParse(input.structuredAnswer);
+  const structuredAnswer = explicitStructured.success
+    ? explicitStructured.data
+    : answerText
+      ? parseAiStructuredAnswer(answerText)
+      : undefined;
+  const explicitCoverage = AiCitationCoverageSchema.safeParse(input.citationCoverage);
+
+  return {
+    answerText,
+    structuredAnswer,
+    citationCoverage: explicitCoverage.success
+      ? explicitCoverage.data
+      : structuredAnswer
+        ? 'structured_citations'
+        : answerText
+          ? 'uncited_fallback'
+          : 'no_answer',
+  };
 }
 
 const TOOL_DEFINITIONS: ToolDefinition[] = [

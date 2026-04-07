@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
-  buildAiRuntimeMessages,
-  createProviderProxyRequest,
-  parseAiStructuredAnswer,
+  resolveAiAnswer,
   type AiStructuredAnswer,
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
 } from '@campus-copilot/ai';
+import { buildWorkbenchAiProxyRequest, buildWorkbenchExportInput } from '@campus-copilot/core';
 import {
   createExportArtifact,
   type ExportArtifact,
   type ExportFormat,
-  type ExportInput,
   type ExportPreset,
 } from '@campus-copilot/exporter';
 import type { Site } from '@campus-copilot/schema';
@@ -177,6 +175,7 @@ export function App() {
   const [aiPending, setAiPending] = useState(false);
   const [aiAnswer, setAiAnswer] = useState<string>();
   const [aiStructured, setAiStructured] = useState<AiStructuredAnswer>();
+  const [aiNotice, setAiNotice] = useState<string>();
   const [aiError, setAiError] = useState<string>();
 
   useEffect(() => {
@@ -259,31 +258,31 @@ export function App() {
 
   const topSyncRun = latestSyncRuns[0];
 
-  function makeExportInput(generatedAt: string): ExportInput {
-    const siteLabel = filters.site === 'all' ? 'All sites' : SITE_LABELS[filters.site];
-    return {
-      generatedAt,
-      viewTitle: `Web workbench (${siteLabel})`,
-      resources: currentResources,
-      assignments: currentAssignments,
-      announcements: currentAnnouncements,
-      messages: currentMessages,
-      grades: currentGrades,
-      events: currentEvents,
-      alerts: currentAlerts,
-      timelineEntries: recentUpdates?.items ?? [],
-      focusQueue,
-      weeklyLoad,
-      syncRuns: latestSyncRuns,
-      changeEvents: recentChangeEvents,
-    };
-  }
-
   function handleExport(preset: ExportPreset) {
+    const siteLabel = filters.site === 'all' ? 'All sites' : SITE_LABELS[filters.site];
     const artifact = createExportArtifact({
       preset,
       format: exportFormat,
-      input: makeExportInput(now),
+      input: buildWorkbenchExportInput({
+        preset,
+        generatedAt: now,
+        filters,
+        resources: currentResources,
+        assignments: currentAssignments,
+        announcements: currentAnnouncements,
+        messages: currentMessages,
+        grades: currentGrades,
+        events: currentEvents,
+        alerts: currentAlerts,
+        recentUpdates,
+        focusQueue,
+        weeklyLoad,
+        syncRuns: latestSyncRuns,
+        changeEvents: recentChangeEvents,
+        presentation: {
+          viewTitle: `Web workbench (${siteLabel})`,
+        },
+      }),
     });
     downloadArtifact(artifact);
     setFeedback(`Downloaded ${artifact.filename} from the same exporter contract used by the extension.`);
@@ -311,50 +310,57 @@ export function App() {
 
     setAiPending(true);
     setAiError(undefined);
+    setAiNotice(undefined);
 
     try {
+      const siteLabel = filters.site === 'all' ? 'All sites' : SITE_LABELS[filters.site];
       const currentViewExport = createExportArtifact({
         preset: 'current_view',
         format: 'markdown',
-        input: makeExportInput(now),
+        input: buildWorkbenchExportInput({
+          preset: 'current_view',
+          generatedAt: now,
+          filters,
+          resources: currentResources,
+          assignments: currentAssignments,
+          announcements: currentAnnouncements,
+          messages: currentMessages,
+          grades: currentGrades,
+          events: currentEvents,
+          alerts: currentAlerts,
+          recentUpdates,
+          focusQueue,
+          weeklyLoad,
+          syncRuns: latestSyncRuns,
+          changeEvents: recentChangeEvents,
+          presentation: {
+            viewTitle: `Web workbench (${siteLabel})`,
+          },
+        }),
       });
 
-      const runtime = buildAiRuntimeMessages({
+      const request = buildWorkbenchAiProxyRequest({
         provider,
         model,
         switchyardProvider,
         switchyardLane,
         question,
-        toolResults: [
-          { name: 'get_today_snapshot', payload: todaySnapshot ?? {} },
-          { name: 'get_recent_updates', payload: recentUpdates?.items ?? [] },
-          { name: 'get_priority_alerts', payload: priorityAlerts },
-          {
-            name: 'export_current_view',
-            payload: {
-              filename: currentViewExport.filename,
-              format: currentViewExport.format,
-              content: currentViewExport.content,
-              decisionContext: {
-                focusQueue,
-                weeklyLoad,
-                syncRuns: latestSyncRuns,
-                recentChanges: recentChangeEvents,
-              },
-            },
+        todaySnapshot:
+          todaySnapshot ?? {
+            totalAssignments: 0,
+            dueSoonAssignments: 0,
+            recentUpdates: 0,
+            newGrades: 0,
+            riskAlerts: 0,
+            syncedSites: 0,
           },
-        ],
-      });
-
-      const request = createProviderProxyRequest({
-        provider,
-        model,
-        switchyardProvider,
-        switchyardLane,
-        messages: [
-          { role: 'system', content: runtime.systemPrompt },
-          { role: 'user', content: runtime.userPrompt },
-        ],
+        recentUpdates: recentUpdates?.items ?? [],
+        alerts: priorityAlerts,
+        focusQueue,
+        weeklyLoad,
+        syncRuns: latestSyncRuns,
+        recentChanges: recentChangeEvents,
+        currentViewExport,
       });
 
       const response = await fetch(`${aiBaseUrl}${request.route}`, {
@@ -369,18 +375,34 @@ export function App() {
         answerText?: string;
         error?: string;
         structuredAnswer?: AiStructuredAnswer;
+        citationCoverage?: 'structured_citations' | 'uncited_fallback' | 'no_answer';
       };
+      const resolvedAnswer = resolveAiAnswer({
+        answerText: payload.answerText,
+        structuredAnswer: payload.structuredAnswer,
+        citationCoverage: payload.citationCoverage,
+      });
 
-      if (!response.ok || payload.error || !payload.answerText) {
+      if (!response.ok || payload.error || !resolvedAnswer.answerText) {
         throw new Error(payload.error ?? 'The provider did not return a displayable answer.');
       }
 
-      setAiAnswer(payload.answerText);
-      setAiStructured(payload.structuredAnswer ?? parseAiStructuredAnswer(payload.answerText));
-      setFeedback('Fetched a cited AI answer through the same thin BFF contract.');
+      setAiAnswer(resolvedAnswer.answerText);
+      setAiStructured(resolvedAnswer.structuredAnswer);
+      setAiNotice(
+        resolvedAnswer.citationCoverage === 'uncited_fallback'
+          ? 'The provider returned a displayable answer, but it did not include the structured citation block yet. Treat this as uncited fallback.'
+          : undefined,
+      );
+      setFeedback(
+        resolvedAnswer.citationCoverage === 'structured_citations'
+          ? 'Fetched a cited AI answer through the same thin BFF contract.'
+          : 'Fetched an AI answer through the same thin BFF contract, but it is still missing the structured citation block.',
+      );
     } catch (error) {
       setAiStructured(undefined);
       setAiAnswer(undefined);
+      setAiNotice(undefined);
       setAiError(error instanceof Error ? error.message : 'AI request failed.');
     } finally {
       setAiPending(false);
@@ -859,6 +881,7 @@ export function App() {
           </button>
         </div>
         {aiError ? <p className="error">{aiError}</p> : null}
+        {aiNotice ? <p className="feedback">{aiNotice}</p> : null}
         {aiAnswer ? <p className="answer">{aiAnswer}</p> : null}
         {aiStructured ? (
           <div className="ai-structured">

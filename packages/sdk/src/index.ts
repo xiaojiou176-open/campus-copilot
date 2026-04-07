@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { z } from 'zod';
 import {
+  AiCitationCoverageSchema,
   AiStructuredAnswerSchema,
   ProviderIdSchema,
   SwitchyardLaneSchema,
@@ -101,6 +102,7 @@ export const CampusChatResponseSchema = z
     forwardedStatus: z.number().int().optional(),
     answerText: z.string().optional(),
     structuredAnswer: AiStructuredAnswerSchema.optional(),
+    citationCoverage: AiCitationCoverageSchema.optional(),
     error: z.string().optional(),
     message: z.string().optional(),
   })

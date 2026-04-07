@@ -1,12 +1,28 @@
 # Storefront Assets
 
-This file tracks the repository's public-facing assets.
+This file tracks the repository's supporting public-facing proof assets.
+
+It is not the main front-door narrative.
+
+Think of it like the evidence drawer behind the storefront window:
+
+- `README.md` and the docs hub explain what the product is
+- this file inventories the visuals and examples that prove that story is real
+- official listing or marketplace presence still depends on owner-controlled
+  actions outside this file
 
 The rule is simple:
 
 - every outward-facing asset should have an owner
 - every asset should have a purpose
 - every asset should be easy to review and replace
+
+## Role In The Public Story
+
+Use this file when you want to review or refresh proof assets after the product
+story is already clear.
+
+Do not use it as the first explanation of what Campus Copilot is.
 
 ## Asset Inventory
 

@@ -270,6 +270,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Citation'
+    CitationCoverage:
+      type: string
+      enum: [structured_citations, uncited_fallback, no_answer]
     HealthResponse:
       type: object
       additionalProperties: false
@@ -399,6 +402,8 @@ components:
           type: string
         structuredAnswer:
           $ref: '#/components/schemas/StructuredAnswer'
+        citationCoverage:
+          $ref: '#/components/schemas/CitationCoverage'
         error:
           type: string
     SwitchyardChatResponse:
@@ -427,6 +432,8 @@ components:
           type: string
         structuredAnswer:
           $ref: '#/components/schemas/StructuredAnswer'
+        citationCoverage:
+          $ref: '#/components/schemas/CitationCoverage'
         error:
           type: string
     CampusAiAskResponse:
@@ -455,6 +462,8 @@ components:
           type: string
         structuredAnswer:
           $ref: '#/components/schemas/StructuredAnswer'
+        citationCoverage:
+          $ref: '#/components/schemas/CitationCoverage'
         error:
           type: string
         message:

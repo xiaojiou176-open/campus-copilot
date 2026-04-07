@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@campus-copilot/adapters-base": "workspace:*",
+    "@campus-copilot/ai": "workspace:*",
+    "@campus-copilot/exporter": "workspace:*",
     "@campus-copilot/schema": "workspace:*",
     "@campus-copilot/storage": "workspace:*",
     "zod": "^4.1.5"

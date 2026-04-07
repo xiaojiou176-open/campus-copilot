@@ -24,6 +24,7 @@ export function AskAiPanel(props: {
   aiPending: boolean;
   aiAnswer?: string;
   aiStructuredAnswer?: unknown;
+  aiNotice?: string;
   aiError?: string;
   structuredInputSummary: {
     totalAssignments: number;
@@ -59,6 +60,7 @@ export function AskAiPanel(props: {
     aiPending,
     aiAnswer,
     aiStructuredAnswer,
+    aiNotice,
     aiError,
     structuredInputSummary,
     onProviderChange,
@@ -217,6 +219,7 @@ export function AskAiPanel(props: {
         ) : null}
       </div>
       {!config.ai.bffBaseUrl ? <p className="surface__feedback">{text.askAi.missingBffFeedback}</p> : null}
+      {aiNotice ? <p className="surface__feedback">{aiNotice}</p> : null}
       {aiError ? <p className="surface__feedback surface__feedback--error">{aiError}</p> : null}
       {parsedStructuredAnswer.success ? (
         <div className="surface__answer">

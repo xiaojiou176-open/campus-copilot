@@ -358,6 +358,7 @@ type UiText = {
     questionRequired: string;
     noDisplayableAnswer: string;
     aiRequestFailed: string;
+    aiFallbackWithoutCitations: string;
     bffMissingForAi: string;
     providerNotReadyInBff: (provider: string) => string;
     partialSuccess: (site: string) => string;
@@ -823,6 +824,8 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       questionRequired: 'Enter a question so AI knows what to explain.',
       noDisplayableAnswer: 'The BFF responded, but the current provider did not return a displayable answer.',
       aiRequestFailed: 'AI request failed.',
+      aiFallbackWithoutCitations:
+        'The current provider returned a displayable answer, but it did not include the structured citation block yet. Treat this as uncited fallback.',
       bffMissingForAi: 'BFF base URL is not configured yet. Set it in Options first.',
       providerNotReadyInBff: (provider) => `${provider} is not ready in the BFF yet.`,
       partialSuccess: (site) => `${site} partially succeeded.`,
@@ -1342,6 +1345,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       questionRequired: '先输入一个问题，AI 才知道要解释什么。',
       noDisplayableAnswer: 'BFF 已响应，但当前 provider 没有返回可展示的回答。',
       aiRequestFailed: 'AI 请求失败。',
+      aiFallbackWithoutCitations: '当前 provider 返回了可展示的回答，但还没有带上结构化引用块。请把它视为无引用的退化回答。',
       bffMissingForAi: '当前还没配置 BFF 地址，所以 AI 入口只会诚实提示，不会静默失败。',
       providerNotReadyInBff: (provider) => `${provider} 当前在 BFF 中还没有 ready。`,
       partialSuccess: (site) => `${site} 已部分同步成功。`,

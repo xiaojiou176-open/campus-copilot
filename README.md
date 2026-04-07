@@ -1,231 +1,108 @@
 # Campus Copilot
 
-> A local-first academic decision workspace that turns Canvas, Gradescope, EdStem, and MyUW into one structured workbench, then lets cited AI explain the result instead of scraping the web directly.
+> A local-first academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
 
-[Docs](docs/README.md) · [Launch Packet](docs/launch-packet.md) · [Examples](examples/README.md) · [Plugin Bundles](examples/integrations/plugin-bundles.md) · [Toolbox Chooser](examples/toolbox-chooser.md) · [Public Skills](skills/README.md) · [Contract Freeze](docs/11-wave1-contract-freeze-gap-matrix.md) · [Wave 4-7 Ledger](docs/12-wave4-7-omnibus-ledger.md) · [Site Depth Ledger](docs/13-site-depth-exhaustive-ledger.md) · [Public Distribution](docs/14-public-distribution-scoreboard.md) · [Publication Packet](docs/15-publication-submission-packet.md) · [Quickstart](#quickstart) · [Builder Fit](docs/10-builder-api-and-ecosystem-fit.md) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [AI Collaboration](CLAUDE.md) · [Security](SECURITY.md) · [License](LICENSE)
+[Docs](docs/README.md) · [Quickstart](#quickstart) · [Product Brief](docs/01-product-prd.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [AI Collaboration](CLAUDE.md) · [Security](SECURITY.md) · [License](LICENSE)
 
 ![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
 
-## First Look In 30 Seconds
+## Start Here In 60 Seconds
 
-If you only want the fastest truthful proof instead of the full repo story, use this order:
+Campus Copilot takes four campus sites and turns them into **one local workspace**.
+The default student loop is:
 
-| If you want to prove | Open this first | Then check | What a successful first proof looks like |
-| :-- | :-- | :-- | :-- |
-| the product shape is real | [`docs/storefront-assets.md`](docs/storefront-assets.md) | [`docs/assets/weekly-assignments-example.md`](docs/assets/weekly-assignments-example.md) | a real workbench screenshot plus one export sample, not a generic AI shell mock |
-| what a successful output looks like | [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md) | [`examples/site-overview-audit-example.md`](examples/site-overview-audit-example.md) | a plain-language current-view answer plus one site audit card, both still read-only and snapshot-backed |
-| how closeout and launch are packaged | [`docs/launch-packet.md`](docs/launch-packet.md) | [`docs/release-notes-wave47-draft.md`](docs/release-notes-wave47-draft.md) | one launch-facing packet that links proof assets, release notes, release checklist, and GitHub settings-only checks without overclaiming |
+1. sync `Canvas`, `Gradescope`, `EdStem`, and `MyUW` into one workbench
+2. open the decision layer to see **what changed**, **what is still open**, and **what to do first**
+3. export the same structured view or ask **cited AI** to explain it
 
-If you specifically want the builder/tooling route, skip to [Builder Quick Paths](#builder-quick-paths) after this section.
+That is the main story of the repo.
+It is not "open a blank chat box and hope the model figures school out for you."
 
 ## Why This Exists
 
-Campus Copilot is not a generic sidebar chatbot.
+Campus Copilot is not a generic AI shell.
 
-It is a focused **academic decision workspace** for students who want one place to answer questions like:
+It is an **academic decision workspace** for students who want one place to answer questions like:
 
 - What assignments are still open?
 - What changed recently across my classes?
 - What should I pay attention to first?
 
-The product strategy is intentionally narrow:
+The product stays intentionally narrow:
 
 - **Structured data first**: adapters normalize site-specific data into one shared schema.
 - **Local-first by default**: storage, workbench views, filtering, and export live locally.
 - **AI after structure**: AI can summarize or explain the workbench result, but it does not read raw DOM, raw HTML, or cookies.
 - **Export is a first-class feature**: Markdown, CSV, JSON, and ICS are part of the core product, not an afterthought.
 
-Campus Copilot now includes a **learning decision layer** on top of that workbench:
+You can think of it like a school desk instead of a chat window:
+first gather the papers into one pile, then mark what changed, then ask for help on top of that organized pile.
 
-- local user judgment through pin / snooze / note / dismiss overlays
-- derived decision views such as Focus Queue, Weekly Load, and Change Journal
-- cited AI answers that point back to structured entities instead of raw pages
+## What Changes After The First Sync
 
-## What You Can Do On Day One
+After the first real sync, the value is supposed to feel concrete:
 
-If you are evaluating the repository as a real product surface, the first useful loop is simple:
+- you stop hopping between four campus sites just to rebuild the same mental map
+- `Focus Queue`, `Weekly Load`, and `Change Journal` tell you what changed and what should come first
+- export presets carry the same structured evidence into Markdown, CSV, JSON, or ICS
+- cited AI explains the same structured workspace instead of inventing its own hidden source of truth
 
-1. sync the supported sites into one local workbench
-2. read the decision layer to see what is open, what changed, and what should come first
-3. export the current view or ask cited AI to explain the same structured result
+## What To Do First
 
-That is the mainline. The AI/runtime and builder-facing story only matters after this student-facing loop is clear.
+If you are new, follow this order:
 
-## Why AI And Builder Workflows Still Care
+1. **Understand the student-facing loop** in this README.
+2. **Run the local workbench** through [Quickstart](#quickstart).
+3. **Read the product contract** in [docs/01-product-prd.md](docs/01-product-prd.md) and [docs/06-export-and-user-surfaces.md](docs/06-export-and-user-surfaces.md).
+4. **Only after that**, use the proof and builder routes that match your intent.
 
-After the student-facing path is clear, the honest ecosystem fit is this:
-
-Think of Campus Copilot as an **AI-ready context surface**, not an autonomous agent shell.
-
-- **Category**: local-first academic decision workspace
-- **AI hook**: cited AI over structured study data, plus a thin BFF for formal model calls
-- **Result**: one auditable place to see what changed, what is risky, and what to do first
-
-That makes the repository relevant to current AI/agent ecosystems in a very specific way:
-
-- it already works with **Codex / Claude Code-style workflows** because the repo produces structured, exportable, citation-friendly outputs instead of raw browser noise
-- it now exposes a small but real **read-only SDK / CLI / MCP surface plus a provider-runtime seam package** on top of the same local-first substrate
-- it is **not** a generic agent runtime, hosted autonomy platform, or write-capable operator bot
-
-## Builder Quick Paths
-
-If you are coming from a builder/runtime workflow instead of the student-facing extension path, use the shortest honest path for your tool:
-
-Use the [consumer onboarding matrix](#consumer-onboarding-matrix) below when you want the exact first file, first command, and boundary for a specific tool.
-
-If you want the fastest repo-local onboarding pack instead of reading the whole repository narrative, use these in order:
-
-1. [examples/README.md](examples/README.md)
-2. [examples/toolbox-chooser.md](examples/toolbox-chooser.md)
-3. [examples/integrations/README.md](examples/integrations/README.md)
-4. [examples/mcp/README.md](examples/mcp/README.md) if you already know you want the site-sidecar route
-5. [skills/README.md](skills/README.md)
-6. the package READMEs under `packages/*/README.md` for the exact surface you want to consume
-7. [examples/integrations/plugin-bundles.md](examples/integrations/plugin-bundles.md) if you want the current Codex / Claude / OpenClaw plugin-grade repo bundle router
-
-The important guardrail is simple:
-
-> Campus Copilot can be a strong read-only context surface for these tools.  
-> It is still **not** a live-browser plugin, a write-capable MCP platform, or a hosted autonomy layer.
-
-## Consumer Onboarding Matrix
-
-If you just want the fastest truthful starting point, use this routing table instead of guessing:
-
-| Consumer | Start here | Best when you want | Keep this boundary |
-| :-- | :-- | :-- | :-- |
-| Codex | [`examples/integrations/codex-mcp.example.json`](examples/integrations/codex-mcp.example.json) | one generic stdio MCP server over the local BFF plus imported snapshots when repo-root launch or `cwd` support is available | read-only, local-first, not browser control |
-| Codex without `cwd` support | [`examples/integrations/codex-mcp-shell.example.json`](examples/integrations/codex-mcp-shell.example.json) | the same generic MCP server, but with an explicit repo-root shell wrapper | still local-first and read-only |
-| Claude Code / Claude Desktop | [`examples/integrations/claude-code-mcp.example.json`](examples/integrations/claude-code-mcp.example.json) and [`examples/mcp/claude-desktop.example.json`](examples/mcp/claude-desktop.example.json) | the same read-only MCP path, either generic or site-scoped | snapshot-first or thin-BFF-first, never write-capable |
-| Claude Code without `cwd` support | [`examples/integrations/claude-code-mcp-shell.example.json`](examples/integrations/claude-code-mcp-shell.example.json) | the same generic MCP path, but with an explicit repo-root shell wrapper | still local-first and read-only |
-| OpenClaw-style local runtimes | [`examples/openclaw-readonly.md`](examples/openclaw-readonly.md) | a local operator/runtime that can launch stdio MCP tools but should keep Campus Copilot as a context provider | use command snippets directly unless your runtime explicitly supports the same `mcpServers` shape |
-| CLI-first builder checks | [`examples/cli-usage.md`](examples/cli-usage.md) | quick status, provider readiness, per-site inspection, or export from a terminal | local BFF or snapshot only |
-| SDK-first builder code | [`examples/sdk-usage.ts`](examples/sdk-usage.ts) | embedding the read-side contract in your own scripts or tools | shared schema/snapshot/BFF substrate only |
-
-For deterministic first-run examples, prefer [`examples/workspace-snapshot.sample.json`](examples/workspace-snapshot.sample.json) before you involve any live browser state.
-
-If you want the same routing in a narrower builder-only form, use [`examples/README.md`](examples/README.md) for config files and [`skills/README.md`](skills/README.md) for prompt/skill entrypoints.
-
-If you are already sure you want a builder-facing surface but do not know whether to choose MCP, a site sidecar, CLI, `workspace-sdk`, or `site-sdk`, start with [`examples/toolbox-chooser.md`](examples/toolbox-chooser.md).
-
-If your workflow is specifically an OpenClaw-style local runtime and you want the most direct prompt-first path, start with [`skills/openclaw-readonly-consumer/SKILL.md`](skills/openclaw-readonly-consumer/SKILL.md).
-
-## Public Proof Path
-
-If you want the shortest "prove this repo is real" path instead of reading everything:
-
-1. look at the public-facing workbench proof asset in [`docs/storefront-assets.md`](docs/storefront-assets.md)
-2. open the consumer router in [`examples/README.md`](examples/README.md)
-3. open the matching public skill router in [`skills/README.md`](skills/README.md)
-4. read the machine-readable and builder-facing contract summary in [`docs/10-builder-api-and-ecosystem-fit.md`](docs/10-builder-api-and-ecosystem-fit.md)
-5. run `pnpm proof:public` for the fresh repo-local builder/package proof loop
-
-That five-step path is the GitHub-first proof trail for students, builders, and coding-agent consumers.
-
-If you need the exact bundle-grade vs registry-blocked ledger before you publish or pitch anything, open [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) right after the proof loop.
-
-If you want the shortest plain-language proof of the consumer-facing helper layer, add these two checks immediately after step 3:
-
-- [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md)
-- [`examples/site-overview-audit-example.md`](examples/site-overview-audit-example.md)
-- [`scripts/proof-public-surface.sh`](scripts/proof-public-surface.sh) if you want the shell-level wrapper behind `pnpm proof:public`
+That ordering matters.
+Proof is there to verify the workbench is real.
+Builder surfaces are there to consume the same substrate.
+Neither should replace the student-first story on the front door.
 
 ## Current Product Shape
 
 Today the repository already includes:
 
-- A multi-site extension runtime for `Canvas`, `Gradescope`, `EdStem`, and `MyUW`
-- A local canonical data layer backed by shared schema + Dexie read models
-- A learning decision layer with local overlay, Focus Queue, Weekly Load, and Change Journal
+- a multi-site extension runtime for `Canvas`, `Gradescope`, `EdStem`, and `MyUW`
+- a local canonical data layer backed by shared schema and Dexie read models
+- a learning decision layer with local overlay, `Focus Queue`, `Weekly Load`, and `Change Journal`
 - Wave 2 read-only depth for assignment submission context, discussion highlights, and class/exam location context on the same entity contract
-- A workbench surface for sidepanel / popup / options
-- A standalone read-only Web workbench that imports the same current-view workspace contract into the same storage/read-model pipeline
-- Export presets for current view, weekly assignments, recent updates, deadlines, focus queue, weekly load, and change journal
-- A shared AI consumer seam for `OpenAI`, `Gemini`, and a local `Switchyard` runtime on the same semantic contract
-- Cited AI responses over structured workbench outputs
-- A repo-public read-only builder toolbox preview:
-  - `@campus-copilot/sdk` entrypoints for `api`, `snapshot`, and `sites`
-  - `@campus-copilot/workspace-sdk` for derived workbench state, export artifacts, and AI-ready snapshot context
-  - `@campus-copilot/site-sdk` for per-site overview helpers on the imported snapshot contract
-  - `@campus-copilot/cli` for snapshot summaries, per-site inspection, provider status, and BFF chat
-  - `@campus-copilot/mcp` for snapshot-backed MCP config helpers
-  - `@campus-copilot/mcp-server` for the combined read-only stdio MCP server
-  - `@campus-copilot/mcp-readonly` for site-scoped read-only MCP sidecars
-  - `@campus-copilot/provider-runtime` for the Campus-to-provider seam and optional local Switchyard bridge contract
-  - repo-local public skills and Codex integration examples
-- Deterministic repository verification through `pnpm verify`
+- workbench surfaces for `sidepanel`, `popup`, and `options`
+- a standalone read-only Web workbench that imports the same workspace contract into the same storage/read-model pipeline
+- export presets for current view, weekly assignments, recent updates, deadlines, focus queue, weekly load, and change journal
+- a shared AI consumer seam for `OpenAI`, `Gemini`, and an optional local `Switchyard` runtime on the same semantic contract
+- cited AI responses over structured workbench outputs
 
-## Current Scope vs Next Phase
+## Repo-Local Proof Path
 
-The easiest way to keep the repo honest is to separate three layers instead of mixing them into one big promise:
+If you want to prove the repo is real **after** the student loop makes sense, use this order:
 
-- **Current formal scope**: the four-site workbench, shared schema/read-model truth, Wave 2 read-only depth already normalized into assignment/message/event/resource detail, extension + standalone web workbench surfaces, export, cited AI, the shared BFF seam for `OpenAI` / `Gemini` / `Switchyard`, and the repo-public read-only SDK / CLI / MCP surfaces plus a public-ready repo-local provider-runtime seam package over imported snapshots and the thin BFF
-- **Next-phase engineering**: product-serving depth that still strengthens the same workbench, such as selective `Canvas` reply / attachment expansion, richer `Gradescope` page / image rendering beyond the current annotation summaries, broader `EdStem` grouped-material or richer download UX paths, and selective `registration / tuition / textbook` promotion on the same contract
-- **Current internal direction**: browser control-plane diagnostics stay internal, and Wave 5 now means `Switchyard-first` compat/cutover without giving away Campus-owned answer semantics or student-facing stop-rule logic
-- **Later ambition**: broader publication, release-channel distribution, and launch-facing `SEO / video` work
+1. [`docs/storefront-assets.md`](docs/storefront-assets.md) for the workbench proof surface
+2. [`docs/assets/weekly-assignments-example.md`](docs/assets/weekly-assignments-example.md) for one concrete export artifact
+3. [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md) and [`examples/site-overview-audit-example.md`](examples/site-overview-audit-example.md) for plain-language, read-only output examples
+4. [`docs/verification-matrix.md`](docs/verification-matrix.md) for what the repo can and cannot prove deterministically
+5. run `pnpm proof:public` when you want the fresh repo-local builder/package proof loop
+6. [`docs/launch-packet.md`](docs/launch-packet.md) for the launch-facing proof bundle
 
-Use [docs/11-wave1-contract-freeze-gap-matrix.md](docs/11-wave1-contract-freeze-gap-matrix.md), [docs/12-wave4-7-omnibus-ledger.md](docs/12-wave4-7-omnibus-ledger.md), and [docs/13-site-depth-exhaustive-ledger.md](docs/13-site-depth-exhaustive-ledger.md) as the canonical matrices for that split.
+That is intentionally **repo-local proof**.
+It is not the same thing as official listing, marketplace publication, or owner-side platform settings.
 
-## Builder-Facing Surface
+If you need publication truth later, use:
 
-Today the builder-facing surface is still intentionally narrow, but it is no longer just “future direction”:
+- [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) for the bundle-vs-listing ledger
+- [`docs/15-publication-submission-packet.md`](docs/15-publication-submission-packet.md) for owner-only submission order
 
-- **Current API layer**: a thin local BFF in `apps/api` for formal `OpenAI` / `Gemini` API-key calls plus the shared local `Switchyard` bridge
-- **Current machine-readable contract**: [`docs/api/openapi.yaml`](docs/api/openapi.yaml) for the thin local HTTP edge that exists today
-- **Current shared substrate**: normalized schema, derived storage read models, and export-ready structured outputs
-- **Current internal runtime seam**: [`packages/provider-runtime/src/index.ts`](packages/provider-runtime/src/index.ts)
-- **Current provider-runtime seam package**: [`packages/provider-runtime/README.md`](packages/provider-runtime/README.md)
-- **Current SDK surface**: [`packages/sdk/src/index.ts`](packages/sdk/src/index.ts) with read-only BFF + snapshot helpers
-- **Current CLI surface**: [`packages/cli/bin/campus-copilot.mjs`](packages/cli/bin/campus-copilot.mjs) for snapshot summaries, per-site inspection, provider status, and BFF chat
-- **Current MCP config surface**: [`packages/mcp/src/index.mjs`](packages/mcp/src/index.mjs) for snapshot-backed config helpers and site-sidecar wiring
-- **Current MCP server surface**: [`packages/mcp-server/src/bin.ts`](packages/mcp-server/src/bin.ts) for the combined read-only stdio server
-- **Current site MCP sidecars**: [`packages/mcp-readonly/src/server.mjs`](packages/mcp-readonly/src/server.mjs) with four site-scoped read-only entrypoints over imported snapshots
-- **Current site API preview libs**:
-  - [`packages/gradescope-api/src/index.ts`](packages/gradescope-api/src/index.ts)
-  - [`packages/edstem-api/src/index.ts`](packages/edstem-api/src/index.ts)
-  - [`packages/myuw-api/src/index.ts`](packages/myuw-api/src/index.ts)
-- **Current skills/examples**:
-  - [`skills/README.md`](skills/README.md)
-  - [`examples/README.md`](examples/README.md)
-  - [`examples/cli-usage.md`](examples/cli-usage.md)
-  - [`examples/mcp-readonly.md`](examples/mcp-readonly.md)
-  - [`examples/openclaw-readonly.md`](examples/openclaw-readonly.md)
-  - [`examples/sdk-usage.ts`](examples/sdk-usage.ts)
+## Student Questions This Repo Tries To Answer
 
-If you want the builder-facing version of that story, read [docs/10-builder-api-and-ecosystem-fit.md](docs/10-builder-api-and-ecosystem-fit.md).
-If you want the exact publication/blocker ledger behind those surfaces, read [docs/14-public-distribution-scoreboard.md](docs/14-public-distribution-scoreboard.md).
-If you want the per-site exhaustive map and hard classification behind that story, read [docs/13-site-depth-exhaustive-ledger.md](docs/13-site-depth-exhaustive-ledger.md).
+The product is designed around three recurring student questions:
 
-So the honest statement is:
+- what is still open?
+- what changed recently?
+- what should I do first, and why?
 
-> Campus Copilot already has a real AI/runtime spine and a real read-only builder toolbox preview, but it is **not** a hosted autonomy platform, a live-browser control product, or a write-capable MCP server.
-
-Wave 6 is now coherent enough to consume directly from the repository without guesswork:
-
-- package names, commands, examples, docs, and package metadata line up in-repo
-- the site API preview libs and site-scoped MCPs must stay clearly read-only
-- registry publication and broader distribution must not outrun the still-pending Wave 5 `Switchyard-first` cutover
-- `pnpm proof:public` is the current repo-local proof loop for public packaging readiness; it does not imply official listing or marketplace publication
-
-Public-facing evidence you can inspect in-repo:
-
-- [Hero/storefront asset inventory](docs/storefront-assets.md)
-- [Workbench screenshot inventory](docs/storefront-assets.md)
-- [Sample weekly assignments export](docs/assets/weekly-assignments-example.md)
-
-What it does **not** claim:
-
-- It does not claim that every site path is an official public API.
-- It does not claim that private/internal paths are stable forever.
-- It does not claim that mocked smoke coverage equals full live end-to-end coverage.
-- It does not treat OAuth, `web_session`, Anthropic, or automatic multi-provider routing as formal product paths.
-- It does not claim to be a generic MCP host, hosted autonomy layer, or write-capable agent platform.
-
-What it also does **not** silently promote into current shipped truth:
-
-- `registration`, `tuition`, `textbook`, or other deeper domains that still need a new contract
-- write-capable `MCP / SDK / CLI / Skills / plugin` packaging or hosted platform claims
-- launch-perfect `SEO / video` positioning
+Everything else on the front door should support those questions instead of distracting from them.
 
 ## Quickstart
 
@@ -378,6 +255,84 @@ If your intent is specifically **Codex / Claude Code / OpenClaw / MCP onboarding
 5. [Public skills](skills/README.md)
 6. [Public distribution ledger](docs/14-public-distribution-scoreboard.md)
 5. [Builder API and ecosystem fit](docs/10-builder-api-and-ecosystem-fit.md)
+
+## Builder Quick Paths
+
+If you are here for MCP, SDK, CLI, or coding-agent integration, start here
+**after** the student-facing loop and repo-local proof path already make sense.
+
+Use this order when you want the shortest honest builder route:
+
+1. [examples/README.md](examples/README.md)
+2. [examples/toolbox-chooser.md](examples/toolbox-chooser.md)
+3. [examples/integrations/README.md](examples/integrations/README.md)
+4. [examples/mcp/README.md](examples/mcp/README.md) if you already know you want the site-sidecar route
+5. [skills/README.md](skills/README.md)
+6. the package READMEs under `packages/*/README.md` for the exact surface you want to consume
+7. [docs/10-builder-api-and-ecosystem-fit.md](docs/10-builder-api-and-ecosystem-fit.md)
+8. [skills/openclaw-readonly-consumer/SKILL.md](skills/openclaw-readonly-consumer/SKILL.md) if your workflow is specifically an OpenClaw-style local runtime
+
+The guardrail stays simple:
+
+> Campus Copilot can be a strong read-only context surface for builders.
+> It is still **not** a hosted autonomy layer, a public MCP platform, or a write-capable browser-control product.
+
+## Consumer Onboarding Matrix
+
+If you want the fastest truthful starting point for a specific consumer, use
+this routing table instead of guessing:
+
+| Consumer | Start here | Best when you want | Keep this boundary |
+| :-- | :-- | :-- | :-- |
+| Codex | [`examples/integrations/codex-mcp.example.json`](examples/integrations/codex-mcp.example.json) | one generic stdio MCP server over the local BFF plus imported snapshots when repo-root launch or `cwd` support is available | read-only, local-first, not browser control |
+| Codex without `cwd` support | [`examples/integrations/codex-mcp-shell.example.json`](examples/integrations/codex-mcp-shell.example.json) | the same generic MCP server, but with an explicit repo-root shell wrapper | still local-first and read-only |
+| Claude Code / Claude Desktop | [`examples/integrations/claude-code-mcp.example.json`](examples/integrations/claude-code-mcp.example.json) and [`examples/mcp/claude-desktop.example.json`](examples/mcp/claude-desktop.example.json) | the same read-only MCP path, either generic or site-scoped | snapshot-first or thin-BFF-first, never write-capable |
+| Claude Code without `cwd` support | [`examples/integrations/claude-code-mcp-shell.example.json`](examples/integrations/claude-code-mcp-shell.example.json) | the same generic MCP path, but with an explicit repo-root shell wrapper | still local-first and read-only |
+| OpenClaw-style local runtimes | [`examples/openclaw-readonly.md`](examples/openclaw-readonly.md) | a local operator/runtime that can launch stdio MCP tools but should keep Campus Copilot as a context provider | use command snippets directly unless your runtime explicitly supports the same `mcpServers` shape |
+| CLI-first builder checks | [`examples/cli-usage.md`](examples/cli-usage.md) | quick status, provider readiness, per-site inspection, or export from a terminal | local BFF or snapshot only |
+| SDK-first builder code | [`examples/sdk-usage.ts`](examples/sdk-usage.ts) | embedding the read-side contract in your own scripts or tools | shared schema/snapshot/BFF substrate only |
+
+For deterministic first-run examples, prefer [`examples/workspace-snapshot.sample.json`](examples/workspace-snapshot.sample.json) before you involve any live browser state.
+
+If you are already sure you want a builder-facing surface but do not know whether to choose MCP, a site sidecar, CLI, `workspace-sdk`, or `site-sdk`, start with [`examples/toolbox-chooser.md`](examples/toolbox-chooser.md).
+
+## Current Scope vs Next Phase
+
+The easiest way to keep the repo honest is to separate four layers instead of
+mixing them into one big promise:
+
+- **Current formal scope**: the four-site workbench, shared schema/read-model truth, Wave 2 read-only depth already normalized into assignment/message/event/resource detail, extension + standalone web workbench surfaces, export, cited AI, and the shared BFF seam for `OpenAI` / `Gemini` / optional local `Switchyard`
+- **Current builder preview**: repo-public read-only SDK / CLI / MCP surfaces plus a repo-local provider-runtime seam package over imported snapshots and the thin BFF
+- **Current internal direction**: browser control-plane diagnostics stay internal, and Wave 5 continues the `Switchyard-first` cutover without giving away Campus-owned answer semantics or student-facing stop-rule logic
+- **Later ambition**: broader publication, release-channel distribution, and launch-facing `SEO / video` work
+
+Use [docs/11-wave1-contract-freeze-gap-matrix.md](docs/11-wave1-contract-freeze-gap-matrix.md), [docs/12-wave4-7-omnibus-ledger.md](docs/12-wave4-7-omnibus-ledger.md), and [docs/13-site-depth-exhaustive-ledger.md](docs/13-site-depth-exhaustive-ledger.md) as the canonical matrices for that split.
+
+## Builder-Facing Surface
+
+Today the builder-facing surface is intentionally narrow, but it is no longer
+just "future direction":
+
+- **Current API layer**: a thin local BFF in `apps/api` for formal `OpenAI` / `Gemini` API-key calls plus the shared local `Switchyard` bridge
+- **Current machine-readable contract**: [docs/api/openapi.yaml](docs/api/openapi.yaml) for the thin local HTTP edge that exists today
+- **Current shared substrate**: normalized schema, derived storage read models, and export-ready structured outputs
+- **Current provider seam**: [`@campus-copilot/provider-runtime`](packages/provider-runtime/README.md) for the Campus-to-provider seam and optional local `Switchyard` bridge
+- **Current read-only toolbox preview**:
+  - `@campus-copilot/sdk`
+  - `@campus-copilot/workspace-sdk`
+  - `@campus-copilot/site-sdk`
+  - `@campus-copilot/cli`
+  - `@campus-copilot/mcp`
+  - `@campus-copilot/mcp-server`
+  - `@campus-copilot/mcp-readonly`
+  - repo-local public skills and Codex / Claude Code integration examples
+
+The honest statement is:
+
+> Campus Copilot already has a real AI/runtime spine and a real read-only builder toolbox preview, but it is **not** a hosted autonomy platform, a live-browser control product, or a write-capable MCP server.
+
+If you want the full builder-facing explanation, read [docs/10-builder-api-and-ecosystem-fit.md](docs/10-builder-api-and-ecosystem-fit.md).
+If you want the bundle-grade vs listing-grade truth behind those surfaces, read [docs/14-public-distribution-scoreboard.md](docs/14-public-distribution-scoreboard.md).
 
 ## Trust Signals
 

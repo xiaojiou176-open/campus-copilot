@@ -1,12 +1,29 @@
 # Builder API And Ecosystem Fit
 
+This brief is a builder-facing second-layer explainer, not the repository's
+front-door identity.
+
+Read it after the student-facing mainline is already clear in `README.md` and
+the product docs.
+
 This brief explains one narrow question:
 
 > If you are an external builder, coding agent, or workflow maintainer, what is already real in Campus Copilot today, what is preview-only, and what still belongs to later Wave 6 packaging?
 
+## How To Read This File
+
+Use this file when you need the builder/tooling truth split:
+
+- what builder surfaces are already real
+- which ones are read-only or preview-grade
+- which claims still require owner action, upstream listing, or later packaging
+
+Do not use this file as the first product introduction. Campus Copilot is still
+first a student-facing local-first academic decision workspace.
+
 ## Current Builder-Facing Surface
 
-Campus Copilot already has a real **read-side builder spine**:
+Campus Copilot already has a real but secondary **read-side builder spine**:
 
 - a thin local HTTP edge in `apps/api`
 - a shared runtime compat seam in `packages/provider-runtime`
@@ -15,7 +32,8 @@ Campus Copilot already has a real **read-side builder spine**:
 - export-ready structured output in `packages/exporter`
 - a standalone imported-workspace web surface in `apps/web` that reuses the same storage/export/AI contract
 
-That makes the repository useful to builders who want:
+That makes the repository useful to builders who arrive after the product story
+is already grounded and want:
 
 - structured academic context instead of raw browser noise
 - cited AI answers over normalized data
@@ -194,7 +212,11 @@ The repository already has real substrate pieces, and it now ships repo-public p
 
 This is the honest builder statement:
 
-> Campus Copilot already has a reusable schema/storage/export spine, and it now exposes repo-public read-only SDK / CLI / MCP surfaces plus a public-ready repo-local provider-runtime seam package, but it is still not a hosted SDK or autonomy product.
+> Campus Copilot already has a reusable schema/storage/export spine, and it now
+> exposes repo-public read-only SDK / CLI / MCP surfaces plus a public-ready
+> repo-local provider-runtime seam package, but that builder layer is still not
+> the repository's first identity and it is not a hosted SDK or autonomy
+> product.
 
 ## Current Read-Only Toolbox Preview
 
@@ -365,7 +387,8 @@ What still belongs to later execution instead of repo-local wording cleanup:
 
 ## Repo-Local Public Proof Loop
 
-Use this when you want a fresh, repeatable answer to “is the current public-facing builder/package surface still runnable and packable?”
+Use this when you want a fresh, repeatable answer to "is the current
+builder/package support layer still runnable and packable inside the repo?"
 
 ```bash
 pnpm proof:public

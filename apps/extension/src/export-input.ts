@@ -1,3 +1,4 @@
+import { buildWorkbenchExportInput as buildSharedWorkbenchExportInput } from '@campus-copilot/core';
 import type { ExportInput, ExportPreset } from '@campus-copilot/exporter';
 import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource } from '@campus-copilot/schema';
 import type {
@@ -65,43 +66,52 @@ function buildViewTitle(
 export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): ExportInput {
   const text = getUiText(args.uiLanguage);
 
-  return {
+  return buildSharedWorkbenchExportInput({
+    preset: args.preset,
     generatedAt: args.generatedAt,
-    viewTitle: buildViewTitle(args.preset, args.filters, text),
+    filters: args.filters,
     resources: args.resources,
     assignments: args.assignments,
     announcements: args.announcements,
     messages: args.messages,
     grades: args.grades,
     events: args.events,
-    alerts: args.alerts.map((alert) => ({
-      ...alert,
-      title: formatAlertTitle(alert, args.uiLanguage),
-      summary: formatAlertSummary(alert, args.uiLanguage),
-    })),
-    timelineEntries: (args.recentUpdates?.items ?? []).map((entry) => ({
-      ...entry,
-      summary: formatTimelineSummary(entry, args.uiLanguage) ?? entry.summary,
-    })),
-    focusQueue: args.focusQueue.map((item) => ({
-      ...item,
-      reasons: item.reasons.map((reason) => ({
-        ...reason,
-        label: text.priorityReasonLabels[reason.code],
-        detail: formatFocusReason(reason, item, args.uiLanguage),
-      })),
-      blockedBy: localizeResourceList(item.blockedBy, args.uiLanguage),
-    })),
-    weeklyLoad: args.weeklyLoad.map((entry) => ({
-      ...entry,
-      highlights: formatWeeklyLoadHighlights(entry, args.uiLanguage),
-      summary: formatWeeklyLoadSummary(entry, args.uiLanguage),
-    })),
+    alerts: args.alerts,
+    recentUpdates: args.recentUpdates,
+    focusQueue: args.focusQueue,
+    weeklyLoad: args.weeklyLoad,
     syncRuns: args.syncRuns,
-    changeEvents: args.changeEvents.map((event) => ({
-      ...event,
-      title: formatChangeEventTitle(event, args.uiLanguage),
-      summary: formatChangeEventSummary(event, args.uiLanguage, text),
-    })),
-  };
+    changeEvents: args.changeEvents,
+    presentation: {
+      viewTitle: buildViewTitle(args.preset, args.filters, text),
+      alerts: args.alerts.map((alert) => ({
+        ...alert,
+        title: formatAlertTitle(alert, args.uiLanguage),
+        summary: formatAlertSummary(alert, args.uiLanguage),
+      })),
+      recentUpdates: (args.recentUpdates?.items ?? []).map((entry) => ({
+        ...entry,
+        summary: formatTimelineSummary(entry, args.uiLanguage) ?? entry.summary,
+      })),
+      focusQueue: args.focusQueue.map((item) => ({
+        ...item,
+        reasons: item.reasons.map((reason) => ({
+          ...reason,
+          label: text.priorityReasonLabels[reason.code],
+          detail: formatFocusReason(reason, item, args.uiLanguage),
+        })),
+        blockedBy: localizeResourceList(item.blockedBy, args.uiLanguage),
+      })),
+      weeklyLoad: args.weeklyLoad.map((entry) => ({
+        ...entry,
+        highlights: formatWeeklyLoadHighlights(entry, args.uiLanguage),
+        summary: formatWeeklyLoadSummary(entry, args.uiLanguage),
+      })),
+      changeEvents: args.changeEvents.map((event) => ({
+        ...event,
+        title: formatChangeEventTitle(event, args.uiLanguage),
+        summary: formatChangeEventSummary(event, args.uiLanguage, text),
+      })),
+    },
+  });
 }

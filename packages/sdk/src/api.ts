@@ -1,6 +1,7 @@
 import {
   createProviderProxyRequest,
   type ChatMessage,
+  type AiCitationCoverage,
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
@@ -27,6 +28,7 @@ export interface CampusCopilotChatResponse {
   requestId?: string;
   answerText?: string;
   structuredAnswer?: unknown;
+  citationCoverage?: AiCitationCoverage;
   forwardedStatus?: number;
   error?: string;
 }

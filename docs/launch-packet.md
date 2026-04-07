@@ -1,6 +1,12 @@
 # Launch Packet
 
-This file is the shortest truthful launch/closeout packet for the repository.
+This file is the shortest truthful launch/closeout packet for the repository's
+supporting public-proof layer.
+
+It is not the default front-door story.
+
+Use it after the README or docs hub has already established the main product
+identity as a local-first academic decision workspace.
 
 Use it when you want one place that answers:
 
@@ -8,7 +14,16 @@ Use it when you want one place that answers:
 - what public-facing wording is already prepared
 - what still needs owner action outside git
 
-## The 5-Item Packet
+## Role Of This Packet
+
+Use this file as the second-layer review folder behind the main product story:
+
+- `README.md` explains what Campus Copilot is for students
+- this packet gathers proof assets, launch wording, and owner-action tails
+- official listing, marketplace listing, and GitHub-settings work stay clearly
+  separate from repo-local proof
+
+## The 5 Supporting Packet Items
 
 1. [`storefront-assets.md`](storefront-assets.md)
    Use this first for the public-proof assets:
@@ -48,6 +63,9 @@ Use it when you want one place that answers:
 
 ## Fast Review Order
 
+If the reader has not yet seen the student-facing mainline, send them to
+`README.md` first.
+
 If you only have a few minutes, use this order:
 
 1. [`storefront-assets.md`](storefront-assets.md)
@@ -56,7 +74,8 @@ If you only have a few minutes, use this order:
 4. [`release-notes-wave47-draft.md`](release-notes-wave47-draft.md)
 5. [`github-surface-checklist.md`](github-surface-checklist.md)
 
-That sequence proves:
+That sequence is meant to verify supporting evidence, not replace the front
+door. It proves:
 
 - the repo has a real workbench shape
 - the repo has real read-only output examples

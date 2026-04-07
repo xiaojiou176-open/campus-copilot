@@ -182,6 +182,7 @@ describe('api thin bff', () => {
         },
       ],
     });
+    expect(body.citationCoverage).toBe('structured_citations');
     expect(response.body).not.toContain('providerPayload');
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(fetchSpy.mock.calls[0]?.[0]).toContain('/chat/completions');
@@ -313,6 +314,7 @@ describe('api thin bff', () => {
     expect(response.status).toBe(200);
     expect(body.answerText).toBe('先看 Homework 5，它明晚截止。');
     expect(body.structuredAnswer).toBeUndefined();
+    expect(body.citationCoverage).toBe('uncited_fallback');
     expect(response.body).not.toContain('candidates');
   });
 
@@ -401,6 +403,7 @@ describe('api thin bff', () => {
     expect(body.runtimeProvider).toBe('qwen');
     expect(body.lane).toBe('web');
     expect(body.answerText).toBe('Qwen 路径已通过 Switchyard 薄桥返回。');
+    expect(body.citationCoverage).toBe('uncited_fallback');
     expect(fetchSpy.mock.calls[0]?.[1]?.body).toContain('"provider":"qwen"');
     expect(fetchSpy.mock.calls[0]?.[1]?.headers).toBeInstanceOf(Headers);
     expect((fetchSpy.mock.calls[0]?.[1]?.headers as Headers).get('authorization')).toBe(
@@ -460,6 +463,7 @@ describe('api thin bff', () => {
     expect(body.provider).toBe('switchyard');
     expect(body.runtimePath).toBe('switchyard');
     expect(body.runtimeProvider).toBe('gemini');
+    expect(body.citationCoverage).toBe('structured_citations');
     const firstSwitchyardCall = fetchSpy.mock.calls.at(0) as [string, RequestInit] | undefined;
     const firstSwitchyardUrl = firstSwitchyardCall?.[0];
     expect(firstSwitchyardUrl).toContain('/v1/runtime/invoke');

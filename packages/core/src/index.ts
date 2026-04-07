@@ -105,3 +105,11 @@ export function createSurfaceSnapshot(
     latestSyncState,
   };
 }
+
+export {
+  buildWorkbenchAiProxyRequest,
+  buildWorkbenchExportInput,
+  type BuildWorkbenchAiProxyRequestArgs,
+  type BuildWorkbenchExportInputArgs,
+  type WorkbenchPresentationOverrides,
+} from './workbench-composition';

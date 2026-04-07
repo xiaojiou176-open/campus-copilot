@@ -11,6 +11,7 @@ import {
   createProviderProxyRequest,
   getToolDefinitions,
   parseAiStructuredAnswer,
+  resolveAiAnswer,
 } from './index';
 
 describe('ai runtime contracts', () => {
@@ -207,6 +208,48 @@ Here is the structured answer:
         }),
       ),
     ).toBeUndefined();
+  });
+
+  it('resolves provider payloads into either cited or uncited display answers', () => {
+    expect(
+      resolveAiAnswer({
+        answerText: '现在最该关注 Homework 5，明晚截止。',
+      }),
+    ).toEqual({
+      answerText: '现在最该关注 Homework 5，明晚截止。',
+      structuredAnswer: undefined,
+      citationCoverage: 'uncited_fallback',
+    });
+
+    expect(
+      resolveAiAnswer({
+        answerText: JSON.stringify({
+          summary: '先完成 Homework 5。',
+          bullets: ['明晚截止'],
+          nextActions: ['先确认要求'],
+          trustGaps: [],
+          citations: [
+            {
+              entityId: 'assignment:hw5',
+              kind: 'assignment',
+              site: 'canvas',
+              title: 'Homework 5',
+            },
+          ],
+        }),
+      }),
+    ).toMatchObject({
+      citationCoverage: 'structured_citations',
+      structuredAnswer: {
+        summary: '先完成 Homework 5。',
+      },
+    });
+
+    expect(resolveAiAnswer({})).toEqual({
+      answerText: undefined,
+      structuredAnswer: undefined,
+      citationCoverage: 'no_answer',
+    });
   });
 
   it('keeps legacy structured answers compatible by defaulting action arrays to empty', () => {

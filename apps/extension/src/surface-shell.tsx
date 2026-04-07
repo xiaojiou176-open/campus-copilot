@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
-import type {
-  AiStructuredAnswer,
-  ProviderId,
-  SwitchyardLane,
-  SwitchyardRuntimeProvider,
+import {
+  resolveAiAnswer,
+  type AiStructuredAnswer,
+  type ProviderId,
+  type SwitchyardLane,
+  type SwitchyardRuntimeProvider,
 } from '@campus-copilot/ai';
 import type { ExportFormat, ExportPreset } from '@campus-copilot/exporter';
 import { createExportArtifact } from '@campus-copilot/exporter';
@@ -90,6 +91,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const [aiQuestion, setAiQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState<string>();
   const [aiStructuredAnswer, setAiStructuredAnswer] = useState<AiStructuredAnswer>();
+  const [aiNotice, setAiNotice] = useState<string>();
   const [aiError, setAiError] = useState<string>();
   const [aiPending, setAiPending] = useState(false);
   const [providerStatusPending, setProviderStatusPending] = useState(false);
@@ -433,6 +435,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
     setAiPending(true);
     setAiError(undefined);
+    setAiNotice(undefined);
     setAiStructuredAnswer(undefined);
 
     try {
@@ -491,19 +494,31 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         body: JSON.stringify(proxyRequest.body),
       });
       const payload = (await response.json()) as AiResponsePayload;
+      const resolvedAnswer = resolveAiAnswer({
+        answerText: payload.answerText,
+        structuredAnswer: payload.structuredAnswer,
+        citationCoverage: payload.citationCoverage,
+      });
 
-      if (!response.ok || payload.ok === false || !payload.answerText) {
+      if (!response.ok || payload.ok === false || !resolvedAnswer.answerText) {
         setAiAnswer(undefined);
         setAiStructuredAnswer(undefined);
+        setAiNotice(undefined);
         setAiError(payload.error ?? payload.answerText ?? text.feedback.noDisplayableAnswer);
         return;
       }
 
-      setAiAnswer(payload.answerText);
-      setAiStructuredAnswer(payload.structuredAnswer as AiStructuredAnswer | undefined);
+      setAiAnswer(resolvedAnswer.answerText);
+      setAiStructuredAnswer(resolvedAnswer.structuredAnswer);
+      setAiNotice(
+        resolvedAnswer.citationCoverage === 'uncited_fallback'
+          ? text.feedback.aiFallbackWithoutCitations
+          : undefined,
+      );
     } catch (error) {
       setAiAnswer(undefined);
       setAiStructuredAnswer(undefined);
+      setAiNotice(undefined);
       setAiError(error instanceof Error ? error.message : text.feedback.aiRequestFailed);
     } finally {
       setAiPending(false);
@@ -611,6 +626,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
             aiPending={aiPending}
             aiAnswer={aiAnswer}
             aiStructuredAnswer={aiStructuredAnswer}
+            aiNotice={aiNotice}
             aiError={aiError}
             structuredInputSummary={{
               totalAssignments: todaySnapshot?.totalAssignments ?? 0,
