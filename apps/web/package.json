@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1 --port 4175",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4175",
-    "preview:test": "vite preview --host 127.0.0.1 --port 4175",
+    "preview:test": "vite preview --host 127.0.0.1 --port 4175 --strictPort",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --config vitest.config.ts",
     "test:interaction": "pnpm build && playwright test -c playwright.config.ts"
