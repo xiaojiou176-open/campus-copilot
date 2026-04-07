@@ -184,7 +184,13 @@ Use this five-layer split as the default operating model:
 | `pre-push` | `pnpm verify` + history secret scans | local deterministic repo gate without hosted-only browser setup |
 | `hosted` | GitHub `Verify` / `Security Hygiene` / `Dependency Review` / `CodeQL` on PRs | required remote re-checks on GitHub-hosted runners |
 | `nightly` | `pnpm verify:nightly` plus scheduled `CodeQL` | heavier deterministic drift checks without slowing every push |
-| `manual` | `pnpm proof:public`, provider/browser proof lanes, storefront audit | environment-dependent proof and owner-side closeout |
+| `manual` | provider/browser proof lanes and storefront audit | environment-dependent proof and owner-side closeout |
+
+If you want the heavier repo-local publication/build proof on demand instead of waiting for the nightly lane, run:
+
+```bash
+pnpm proof:public
+```
 
 If you want the same closeout lane to run before local commits and pushes, install the repo-owned hooks:
 

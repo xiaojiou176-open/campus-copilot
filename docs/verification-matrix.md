@@ -18,7 +18,7 @@ Use this split before you decide where a new check belongs:
 | `pre-push` | `pnpm verify` + `pnpm scan:git-history:secrets` | keep the default local path deterministic and lighter than hosted CI |
 | `hosted` | GitHub `Verify`, `Security Hygiene`, `Dependency Review`, and PR `CodeQL` | required GitHub-hosted re-checks for pull requests |
 | `nightly` | `pnpm verify:nightly` plus scheduled `CodeQL` | recurring deep analysis without bloating every PR lane |
-| `manual` | `pnpm proof:public`, `pnpm smoke:*`, live/browser lanes, storefront audit | environment-dependent, operator-dependent, or owner-side proof |
+| `manual` | `pnpm smoke:*`, live/browser lanes, storefront audit | environment-dependent, operator-dependent, or owner-side proof |
 
 ## Verification Lanes
 

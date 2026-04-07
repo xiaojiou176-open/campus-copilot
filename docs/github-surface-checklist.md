@@ -8,9 +8,9 @@ Use it to avoid writing platform-side unknowns into `README.md` as if the reposi
 
 | Item | Where to check | Repo can prove it? | Last checked | Notes |
 | :-- | :-- | :--: | :-- | :-- |
-| Repository description | GitHub repository settings / page header | No | 2026-04-07 | Current value: `AI-ready academic decision workspace with cited study context from Canvas, Gradescope, EdStem, and MyUW.` This is close to the current repo story, but it should be reviewed periodically because the front door is explicitly local-first and student-first, not AI-shell-first. |
+| Repository description | GitHub repository settings / page header | No | 2026-04-07 | Current value: `Local-first academic decision workspace with cited study context from Canvas, Gradescope, EdStem, and MyUW.` This now matches the repo's local-first and student-first front door more directly. |
 | Homepage / website URL | GitHub repository settings | No | 2026-04-07 | Configured to `https://xiaojiou176-open.github.io/campus-copilot/`. This is now the intended GitHub Pages front door, but the live URL still needs a fresh post-merge deploy check before it should be treated as current proof. |
-| Topics | GitHub repository settings | No | 2026-04-06 | Current topics: `browser-extension`, `canvas`, `education`, `gradescope`, `local-first`, `student-productivity`, `typescript`, `ai`, `decision-support`. |
+| Topics | GitHub repository settings | No | 2026-04-07 | Current topics: `ai`, `browser-extension`, `canvas`, `decision-support`, `edstem`, `education`, `gradescope`, `local-first`, `myuw`, `student-productivity`, `typescript`. |
 | Social preview image | GitHub repository settings | No | 2026-04-07 | Custom social preview is enabled (`usesCustomOpenGraphImage=true`). Repo-tracked source remains `docs/assets/social-preview.png`; keep it aligned with the current front-door positioning. |
 | Discussions enabled | GitHub repository settings | No | 2026-04-06 | Enabled (`has_discussions=true`). |
 | Branch protection | GitHub branch protection settings | No | 2026-04-07 | Required checks are `Verify`, `CodeQL`, `Security Hygiene`, and `Dependency Review`; `strict=true`; `required_approving_review_count=1`; `require_last_push_approval=true`; admins enforced; linear history required; conversation resolution required; force-push and deletion disabled. |

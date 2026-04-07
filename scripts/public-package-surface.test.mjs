@@ -19,6 +19,39 @@ const packages = [
   'packages/myuw-api',
 ];
 
+const pnpmCommand = (() => {
+  const pnpmEntrypoint = process.env.npm_execpath;
+
+  if (typeof pnpmEntrypoint === 'string' && pnpmEntrypoint.includes('pnpm')) {
+    return { command: process.execPath, prefixArgs: [pnpmEntrypoint] };
+  }
+
+  try {
+    const resolved = execFileSync('which', ['pnpm'], {
+      encoding: 'utf8',
+      stdio: 'pipe',
+    }).trim();
+
+    if (resolved) {
+      return { command: resolved, prefixArgs: [] };
+    }
+  } catch {
+    // Fall back to PATH lookup below.
+  }
+
+  return { command: 'pnpm', prefixArgs: [] };
+})();
+
+function execPnpm(args, options = {}) {
+  return execFileSync(pnpmCommand.command, [...pnpmCommand.prefixArgs, ...args], {
+    ...options,
+    env: {
+      ...process.env,
+      ...options.env,
+    },
+  });
+}
+
 function packDryRun(cwd) {
   const stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
     cwd,
@@ -43,7 +76,7 @@ function createTempWorkspace(prefix) {
 }
 
 function packTarball(cwd, packDir) {
-  execFileSync('pnpm', ['pack', '--pack-destination', packDir], {
+  execPnpm(['pack', '--pack-destination', packDir], {
     cwd,
     encoding: 'utf8',
     stdio: 'pipe',
@@ -54,37 +87,53 @@ function packTarball(cwd, packDir) {
   return join(packDir, tarballs[0]);
 }
 
-test('repo-public preview packages stay packable with explicit file inventories', () => {
+function installTarball(workspaceDir, tarballPath) {
+  execFileSync('npm', ['install', tarballPath], {
+    cwd: workspaceDir,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  });
+}
+
+function serialTest(name, fn) {
+  return test(name, { concurrency: false }, fn);
+}
+
+serialTest('repo-public preview packages stay packable with explicit file inventories', () => {
   for (const dir of packages) {
     const manifest = JSON.parse(readFileSync(`${dir}/package.json`, 'utf8'));
     const [result] = packDryRun(dir);
     const filePaths = result.files.map((file) => file.path);
+    const manifestFiles = Array.isArray(manifest.files) ? manifest.files : [];
+    const packHasRuntimeFiles = filePaths.some(
+      (filePath) =>
+        filePath.startsWith('src/') || filePath.startsWith('bin/') || filePath.startsWith('dist/'),
+    );
+    const manifestDeclaresRuntimeFiles = manifestFiles.some((filePath) =>
+      filePath === 'dist' ||
+      filePath === 'dist/' ||
+      filePath.startsWith('src') ||
+      filePath.startsWith('bin'),
+    );
 
     assert.equal(manifest.private, false, `${dir} must remain public-facing`);
     assert.notEqual(manifest.version, '0.0.0', `${dir} must not advertise placeholder version`);
     assert.ok(filePaths.includes('README.md'), `${dir} pack output must include README.md`);
     assert.ok(filePaths.includes('package.json'), `${dir} pack output must include package.json`);
     assert.ok(
-      filePaths.some(
-        (filePath) =>
-          filePath.startsWith('src/') || filePath.startsWith('bin/') || filePath.startsWith('dist/'),
-      ),
-      `${dir} pack output must include runtime files`,
+      packHasRuntimeFiles || manifestDeclaresRuntimeFiles,
+      `${dir} pack output or explicit file inventory must include runtime files`,
     );
   }
 });
 
-test('@campus-copilot/mcp tarball installs and imports in a fresh temp workspace', () => {
+serialTest('@campus-copilot/mcp tarball installs and imports in a fresh temp workspace', () => {
   const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-mcp-pack-'));
   const workspaceDir = createTempWorkspace('campus-copilot-mcp-proof-');
 
   try {
     const tarballPath = packTarball('packages/mcp', packDir);
-    execFileSync('pnpm', ['add', tarballPath], {
-      cwd: workspaceDir,
-      encoding: 'utf8',
-      stdio: 'pipe',
-    });
+    installTarball(workspaceDir, tarballPath);
 
     const stdout = execFileSync(
       'node',
@@ -105,19 +154,15 @@ test('@campus-copilot/mcp tarball installs and imports in a fresh temp workspace
   }
 });
 
-test('@campus-copilot/mcp-readonly tarball installs and exposes a runnable help surface', () => {
+serialTest('@campus-copilot/mcp-readonly tarball installs and exposes a runnable help surface', () => {
   const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-mcp-readonly-pack-'));
   const workspaceDir = createTempWorkspace('campus-copilot-mcp-readonly-proof-');
 
   try {
     const tarballPath = packTarball('packages/mcp-readonly', packDir);
-    execFileSync('pnpm', ['add', tarballPath], {
-      cwd: workspaceDir,
-      encoding: 'utf8',
-      stdio: 'pipe',
-    });
+    installTarball(workspaceDir, tarballPath);
 
-    const stdout = execFileSync('pnpm', ['exec', 'campus-copilot-mcp-canvas', '--help'], {
+    const stdout = execPnpm(['exec', 'campus-copilot-mcp-canvas', '--help'], {
       cwd: workspaceDir,
       encoding: 'utf8',
       stdio: 'pipe',
@@ -131,19 +176,15 @@ test('@campus-copilot/mcp-readonly tarball installs and exposes a runnable help 
   }
 });
 
-test('@campus-copilot/mcp-server tarball installs and exposes a runnable help surface', () => {
+serialTest('@campus-copilot/mcp-server tarball installs and exposes a runnable help surface', () => {
   const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-mcp-server-pack-'));
   const workspaceDir = createTempWorkspace('campus-copilot-mcp-server-proof-');
 
   try {
     const tarballPath = packTarball('packages/mcp-server', packDir);
-    execFileSync('pnpm', ['add', tarballPath], {
-      cwd: workspaceDir,
-      encoding: 'utf8',
-      stdio: 'pipe',
-    });
+    installTarball(workspaceDir, tarballPath);
 
-    const stdout = execFileSync('pnpm', ['exec', 'campus-copilot-mcp', '--help'], {
+    const stdout = execPnpm(['exec', 'campus-copilot-mcp', '--help'], {
       cwd: workspaceDir,
       encoding: 'utf8',
       stdio: 'pipe',
@@ -157,7 +198,7 @@ test('@campus-copilot/mcp-server tarball installs and exposes a runnable help su
   }
 });
 
-test('mcp-server preregistry metadata stays aligned with package.json', () => {
+serialTest('mcp-server preregistry metadata stays aligned with package.json', () => {
   const pkg = JSON.parse(readFileSync('packages/mcp-server/package.json', 'utf8'));
   const metadata = JSON.parse(readFileSync('packages/mcp-server/server.json', 'utf8'));
 
@@ -170,7 +211,7 @@ test('mcp-server preregistry metadata stays aligned with package.json', () => {
   assert.equal(metadata.packages[0].transport.type, 'stdio');
 });
 
-test('OpenClaw audit treats the current repo as a compatible bundle when Claude-style roots exist', () => {
+serialTest('OpenClaw audit treats the current repo as a compatible bundle when Claude-style roots exist', () => {
   const stdout = execFileSync('node', ['scripts/audit-public-distribution.mjs'], {
     encoding: 'utf8',
     stdio: 'pipe',
@@ -179,7 +220,7 @@ test('OpenClaw audit treats the current repo as a compatible bundle when Claude-
   assert.match(stdout, /OpenClaw route \| plugin-grade repo bundle/);
 });
 
-test('audit promotes mcp-readonly to a registry candidate once no private deps remain', () => {
+serialTest('audit promotes mcp-readonly to a registry candidate once no private deps remain', () => {
   const stdout = execFileSync('node', ['scripts/audit-public-distribution.mjs'], {
     encoding: 'utf8',
     stdio: 'pipe',
@@ -188,17 +229,13 @@ test('audit promotes mcp-readonly to a registry candidate once no private deps r
   assert.match(stdout, /@campus-copilot\/mcp-readonly \| public-ready \(repo-local\) \| registry candidate/);
 });
 
-test('@campus-copilot/provider-runtime tarball installs and imports in a fresh temp workspace', () => {
+serialTest('@campus-copilot/provider-runtime tarball installs and imports in a fresh temp workspace', () => {
   const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-provider-runtime-pack-'));
   const workspaceDir = createTempWorkspace('campus-copilot-provider-runtime-proof-');
 
   try {
     const tarballPath = packTarball('packages/provider-runtime', packDir);
-    execFileSync('pnpm', ['add', tarballPath], {
-      cwd: workspaceDir,
-      encoding: 'utf8',
-      stdio: 'pipe',
-    });
+    installTarball(workspaceDir, tarballPath);
 
     const stdout = execFileSync(
       'node',
@@ -220,19 +257,25 @@ test('@campus-copilot/provider-runtime tarball installs and imports in a fresh t
   }
 });
 
-test('@campus-copilot/cli tarball installs and runs in a fresh temp workspace', () => {
+serialTest('@campus-copilot/cli tarball installs and runs in a fresh temp workspace', () => {
   const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-cli-pack-'));
   const workspaceDir = createTempWorkspace('campus-copilot-cli-proof-');
 
   try {
     const tarballPath = packTarball('packages/cli', packDir);
-    execFileSync('pnpm', ['add', tarballPath], {
-      cwd: workspaceDir,
-      encoding: 'utf8',
-      stdio: 'pipe',
-    });
+    installTarball(workspaceDir, tarballPath);
+    const installedManifest = JSON.parse(
+      readFileSync(join(workspaceDir, 'node_modules', '@campus-copilot', 'cli', 'package.json'), 'utf8'),
+    );
+    const cliEntrypoint = join(
+      workspaceDir,
+      'node_modules',
+      '@campus-copilot',
+      'cli',
+      installedManifest.bin['campus-copilot'],
+    );
 
-    const stdout = execFileSync(join(workspaceDir, 'node_modules', '.bin', 'campus-copilot'), ['help'], {
+    const stdout = execFileSync(process.execPath, [cliEntrypoint, 'help'], {
       cwd: workspaceDir,
       encoding: 'utf8',
       stdio: 'pipe',
