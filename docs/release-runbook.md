@@ -41,7 +41,7 @@ bash scripts/support-bundle-smoke.sh
 ```
 
 Run those serially in that order.
-Also confirm the latest GitHub-hosted `Verify` workflow is green, because the hosted lane now adds `pnpm verify:hosted` and re-checks the extension Playwright smoke on managed CI browsers.
+Also confirm the latest GitHub-hosted `Verify` and `Nightly` workflows are green when you want hosted evidence for the browser smoke, coverage, public-distribution proof, and web interaction lanes.
 `bash scripts/support-bundle-smoke.sh` expects the fresh coverage summary produced by `pnpm test:coverage`.
 `pnpm proof:public` is the repo-local proof loop for public package readiness: it proves public routing, help entrypoints, and dry-run pack behavior, not registry publication or marketplace listing.
 

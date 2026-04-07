@@ -10,8 +10,9 @@ mkdir -p "$TEMP_DIR"
 # This smoke harness pins the canonical local live profile so that
 # support-bundle generation can exercise the explicit-profile contract
 # without requiring the caller to export the vars manually every time.
-# Keep attach mode on the canonical auto lane so the bundle reflects the
-# same strongest repo-owned CDP surface that `probe:live` uses by default.
+# Keep attach mode pinned to the explicit page lane because the repo-owned
+# browser context can surface stronger current-page truth than stale CDP target
+# summaries when SSO redirect tabs linger in the same profile.
 # Use a support-bundle-specific override key instead of inheriting ambient
 # `CHROME_ATTACH_MODE`, which may still point at weaker diagnostic lanes.
 : "${CAMPUS_COPILOT_BROWSER_ROOT:=$HOME/.cache/campus-copilot/browser/chrome-user-data}"
@@ -19,7 +20,7 @@ mkdir -p "$TEMP_DIR"
 : "${CHROME_PROFILE_NAME:=Profile 1}"
 : "${CAMPUS_COPILOT_BROWSER_CDP_PORT:=9334}"
 : "${CHROME_CDP_URL:=http://127.0.0.1:$CAMPUS_COPILOT_BROWSER_CDP_PORT}"
-: "${SUPPORT_BUNDLE_ATTACH_MODE:=auto}"
+: "${SUPPORT_BUNDLE_ATTACH_MODE:=page}"
 CHROME_ATTACH_MODE="$SUPPORT_BUNDLE_ATTACH_MODE"
 export CAMPUS_COPILOT_BROWSER_ROOT CAMPUS_COPILOT_BROWSER_CDP_PORT
 export CHROME_USER_DATA_DIR CHROME_PROFILE_NAME CHROME_CDP_URL CHROME_ATTACH_MODE SUPPORT_BUNDLE_ATTACH_MODE
