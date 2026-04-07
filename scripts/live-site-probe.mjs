@@ -784,7 +784,32 @@ try {
     cdpAttachError = 'debug_chrome_process_present_but_not_listening';
   }
 
-  if (activeCdpUrl && cdpProbe?.ok && sessionConfig.attachMode !== 'page' && sessionConfig.attachMode !== 'persistent' && !cdpTargetsLookWrong && !cdpBrowserIsAmbiguous) {
+  if (activeCdpUrl && cdpProbe?.ok && sessionConfig.attachMode === 'page' && !cdpTargetsLookWrong && !cdpBrowserIsAmbiguous) {
+    try {
+      browser = await withTimeout(
+        () =>
+          chromium.connectOverCDP(normalizeCdpConnectUrl(activeCdpUrl), {
+            timeout: sessionConfig.cdpAttachTimeoutMs,
+          }),
+        sessionConfig.cdpAttachTimeoutMs + 500,
+        'connect_over_cdp_page_mode',
+      );
+      const context = browser.contexts()[0];
+      if (!context) {
+        throw new Error('No browser context available from CHROME_CDP_URL.');
+      }
+
+      traceCapturePlan = await startTraceCapture(context, traceCapturePlan);
+      try {
+        primaryResults = await probeSitesWithContext(context, 'page_cdp_context', true);
+      } finally {
+        traceCapturePlan = await stopTraceCapture(context, traceCapturePlan);
+      }
+      attachModeResolved = 'page_cdp_context';
+    } catch (error) {
+      cdpAttachError = describeCdpConnectError(error);
+    }
+  } else if (activeCdpUrl && cdpProbe?.ok && sessionConfig.attachMode !== 'page' && sessionConfig.attachMode !== 'persistent' && !cdpTargetsLookWrong && !cdpBrowserIsAmbiguous) {
     try {
       browser = await withTimeout(
         () =>
