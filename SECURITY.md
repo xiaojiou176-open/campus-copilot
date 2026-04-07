@@ -82,6 +82,7 @@ Current closeout rules:
 - `gitleaks` and `trufflehog` required lanes should scan the reachable git history or the clean CI checkout
 - ignored local-only materials such as `.env` or `.agents/Conversations` do not count as repository leaks by themselves
 - those ignored materials become repository blockers immediately if they move into tracked files, reachable history, screenshots, support bundles, workflow logs, or published docs
+- use `pnpm check:secret-leaks` when you want the repository's truthful local leak gate without treating ignored local-only materials as public-repo findings
 
 When you run directory-wide local tools, interpret hits carefully:
 

@@ -33,6 +33,7 @@
     "hooks:run:pre-commit": "bash scripts/run-pre-commit-hooks.sh",
     "hooks:run:pre-push": "bash scripts/run-pre-push-hooks.sh",
     "scan:git-history:secrets": "bash scripts/scan-git-history-secrets.sh",
+    "check:secret-leaks": "bash scripts/check-secret-leaks.sh",
     "dev:extension": "pnpm --filter @campus-copilot/extension dev",
     "dev:api": "pnpm --filter @campus-copilot/api dev",
     "start:api": "pnpm --filter @campus-copilot/api start",

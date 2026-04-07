@@ -2,9 +2,13 @@
 
 > A local-first academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
 
-[Docs](docs/README.md) · [Quickstart](#quickstart) · [Product Brief](docs/01-product-prd.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [AI Collaboration](CLAUDE.md) · [Security](SECURITY.md) · [License](LICENSE)
+[Docs](docs/README.md) · [Quickstart](#quickstart) · [Integrations](INTEGRATIONS.md) · [Distribution](DISTRIBUTION.md) · [Privacy](PRIVACY.md) · [Product Brief](docs/01-product-prd.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [AI Collaboration](CLAUDE.md) · [Security](SECURITY.md) · [License](LICENSE)
 
 ![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
+
+Real workbench proof, not concept art:
+
+![Campus Copilot sidepanel overview](docs/assets/sidepanel-overview.png)
 
 ## Start Here In 60 Seconds
 

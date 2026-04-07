@@ -22,6 +22,7 @@ If you are new, pick one route and ignore the rest for now:
 - **I want the builder/API surface after the product shape is clear**: start with [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md)
 - **I want builder-facing examples and public skills**: start with [`../examples/README.md`](../examples/README.md), then [`../skills/README.md`](../skills/README.md), then [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md)
 - **I want exact public distribution blockers or publish order**: start with [`14-public-distribution-scoreboard.md`](14-public-distribution-scoreboard.md), then [`15-publication-submission-packet.md`](15-publication-submission-packet.md)
+- **I want the shortest public-ready distribution or integration router**: start with [`../DISTRIBUTION.md`](../DISTRIBUTION.md), [`../INTEGRATIONS.md`](../INTEGRATIONS.md), and [`../PRIVACY.md`](../PRIVACY.md)
 - **I want the live/manual validation lane**: start with [`verification-matrix.md`](verification-matrix.md), then [`live-validation-runbook.md`](live-validation-runbook.md), then [`site-capability-matrix.md`](site-capability-matrix.md)
 
 ## Default Newcomer Route
@@ -111,6 +112,9 @@ If you are a maintainer or contributor, read in this order:
 | Need | Canonical file |
 | :-- | :-- |
 | Public AI collaborator contract | [`../CLAUDE.md`](../CLAUDE.md) |
+| Short truthful distribution router | [`../DISTRIBUTION.md`](../DISTRIBUTION.md) |
+| Short truthful integrations router | [`../INTEGRATIONS.md`](../INTEGRATIONS.md) |
+| Short privacy posture page | [`../PRIVACY.md`](../PRIVACY.md) |
 | AI/runtime boundary and builder-facing path | [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md) |
 | Machine-readable current HTTP contract | [`api/openapi.yaml`](api/openapi.yaml) |
 | Builder example router | [`../examples/README.md`](../examples/README.md) |

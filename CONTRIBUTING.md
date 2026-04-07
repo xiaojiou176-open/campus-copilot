@@ -21,7 +21,9 @@ Read these first:
 5. [`docs/integration-boundaries.md`](docs/integration-boundaries.md)
 6. [`docs/diagnostics-and-logging.md`](docs/diagnostics-and-logging.md)
 7. [`docs/disk-governance.md`](docs/disk-governance.md)
-8. The relevant numbered brief in [`docs/README.md`](docs/README.md) for the subsystem you are touching
+8. [`DISTRIBUTION.md`](DISTRIBUTION.md) and [`INTEGRATIONS.md`](INTEGRATIONS.md) if your change touches public routing, bundles, or package claims
+9. [`PRIVACY.md`](PRIVACY.md) if your change touches permissions, uploads, or browser-store-facing posture
+10. The relevant numbered brief in [`docs/README.md`](docs/README.md) for the subsystem you are touching
 
 The numbered docs under `docs/01-08` are now concise English canonical briefs.
 Do not treat them as free-form long essays, and do not create translated duplicates.

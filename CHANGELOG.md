@@ -8,6 +8,8 @@ The format is inspired by Keep a Changelog.
 
 ### Added
 
+- Added short root-level routing pages for distribution, integrations, and privacy so release/distribution readiness stays discoverable without turning the docs tree into a second README maze.
+- Added `pnpm check:secret-leaks` as the truthful local convenience gate for tracked/reachable leak checks without misreporting ignored local-only materials as repo leaks.
 - Added the Wave 4-7 omnibus ledger for the post-Wave23 back-half SSOT.
 - Added a repo-public read-only builder preview across `sdk`, `workspace-sdk`, `site-sdk`, `cli`, `mcp`, `mcp-readonly`, `mcp-server`, and site API preview packages.
 - Added browser evidence capture helpers plus HAR-like/network/console support for the internal diagnostics side-lane.

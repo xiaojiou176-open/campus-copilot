@@ -14,14 +14,17 @@ apps
 CHANGELOG.md
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
+DISTRIBUTION.md
 docs
 examples
+INTEGRATIONS.md
 LICENSE
 package.json
 packages
 pnpm-lock.yaml
 pnpm-workspace.yaml
 policies
+PRIVACY.md
 README.md
 RELEASE.md
 scripts
