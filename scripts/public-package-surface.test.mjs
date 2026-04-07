@@ -19,15 +19,15 @@ const packages = [
   'packages/myuw-api',
 ];
 
-const pnpmCommand = (() => {
-  const pnpmEntrypoint = process.env.npm_execpath;
+function resolvePackageManagerCommand(binaryName) {
+  const entrypoint = process.env.npm_execpath;
 
-  if (typeof pnpmEntrypoint === 'string' && pnpmEntrypoint.includes('pnpm')) {
-    return { command: process.execPath, prefixArgs: [pnpmEntrypoint] };
+  if (typeof entrypoint === 'string' && entrypoint.includes(binaryName)) {
+    return { command: process.execPath, prefixArgs: [entrypoint] };
   }
 
   try {
-    const resolved = execFileSync('which', ['pnpm'], {
+    const resolved = execFileSync('which', [binaryName], {
       encoding: 'utf8',
       stdio: 'pipe',
     }).trim();
@@ -39,8 +39,11 @@ const pnpmCommand = (() => {
     // Fall back to PATH lookup below.
   }
 
-  return { command: 'pnpm', prefixArgs: [] };
-})();
+  return { command: binaryName, prefixArgs: [] };
+}
+
+const pnpmCommand = resolvePackageManagerCommand('pnpm');
+const npmCommand = resolvePackageManagerCommand('npm');
 
 function execPnpm(args, options = {}) {
   return execFileSync(pnpmCommand.command, [...pnpmCommand.prefixArgs, ...args], {
@@ -52,8 +55,18 @@ function execPnpm(args, options = {}) {
   });
 }
 
+function execNpm(args, options = {}) {
+  return execFileSync(npmCommand.command, [...npmCommand.prefixArgs, ...args], {
+    ...options,
+    env: {
+      ...process.env,
+      ...options.env,
+    },
+  });
+}
+
 function packDryRun(cwd) {
-  const stdout = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+  const stdout = execNpm(['pack', '--dry-run', '--json'], {
     cwd,
     encoding: 'utf8',
   });
@@ -88,7 +101,7 @@ function packTarball(cwd, packDir) {
 }
 
 function installTarball(workspaceDir, tarballPath) {
-  execFileSync('npm', ['install', tarballPath], {
+  execNpm(['install', tarballPath], {
     cwd: workspaceDir,
     encoding: 'utf8',
     stdio: 'pipe',
