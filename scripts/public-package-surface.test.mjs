@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const packages = [
@@ -21,8 +21,11 @@ const packages = [
 
 function resolvePackageManagerCommand(binaryName) {
   const entrypoint = process.env.npm_execpath;
+  const entrypointBase = typeof entrypoint === 'string' ? basename(entrypoint).toLowerCase() : '';
 
-  if (typeof entrypoint === 'string' && entrypoint.includes(binaryName)) {
+  const matchesEntrypoint = binaryName === 'pnpm' && entrypointBase.startsWith('pnpm');
+
+  if (typeof entrypoint === 'string' && matchesEntrypoint) {
     return { command: process.execPath, prefixArgs: [entrypoint] };
   }
 
