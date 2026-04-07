@@ -47,6 +47,7 @@ import './styles.css';
 import { buildAiProxyRequest } from './ai-request';
 import { buildWorkbenchExportInput } from './export-input';
 import { getUiText, readBrowserLanguage, resolveUiLanguage } from './i18n';
+import { buildSurfaceAiRequest, buildSurfaceExportArtifact } from './surface-shell-composition';
 import {
   buildDownloadPayload,
   buildEmptyProviderStatus,
@@ -361,27 +362,33 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   }
 
   async function handleExport(preset: ExportPreset) {
-    const artifact = createExportArtifact({
+    const artifact = buildSurfaceExportArtifact({
       preset,
       format: selectedFormat,
-      input: buildWorkbenchExportInput({
-        preset,
-        generatedAt: now,
+      state: {
+        now,
         uiLanguage,
         filters,
-        resources: preset === 'current_view' ? currentResources : workbenchView?.resources ?? [],
-        assignments: preset === 'current_view' ? currentAssignments : workbenchView?.assignments ?? [],
-        announcements: preset === 'current_view' ? currentAnnouncements : workbenchView?.announcements ?? [],
-        messages: preset === 'current_view' ? currentMessages : workbenchView?.messages ?? [],
-        grades: preset === 'current_view' ? currentGrades : workbenchView?.grades ?? [],
-        events: preset === 'current_view' ? currentEvents : workbenchView?.events ?? [],
-        alerts: preset === 'current_view' ? currentAlerts : priorityAlerts,
-        recentUpdates: currentRecentUpdates,
+        currentResources,
+        currentAssignments,
+        currentAnnouncements,
+        currentMessages,
+        currentGrades,
+        currentEvents,
+        currentAlerts,
+        currentRecentUpdates,
+        workbenchResources: workbenchView?.resources ?? [],
+        workbenchAssignments: workbenchView?.assignments ?? [],
+        workbenchAnnouncements: workbenchView?.announcements ?? [],
+        workbenchMessages: workbenchView?.messages ?? [],
+        workbenchGrades: workbenchView?.grades ?? [],
+        workbenchEvents: workbenchView?.events ?? [],
+        priorityAlerts,
         focusQueue,
         weeklyLoad,
-        syncRuns: latestSyncRuns,
-        changeEvents: recentChangeEvents,
-      }),
+        latestSyncRuns,
+        recentChangeEvents,
+      },
     });
 
     const blob = buildDownloadPayload(artifact.format, artifact.content);
@@ -439,35 +446,11 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     setAiStructuredAnswer(undefined);
 
     try {
-      const exportArtifact = createExportArtifact({
-        preset: 'current_view',
-        format: 'markdown',
-        input: buildWorkbenchExportInput({
-          preset: 'current_view',
-          generatedAt: now,
-          uiLanguage,
-          filters,
-          resources: currentResources,
-          assignments: currentAssignments,
-          announcements: currentAnnouncements,
-          messages: currentMessages,
-          grades: currentGrades,
-          events: currentEvents,
-          alerts: currentAlerts,
-          recentUpdates: currentRecentUpdates,
-          focusQueue,
-          weeklyLoad,
-          syncRuns: latestSyncRuns,
-          changeEvents: recentChangeEvents,
-        }),
-      });
-
-      const proxyRequest = buildAiProxyRequest({
+      const { currentViewExport: exportArtifact, proxyRequest } = buildSurfaceAiRequest({
         provider: aiProvider,
         model: aiModel,
         switchyardProvider,
         switchyardLane,
-        uiLanguage,
         question: aiQuestion,
         todaySnapshot: todaySnapshot ?? {
           totalAssignments: 0,
@@ -477,13 +460,30 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
           riskAlerts: 0,
           syncedSites: 0,
         },
-        recentUpdates: currentRecentUpdates?.items ?? [],
-        alerts: currentAlerts,
-        focusQueue,
-        weeklyLoad,
-        syncRuns: latestSyncRuns,
-        recentChanges: recentChangeEvents,
-        currentViewExport: exportArtifact,
+        state: {
+          now,
+          uiLanguage,
+          filters,
+          currentResources,
+          currentAssignments,
+          currentAnnouncements,
+          currentMessages,
+          currentGrades,
+          currentEvents,
+          currentAlerts,
+          currentRecentUpdates,
+          workbenchResources: workbenchView?.resources ?? [],
+          workbenchAssignments: workbenchView?.assignments ?? [],
+          workbenchAnnouncements: workbenchView?.announcements ?? [],
+          workbenchMessages: workbenchView?.messages ?? [],
+          workbenchGrades: workbenchView?.grades ?? [],
+          workbenchEvents: workbenchView?.events ?? [],
+          priorityAlerts,
+          focusQueue,
+          weeklyLoad,
+          latestSyncRuns,
+          recentChangeEvents,
+        },
       });
 
       const response = await fetch(`${config.ai.bffBaseUrl}${proxyRequest.route}`, {

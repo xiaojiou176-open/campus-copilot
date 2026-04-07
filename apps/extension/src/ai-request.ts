@@ -15,16 +15,12 @@ import type {
 } from '@campus-copilot/storage';
 import { getUiText, type ResolvedUiLanguage } from './i18n';
 import {
-  formatAlertSummary,
-  formatAlertTitle,
-  formatChangeEventSummary,
-  formatChangeEventTitle,
-  formatFocusReason,
-  formatTimelineSummary,
-  formatWeeklyLoadHighlights,
-  formatWeeklyLoadSummary,
-  localizeResourceList,
-} from './surface-shell-view-helpers';
+  buildLocalizedAlertPresentation,
+  buildLocalizedChangeEventPresentation,
+  buildLocalizedFocusQueuePresentation,
+  buildLocalizedRecentUpdatesPresentation,
+  buildLocalizedWeeklyLoadPresentation,
+} from './workbench-presentation';
 
 export function buildAiProxyRequest(input: {
   provider: ProviderId;
@@ -42,7 +38,7 @@ export function buildAiProxyRequest(input: {
   recentChanges: ChangeEvent[];
   currentViewExport: ExportArtifact;
 }) {
-  const text = getUiText(input.uiLanguage);
+  getUiText(input.uiLanguage);
   return buildSharedWorkbenchAiProxyRequest({
     provider: input.provider,
     model: input.model,
@@ -58,34 +54,11 @@ export function buildAiProxyRequest(input: {
     recentChanges: input.recentChanges,
     currentViewExport: input.currentViewExport,
     presentation: {
-      recentUpdates: input.recentUpdates.map((entry) => ({
-        ...entry,
-        summary: formatTimelineSummary(entry, input.uiLanguage) ?? entry.summary,
-      })),
-      alerts: input.alerts.map((alert) => ({
-        ...alert,
-        title: formatAlertTitle(alert, input.uiLanguage),
-        summary: formatAlertSummary(alert, input.uiLanguage),
-      })),
-      focusQueue: input.focusQueue.map((item) => ({
-        ...item,
-        reasons: item.reasons.map((reason) => ({
-          ...reason,
-          label: text.priorityReasonLabels[reason.code],
-          detail: formatFocusReason(reason, item, input.uiLanguage),
-        })),
-        blockedBy: localizeResourceList(item.blockedBy, input.uiLanguage),
-      })),
-      weeklyLoad: input.weeklyLoad.map((entry) => ({
-        ...entry,
-        highlights: formatWeeklyLoadHighlights(entry, input.uiLanguage),
-        summary: formatWeeklyLoadSummary(entry, input.uiLanguage),
-      })),
-      changeEvents: input.recentChanges.map((event) => ({
-        ...event,
-        title: formatChangeEventTitle(event, input.uiLanguage),
-        summary: formatChangeEventSummary(event, input.uiLanguage, text),
-      })),
+      recentUpdates: buildLocalizedRecentUpdatesPresentation(input.recentUpdates, input.uiLanguage),
+      alerts: buildLocalizedAlertPresentation(input.alerts, input.uiLanguage),
+      focusQueue: buildLocalizedFocusQueuePresentation(input.focusQueue, input.uiLanguage),
+      weeklyLoad: buildLocalizedWeeklyLoadPresentation(input.weeklyLoad, input.uiLanguage),
+      changeEvents: buildLocalizedChangeEventPresentation(input.recentChanges, input.uiLanguage),
     },
   });
 }
