@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -36,7 +36,13 @@ function resolvePackageManagerCommand(binaryName) {
     }).trim();
 
     if (resolved) {
-      return { command: resolved, prefixArgs: [] };
+      const realEntrypoint = realpathSync(resolved);
+
+      if (realEntrypoint.endsWith('.js') || realEntrypoint.endsWith('.cjs') || realEntrypoint.endsWith('.mjs')) {
+        return { command: process.execPath, prefixArgs: [realEntrypoint] };
+      }
+
+      return { command: realEntrypoint, prefixArgs: [] };
     }
   } catch {
     // Fall back to PATH lookup below.
@@ -104,7 +110,10 @@ function packTarball(cwd, packDir) {
 }
 
 function installTarball(workspaceDir, tarballPath) {
-  execNpm(['install', tarballPath], {
+  const localTarballPath = join(workspaceDir, basename(tarballPath));
+  copyFileSync(tarballPath, localTarballPath);
+
+  execNpm(['install', localTarballPath], {
     cwd: workspaceDir,
     encoding: 'utf8',
     stdio: 'pipe',
