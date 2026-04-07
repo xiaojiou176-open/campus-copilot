@@ -12,5 +12,3 @@ pnpm test
 pnpm smoke:api
 pnpm --filter @campus-copilot/web build
 pnpm --filter @campus-copilot/extension build
-
-EXTENSION_SMOKE_SKIP_BUILD=1 bash scripts/run-extension-smoke.sh

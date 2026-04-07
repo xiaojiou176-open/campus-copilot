@@ -51,6 +51,7 @@ Fresh repository gates passed:
 - `pnpm typecheck`
 - `pnpm test`
 - `pnpm verify`
+- `pnpm verify:hosted`
 - `pnpm smoke:provider`
 - `pnpm smoke:sidepanel`
 - `pnpm test:coverage`

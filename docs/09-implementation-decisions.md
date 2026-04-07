@@ -64,7 +64,7 @@ The repository currently treats these as formal paths:
 - thin BFF / shared consumer seam for a local `Switchyard` runtime
 - citation-aware AI answers over structured results
 - repo-public read-only SDK / CLI / MCP preview over imported snapshots and the thin BFF
-- deterministic repository verification through `pnpm verify`
+- deterministic repository verification through local `pnpm verify`, plus the GitHub-hosted `Verify` lane / `pnpm verify:hosted` when the managed headless Chromium smoke is required
 
 ## Current Non-Formal Paths
 

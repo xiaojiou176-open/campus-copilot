@@ -47,6 +47,14 @@ pnpm verify
 
 If you change docs, governance, or public collaboration surfaces, those checks are already part of the deterministic gate. Do not describe them as optional if `pnpm verify` now includes them.
 
+If you need the same browser-contract bundle that the GitHub-hosted required lane runs, use:
+
+```bash
+pnpm verify:hosted
+```
+
+That hosted lane keeps the deterministic extension Playwright smoke on managed Chromium instead of forcing every local pre-push path to bootstrap browser binaries first.
+
 ## Repo-owned Browser Identity
 
 `pnpm browser:launch` now opens or reuses the canonical Campus Copilot browser lane with a generated local identity tab under:

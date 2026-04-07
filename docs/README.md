@@ -50,6 +50,7 @@ Keep the split honest:
 
 - `verification-matrix.md` and `launch-packet.md` are **repo-local proof**
 - `14-public-distribution-scoreboard.md` and `15-publication-submission-packet.md` include **official listing / owner-only publication** concerns that do not belong on the default student path
+- the current validation contract also splits cleanly into `pre-commit`, `pre-push`, `hosted`, `nightly`, and `manual`, with the exact boundaries living in [`verification-matrix.md`](verification-matrix.md)
 
 ## Builder Lane
 
@@ -116,7 +117,7 @@ If you are a maintainer or contributor, read in this order:
 | Plugin-grade bundle router | [`../examples/integrations/plugin-bundles.md`](../examples/integrations/plugin-bundles.md) |
 | Fast package/toolbox chooser | [`../examples/toolbox-chooser.md`](../examples/toolbox-chooser.md) |
 | Public skills router | [`../skills/README.md`](../skills/README.md) |
-| Deterministic vs manual validation | [`verification-matrix.md`](verification-matrix.md) |
+| Deterministic vs manual validation, including the five-layer CI split | [`verification-matrix.md`](verification-matrix.md) |
 | Optional local coverage audit and test-pyramid context | [`verification-matrix.md`](verification-matrix.md) |
 | Manual live procedure | [`live-validation-runbook.md`](live-validation-runbook.md) |
 | Launch/closeout packet | [`launch-packet.md`](launch-packet.md) |
