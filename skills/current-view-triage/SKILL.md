@@ -22,6 +22,7 @@ Treat it like a **read-only triage plugin card** over one imported workspace sna
 - one imported snapshot path or one current-view export
 - or one connected Campus Copilot MCP server
 - use `references/mcp-setup.md` if the MCP server still needs to be connected
+- use `references/input-shape.md` if only a snapshot/current-view export is available
 
 ## Exposed MCP abilities
 
@@ -55,7 +56,7 @@ Use `references/capability-map.md` when you need the quick map.
 
 - Codex or Claude-style first-pass triage over a snapshot
 - OpenClaw-style local consumers that need one short "what now" brief
-- repo-local verification that the decision layer is understandable before reopening live browser work
+- any read-only triage workflow that needs one trustworthy next action without reopening browser automation
 
 ## Hard boundary
 
@@ -66,5 +67,6 @@ Use `references/capability-map.md` when you need the quick map.
 ## Companion references
 
 - `references/mcp-setup.md`
+- `references/input-shape.md`
 - `references/capability-map.md`
 - `references/example-output.md`
