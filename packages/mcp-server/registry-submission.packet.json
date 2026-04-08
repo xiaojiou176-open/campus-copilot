@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "kind": "repo-owned-mcp-registry-submission-packet",
-  "truthBoundary": "This packet is a repo-side preflight artifact. It is not proof of package publication or official registry listing.",
+  "truthBoundary": "This packet records the repo-owned MCP Registry source of truth. It does not replace a fresh read-back of the public discovery page.",
   "officialSources": {
     "quickstart": "https://modelcontextprotocol.io/registry/quickstart",
     "schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"
@@ -10,8 +10,13 @@
     "name": "@campus-copilot/mcp-server",
     "version": "0.1.0",
     "mcpName": "io.github.xiaojiou176-open/campus-copilot-mcp",
+    "distributionType": "mcpb",
     "publishConfigAccess": "public",
-    "npmPublicationRequiredBeforeRegistrySubmit": true
+    "releaseTag": "v0.1.0",
+    "releaseAsset": "campus-copilot-mcp-0.1.0.mcpb",
+    "releaseAssetUrl": "https://github.com/xiaojiou176-open/campus-copilot/releases/download/v0.1.0/campus-copilot-mcp-0.1.0.mcpb",
+    "fileSha256": "24b45ad5883479df448b2d622d3a6e476272cb6782bbb29d518fbf3751aad461",
+    "npmPublicationRequiredBeforeRegistrySubmit": false
   },
   "server": {
     "schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
@@ -27,6 +32,7 @@
   },
   "docs": {
     "readme": "packages/mcp-server/README.md",
+    "bundleManifest": "packages/mcp-server/mcpb.manifest.json",
     "examples": [
       "examples/integrations/README.md",
       "examples/integrations/codex-mcp.example.json",
@@ -34,9 +40,15 @@
     ],
     "packetDoc": "docs/16-distribution-preflight-packets.md"
   },
-  "ownerLater": {
-    "publishPackage": "npm publish --access public",
+  "ownerWorkflow": {
+    "buildLocalBundle": "pnpm --filter @campus-copilot/mcp-server build",
+    "uploadReleaseAsset": "gh release upload v0.1.0 campus-copilot-mcp-0.1.0.mcpb --repo xiaojiou176-open/campus-copilot --clobber",
     "login": "mcp-publisher login github",
-    "publishMetadata": "mcp-publisher publish"
+    "publishMetadata": "mcp-publisher publish packages/mcp-server/server.json"
+  },
+  "currentRegistrySubmit": {
+    "submittedAt": "2026-04-08",
+    "submitCommand": "mcp-publisher publish packages/mcp-server/server.json",
+    "status": "accepted_by_registry"
   }
 }

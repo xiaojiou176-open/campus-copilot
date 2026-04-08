@@ -14,7 +14,7 @@ It is the shipping counter:
 | If you need... | Open this | Why |
 | :-- | :-- | :-- |
 | the product front door | [`README.md`](README.md) | start with the product story, not the shipping ledger |
-| the canonical state ledger | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) | this is the SSOT for `public-ready`, `registry candidate`, `registry blocked`, and `not officially listed` |
+| the canonical state ledger | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) | this is the SSOT for `public-ready`, `registry candidate`, `registry submitted`, `registry blocked`, and `not officially listed` |
 | the owner-only action queue | [`docs/15-publication-submission-packet.md`](docs/15-publication-submission-packet.md) | use this only when the question becomes "what does the owner click next?" |
 | the packet inventory | [`docs/16-distribution-preflight-packets.md`](docs/16-distribution-preflight-packets.md) | use this when you want the exact repo-owned packet files and validation commands |
 | browser store last mile | [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) | the Chrome lane has its own packet and owner-only dashboard work |
@@ -29,6 +29,7 @@ These labels are the vocabulary for the rest of the distribution docs:
 | :-- | :-- |
 | `public-ready (repo-local)` | the repo already has a public install path, fresh proof loop, public docs, and a reproducible sample |
 | `registry candidate` | the artifact looks publishable, but no upstream package or listing page has been proven yet |
+| `registry submitted` | the upstream registry accepted the submission, but the discovery page has not been freshly re-read yet |
 | `registry blocked` | the surface is public and useful, but packaging or dependency shape still blocks standalone publication |
 | `owner-only later` | the repo-side packet is ready, but the remaining step is account-side submission, publish, or review |
 | `not officially listed` | no upstream marketplace, registry, or directory page has been freshly confirmed |
@@ -38,7 +39,7 @@ These labels are the vocabulary for the rest of the distribution docs:
 | Surface | Current truthful state | First proof | Read next |
 | :-- | :-- | :-- | :-- |
 | Main repository + Pages | public and GitHub Pages-backed | open the repo and homepage | [`README.md`](README.md) |
-| `@campus-copilot/mcp-server` stdio route | `public-ready (repo-local)` + `registry candidate` | `pnpm --filter @campus-copilot/mcp-server start --help` | [`docs/mcp-registry-submission-prep.md`](docs/mcp-registry-submission-prep.md) |
+| `@campus-copilot/mcp-server` stdio route | `public-ready (repo-local)` + `registry submitted` | `pnpm --filter @campus-copilot/mcp-server start --help` | [`docs/mcp-registry-submission-prep.md`](docs/mcp-registry-submission-prep.md) |
 | Docker / container path | `container-ready (repo-local)` | `docker build -t campus-copilot-api:local .`, `docker compose -f compose.yaml up -d campus-copilot-api`, then `pnpm smoke:docker:api` | [`docs/container-publication-prep.md`](docs/container-publication-prep.md) |
 | Browser extension | `build-ready product surface` | `pnpm --filter @campus-copilot/extension build` | [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) |
 | CLI / sidecars / provider-runtime / site APIs | `public-ready (repo-local)` or `registry candidate` | `pnpm proof:public` | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) |
@@ -59,8 +60,8 @@ Use the extension lane like a stage-gate, not like a vague "maybe ready" claim:
 
 These do **not** block repo-side readiness:
 
-- npm or package publication under owner credentials
-- official MCP Registry submission
+- future package publication under owner credentials for the non-registry package lanes
+- fresh registry discovery-page read-back after a submission is accepted
 - official marketplace or directory submission
 - Chrome Web Store dashboard submission
 - container registry push or directory-side listing for `ghcr.io/xiaojiou176-open/campus-copilot-api`
@@ -78,6 +79,7 @@ Keep these repo-side gates green before any owner-side step:
 
 - Do not call `public-ready (repo-local)` the same thing as `published`.
 - Do not call `registry candidate` the same thing as `officially listed`.
+- Do not call `registry submitted` the same thing as `fresh discovery-page read-back`.
 - Do not call `container-ready (repo-local)` the same thing as hosted SaaS.
 - Do not call plugin-grade repo bundles official marketplace plugins.
 - Keep this page narrower than the product story on the front door.

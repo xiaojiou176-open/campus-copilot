@@ -16,6 +16,7 @@ export function validateMcpRegistryPreflight() {
   const failures = [];
 
   const pkg = readJson('packages/mcp-server/package.json');
+  const bundleManifest = readJson('packages/mcp-server/mcpb.manifest.json');
   const server = readJson('packages/mcp-server/server.json');
   const packet = readJson('packages/mcp-server/registry-submission.packet.json');
   const readme = readFileSync(fromRepoRoot('packages/mcp-server/README.md'), 'utf8');
@@ -24,6 +25,7 @@ export function validateMcpRegistryPreflight() {
   const submissionPacketDoc = readFileSync(fromRepoRoot('docs/15-publication-submission-packet.md'), 'utf8');
   const preflightDoc = readFileSync(fromRepoRoot('docs/16-distribution-preflight-packets.md'), 'utf8');
   const examples = readFileSync(fromRepoRoot('examples/integrations/README.md'), 'utf8');
+  const expectedBundleUrl = `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
 
   if (pkg.private !== false) {
     failures.push('mcp_registry_package_must_be_public');
@@ -36,6 +38,18 @@ export function validateMcpRegistryPreflight() {
   }
   if (pkg.repository?.directory !== 'packages/mcp-server') {
     failures.push('mcp_registry_package_repository_directory_drift');
+  }
+  if (bundleManifest.manifest_version !== '0.2') {
+    failures.push('mcp_registry_bundle_manifest_version_drift');
+  }
+  if (bundleManifest.version !== pkg.version) {
+    failures.push('mcp_registry_bundle_manifest_package_version_drift');
+  }
+  if (bundleManifest.server?.type !== 'node') {
+    failures.push('mcp_registry_bundle_manifest_server_type_drift');
+  }
+  if (bundleManifest.server?.entry_point !== 'dist/bin.mjs') {
+    failures.push('mcp_registry_bundle_manifest_entrypoint_drift');
   }
 
   if (server.$schema !== 'https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json') {
@@ -60,14 +74,17 @@ export function validateMcpRegistryPreflight() {
     failures.push('mcp_registry_server_packages_shape_drift');
   } else {
     const [firstPackage] = server.packages;
-    if (firstPackage.registryType !== 'npm') {
+    if (firstPackage.registryType !== 'mcpb') {
       failures.push('mcp_registry_server_registry_type_drift');
     }
-    if (firstPackage.identifier !== pkg.name) {
+    if (firstPackage.identifier !== expectedBundleUrl) {
       failures.push('mcp_registry_server_identifier_drift');
     }
     if (firstPackage.version !== pkg.version) {
       failures.push('mcp_registry_server_package_version_drift');
+    }
+    if (firstPackage.fileSha256 !== packet.package?.fileSha256) {
+      failures.push('mcp_registry_server_bundle_hash_drift');
     }
     if (firstPackage.transport?.type !== 'stdio') {
       failures.push('mcp_registry_server_transport_drift');
@@ -86,6 +103,15 @@ export function validateMcpRegistryPreflight() {
   if (packet.package?.mcpName !== pkg.mcpName) {
     failures.push('mcp_registry_packet_mcp_name_drift');
   }
+  if (packet.package?.distributionType !== 'mcpb') {
+    failures.push('mcp_registry_packet_distribution_type_drift');
+  }
+  if (packet.package?.releaseAssetUrl !== expectedBundleUrl) {
+    failures.push('mcp_registry_packet_release_asset_url_drift');
+  }
+  if (packet.docs?.bundleManifest !== 'packages/mcp-server/mcpb.manifest.json') {
+    failures.push('mcp_registry_packet_bundle_manifest_reference_drift');
+  }
   if (packet.server?.name !== server.name) {
     failures.push('mcp_registry_packet_server_name_drift');
   }
@@ -103,8 +129,10 @@ export function validateMcpRegistryPreflight() {
     'registry-submission.packet.json',
     'server.json',
     'mcpName',
+    'mcpb.manifest.json',
     'stdio',
-    'official listing is still a separate upstream step',
+    'release-hosted `.mcpb` bundle',
+    'discovery-page read-back is still a separate upstream step',
     'pnpm start:mcp',
   ];
   for (const snippet of readmeSnippets) {
@@ -115,9 +143,10 @@ export function validateMcpRegistryPreflight() {
 
   const repoDocSnippets = [
     'registry-submission.packet.json',
+    'mcpb.manifest.json',
     'check:mcp-registry-preflight',
     'mcp-publisher login github',
-    'mcp-publisher publish',
+    'mcp-publisher publish packages/mcp-server/server.json',
   ];
   for (const snippet of repoDocSnippets) {
     if (!preflightDoc.includes(snippet)) {

@@ -222,18 +222,27 @@ serialTest('@campus-copilot/mcp-server tarball installs and exposes a runnable h
 
 serialTest('mcp-server preregistry metadata stays aligned with package.json', () => {
   const pkg = JSON.parse(readFileSync('packages/mcp-server/package.json', 'utf8'));
+  const bundleManifest = JSON.parse(readFileSync('packages/mcp-server/mcpb.manifest.json', 'utf8'));
   const metadata = JSON.parse(readFileSync('packages/mcp-server/server.json', 'utf8'));
   const packet = JSON.parse(readFileSync('packages/mcp-server/registry-submission.packet.json', 'utf8'));
+  const expectedBundleUrl = `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
 
   assert.equal(pkg.mcpName, 'io.github.xiaojiou176-open/campus-copilot-mcp');
+  assert.equal(bundleManifest.version, pkg.version);
+  assert.equal(bundleManifest.server.type, 'node');
+  assert.equal(bundleManifest.server.entry_point, 'dist/bin.mjs');
   assert.equal(metadata.name, pkg.mcpName);
   assert.equal(metadata.version, pkg.version);
   assert.equal(metadata.repository.subfolder, 'packages/mcp-server');
-  assert.equal(metadata.packages[0].registryType, 'npm');
-  assert.equal(metadata.packages[0].identifier, pkg.name);
+  assert.equal(metadata.packages[0].registryType, 'mcpb');
+  assert.equal(metadata.packages[0].identifier, expectedBundleUrl);
   assert.equal(metadata.packages[0].version, pkg.version);
+  assert.match(metadata.packages[0].fileSha256, /^[a-f0-9]{64}$/);
   assert.equal(metadata.packages[0].transport.type, 'stdio');
   assert.equal(packet.package.name, pkg.name);
+  assert.equal(packet.package.distributionType, 'mcpb');
+  assert.equal(packet.package.releaseAssetUrl, expectedBundleUrl);
+  assert.equal(packet.docs.bundleManifest, 'packages/mcp-server/mcpb.manifest.json');
   assert.equal(packet.package.mcpName, pkg.mcpName);
   assert.equal(packet.server.transport, 'stdio');
 });

@@ -6,13 +6,13 @@ Use it when the question is:
 
 > Which exact packet file is ready, which check proves it, and where does owner-only action begin?
 
-This file does **not** claim that any submission has already happened.
+This file is mostly repo-side inventory. If a lane already has an accepted submit, the state column must say so explicitly.
 
 ## Packet Inventory
 
 | Surface | Repo-owned packet or source | Validation command | Current truthful state | Read next |
 | :-- | :-- | :-- | :-- | :-- |
-| MCP Registry | [`../packages/mcp-server/registry-submission.packet.json`](../packages/mcp-server/registry-submission.packet.json) | `pnpm check:mcp-registry-preflight` | `registry-ready (repo-local)` | [`mcp-registry-submission-prep.md`](mcp-registry-submission-prep.md) |
+| MCP Registry | [`../packages/mcp-server/registry-submission.packet.json`](../packages/mcp-server/registry-submission.packet.json), [`../packages/mcp-server/mcpb.manifest.json`](../packages/mcp-server/mcpb.manifest.json) | `pnpm check:mcp-registry-preflight` | `release-hosted .mcpb + registry submitted` | [`mcp-registry-submission-prep.md`](mcp-registry-submission-prep.md) |
 | OpenClaw / ClawHub skill publish | [`../skills/clawhub-submission.packet.json`](../skills/clawhub-submission.packet.json) | `pnpm check:skill-catalog` | `generic upstream packet ready` | [`skill-publication-prep.md`](skill-publication-prep.md) |
 | Thin BFF container image | [`container-publication.packet.json`](container-publication.packet.json) | `pnpm check:container-surface` | `container-publication-prepared` for `campus-copilot-api:local` and future `ghcr.io/xiaojiou176-open/campus-copilot-api` | [`container-publication-prep.md`](container-publication-prep.md) |
 | Chrome Web Store | extension build output plus [`chrome-web-store-submission-packet.md`](chrome-web-store-submission-packet.md) | `pnpm --filter @campus-copilot/extension build` | `packet-ready` | [`chrome-web-store-submission-packet.md`](chrome-web-store-submission-packet.md) |
@@ -22,7 +22,7 @@ This file does **not** claim that any submission has already happened.
 
 | Packet lane | What it is for | What it is not |
 | :-- | :-- | :-- |
-| MCP Registry | align package metadata, `server.json`, and stdio install truth | proof that the package is already published or listed |
+| MCP Registry | align package metadata, `.mcpb` bundle truth, `server.json`, and stdio install truth | proof that the discovery page has already been freshly re-read |
 | Skill publish | give owner-side publish commands and stable metadata inputs | an invented vendor manifest |
 | Container image | lock image naming, OCI metadata, and truth boundary | proof that GHCR or Docker Hub already has a live page |
 | Chrome Web Store | prove the repo already has build, assets, and a submission packet | proof that the extension is already store-listed |
@@ -30,7 +30,11 @@ This file does **not** claim that any submission has already happened.
 
 ## Owner-Only Later Boundary
 
-Every packet in this file still needs one of the following before it becomes public:
+Not every packet in this file needs the same next step.
+
+Some lanes are still repo-local only, while others already have an accepted upstream submit and now only need read-back proof.
+
+The most common later steps are:
 
 - package publication
 - registry submission
@@ -38,11 +42,11 @@ Every packet in this file still needs one of the following before it becomes pub
 - store dashboard upload
 - registry push under owner credentials
 
-For the MCP Registry lane, the owner-only submit flow is still:
+For the MCP Registry lane, the reusable submit flow is:
 
 ```bash
 mcp-publisher login github
-mcp-publisher publish
+mcp-publisher publish packages/mcp-server/server.json
 ```
 
 That is why these packets should be read together with:

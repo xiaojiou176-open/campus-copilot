@@ -11,9 +11,10 @@
   "version": "0.1.0",
   "packages": [
     {
-      "registryType": "npm",
-      "identifier": "@campus-copilot/mcp-server",
+      "registryType": "mcpb",
+      "identifier": "https://github.com/xiaojiou176-open/campus-copilot/releases/download/v0.1.0/campus-copilot-mcp-0.1.0.mcpb",
       "version": "0.1.0",
+      "fileSha256": "24b45ad5883479df448b2d622d3a6e476272cb6782bbb29d518fbf3751aad461",
       "transport": {
         "type": "stdio"
       }
