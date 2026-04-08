@@ -54,9 +54,10 @@
         "openclaw-style-local-runtime"
       ],
       "companionFiles": [
-        "../examples/current-view-triage-example.md",
-        "../examples/workspace-snapshot.sample.json",
-        "../examples/openclaw-readonly.md"
+        "current-view-triage/README.md",
+        "current-view-triage/references/mcp-setup.md",
+        "current-view-triage/references/capability-map.md",
+        "current-view-triage/references/example-output.md"
       ]
     },
     {
