@@ -10,7 +10,7 @@ If you are still choosing between the generic MCP server, site sidecars, CLI, or
 
 ## Install
 
-Current install status: repo-local public-ready candidate with a bundled JS server artifact. Do not assume hosted MCP distribution or official registry listing from this README alone.
+Current install status: repo-local public surface with a bundled JS server artifact. The official MCP Registry lane now uses a GitHub release-hosted `.mcpb` bundle for this server; discovery-page read-back is still a separate proof step.
 
 From the repo root:
 
@@ -35,12 +35,13 @@ pnpm --filter @campus-copilot/mcp-server start
 Registry-unblock progress in this repo:
 
 - the published bin now targets a bundled `dist/bin.mjs` artifact instead of a raw TypeScript entrypoint
-- this package is the cleanest current candidate for future official MCP Registry submission work
+- the registry path now ships a release-hosted `.mcpb` bundle instead of relying on a public npm scope that does not exist
 - preregistry metadata now lives beside the package in [`server.json`](./server.json) and the package-level `mcpName`
+- the bundle manifest now lives in [`mcpb.manifest.json`](./mcpb.manifest.json)
 - repo-side submit-ready fields now also live in [`registry-submission.packet.json`](./registry-submission.packet.json)
 - the consolidated preflight ledger lives in [`../../docs/16-distribution-preflight-packets.md`](../../docs/16-distribution-preflight-packets.md)
 - the container/image packet lives in [`../../docs/container-publication-prep.md`](../../docs/container-publication-prep.md)
-- official listing is still a separate upstream step; this README does not imply it has already happened
+- registry discovery-page read-back is still a separate upstream step; this README does not imply the listing UI has already been re-read
 
 Registry preflight proof from the repo root:
 
@@ -51,7 +52,8 @@ pnpm check:mcp-registry-preflight
 That preflight checks the late-stage alignment work that tends to drift:
 
 - `package.json#mcpName`
-- `server.json` name/version/repository/transport alignment
+- `server.json` release asset URL / SHA / transport alignment
+- `mcpb.manifest.json` version and entry-point alignment
 - the monorepo `subfolder` path
 - example config plus truthful install wording
 - the repo-owned submission packet that the owner can reuse later

@@ -8,6 +8,7 @@ This file is the **status ledger** for repo-side distribution truth.
 | :-- | :-- |
 | `public-ready (repo-local)` | public install path + fresh proof loop + public doc/router + sample all exist inside the repo |
 | `registry candidate` | the package shape is good enough for real publication later |
+| `registry submitted` | the upstream registry accepted the submission, but the discovery page has not been freshly re-read yet |
 | `registry blocked` | repo-side proof exists, but packaging/export blockers still remain |
 | `plugin-grade repo bundle` | the route is real as a repo bundle, but not officially listed |
 | `container-ready (repo-local)` | the image path is real locally, but not yet pushed/listed |
@@ -17,7 +18,7 @@ This file is the **status ledger** for repo-side distribution truth.
 | Surface | State | First proof | Main blocker before official listing |
 | :-- | :-- | :-- | :-- |
 | `@campus-copilot/cli` | `public-ready (repo-local)`, `registry candidate` | `pnpm --filter @campus-copilot/cli test` | no upstream publication page exists yet |
-| `@campus-copilot/mcp-server` | `public-ready (repo-local)`, `registry candidate` | `pnpm --filter @campus-copilot/mcp-server build && pnpm --filter @campus-copilot/mcp-server test` | official MCP Registry submit still not executed; packet lives in `packages/mcp-server/registry-submission.packet.json` |
+| `@campus-copilot/mcp-server` | `public-ready (repo-local)`, `registry submitted` | `pnpm --filter @campus-copilot/mcp-server build && pnpm --filter @campus-copilot/mcp-server test` | fresh registry discovery-page read-back is still pending; packet lives in `packages/mcp-server/registry-submission.packet.json` |
 | `@campus-copilot/mcp` | `public-ready (repo-local)`, `registry candidate` | `pnpm --filter @campus-copilot/mcp test` | helper package is still not an official listing |
 | `@campus-copilot/mcp-readonly` | `public-ready (repo-local)`, `registry candidate` | `pnpm --filter @campus-copilot/mcp-readonly build && pnpm --filter @campus-copilot/mcp-readonly test` | sidecar package is still not an official MCP Registry listing |
 | `@campus-copilot/provider-runtime` | `public-ready (repo-local)`, `registry candidate` | `pnpm --filter @campus-copilot/provider-runtime test` | no upstream package publication yet |
@@ -45,7 +46,7 @@ Latest checked against official sources on `2026-04-07 PDT`.
 
 | Surface | Official public face exists? | Exact official URL | Current repo-local status | Remaining blocker |
 | :-- | :-- | :-- | :-- | :-- |
-| MCP Registry | Yes | [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/) | strongest repo artifact is `@campus-copilot/mcp-server` | npm publish + official submit still not done |
+| MCP Registry | Yes | [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/) | release-hosted `.mcpb` bundle + accepted submit for `io.github.xiaojiou176-open/campus-copilot-mcp` | fresh discovery-page read-back still pending |
 | Codex ecosystem | Yes | [developers.openai.com/codex/ide](https://developers.openai.com/codex/ide) | repo ships a truthful local bundle route | no verified third-party listing lane recorded here |
 | Claude Code ecosystem | Yes | [docs.anthropic.com/en/docs/claude-code/ide-integrations](https://docs.anthropic.com/en/docs/claude-code/ide-integrations) | repo ships truthful Claude bundle routes | no verified marketplace/listing lane recorded here |
 | OpenClaw / ClawHub | Yes | [docs.openclaw.ai/tools/clawhub](https://docs.openclaw.ai/tools/clawhub) | repo ships a compatible bundle + packet | no official publication completed |
@@ -53,10 +54,10 @@ Latest checked against official sources on `2026-04-07 PDT`.
 
 ## Current Truth
 
-- package surfaces can already be discussed as `public-ready (repo-local)` or `registry candidate`
+- package surfaces can already be discussed as `public-ready (repo-local)`, `registry candidate`, or `registry submitted`
 - bundle surfaces should stay at `plugin-grade repo bundle`
 - browser extension should stay at `build-ready product surface`
-- none of these routes should be described as `officially listed` yet
+- only the MCP Registry lane has an accepted submit; none of these routes should be described as `officially listed` until a discovery-page read-back exists
 
 For the skill-facing publish packet and owner-later commands, read
 [`skill-publication-prep.md`](skill-publication-prep.md).

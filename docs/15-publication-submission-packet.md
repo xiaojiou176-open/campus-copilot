@@ -15,8 +15,8 @@ It is intentionally narrow:
 
 | Priority | Surface | Current truthful state | Why it is next | Exact owner-side step |
 | :-- | :-- | :-- | :-- | :-- |
-| 1 | `@campus-copilot/mcp-server` | `public-ready (repo-local)` + `registry candidate` | strongest canonical MCP-server-shaped artifact | publish the package, then execute the official MCP Registry submit flow |
-| 2 | `@campus-copilot/mcp` | `public-ready (repo-local)` + `registry candidate` | good helper package, but should not outrun the canonical server artifact | publish only after the stronger server story leaves the repo |
+| 1 | MCP Registry read-back for `@campus-copilot/mcp-server` | `public-ready (repo-local)` + `registry submitted` | the registry accepted the release-hosted `.mcpb` route, but the discovery page still needs a fresh read-back before anyone says `officially listed` | search and re-read the registry discovery page for `io.github.xiaojiou176-open/campus-copilot-mcp` after propagation |
+| 2 | `@campus-copilot/mcp` | `public-ready (repo-local)` + `registry candidate` | good helper package, but should not outrun the canonical server artifact | publish only after the stronger server story is already public |
 | 3 | `@campus-copilot/cli` | `public-ready (repo-local)` + `registry candidate` | broad builder entrypoint once the MCP story is anchored | publish under owner credentials when you want a general builder install path |
 | 4 | `@campus-copilot/mcp-readonly`, `@campus-copilot/provider-runtime`, `@campus-copilot/gradescope-api`, `@campus-copilot/edstem-api`, `@campus-copilot/myuw-api` | `public-ready (repo-local)` + `registry candidate` | real and packable, but easier to overclaim if they leave first | publish only after the earlier package story is already public |
 | 5 | Public skill pack | `public-ready (repo-local)` + generic packet ready | repo packet is ready, but platform submission still needs owner auth | publish skill-by-skill with the target platform's real upload flow |
@@ -36,7 +36,7 @@ The recommended order stays:
 
 Why this order is the safest:
 
-- `mcp-server` is the strongest official-registry-shaped artifact
+- `mcp-server` is already the strongest official-registry-shaped artifact and now anchors the public MCP story
 - `mcp` is useful, but it is still the helper package rather than the canonical server surface
 - `cli` is broad and attractive, so it is safer after the MCP story is already anchored
 - the remaining packages are real, but they are easier to misread if they appear before the core story is public
@@ -45,7 +45,7 @@ Why this order is the safest:
 
 | Action | Why it is owner-only | Read this first |
 | :-- | :-- | :-- |
-| Publish the first MCP artifact | requires package credentials and final release choice; the repo packet lives at `packages/mcp-server/registry-submission.packet.json` | [`mcp-registry-submission-prep.md`](mcp-registry-submission-prep.md) |
+| Re-read the first MCP artifact | requires a fresh registry discovery-page check, not just the submit receipt; the repo packet lives at `packages/mcp-server/registry-submission.packet.json` | [`mcp-registry-submission-prep.md`](mcp-registry-submission-prep.md) |
 | Publish the public skill pack | requires platform auth and publish flags | [`skill-publication-prep.md`](skill-publication-prep.md) |
 | Publish the thin BFF image | requires registry auth and visibility choice | [`container-publication-prep.md`](container-publication-prep.md) |
 | Submit the browser extension | requires Chrome Web Store dashboard actions | [`chrome-web-store-submission-packet.md`](chrome-web-store-submission-packet.md) |
@@ -54,6 +54,7 @@ Why this order is the safest:
 ## Rules
 
 - Do not treat `registry candidate` as `already published`.
+- Do not treat `registry submitted` as `officially listed`.
 - Do not treat package publication as `officially listed`.
 - Do not skip the scoreboard before making a publish decision.
 - Do not switch wording to `officially listed` or `marketplace listed` until the upstream page exists.

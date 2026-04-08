@@ -38,6 +38,7 @@ const requiredFiles = [
   'docs/14-public-distribution-scoreboard.md',
   'docs/15-publication-submission-packet.md',
   'docs/16-distribution-preflight-packets.md',
+  'packages/mcp-server/mcpb.manifest.json',
   'docs/container-publication.packet.json',
   'docs/assets/hero-workbench-overview.svg',
   'docs/assets/social-preview-source.svg',
@@ -370,6 +371,7 @@ for (const manifestPath of publicPackageManifests) {
       failures.push(`public_package_server_metadata_missing:${serverMetadataPath}`);
     } else {
       const metadata = JSON.parse(readFileSync(serverMetadataPath, 'utf8'));
+      const expectedBundleUrl = `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
       if (metadata.name !== pkg.mcpName) {
         failures.push(`public_package_server_metadata_name_mismatch:${serverMetadataPath}`);
       }
@@ -380,14 +382,17 @@ for (const manifestPath of publicPackageManifests) {
         failures.push(`public_package_server_metadata_packages_invalid:${serverMetadataPath}`);
       } else {
         const [packageEntry] = metadata.packages;
-        if (packageEntry.registryType !== 'npm') {
+        if (packageEntry.registryType !== 'mcpb') {
           failures.push(`public_package_server_metadata_registry_type_invalid:${serverMetadataPath}`);
         }
-        if (packageEntry.identifier !== pkg.name) {
+        if (packageEntry.identifier !== expectedBundleUrl) {
           failures.push(`public_package_server_metadata_identifier_mismatch:${serverMetadataPath}`);
         }
         if (packageEntry.version !== pkg.version) {
           failures.push(`public_package_server_metadata_package_version_mismatch:${serverMetadataPath}`);
+        }
+        if (typeof packageEntry.fileSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(packageEntry.fileSha256)) {
+          failures.push(`public_package_server_metadata_bundle_hash_invalid:${serverMetadataPath}`);
         }
         if (packageEntry.transport?.type !== 'stdio') {
           failures.push(`public_package_server_metadata_transport_invalid:${serverMetadataPath}`);

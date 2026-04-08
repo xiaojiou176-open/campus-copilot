@@ -1,0 +1,41 @@
+{
+  "manifest_version": "0.2",
+  "name": "Campus Copilot MCP",
+  "version": "0.1.0",
+  "description": "Read-only MCP server for the local Campus Copilot BFF and imported workspace snapshots.",
+  "author": {
+    "name": "xiaojiou176-open",
+    "url": "https://github.com/xiaojiou176-open/campus-copilot"
+  },
+  "homepage": "https://github.com/xiaojiou176-open/campus-copilot",
+  "support": "https://github.com/xiaojiou176-open/campus-copilot/issues",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/bin.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/bin.mjs"
+      ],
+      "env": {}
+    }
+  },
+  "tools": [
+    {
+      "name": "campus_health",
+      "description": "Checks local BFF and snapshot workspace health."
+    }
+  ],
+  "keywords": [
+    "campus-copilot",
+    "mcp",
+    "server",
+    "read-only",
+    "stdio"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaojiou176-open/campus-copilot"
+  }
+}
