@@ -51,14 +51,13 @@ Recommended shared baseline tags for ClawHub skill publish: `latest,campus-copil
 
 ## Owner-Only Later Steps
 
-1. wait for ClawHub's hourly new-skill rate limit to reset, then publish `site-snapshot-review` and `switchyard-runtime-check`
-   - you can still use `clawhub sync --all` after the rate-limit window resets if you prefer the bulk path over one-by-one publish
-2. re-read the remaining ClawHub listing pages after those two publishes succeed
-3. if a future remote MCP server is deployed and Glama becomes relevant, publish the real `/.well-known/glama.json` file on that remote domain and claim the connector there
+1. re-read or archive the ClawHub listing pages whenever you need a fresh external receipt set
+   - for future bulk refreshes, `clawhub sync --all` remains the canonical repo-side batch path
+2. if a future remote MCP server is deployed and Glama becomes relevant, publish the real `/.well-known/glama.json` file on that remote domain and claim the connector there
 
 ## Current Verdict
 
 - **Repo-side state**: `skill publication packet ready`
 - **OpenClaw bundle truth**: `compatible repo bundle on a manifestless Claude-style layout`
-- **ClawHub truth**: `current-view-triage`, `openclaw-readonly-consumer`, `read-only-workspace-analysis`, `read-only-workspace-audit`, `site-mcp-consumer`, and `site-overview-audit` are live; `site-snapshot-review` and `switchyard-runtime-check` remain blocked by ClawHub's max-5-new-skills-per-hour limit
+- **ClawHub truth**: all 8 repo-owned public skills are now live, including `site-snapshot-review` and `switchyard-runtime-check`
 - **Glama truth**: `generic directory packet ready; no stable local-surface manifest path recovered`

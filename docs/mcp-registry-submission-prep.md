@@ -36,7 +36,7 @@ Use it when the question becomes:
 - transport: `stdio`
 - repository subfolder: `packages/mcp-server`
 - fresh discovery read-back on `2026-04-10` shows the registry entry is publicly searchable as `active`
-- current blocker: the registry needs a fresh `0.1.1` bundle + metadata publish so the public listing can advance beyond the older `0.1.0` artifact
+- current status: the `0.1.1` bundle and metadata publish have completed, and the registry now shows `0.1.1` as the latest active version
 
 ## Submit Flow
 
@@ -67,8 +67,8 @@ mcp-publisher publish packages/mcp-server/server.json
 
 ## Current Verdict
 
-- **Repo-side state**: `listing exists, but current main still needs a refreshed .mcpb + metadata publish`
+- **Repo-side state**: `current main now has a release-backed deterministic .mcpb path`
 - **Package truth**: `real local package + real .mcpb bundle + real server.json + real stdio install path`
-- **Registry submit truth**: `accepted by the official MCP Registry on 2026-04-08`
-- **Fresh read-back**: official API search on `2026-04-10` returns `io.github.xiaojiou176-open/campus-copilot-mcp` as `active`
-- **Still separate blocker**: publisher auth plus refreshed asset/metadata so the public listing matches current `main`
+- **Registry submit truth**: `accepted by the official MCP Registry on 2026-04-10 for version 0.1.1`
+- **Fresh read-back**: official API search on `2026-04-10` returns `io.github.xiaojiou176-open/campus-copilot-mcp` with `0.1.1` as the latest active version
+- **Still separate blocker**: none on the registry-freshness lane
