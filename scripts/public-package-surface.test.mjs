@@ -265,6 +265,191 @@ serialTest('audit promotes mcp-readonly to a registry candidate once no private 
   assert.match(stdout, /@campus-copilot\/mcp-readonly \| public-ready \(repo-local\) \| registry candidate/);
 });
 
+serialTest('@campus-copilot/sdk tarball installs and exposes bundled runtime entrypoints', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-sdk-pack-'));
+  const workspaceDir = createTempWorkspace('campus-copilot-sdk-proof-');
+
+  try {
+    const tarballPath = packTarball('packages/sdk', packDir);
+    installTarball(workspaceDir, tarballPath);
+
+    const stdout = execFileSync(
+      'node',
+      [
+        '-e',
+        `Promise.all([
+          import('@campus-copilot/sdk'),
+          import('@campus-copilot/sdk/api'),
+          import('@campus-copilot/sdk/snapshot'),
+          import('@campus-copilot/sdk/sites'),
+        ]).then(([sdk, apiMod, snapshotMod, sitesMod]) => {
+          const snapshot = sdk.parseImportedWorkbenchSnapshot(JSON.stringify({
+            generatedAt: '2026-04-03T09:00:00-07:00',
+            resources: [],
+            assignments: [{
+              id: 'canvas:assignment:hw5',
+              kind: 'assignment',
+              site: 'canvas',
+              source: { site: 'canvas', resourceId: 'hw5', resourceType: 'assignment' },
+              title: 'Homework 5',
+              status: 'submitted',
+              dueAt: '2026-04-04T23:59:00-07:00',
+            }],
+            announcements: [],
+            messages: [],
+            grades: [],
+            events: [],
+            syncRuns: [],
+            changeEvents: [],
+          }));
+          const summary = snapshotMod.buildWorkspaceSummary(snapshot);
+          const siteRecords = sitesMod.getCanvasAssignments(snapshot);
+          console.log([
+            typeof apiMod.CampusCopilotApiClient,
+            summary.totals.assignments,
+            siteRecords.length,
+          ].join(','));
+        });`,
+      ],
+      {
+        cwd: workspaceDir,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      },
+    );
+
+    assert.match(stdout, /function,1,1/);
+  } finally {
+    rmSync(packDir, { force: true, recursive: true });
+    rmSync(workspaceDir, { force: true, recursive: true });
+  }
+});
+
+serialTest('@campus-copilot/workspace-sdk tarball installs and derives workspace state without private deps', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-workspace-sdk-pack-'));
+  const workspaceDir = createTempWorkspace('campus-copilot-workspace-sdk-proof-');
+
+  try {
+    const tarballPath = packTarball('packages/workspace-sdk', packDir);
+    installTarball(workspaceDir, tarballPath);
+
+    const stdout = execFileSync(
+      'node',
+      [
+        '-e',
+        `import('@campus-copilot/workspace-sdk').then(async (workspaceSdk) => {
+          const snapshot = workspaceSdk.parseWorkspaceSnapshot(JSON.stringify({
+            generatedAt: '2026-04-03T09:00:00-07:00',
+            resources: [],
+            assignments: [{
+              id: 'canvas:assignment:hw5',
+              kind: 'assignment',
+              site: 'canvas',
+              source: { site: 'canvas', resourceId: 'hw5', resourceType: 'assignment' },
+              title: 'Homework 5',
+              courseId: 'canvas:course:cse142',
+              dueAt: '2026-04-04T23:59:00-07:00',
+              status: 'submitted',
+            }],
+            announcements: [],
+            messages: [],
+            grades: [],
+            events: [],
+            syncRuns: [{
+              id: 'sync-run:canvas:1',
+              site: 'canvas',
+              status: 'success',
+              outcome: 'success',
+              startedAt: '2026-04-03T08:00:00-07:00',
+              completedAt: '2026-04-03T08:02:00-07:00',
+              changeCount: 1,
+            }],
+            changeEvents: [{
+              id: 'change-event:canvas:hw5',
+              runId: 'sync-run:canvas:1',
+              site: 'canvas',
+              changeType: 'status_changed',
+              occurredAt: '2026-04-03T08:02:00-07:00',
+              title: 'Homework 5 status changed',
+              summary: 'Submitted draft is already in Canvas.',
+              entityId: 'canvas:assignment:hw5',
+            }],
+          }));
+          const summary = await workspaceSdk.buildWorkspaceSummary(snapshot);
+          console.log([
+            summary.siteCounts.find((entry) => entry.site === 'canvas')?.assignments,
+            summary.latestSyncRuns.length,
+          ].join(','));
+        });`,
+      ],
+      {
+        cwd: workspaceDir,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      },
+    );
+
+    assert.match(stdout, /1,1/);
+  } finally {
+    rmSync(packDir, { force: true, recursive: true });
+    rmSync(workspaceDir, { force: true, recursive: true });
+  }
+});
+
+serialTest('@campus-copilot/site-sdk tarball installs and returns per-site overview helpers', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-site-sdk-pack-'));
+  const workspaceDir = createTempWorkspace('campus-copilot-site-sdk-proof-');
+
+  try {
+    const tarballPath = packTarball('packages/site-sdk', packDir);
+    installTarball(workspaceDir, tarballPath);
+
+    const stdout = execFileSync(
+      'node',
+      [
+        '-e',
+        `import('@campus-copilot/site-sdk').then(async (siteSdk) => {
+          const snapshot = {
+            generatedAt: '2026-04-03T09:00:00-07:00',
+            resources: [],
+            assignments: [{
+              id: 'canvas:assignment:hw5',
+              kind: 'assignment',
+              site: 'canvas',
+              source: { site: 'canvas', resourceId: 'hw5', resourceType: 'assignment' },
+              title: 'Homework 5',
+              courseId: 'canvas:course:cse142',
+              dueAt: '2026-04-04T23:59:00-07:00',
+              status: 'submitted',
+            }],
+            announcements: [],
+            messages: [],
+            grades: [],
+            events: [],
+            syncRuns: [],
+            changeEvents: [],
+          };
+          const overview = await siteSdk.getCanvasOverview(snapshot);
+          console.log([
+            siteSdk.SITE_TOOLBOX_ORDER.join(':'),
+            overview.counts.assignments,
+          ].join('|'));
+        });`,
+      ],
+      {
+        cwd: workspaceDir,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      },
+    );
+
+    assert.match(stdout, /canvas:gradescope:edstem:myuw:time-schedule\|1/);
+  } finally {
+    rmSync(packDir, { force: true, recursive: true });
+    rmSync(workspaceDir, { force: true, recursive: true });
+  }
+});
+
 serialTest('@campus-copilot/provider-runtime tarball installs and imports in a fresh temp workspace', () => {
   const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-provider-runtime-pack-'));
   const workspaceDir = createTempWorkspace('campus-copilot-provider-runtime-proof-');

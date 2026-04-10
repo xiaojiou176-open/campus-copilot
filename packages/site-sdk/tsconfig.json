@@ -3,7 +3,10 @@
   "compilerOptions": {
     "lib": ["ES2022"],
     "types": ["node"],
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@campus-copilot/workspace-sdk": ["packages/workspace-sdk/src/index.ts"]
+    }
   },
   "include": ["src/**/*.ts"]
 }

@@ -12,8 +12,8 @@ Use it when the question becomes:
 - it is **not** the stdio MCP transport
 - the local proof image tag stays `campus-copilot-api:local`
 - the recommended future public image reference is `ghcr.io/xiaojiou176-open/campus-copilot-api`
-- that reference is still only a repo-side recommendation today
-- no image has been pushed to GHCR, Docker Hub, or another registry from this repo in this wave
+- that reference started as a repo-side recommendation, but this wave has now pushed the image to GHCR
+- the current GHCR package still uses non-public visibility, so external anonymous read-back is not complete yet
 
 ## Naming And Tag Strategy
 
@@ -51,8 +51,7 @@ The Dockerfile carries the expected OCI label set:
 
 ## Owner-Only Later Steps
 
-1. choose the real destination registry and create the repository if needed
-2. build the image with real version and revision metadata, for example:
+1. keep the current build command and tag set as the canonical publication recipe:
 
 ```bash
 docker build \
@@ -61,11 +60,11 @@ docker build \
   -t ghcr.io/xiaojiou176-open/campus-copilot-api:0.1.0 .
 ```
 
-3. push the image under owner-controlled credentials
-4. verify the live registry page after the push succeeds
+2. ensure the GHCR package visibility becomes public
+3. verify the live package page after the visibility change succeeds
 
 ## Current Verdict
 
 - **Repo-side state**: `container publication prep ready`
-- **Runtime truth**: thin local BFF only
-- **Owner-only later**: registry creation, push credentials, and final publish actions
+- **Runtime truth**: thin local BFF plus a pushed GHCR image at `ghcr.io/xiaojiou176-open/campus-copilot-api`
+- **Owner-only later**: package visibility/public read-back and any further registry-side listing work

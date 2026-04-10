@@ -48,12 +48,12 @@ These labels are the vocabulary for the rest of the distribution docs:
 | Surface | Current truthful state | First proof | Read next |
 | :-- | :-- | :-- | :-- |
 | Main repository + Pages | public and GitHub Pages-backed | open the repo and homepage | [`README.md`](README.md) |
-| `@campus-copilot/mcp-server` stdio route | `public-ready (repo-local)` + `registry submitted` | `pnpm --filter @campus-copilot/mcp-server start --help` | [`docs/mcp-registry-submission-prep.md`](docs/mcp-registry-submission-prep.md) |
-| Docker / container path | `container-ready (repo-local)` | `docker build -t campus-copilot-api:local .`, `docker compose -f compose.yaml up -d campus-copilot-api`, then `pnpm smoke:docker:api` | [`docs/container-publication-prep.md`](docs/container-publication-prep.md) |
+| `@campus-copilot/mcp-server` stdio route | `public-ready (repo-local)` + `registry listed for v0.1.0` + `current main ahead of the published artifact` | `pnpm --filter @campus-copilot/mcp-server start --help` | [`docs/mcp-registry-submission-prep.md`](docs/mcp-registry-submission-prep.md) |
+| Docker / container path | `container-ready (repo-local)` + `GHCR pushed` + `visibility still internal` | `docker build -t campus-copilot-api:local .`, `docker compose -f compose.yaml up -d campus-copilot-api`, then `pnpm smoke:docker:api` | [`docs/container-publication-prep.md`](docs/container-publication-prep.md) |
 | Browser extension | `build-ready product surface` | `pnpm --filter @campus-copilot/extension build` | [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) |
 | CLI / sidecars / provider-runtime / site APIs | `public-ready (repo-local)` or `registry candidate` | `pnpm proof:public` | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) |
-| SDK / workspace-sdk / site-sdk | `public-ready (repo-local)` + `registry blocked` | `pnpm proof:public` | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) |
-| Public skill pack | `public-ready (repo-local)` + generic packet ready | `pnpm check:skill-catalog` | [`docs/skill-publication-prep.md`](docs/skill-publication-prep.md) |
+| SDK / workspace-sdk / site-sdk | `public-ready (repo-local)` + `registry candidate` | `pnpm proof:public` | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) |
+| Public skill pack | `public-ready (repo-local)` + `6 live ClawHub listings` + `2 rate-limited remainder` | `pnpm check:skill-catalog` | [`docs/skill-publication-prep.md`](docs/skill-publication-prep.md) |
 | Codex / Claude / OpenClaw bundles | `plugin-grade repo bundle` + `not officially listed` | `pnpm proof:public` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
 
 ## Chrome Web Store Lane
@@ -70,10 +70,10 @@ Use the extension lane like a stage-gate, not like a vague "maybe ready" claim:
 These do **not** block repo-side readiness:
 
 - future package publication under owner credentials for the non-registry package lanes
-- fresh registry discovery-page read-back after a submission is accepted
+- refreshed MCP Registry `.mcpb` bundle + metadata publish so the public listing matches current `main`
 - official marketplace or directory submission
 - Chrome Web Store dashboard submission
-- container registry push or directory-side listing for `ghcr.io/xiaojiou176-open/campus-copilot-api`
+- container visibility/public read-back for `ghcr.io/xiaojiou176-open/campus-copilot-api`
 - promo video, launch post, or off-repo distribution
 
 Keep these repo-side gates green before any owner-side step:

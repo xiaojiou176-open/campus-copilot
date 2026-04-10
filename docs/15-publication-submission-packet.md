@@ -15,12 +15,12 @@ It is intentionally narrow:
 
 | Priority | Surface | Current truthful state | Why it is next | Exact owner-side step |
 | :-- | :-- | :-- | :-- | :-- |
-| 1 | MCP Registry read-back for `@campus-copilot/mcp-server` | `public-ready (repo-local)` + `registry submitted` | the registry accepted the release-hosted `.mcpb` route, but the discovery page still needs a fresh read-back before anyone says `officially listed` | search and re-read the registry discovery page for `io.github.xiaojiou176-open/campus-copilot-mcp` after propagation |
+| 1 | Refresh the MCP Registry artifact for `@campus-copilot/mcp-server` | `public discovery hit exists for v0.1.0`, but current `main` is ahead of the listed artifact | the external listing now exists, so the remaining gap is no longer discovery; it is artifact freshness, and the repo packet still lives at `packages/mcp-server/registry-submission.packet.json` | rebuild the `.mcpb` bundle, upload the refreshed release asset, re-run `mcp-publisher publish packages/mcp-server/server.json`, then re-read the discovery page |
 | 2 | `@campus-copilot/mcp` | `public-ready (repo-local)` + `registry candidate` | good helper package, but should not outrun the canonical server artifact | publish only after the stronger server story is already public |
 | 3 | `@campus-copilot/cli` | `public-ready (repo-local)` + `registry candidate` | broad builder entrypoint once the MCP story is anchored | publish under owner credentials when you want a general builder install path |
 | 4 | `@campus-copilot/mcp-readonly`, `@campus-copilot/provider-runtime`, `@campus-copilot/gradescope-api`, `@campus-copilot/edstem-api`, `@campus-copilot/myuw-api` | `public-ready (repo-local)` + `registry candidate` | real and packable, but easier to overclaim if they leave first | publish only after the earlier package story is already public |
-| 5 | Public skill pack | `public-ready (repo-local)` + generic packet ready | repo packet is ready, but platform submission still needs owner auth | publish skill-by-skill with the target platform's real upload flow |
-| 6 | Thin BFF container image | `container-ready (repo-local)` | local build/smoke path is real, but registry push is still owner-controlled | push the image to GHCR or the chosen registry under owner credentials |
+| 5 | Public skill pack | `6 skills live on ClawHub`, `2 still unpublished` | the pack is no longer purely repo-local, but ClawHub now blocks the last 2 skills with an hourly new-skill rate limit | wait for the rate limit to reset, then publish `site-snapshot-review` and `switchyard-runtime-check` |
+| 6 | Thin BFF container image | `GHCR push completed`, but package visibility is still `internal` | the registry push is done; the remaining gap is public visibility and public read-back | switch `ghcr.io/xiaojiou176-open/campus-copilot-api` to public and then re-read the package page |
 | 7 | Browser extension | `build-ready`, `asset-ready`, `packet-ready` | repo-side extension prep is done, but store submission is dashboard-only later | upload package and finalize listing details in Chrome Web Store |
 | 8 | Any `officially listed` wording | `not officially listed` until read-back exists | wording must trail proof, not lead it | only switch wording after an upstream page or review receipt exists |
 
@@ -45,7 +45,7 @@ Why this order is the safest:
 
 | Action | Why it is owner-only | Read this first |
 | :-- | :-- | :-- |
-| Re-read the first MCP artifact | requires a fresh registry discovery-page check, not just the submit receipt; the repo packet lives at `packages/mcp-server/registry-submission.packet.json` | [`mcp-registry-submission-prep.md`](mcp-registry-submission-prep.md) |
+| Refresh the first MCP artifact | requires a new release asset plus publisher auth because the public registry entry still points at the older v0.1.0 artifact | [`mcp-registry-submission-prep.md`](mcp-registry-submission-prep.md) |
 | Publish the public skill pack | requires platform auth and publish flags | [`skill-publication-prep.md`](skill-publication-prep.md) |
 | Publish the thin BFF image | requires registry auth and visibility choice | [`container-publication-prep.md`](container-publication-prep.md) |
 | Submit the browser extension | requires Chrome Web Store dashboard actions | [`chrome-web-store-submission-packet.md`](chrome-web-store-submission-packet.md) |

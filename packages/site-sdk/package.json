@@ -18,15 +18,18 @@
     "access": "public"
   },
   "type": "module",
-  "files": ["README.md", "src", "tsconfig.json"],
+  "files": ["README.md", "dist"],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js"
   },
   "scripts": {
+    "build": "pnpm --filter @campus-copilot/workspace-sdk build && rm -rf dist && pnpm exec esbuild ./src/index.ts --bundle --platform=node --format=esm --target=node20 --legal-comments=none --outfile=dist/index.js",
+    "prepack": "pnpm build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@campus-copilot/schema": "workspace:*",
     "@campus-copilot/storage": "workspace:*",
     "@campus-copilot/workspace-sdk": "workspace:*"

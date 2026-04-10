@@ -14,6 +14,7 @@ Use it when the question becomes:
   - keep the monorepo subfolder truth explicit
   - keep the transport truth explicit: `stdio`
   - keep the boundary explicit: accepted submit does **not** mean freshly re-read discovery page
+  - keep the artifact boundary explicit: a discovery hit does **not** mean the listing already reflects the latest merged bundle
 
 ## Current Repo-Side SSOT
 
@@ -31,9 +32,11 @@ Use it when the question becomes:
 - registry package type: `mcpb`
 - version: `0.1.0`
 - release asset URL: `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v0.1.0/campus-copilot-mcp-0.1.0.mcpb`
-- SHA-256: `24b45ad5883479df448b2d622d3a6e476272cb6782bbb29d518fbf3751aad461`
+- currently listed SHA-256: `24b45ad5883479df448b2d622d3a6e476272cb6782bbb29d518fbf3751aad461`
 - transport: `stdio`
 - repository subfolder: `packages/mcp-server`
+- fresh discovery read-back on `2026-04-10` shows the registry entry is publicly searchable as `active`
+- current blocker: the public listing still points at the older v0.1.0 artifact while `main` now carries a newer MCP tool surface
 
 ## Submit Flow
 
@@ -43,7 +46,7 @@ Use it when the question becomes:
 pnpm --filter @campus-copilot/mcp-server build
 ```
 
-2. upload the `.mcpb` asset to the matching GitHub release tag
+2. package a fresh `.mcpb` bundle from the current `dist/bin.mjs` plus `packages/mcp-server/mcpb.manifest.json` (renamed to `manifest.json` inside the archive), then upload that artifact to the matching GitHub release tag
 3. authenticate the publisher:
 
 ```bash
@@ -56,11 +59,12 @@ mcp-publisher login github
 mcp-publisher publish packages/mcp-server/server.json
 ```
 
-5. verify the discovery page after it appears upstream
+5. verify that the discovery page still resolves and now reflects the refreshed asset metadata
 
 ## Current Verdict
 
-- **Repo-side state**: `release-hosted .mcpb + registry metadata aligned`
+- **Repo-side state**: `listing exists, but current main still needs a refreshed .mcpb + metadata publish`
 - **Package truth**: `real local package + real .mcpb bundle + real server.json + real stdio install path`
 - **Registry submit truth**: `accepted by the official MCP Registry on 2026-04-08`
-- **Still separate proof**: fresh discovery-page read-back
+- **Fresh read-back**: official API search on `2026-04-10` returns `io.github.xiaojiou176-open/campus-copilot-mcp` as `active`
+- **Still separate blocker**: publisher auth plus refreshed asset/metadata so the public listing matches current `main`

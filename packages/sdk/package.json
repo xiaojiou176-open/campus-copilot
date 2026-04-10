@@ -18,18 +18,21 @@
     "access": "public"
   },
   "type": "module",
-  "files": ["README.md", "src", "tsconfig.json"],
+  "files": ["README.md", "dist"],
   "exports": {
-    ".": "./src/index.ts",
-    "./api": "./src/api.ts",
-    "./snapshot": "./src/snapshot.ts",
-    "./sites": "./src/sites.ts"
+    ".": "./dist/index.js",
+    "./api": "./dist/api.js",
+    "./snapshot": "./dist/snapshot.js",
+    "./sites": "./dist/sites.js"
   },
   "scripts": {
+    "build": "rm -rf dist && pnpm exec esbuild ./src/index.ts ./src/api.ts ./src/snapshot.ts ./src/sites.ts --bundle --platform=node --format=esm --target=node20 --legal-comments=none --outdir=dist",
+    "prepack": "pnpm build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@campus-copilot/ai": "workspace:*",
     "@campus-copilot/exporter": "workspace:*",
     "@campus-copilot/schema": "workspace:*",
