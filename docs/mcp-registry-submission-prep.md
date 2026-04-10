@@ -32,7 +32,7 @@ Use it when the question becomes:
 - registry package type: `mcpb`
 - version: `0.1.1`
 - release asset URL: `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v0.1.1/campus-copilot-mcp-0.1.1.mcpb`
-- currently targeted SHA-256: `91bd7cf1c0b429ee5ae66176cdfde6bc390589f09c9fb910dedd333c8efba3c8`
+- currently targeted SHA-256: `381a1bdf42cf83cd832039b6e1df7fa20f08f8ea2a6eb92329f64cde7bb61814`
 - transport: `stdio`
 - repository subfolder: `packages/mcp-server`
 - fresh discovery read-back on `2026-04-10` shows the registry entry is publicly searchable as `active`
@@ -46,7 +46,11 @@ Use it when the question becomes:
 pnpm --filter @campus-copilot/mcp-server build
 ```
 
-2. package a fresh `.mcpb` bundle from the current `dist/bin.mjs` plus `packages/mcp-server/mcpb.manifest.json` (renamed to `manifest.json` inside the archive), then upload that artifact to the matching GitHub release tag
+2. package a fresh deterministic `.mcpb` bundle from the current `dist/bin.mjs` plus `packages/mcp-server/mcpb.manifest.json` (renamed to `manifest.json` inside the archive), then upload that artifact to the matching GitHub release tag:
+
+```bash
+node scripts/build-mcpb-bundle.mjs
+```
 3. authenticate the publisher:
 
 ```bash

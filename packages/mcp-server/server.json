@@ -14,7 +14,7 @@
       "registryType": "mcpb",
       "identifier": "https://github.com/xiaojiou176-open/campus-copilot/releases/download/v0.1.1/campus-copilot-mcp-0.1.1.mcpb",
       "version": "0.1.1",
-      "fileSha256": "91bd7cf1c0b429ee5ae66176cdfde6bc390589f09c9fb910dedd333c8efba3c8",
+      "fileSha256": "381a1bdf42cf83cd832039b6e1df7fa20f08f8ea2a6eb92329f64cde7bb61814",
       "transport": {
         "type": "stdio"
       }
