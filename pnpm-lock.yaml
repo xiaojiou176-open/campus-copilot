@@ -150,6 +150,8 @@ importers:
         specifier: ^4.1.5
         version: 4.3.6
 
+  packages/adapters-ctclink-proof: {}
+
   packages/adapters-edstem:
     dependencies:
       '@campus-copilot/adapters-base':
@@ -174,6 +176,8 @@ importers:
         specifier: ^4.1.5
         version: 4.3.6
 
+  packages/adapters-myplan: {}
+
   packages/adapters-myuw:
     dependencies:
       '@campus-copilot/adapters-base':
@@ -185,6 +189,8 @@ importers:
       zod:
         specifier: ^4.1.5
         version: 4.3.6
+
+  packages/adapters-time-schedule: {}
 
   packages/ai:
     dependencies:
@@ -282,7 +288,7 @@ importers:
         version: 4.3.6
 
   packages/sdk:
-    dependencies:
+    devDependencies:
       '@campus-copilot/ai':
         specifier: workspace:*
         version: link:../ai
@@ -300,7 +306,7 @@ importers:
         version: 4.3.6
 
   packages/site-sdk:
-    dependencies:
+    devDependencies:
       '@campus-copilot/schema':
         specifier: workspace:*
         version: link:../schema
@@ -331,7 +337,7 @@ importers:
         version: 4.3.6
 
   packages/workspace-sdk:
-    dependencies:
+    devDependencies:
       '@campus-copilot/ai':
         specifier: workspace:*
         version: link:../ai
