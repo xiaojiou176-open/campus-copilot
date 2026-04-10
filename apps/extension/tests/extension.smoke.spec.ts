@@ -518,10 +518,15 @@ test('asks ai after provider config exists', async ({ page, baseURL }) => {
   await page.getByRole('button', { name: 'Save configuration' }).click();
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
-  await expect(page.getByRole('heading', { name: 'Structured inputs' })).toBeVisible();
-  await expect(page.getByText(/Today snapshot · Open assignments \d+ · Due within 48 hours \d+ · New grades \d+/)).toBeVisible();
-  await expect(page.getByText(/Focus queue · \d+/)).toBeVisible();
-  await expect(page.getByText(/Current workbench view · MARKDOWN/)).toBeVisible();
+  const askAiPanel = page.locator('article.surface__panel').filter({
+    has: page.getByRole('heading', { name: 'Ask AI about this workspace' }),
+  });
+  await expect(askAiPanel.getByRole('heading', { name: 'What AI can see' })).toBeVisible();
+  await expect(askAiPanel.getByText('Today snapshot', { exact: true })).toBeVisible();
+  await expect(askAiPanel.getByText(/Open assignments \d+ · Due within 48 hours \d+ · New grades \d+/)).toBeVisible();
+  await expect(askAiPanel.getByText('Focus queue', { exact: true })).toBeVisible();
+  await expect(askAiPanel.getByText('Current workbench view', { exact: true })).toBeVisible();
+  await expect(askAiPanel.getByText('MARKDOWN', { exact: true })).toBeVisible();
   await page.getByLabel('Question').fill('What should I pay attention to right now?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
@@ -533,6 +538,9 @@ test('asks ai after provider config exists', async ({ page, baseURL }) => {
 
 test('popup exposes all formal export presets, including recent updates and all deadlines', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/popup.html');
+  const quickPulsePanel = page.locator('article.surface__panel').filter({
+    has: page.getByRole('heading', { name: 'Quick pulse exports' }),
+  });
 
   await expect(page.getByRole('button', { name: 'Weekly assignments' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Recent updates' })).toBeVisible();
@@ -540,7 +548,7 @@ test('popup exposes all formal export presets, including recent updates and all 
   await expect(page.getByRole('button', { name: 'Focus queue' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Weekly load' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Change journal' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Current view' })).toBeVisible();
+  await expect(quickPulsePanel.getByRole('button', { name: /^Current view/ })).toBeVisible();
 
   await page.getByRole('button', { name: 'Recent updates' }).click();
   let downloadPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
@@ -557,6 +565,8 @@ test('shows provider not ready when selected provider is unavailable in bff stat
   await page.getByRole('button', { name: 'Save configuration' }).click();
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
+  await page.locator('summary').filter({ hasText: 'Advanced runtime settings' }).click();
+  await expect(page.getByLabel('Provider')).toBeVisible();
   await page.getByLabel('Provider').selectOption('gemini');
   await page.getByLabel('Question').fill('What changed recently?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
@@ -576,20 +586,23 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
   await page.getByRole('button', { name: '保存配置' }).click();
   await expect(page.getByText('配置已保存。')).toBeVisible();
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
+  const chineseAskAiPanel = page.locator('article.surface__panel').filter({
+    has: page.getByRole('heading', { name: '围绕这张工作台来问 AI' }),
+  });
 
   await expect(page.getByText('当前状态: 被环境或运行时阻塞')).toBeVisible();
   await expect(page.getByRole('heading', { name: '现在先做什么' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '结构化输入' })).toBeVisible();
-  await expect(page.getByText(/今日快照 · 待办作业 \d+ · 48 小时内截止 \d+ · 新成绩 \d+/)).toBeVisible();
+  await expect(chineseAskAiPanel.getByRole('heading', { name: 'AI 当前能看见什么' })).toBeVisible();
+  await expect(chineseAskAiPanel.getByText('今日快照', { exact: true })).toBeVisible();
+  await expect(chineseAskAiPanel.getByText(/待办作业 \d+ · 48 小时内截止 \d+ · 新成绩 \d+/)).toBeVisible();
   await expect(page.getByRole('heading', { name: '可信度摘要' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '专注队列' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '本周负荷' })).toBeVisible();
+  await expect(chineseAskAiPanel.getByText('当前工作台视图', { exact: true })).toBeVisible();
+  await expect(chineseAskAiPanel.getByText('MARKDOWN', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: '变化账本' })).toBeVisible();
   await expect(page.getByText('OpenAI · 未就绪')).toBeVisible();
-  const openAiStatusCard = page
-    .locator('article.surface__status-card')
-    .filter({ has: page.locator('strong', { hasText: /^OpenAI$/ }) });
-  await expect(openAiStatusCard.getByText('缺少 API key')).toBeVisible();
+  await expect(chineseAskAiPanel.getByText(/缺少 API key · 最近检查:/)).toBeVisible();
   await expect(page.getByText('新鲜站点')).toBeVisible();
   await expect(page.getByText('陈旧站点')).toBeVisible();
   await expect(page.getByText('未同步站点')).toBeVisible();

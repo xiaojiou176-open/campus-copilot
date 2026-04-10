@@ -141,27 +141,173 @@ type ParsedCourseHeader = {
   blockHtml: string;
 };
 
+type HtmlBlock = {
+  openTag: string;
+  innerHtml: string;
+  html: string;
+  startIndex: number;
+  endIndex: number;
+};
+
+const HTML_ENTITY_MAP: Record<string, string> = {
+  amp: '&',
+  gt: '>',
+  lt: '<',
+  nbsp: ' ',
+  quot: '"',
+};
+
+const HTML_TIMESTAMP_PATTERN = /\d{1,2}:\d{2}\s*(?:am|pm)\s+[A-Za-z]+\s+\d{1,2},\s+\d{4}/i;
+
 function decodeEntities(input: string) {
-  return input
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&#x27;/gi, "'")
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>');
+  return input.replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]+);/gi, (entity, token) => {
+    const normalizedToken = String(token).toLowerCase();
+    if (normalizedToken === '#39' || normalizedToken === '#x27') {
+      return "'";
+    }
+    if (normalizedToken.startsWith('#x') || normalizedToken.startsWith('#')) {
+      const codePoint = Number.parseInt(
+        normalizedToken.startsWith('#x') ? normalizedToken.slice(2) : normalizedToken.slice(1),
+        normalizedToken.startsWith('#x') ? 16 : 10,
+      );
+      if (!Number.isFinite(codePoint) || codePoint <= 0) {
+        return entity;
+      }
+      try {
+        return String.fromCodePoint(codePoint);
+      } catch {
+        return entity;
+      }
+    }
+    return HTML_ENTITY_MAP[normalizedToken] ?? entity;
+  });
+}
+
+function replaceLineBreakTags(input: string) {
+  return input.replace(/<br\b[^>]*\/?>/gi, '\n');
 }
 
 function stripTags(input: string) {
-  return decodeEntities(input).replace(/<[^>]+>/g, ' ');
+  let text = '';
+  let insideTag = false;
+
+  for (const character of input) {
+    if (character === '<') {
+      insideTag = true;
+      continue;
+    }
+    if (insideTag) {
+      if (character === '>') {
+        insideTag = false;
+      }
+      continue;
+    }
+    text += character;
+  }
+
+  return text;
+}
+
+function htmlToPlainText(input: string) {
+  return decodeEntities(stripTags(input));
+}
+
+function htmlToPlainTextWithLineBreaks(input: string) {
+  return decodeEntities(stripTags(replaceLineBreakTags(input)));
 }
 
 function normalizeWhitespace(input: string) {
-  return stripTags(input).replace(/\s+/g, ' ').trim();
+  return htmlToPlainText(input).replace(/\s+/g, ' ').trim();
 }
 
 function absoluteUrl(rawUrl: string) {
   return new URL(rawUrl, ROOT_ORIGIN).toString();
+}
+
+function readHtmlAttribute(openTag: string, attributeName: string) {
+  const attributePattern = new RegExp(
+    `${attributeName}\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))`,
+    'i',
+  );
+  const match = openTag.match(attributePattern);
+  return match ? match[1] ?? match[2] ?? match[3] : undefined;
+}
+
+function collectElementBlocks(html: string, tagName: string): HtmlBlock[] {
+  const normalizedTagName = tagName.toLowerCase();
+  const lowerHtml = html.toLowerCase();
+  const openNeedle = `<${normalizedTagName}`;
+  const closeNeedle = `</${normalizedTagName}>`;
+  const blocks: HtmlBlock[] = [];
+  let searchIndex = 0;
+
+  while (searchIndex < html.length) {
+    const openStart = lowerHtml.indexOf(openNeedle, searchIndex);
+    if (openStart < 0) {
+      break;
+    }
+
+    const openEnd = lowerHtml.indexOf('>', openStart);
+    if (openEnd < 0) {
+      break;
+    }
+
+    let cursor = openEnd + 1;
+    let depth = 1;
+
+    while (cursor < html.length) {
+      const nextOpen = lowerHtml.indexOf(openNeedle, cursor);
+      const nextClose = lowerHtml.indexOf(closeNeedle, cursor);
+      if (nextClose < 0) {
+        depth = 0;
+        break;
+      }
+
+      if (nextOpen >= 0 && nextOpen < nextClose) {
+        const nextOpenEnd = lowerHtml.indexOf('>', nextOpen);
+        if (nextOpenEnd < 0) {
+          depth = 0;
+          break;
+        }
+        depth += 1;
+        cursor = nextOpenEnd + 1;
+        continue;
+      }
+
+      depth -= 1;
+      const closeStart = nextClose;
+      const closeEnd = nextClose + closeNeedle.length;
+      if (depth === 0) {
+        blocks.push({
+          openTag: html.slice(openStart, openEnd + 1),
+          innerHtml: html.slice(openEnd + 1, closeStart),
+          html: html.slice(openStart, closeEnd),
+          startIndex: openStart,
+          endIndex: closeEnd,
+        });
+        searchIndex = closeEnd;
+        break;
+      }
+
+      cursor = closeEnd;
+    }
+
+    if (searchIndex <= openStart) {
+      break;
+    }
+  }
+
+  return blocks;
+}
+
+function getFirstTextBlock(html: string, tagName: string, predicate?: (text: string) => boolean) {
+  for (const block of collectElementBlocks(html, tagName)) {
+    const text = normalizeWhitespace(block.innerHtml);
+    if (!predicate || predicate(text)) {
+      return text;
+    }
+  }
+  return '';
 }
 
 function parseStatus(line: string) {
@@ -175,37 +321,41 @@ function parseStatus(line: string) {
 }
 
 function parseCourseHeaders(html: string): ParsedCourseHeader[] {
-  const headerRegex =
-    /<table[^>]*bgcolor=["']#ccffcc["'][^>]*>\s*<tr>\s*<td width="50%">\s*<b>\s*<a name=(?<anchor>["']?[^"'>\s]+["']?)>(?<courseHtml>[\s\S]*?)<\/a>\s*&nbsp;\s*<a href=(?<href>["']?[^>\s]+["']?)>(?<titleHtml>[\s\S]*?)<\/a>\s*<\/b>\s*<\/td>\s*<td width="15%">\s*<b>(?<tagsHtml>[\s\S]*?)<\/b>\s*<\/td>[\s\S]*?<\/table>/gi;
-  const matches = Array.from(html.matchAll(headerRegex));
+  const headerTables = collectElementBlocks(html, 'table').filter(
+    (table) => readHtmlAttribute(table.openTag, 'bgcolor')?.toLowerCase() === '#ccffcc',
+  );
 
-  return matches.map((match, index) => {
-    const currentIndex = match.index ?? 0;
-    const nextIndex = matches[index + 1]?.index ?? html.length;
-    const rawCourse = normalizeWhitespace(match.groups?.courseHtml ?? '');
-    const tags = normalizeWhitespace(match.groups?.tagsHtml ?? '')
-      .replace(/^\(/, '')
-      .replace(/\)$/, '')
+  return headerTables.map((table, index) => {
+    const nextIndex = headerTables[index + 1]?.startIndex ?? html.length;
+    const anchors = collectElementBlocks(table.html, 'a');
+    const courseAnchor = anchors.find((anchor) => readHtmlAttribute(anchor.openTag, 'name'));
+    const titleAnchor = anchors.find((anchor) => readHtmlAttribute(anchor.openTag, 'href'));
+    const tagCell = collectElementBlocks(table.html, 'td').find(
+      (cell) => readHtmlAttribute(cell.openTag, 'width') === '15%',
+    );
+    const rawTags = normalizeWhitespace(tagCell?.innerHtml ?? '');
+    const trimmedTags = rawTags.startsWith('(') && rawTags.endsWith(')')
+      ? rawTags.slice(1, -1)
+      : rawTags;
+    const tags = trimmedTags
       .split(',')
       .map((tag) => tag.trim())
       .filter(Boolean);
     return {
-      anchor: normalizeWhitespace(match.groups?.anchor ?? '').replace(/^["']|["']$/g, ''),
-      courseKey: rawCourse,
-      courseTitle: normalizeWhitespace(match.groups?.titleHtml ?? ''),
-      catalogUrl: match.groups?.href
-        ? absoluteUrl(match.groups.href.replace(/^["']|["']$/g, ''))
+      anchor: readHtmlAttribute(courseAnchor?.openTag ?? '', 'name') ?? '',
+      courseKey: normalizeWhitespace(courseAnchor?.innerHtml ?? ''),
+      courseTitle: normalizeWhitespace(titleAnchor?.innerHtml ?? ''),
+      catalogUrl: titleAnchor?.openTag
+        ? absoluteUrl(readHtmlAttribute(titleAnchor.openTag, 'href') ?? '/')
         : undefined,
       tags,
-      blockHtml: html.slice(currentIndex, nextIndex),
+      blockHtml: html.slice(table.startIndex, nextIndex),
     };
   });
 }
 
 function parseNoteLines(sectionHtml: string) {
-  return decodeEntities(sectionHtml)
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
+  return htmlToPlainTextWithLineBreaks(sectionHtml)
     .split('\n')
     .map((line) => line.replace(/\s+/g, ' ').trim())
     .filter(Boolean)
@@ -403,19 +553,34 @@ function parseSection(sectionHtml: string, courseKey: string, warnings: string[]
 }
 
 export function extractScheduleRootSnapshot(html: string): ScheduleRootSnapshot {
-  const publicDisclosure = normalizeWhitespace(
-    html.match(/<p>(?<content>[\s\S]*?Course Offerings pages allow[\s\S]*?)<\/p>/i)?.groups?.content ?? '',
+  const publicDisclosure = getFirstTextBlock(
+    html,
+    'p',
+    (text) => text.includes('Course Offerings pages allow'),
   );
 
-  const quarterLinks = Array.from(
-    html.matchAll(
-      /<li>[\s\S]*?(?<quarter>(?:Winter|Spring|Summer|Autumn)\s+Quarter\s+\d{4})[\s\S]*?<a href="(?<netid>[^"]+)">Time Schedule View[^<]*<\/a>[\s\S]*?<a href="(?<public>[^"]+)">Course Offerings View<\/a>[\s\S]*?<\/li>/gi,
-    ),
-  ).map((match) => ({
-    quarter: normalizeWhitespace(match.groups?.quarter ?? ''),
-    netIdTimeScheduleUrl: absoluteUrl(match.groups?.netid ?? '/'),
-    publicCourseOfferingsUrl: absoluteUrl(match.groups?.public ?? '/'),
-  }));
+  const quarterLinks = collectElementBlocks(html, 'li').flatMap((item) => {
+    const text = normalizeWhitespace(item.innerHtml);
+    const quarterSeparatorIndex = text.indexOf(':');
+    const quarter = quarterSeparatorIndex >= 0 ? text.slice(0, quarterSeparatorIndex).trim() : '';
+    const links = collectElementBlocks(item.html, 'a');
+    const netIdLink = links.find((link) => normalizeWhitespace(link.innerHtml).includes('Time Schedule View'));
+    const publicLink = links.find((link) => normalizeWhitespace(link.innerHtml).includes('Course Offerings View'));
+    const netIdHref = netIdLink?.openTag ? readHtmlAttribute(netIdLink.openTag, 'href') : undefined;
+    const publicHref = publicLink?.openTag ? readHtmlAttribute(publicLink.openTag, 'href') : undefined;
+
+    if (!quarter || !netIdHref || !publicHref) {
+      return [];
+    }
+
+    return [
+      {
+        quarter,
+        netIdTimeScheduleUrl: absoluteUrl(netIdHref),
+        publicCourseOfferingsUrl: absoluteUrl(publicHref),
+      },
+    ];
+  });
 
   return {
     publicDisclosure,
@@ -440,10 +605,14 @@ export function parseTimeScheduleBoundaryHtml(html: string, _sourceUrl: string):
 export function extractPublicCourseOfferingsPage(html: string): PublicCourseOfferingsPage {
   const warnings: string[] = [];
   const courses = parseCourseHeaders(html).map((header) => {
-    const sectionRegex = /<table[^>]*width="100%"[^>]*>\s*<tr>\s*<td>\s*<pre>([\s\S]*?)<\/td>\s*<\/tr>\s*<\/table>/gi;
     const sections: PublicCourseOfferingSection[] = [];
-    for (const match of Array.from(header.blockHtml.matchAll(sectionRegex))) {
-      const parsedSection = parseSection(match[1] ?? '', header.courseKey, warnings);
+    const sectionTables = collectElementBlocks(header.blockHtml, 'table').filter(
+      (table) => readHtmlAttribute(table.openTag, 'width') === '100%' && collectElementBlocks(table.html, 'pre').length > 0,
+    );
+
+    for (const table of sectionTables) {
+      const preBlock = collectElementBlocks(table.html, 'pre')[0];
+      const parsedSection = parseSection(preBlock?.innerHtml ?? '', header.courseKey, warnings);
       if (parsedSection) {
         sections.push(parsedSection);
       }
@@ -461,16 +630,20 @@ export function extractPublicCourseOfferingsPage(html: string): PublicCourseOffe
     } satisfies PublicCourseOfferingCourse;
   });
 
+  const lastUpdatedBanner = getFirstTextBlock(
+    html,
+    'div',
+    (text) => text.includes('but may have changed since then.'),
+  );
+  const lastUpdatedText = lastUpdatedBanner.match(HTML_TIMESTAMP_PATTERN)?.[0];
+
   return {
     carrier: 'public_course_offerings',
-    quarter: normalizeWhitespace(html.match(/<h1>\s*(?<quarter>[^<]+?)\s+Course Offerings\s*<\/h1>/i)?.groups?.quarter ?? ''),
-    department: normalizeWhitespace(
-      html.match(/<h2>\s*(?<department>[\s\S]*?)<\/h2>/i)?.groups?.department ?? '',
-    ) || undefined,
-    lastUpdatedText:
-      normalizeWhitespace(
-        html.match(/\(<b>(?<stamp>[^<]+)<\/b>\)\s+but may have changed since then\./i)?.groups?.stamp ?? '',
-      ) || undefined,
+    quarter:
+      getFirstTextBlock(html, 'h1', (text) => text.endsWith('Course Offerings')).replace(/ Course Offerings$/, '') ||
+      '',
+    department: getFirstTextBlock(html, 'h2') || undefined,
+    lastUpdatedText,
     courses,
     warnings,
   };

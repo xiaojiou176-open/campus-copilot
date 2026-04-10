@@ -129,23 +129,73 @@ type TimeScheduleParsedCourse = {
   sections: TimeScheduleParsedSection[];
 };
 
+const HTML_ENTITY_MAP: Record<string, string> = {
+  amp: '&',
+  gt: '>',
+  lt: '<',
+  nbsp: ' ',
+  quot: '"',
+};
+
 function decodeEntities(input: string) {
-  return input
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&#x27;/gi, "'")
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>');
+  return input.replace(/&(#x[0-9a-f]+|#\d+|[a-z][a-z0-9]+);/gi, (entity, token) => {
+    const normalizedToken = String(token).toLowerCase();
+    if (normalizedToken === '#39' || normalizedToken === '#x27') {
+      return "'";
+    }
+    if (normalizedToken.startsWith('#x') || normalizedToken.startsWith('#')) {
+      const codePoint = Number.parseInt(
+        normalizedToken.startsWith('#x') ? normalizedToken.slice(2) : normalizedToken.slice(1),
+        normalizedToken.startsWith('#x') ? 16 : 10,
+      );
+      if (!Number.isFinite(codePoint) || codePoint <= 0) {
+        return entity;
+      }
+      try {
+        return String.fromCodePoint(codePoint);
+      } catch {
+        return entity;
+      }
+    }
+    return HTML_ENTITY_MAP[normalizedToken] ?? entity;
+  });
+}
+
+function replaceLineBreakTags(input: string) {
+  return input.replace(/<br\b[^>]*\/?>/gi, '\n');
 }
 
 function stripTags(input: string) {
-  return decodeEntities(input).replace(/<[^>]+>/g, ' ');
+  let text = '';
+  let insideTag = false;
+
+  for (const character of input) {
+    if (character === '<') {
+      insideTag = true;
+      continue;
+    }
+    if (insideTag) {
+      if (character === '>') {
+        insideTag = false;
+      }
+      continue;
+    }
+    text += character;
+  }
+
+  return text;
+}
+
+function htmlToPlainText(input: string) {
+  return decodeEntities(stripTags(input));
+}
+
+function htmlToPlainTextWithLineBreaks(input: string) {
+  return decodeEntities(stripTags(replaceLineBreakTags(input)));
 }
 
 function normalizeWhitespace(input: string) {
-  return stripTags(input).replace(/\s+/g, ' ').trim();
+  return htmlToPlainText(input).replace(/\s+/g, ' ').trim();
 }
 
 function absoluteTimeScheduleUrl(rawUrl: string) {
@@ -172,9 +222,7 @@ function parseTimeScheduleCourseHeaders(html: string) {
 }
 
 function parseTimeScheduleNoteLines(sectionHtml: string) {
-  return decodeEntities(sectionHtml)
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
+  return htmlToPlainTextWithLineBreaks(sectionHtml)
     .split('\n')
     .map((line) => line.replace(/\s+/g, ' ').trim())
     .filter(Boolean)

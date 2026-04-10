@@ -81,6 +81,41 @@ describe('background site dispatch', () => {
     }
   });
 
+  it('keeps encoded angle-bracket course text when syncing Time Schedule in the background', async () => {
+    const executeScriptMock = vi.spyOn(
+      browser.scripting as {
+        executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
+      },
+      'executeScript',
+    );
+    executeScriptMock.mockResolvedValueOnce([
+      {
+        result: readFileSync(
+          new URL('../../../packages/adapters-time-schedule/src/__fixtures__/public-course-offerings-cse.html', import.meta.url),
+          'utf8',
+        ).replace('COMP PROGRAMMING I', 'COMP &lt;LAB&gt; PROGRAMMING I'),
+      },
+    ]);
+
+    const result = await SITE_SYNC_HANDLERS['time-schedule']({
+      activeTab: {
+        tabId: 1,
+        url: 'https://www.washington.edu/students/timeschd/pub/SPR2026/cse.html',
+      },
+      now: '2026-04-10T06:10:00Z',
+      config: getDefaultExtensionConfig(),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.courses?.[0]).toEqual(
+        expect.objectContaining({
+          title: 'COMP <LAB> PROGRAMMING I',
+        }),
+      );
+    }
+  });
+
   it('falls back to EdStem dashboard DOM when path config is missing but the active tab still exposes course cards', async () => {
     const executeScriptMock = vi.spyOn(
       browser.scripting as {

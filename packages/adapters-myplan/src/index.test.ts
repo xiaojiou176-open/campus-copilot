@@ -180,4 +180,23 @@ describe('MyPlanPrototype', () => {
     expect(comparison.promotionEntryCriteria[0]).toContain('live current-user session');
     expect(comparison.sharedPromotionBlockers).toContain('live current-user carrier lock still pending');
   });
+
+  it('extracts the bootstrap script even when script attributes are reordered', () => {
+    const bootstrapJson = readFixture('authenticated-bootstrap.json');
+    const pageHtml = `
+      <main data-myplan-auth="authenticated" data-myplan-surface="planning">
+        <script type="application/json" data-captured="true" id="myplan-bootstrap">
+          ${bootstrapJson}
+        </script>
+      </main>
+    `;
+
+    const snapshot = buildMyPlanPrototype({
+      capturedAt: '2026-04-09T14:00:00-07:00',
+      pageHtml,
+    });
+
+    expect(snapshot.planLabel).toBe('Computer Science transfer plan');
+    expect(snapshot.carrier.carrierKind).toBe('authenticated_html_bootstrap');
+  });
 });

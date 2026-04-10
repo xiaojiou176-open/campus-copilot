@@ -411,6 +411,48 @@ function assertIsoDateTime(value: string, label: string) {
   return value;
 }
 
+function isHtmlTagNameStart(char: string | undefined) {
+  if (!char) {
+    return false;
+  }
+
+  const code = char.charCodeAt(0);
+  return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+}
+
+function isHtmlTagBoundary(char: string | undefined) {
+  return char == null || char === ' ' || char === '\n' || char === '\r' || char === '\t' || char === '>';
+}
+
+function findHtmlTagEnd(source: string, startIndex: number) {
+  let quote: '"' | "'" | undefined;
+
+  for (let index = startIndex; index < source.length; index += 1) {
+    const char = source[index];
+    if (!char) {
+      break;
+    }
+
+    if (quote) {
+      if (char === quote) {
+        quote = undefined;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+
+    if (char === '>') {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
 function normalizeCourse(rawCourse: RawMyPlanCourse, status: MyPlanCourseStatus): MyPlanCourseRef {
   return {
     courseId: String(rawCourse.id),
@@ -438,21 +480,149 @@ function normalizeTermPlan(rawTerm: RawMyPlanTerm): MyPlanTermPlan {
   };
 }
 
+function readHtmlAttribute(openTag: string, attributeName: string) {
+  const lowerOpenTag = openTag.toLowerCase();
+  const lowerAttributeName = attributeName.toLowerCase();
+  let searchIndex = 0;
+
+  while (searchIndex < lowerOpenTag.length) {
+    const attributeIndex = lowerOpenTag.indexOf(lowerAttributeName, searchIndex);
+    if (attributeIndex < 0) {
+      return undefined;
+    }
+
+    const previousChar = lowerOpenTag[attributeIndex - 1];
+    const nextChar = lowerOpenTag[attributeIndex + lowerAttributeName.length];
+    if (
+      (attributeIndex === 0 || isHtmlTagBoundary(previousChar)) &&
+      (nextChar === '=' || nextChar === ' ' || nextChar === '\n' || nextChar === '\r' || nextChar === '\t')
+    ) {
+      let valueStart = attributeIndex + lowerAttributeName.length;
+      while (
+        valueStart < openTag.length &&
+        (openTag[valueStart] === ' ' ||
+          openTag[valueStart] === '\n' ||
+          openTag[valueStart] === '\r' ||
+          openTag[valueStart] === '\t')
+      ) {
+        valueStart += 1;
+      }
+      if (openTag[valueStart] !== '=') {
+        searchIndex = attributeIndex + lowerAttributeName.length;
+        continue;
+      }
+      valueStart += 1;
+      while (
+        valueStart < openTag.length &&
+        (openTag[valueStart] === ' ' ||
+          openTag[valueStart] === '\n' ||
+          openTag[valueStart] === '\r' ||
+          openTag[valueStart] === '\t')
+      ) {
+        valueStart += 1;
+      }
+
+      const firstChar = openTag[valueStart];
+      if (!firstChar) {
+        return undefined;
+      }
+
+      if (firstChar === '"' || firstChar === "'") {
+        const valueEnd = openTag.indexOf(firstChar, valueStart + 1);
+        return valueEnd < 0 ? undefined : openTag.slice(valueStart + 1, valueEnd);
+      }
+
+      let valueEnd = valueStart;
+      while (valueEnd < openTag.length && !isHtmlTagBoundary(openTag[valueEnd])) {
+        valueEnd += 1;
+      }
+      return openTag.slice(valueStart, valueEnd);
+    }
+
+    searchIndex = attributeIndex + lowerAttributeName.length;
+  }
+
+  return undefined;
+}
+
+function findFirstHtmlAttributeValue(pageHtml: string, attributeName: string) {
+  for (let index = 0; index < pageHtml.length; index += 1) {
+    if (pageHtml[index] !== '<' || !isHtmlTagNameStart(pageHtml[index + 1])) {
+      continue;
+    }
+
+    const tagEnd = findHtmlTagEnd(pageHtml, index + 1);
+    if (tagEnd < 0) {
+      return undefined;
+    }
+
+    const value = readHtmlAttribute(pageHtml.slice(index, tagEnd + 1), attributeName);
+    if (value !== undefined) {
+      return value;
+    }
+
+    index = tagEnd;
+  }
+
+  return undefined;
+}
+
+function findScriptElementText(pageHtml: string, predicate: (openTag: string) => boolean) {
+  const lowerPageHtml = pageHtml.toLowerCase();
+  let searchIndex = 0;
+
+  while (searchIndex < pageHtml.length) {
+    const openTagStart = lowerPageHtml.indexOf('<script', searchIndex);
+    if (openTagStart < 0) {
+      return undefined;
+    }
+
+    if (!isHtmlTagBoundary(lowerPageHtml[openTagStart + '<script'.length])) {
+      searchIndex = openTagStart + 1;
+      continue;
+    }
+
+    const openTagEnd = findHtmlTagEnd(pageHtml, openTagStart + '<script'.length);
+    if (openTagEnd < 0) {
+      return undefined;
+    }
+
+    const openTag = pageHtml.slice(openTagStart, openTagEnd + 1);
+    if (!predicate(openTag)) {
+      searchIndex = openTagEnd + 1;
+      continue;
+    }
+
+    const contentStart = openTagEnd + 1;
+    const closeTagIndex = lowerPageHtml.indexOf('</script>', contentStart);
+    if (closeTagIndex < 0) {
+      return undefined;
+    }
+
+    return pageHtml.slice(contentStart, closeTagIndex);
+  }
+
+  return undefined;
+}
+
 function extractBootstrapFromHtml(pageHtml: string): unknown {
-  const authMatch = pageHtml.match(/data-myplan-auth="(?<state>[^"]+)"/i);
-  if (authMatch?.groups?.state !== 'authenticated') {
+  const authState = findFirstHtmlAttributeValue(pageHtml, 'data-myplan-auth');
+  if (authState !== 'authenticated') {
     throw new Error('MyPlan authenticated carrier shell is unavailable.');
   }
 
-  const match = pageHtml.match(
-    /<script[^>]+id="myplan-bootstrap"[^>]*type="application\/json"[^>]*>(?<json>[\s\S]*?)<\/script>/i,
+  const jsonPayload = findScriptElementText(
+    pageHtml,
+    (openTag) =>
+      readHtmlAttribute(openTag, 'id') === 'myplan-bootstrap' &&
+      readHtmlAttribute(openTag, 'type') === 'application/json',
   );
-  if (!match?.groups?.json) {
+  if (!jsonPayload) {
     throw new Error('MyPlan bootstrap payload is unavailable.');
   }
 
   try {
-    return JSON.parse(match.groups.json);
+    return JSON.parse(jsonPayload);
   } catch {
     throw new Error('MyPlan bootstrap payload is malformed.');
   }

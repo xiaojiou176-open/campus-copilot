@@ -121,4 +121,16 @@ describe('adapters-time-schedule limited shared landing', () => {
     expect(source).not.toContain('@campus-copilot/core');
     expect(packageJson.dependencies ?? {}).toEqual({});
   });
+
+  it('preserves encoded angle-bracket text instead of decoding it into removable markup', () => {
+    const html = readFixture('public-course-offerings-cse.html').replace(
+      'RESEARCH SEMINAR',
+      'RESEARCH &lt;LAB&gt; SEMINAR',
+    );
+
+    const page = extractPublicCourseOfferingsPage(html);
+    const cse590 = page.courses.find((course: PublicCourseOfferingCourse) => course.courseKey === 'CSE 590');
+
+    expect(cse590?.title).toBe('RESEARCH <LAB> SEMINAR');
+  });
 });
