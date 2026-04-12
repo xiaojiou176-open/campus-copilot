@@ -142,7 +142,6 @@ function buildPlanCaptureFromHtml(
   }
 
   const plannedCourseCount = uniqueCourses.size;
-  const plannedCredits = Array.from(uniqueCourses.values()).reduce((total, course) => total + course.credits, 0);
   const issuesToResolveMatch = pageHtml.match(/<h2[^>]*>\s*Issues to Resolve\s*<\/h2>[\s\S]*?<div[^>]*class="card-body"[^>]*>(?<body>[\s\S]*?)<\/div>/i);
   const issuesSummary = stripTags(issuesToResolveMatch?.groups?.body ?? '');
   const transferPlanningSummary = pageHtml.includes('Find CTC Transfer Equivalency')
