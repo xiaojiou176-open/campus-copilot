@@ -65,6 +65,9 @@ describe('web workbench planning pulse', () => {
       }),
     );
 
+    expect(html).toContain('Grouped student view');
+    expect(html).toContain('Academic lane');
+    expect(html).toContain('Administrative lane');
     expect(html).toContain('Planning Pulse');
     expect(html).toContain('Allen School planning draft');
     expect(html).toContain('3 term(s) · 9 planned course(s) · 2 backup course(s) · 4 schedule option(s)');

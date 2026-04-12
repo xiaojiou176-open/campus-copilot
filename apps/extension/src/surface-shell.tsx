@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { browser } from 'wxt/browser';
 import {
   type AdvancedMaterialAnalysisRequest,
@@ -11,12 +11,16 @@ import {
 import type { ExportFormat, ExportPreset } from '@campus-copilot/exporter';
 import { createExportArtifact } from '@campus-copilot/exporter';
 import {
+  CAPTURE_PLANNING_SUBSTRATE_COMMAND,
   GET_SITE_SYNC_STATUS_COMMAND,
+  resolveLocalBffBaseUrl,
   SYNC_SITE_COMMAND,
+  type CapturePlanningSubstrateCommandResponse,
+  type LocalBffResolution,
   type SiteSyncOutcome,
   type SyncSiteCommandResponse,
 } from '@campus-copilot/core';
-import type { EntityKind, Site } from '@campus-copilot/schema';
+import type { EntityKind, Resource, Site } from '@campus-copilot/schema';
 import {
     clearLocalEntityOverlayField,
     markEntitiesSeen,
@@ -49,7 +53,7 @@ import {
 import './styles.css';
 import { buildAiProxyRequest } from './ai-request';
 import { buildWorkbenchExportInput } from './export-input';
-import { getUiText, readBrowserLanguage, resolveUiLanguage } from './i18n';
+import { formatRelativeTime, getUiText, readBrowserLanguage, resolveUiLanguage } from './i18n';
 import { buildSurfaceAiRequest, buildSurfaceExportArtifact } from './surface-shell-composition';
 import {
   buildDownloadPayload,
@@ -60,25 +64,122 @@ import {
   type AiResponsePayload,
   type ProviderStatusPayload,
   type ProviderStatusState,
+  type SidepanelMode,
   type SurfaceKind,
+  SIDEPANEL_MODE_ORDER,
   SITE_LABELS,
 } from './surface-shell-model';
+import { type ExportFamilyKind, getSidepanelModeCopy } from './sidepanel-mode-copy';
 import {
   AskAiPanel,
   OptionsPanels,
-  PopupQuickExportPanel,
   WorkbenchPanels,
 } from './surface-shell-panels';
+
+type ExportScopeSite = Site | 'all';
+type ActiveTabContext = {
+  tabId?: number;
+  url?: string;
+};
+
+type ExportFamilyCard = {
+  family: ExportFamilyKind;
+  status: 'available' | 'partial' | 'blocked';
+  exportable: boolean;
+};
+
+const COURSE_SCOPED_EXPORT_SITES = new Set<Site>(['canvas', 'gradescope', 'edstem']);
+
+function readInitialSidepanelMode() {
+  if (typeof window === 'undefined') {
+    return 'assistant' as SidepanelMode;
+  }
+
+  const candidate = new URLSearchParams(window.location.search).get('mode');
+  return candidate === 'export' || candidate === 'settings' ? candidate : 'assistant';
+}
+
+function isCourseScopedExportSite(site: ExportScopeSite) {
+  return site !== 'all' && COURSE_SCOPED_EXPORT_SITES.has(site);
+}
+
+function getPlanningCaptureContext(url: string | undefined) {
+  if (!url) {
+    return undefined;
+  }
+
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== 'myplan.uw.edu') {
+      return undefined;
+    }
+
+    if (parsed.pathname.startsWith('/plan/')) {
+      return {
+        kind: 'plan' as const,
+        label: 'MyPlan',
+        buttonLabel: 'plan',
+      };
+    }
+
+    if (parsed.pathname.startsWith('/audit/')) {
+      return {
+        kind: 'audit' as const,
+        label: 'DARS audit',
+        buttonLabel: 'audit',
+      };
+    }
+  } catch {}
+
+  return undefined;
+}
+
+function filterSiteRecords<T extends { site: Site; courseId?: string }>(
+  records: T[],
+  site: ExportScopeSite,
+  courseId?: string,
+) {
+  return records.filter((record) => {
+    if (site !== 'all' && record.site !== site) {
+      return false;
+    }
+
+    if (courseId && record.courseId !== courseId) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+function filterCourseResources(resources: Resource[], site: ExportScopeSite, courseId?: string) {
+  return resources.filter((resource) => {
+    if (site !== 'all' && resource.site !== site) {
+      return false;
+    }
+
+    if (courseId && resource.courseId !== courseId) {
+      return false;
+    }
+
+    return true;
+  });
+}
 
 export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const browserLanguage = readBrowserLanguage();
   const [refreshKey, setRefreshKey] = useState(0);
   const [now, setNow] = useState(() => new Date().toISOString());
+  const [sidepanelMode, setSidepanelMode] = useState<SidepanelMode>(() => readInitialSidepanelMode());
+  const [workspaceDetailsOpen, setWorkspaceDetailsOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('markdown');
   const [filters, setFilters] = useState<WorkbenchFilter>({
     site: 'all',
     onlyUnseenUpdates: false,
   });
+  const [exportScopeSite, setExportScopeSite] = useState<ExportScopeSite>('all');
+  const [exportCourseId, setExportCourseId] = useState('');
+  const [exportFamily, setExportFamily] = useState<ExportFamilyKind>('current_view');
   const [config, setConfig] = useState<ExtensionConfig>(getDefaultExtensionConfig());
   const [optionsDraft, setOptionsDraft] = useState<ExtensionConfig>(getDefaultExtensionConfig());
   const [syncFeedback, setSyncFeedback] = useState<{
@@ -104,10 +205,16 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const [advancedMaterialAcknowledged, setAdvancedMaterialAcknowledged] = useState(false);
   const [providerStatusPending, setProviderStatusPending] = useState(false);
   const [providerStatus, setProviderStatus] = useState<ProviderStatusState>(buildEmptyProviderStatus());
+  const [bffResolution, setBffResolution] = useState<LocalBffResolution>({
+    source: 'none',
+    checkedUrls: [],
+  });
+  const [activeTabContext, setActiveTabContext] = useState<ActiveTabContext>({});
 
   const activeLanguagePreference = surface === 'options' ? optionsDraft.uiLanguage : config.uiLanguage;
   const uiLanguage = resolveUiLanguage(activeLanguagePreference, browserLanguage);
   const text = getUiText(uiLanguage);
+  const modeCopy = getSidepanelModeCopy(uiLanguage);
   const copy = {
     sidepanel: {
       eyebrow: text.hero.sidepanelEyebrow,
@@ -157,6 +264,15 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         }),
       );
 
+      const [activeTab] = await browser.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      setActiveTabContext({
+        tabId: typeof activeTab?.id === 'number' ? activeTab.id : undefined,
+        url: typeof activeTab?.url === 'string' ? activeTab.url : undefined,
+      });
+
       setRefreshKey((current) => current + 1);
       setNow(new Date().toISOString());
     }
@@ -176,6 +292,32 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateLocalBffResolution() {
+      const resolution = await resolveLocalBffBaseUrl({
+        configuredBaseUrl: config.ai.bffBaseUrl,
+      });
+
+      if (!cancelled) {
+        setBffResolution(resolution);
+      }
+    }
+
+    void hydrateLocalBffResolution();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [config.ai.bffBaseUrl]);
+
+  useEffect(() => {
+    if (!isCourseScopedExportSite(exportScopeSite)) {
+      setExportCourseId('');
+    }
+  }, [exportScopeSite]);
+
   const currentResources = workbenchView?.resources ?? [];
   const currentAssignments = workbenchView?.assignments ?? [];
   const currentAnnouncements = workbenchView?.announcements ?? [];
@@ -183,25 +325,65 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const currentGrades = workbenchView?.grades ?? [];
   const currentEvents = workbenchView?.events ?? [];
   const currentAlerts = workbenchView?.alerts ?? [];
+  const activeBffBaseUrl = bffResolution.baseUrl;
+  const exportScopeFilters: WorkbenchFilter = {
+    site: exportScopeSite === 'all' ? 'all' : exportScopeSite,
+    onlyUnseenUpdates: false,
+  };
+  const exportWorkbenchView = useWorkbenchView(now, exportScopeFilters, undefined, refreshKey);
   const availableCourses = allCourses
     .filter((course) => filters.site === 'all' || course.site === filters.site)
     .map((course) => ({
       id: course.id,
       label: `${SITE_LABELS[course.site]} · ${course.title}`,
     }));
+  const exportScopedCourses = allCourses
+    .filter((course) => exportScopeSite === 'all' || course.site === exportScopeSite)
+    .map((course) => ({
+      id: course.id,
+      label: `${SITE_LABELS[course.site]} · ${course.title}`,
+    }));
   const currentRecentUpdates = workbenchView?.recentUpdates;
+  const planningCaptureContext = getPlanningCaptureContext(activeTabContext.url);
+  const exportFamilyCards = useMemo<ExportFamilyCard[]>(() => {
+    if (exportScopeSite === 'canvas') {
+      return [
+        { family: 'current_view', status: 'available', exportable: true },
+        { family: 'resources', status: 'available', exportable: true },
+        { family: 'assignments', status: 'available', exportable: true },
+        { family: 'announcements', status: 'available', exportable: true },
+        { family: 'messages', status: 'available', exportable: true },
+        { family: 'grades', status: 'partial', exportable: true },
+        { family: 'deadlines', status: 'available', exportable: true },
+        { family: 'instructor_feedback', status: 'partial', exportable: false },
+        { family: 'syllabus', status: 'blocked', exportable: false },
+        { family: 'groups', status: 'blocked', exportable: false },
+        { family: 'recordings', status: 'blocked', exportable: false },
+      ];
+    }
+
+    return [
+      { family: 'current_view', status: 'available', exportable: true },
+      { family: 'resources', status: 'available', exportable: true },
+      { family: 'assignments', status: 'available', exportable: true },
+      { family: 'announcements', status: 'available', exportable: true },
+      { family: 'messages', status: 'available', exportable: true },
+      { family: 'grades', status: 'partial', exportable: true },
+      { family: 'deadlines', status: 'available', exportable: true },
+    ];
+  }, [exportScopeSite]);
 
   async function refreshProviderStatus() {
     setProviderStatusPending(true);
 
-    if (!config.ai.bffBaseUrl) {
+    if (!activeBffBaseUrl) {
       setProviderStatus(buildEmptyProviderStatus('missing_bff_base_url'));
       setProviderStatusPending(false);
       return;
     }
 
     try {
-      const response = await fetch(`${config.ai.bffBaseUrl}/api/providers/status`);
+      const response = await fetch(`${activeBffBaseUrl}/api/providers/status`);
       const payload = (await response.json()) as ProviderStatusPayload;
       if (payload.ok) {
         setProviderStatus({
@@ -218,7 +400,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
   useEffect(() => {
     void refreshProviderStatus();
-  }, [config.ai.bffBaseUrl]);
+  }, [activeBffBaseUrl]);
 
   async function refreshStatus() {
     await Promise.all(
@@ -229,6 +411,14 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         });
       }),
     );
+    const [activeTab] = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    setActiveTabContext({
+      tabId: typeof activeTab?.id === 'number' ? activeTab.id : undefined,
+      url: typeof activeTab?.url === 'string' ? activeTab.url : undefined,
+    });
     setRefreshKey((current) => current + 1);
     setNow(new Date().toISOString());
   }
@@ -243,6 +433,8 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     const response = (await browser.runtime.sendMessage({
       type: SYNC_SITE_COMMAND,
       site,
+      tabId: activeTabContext.tabId,
+      url: activeTabContext.url,
     })) as SyncSiteCommandResponse;
 
     await refreshStatus();
@@ -255,6 +447,32 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
           : response.outcome === 'partial_success'
             ? text.feedback.syncPartial(SITE_LABELS[site])
             : text.feedback.syncOutcome(SITE_LABELS[site], response.outcome),
+    });
+  }
+
+  async function handleCapturePlanningSubstrate() {
+    setSyncFeedback({
+      inFlightSite: undefined,
+      outcome: undefined,
+      message: text.feedback.capturingPlanningSubstrate,
+    });
+
+    const response = (await browser.runtime.sendMessage({
+      type: CAPTURE_PLANNING_SUBSTRATE_COMMAND,
+      tabId: activeTabContext.tabId,
+      url: activeTabContext.url,
+    })) as CapturePlanningSubstrateCommandResponse;
+
+    await refreshStatus();
+    setSyncFeedback({
+      inFlightSite: undefined,
+      outcome: response.outcome,
+      message:
+        response.outcome === 'success'
+          ? text.feedback.planningCaptureSuccess(response.planLabel ?? planningCaptureContext?.label ?? 'MyPlan')
+          : response.outcome === 'partial_success'
+            ? text.feedback.planningCapturePartial(response.planLabel ?? planningCaptureContext?.label ?? 'MyPlan')
+            : response.message,
     });
   }
 
@@ -380,6 +598,10 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     const artifact = buildSurfaceExportArtifact({
       preset,
       format: selectedFormat,
+      exportScope: {
+        site: filters.site === 'all' ? undefined : filters.site,
+      },
+      authorization: config.authorization,
       state: {
         now,
         uiLanguage,
@@ -429,6 +651,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
       uiLanguage: optionsDraft.uiLanguage,
       ai: optionsDraft.ai,
       sites: optionsDraft.sites,
+      authorization: optionsDraft.authorization,
     });
     const saved = await saveExtensionConfig(nextConfig);
     setConfig(saved);
@@ -438,8 +661,21 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     await refreshProviderStatus();
   }
 
+  async function handleCycleLanguagePreference() {
+    const sequence: ExtensionConfig['uiLanguage'][] = ['auto', 'en', 'zh-CN'];
+    const nextPreference = sequence[(sequence.indexOf(config.uiLanguage) + 1) % sequence.length];
+    const nextConfig = buildNextConfig({
+      current: config,
+      uiLanguage: nextPreference,
+    });
+    const saved = await saveExtensionConfig(nextConfig);
+    setConfig(saved);
+    setOptionsDraft(saved);
+    setOptionsFeedback(text.options.configurationSaved);
+  }
+
   async function handleAskAi() {
-    if (!config.ai.bffBaseUrl) {
+    if (!activeBffBaseUrl) {
       setAiError(text.feedback.bffMissingForAi);
       return;
     }
@@ -503,6 +739,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         switchyardLane,
         question: aiQuestion,
         advancedMaterialAnalysis,
+        authorization: config.authorization,
         todaySnapshot: todaySnapshot ?? {
           totalAssignments: 0,
           dueSoonAssignments: 0,
@@ -538,7 +775,16 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         },
       });
 
-      const response = await fetch(`${config.ai.bffBaseUrl}${proxyRequest.route}`, {
+      if (!exportArtifact.packaging.aiAllowed) {
+        setAiError(
+          uiLanguage === 'zh-CN'
+            ? '当前范围的 AI 读取仍需在“设置与授权”里单独放行。'
+            : 'AI access for this scope still needs to be enabled in Settings/Auth.',
+        );
+        return;
+      }
+
+      const response = await fetch(`${activeBffBaseUrl}${proxyRequest.route}`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
@@ -582,7 +828,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   async function handleExportDiagnostics() {
     const report = buildDiagnosticsReport({
       generatedAt: new Date().toISOString(),
-      bffBaseUrl: config.ai.bffBaseUrl,
+      bffBaseUrl: activeBffBaseUrl,
       providerStatus,
       orderedSiteStatus: surfaceView.orderedSiteStatus,
       providerOptions: PROVIDER_OPTIONS,
@@ -608,8 +854,19 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
   async function handleOpenMainWorkbench() {
     await browser.tabs.create({
-      url: browser.runtime.getURL('/sidepanel.html'),
+      url: browser.runtime.getURL('/sidepanel.html?mode=assistant'),
     });
+  }
+
+  async function openSidepanelMode(mode: SidepanelMode) {
+    await browser.tabs.create({
+      url: browser.runtime.getURL(`/sidepanel.html?mode=${mode}`),
+    });
+  }
+
+  function enterExportMode(nextSite: ExportScopeSite = filters.site === 'all' ? 'all' : filters.site) {
+    setExportScopeSite(nextSite);
+    setSidepanelMode('export');
   }
 
   const selectedFormatLabel =
@@ -618,139 +875,720 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const surfaceView = buildSurfaceViewModel({
     alerts: priorityAlerts,
     filters,
-    config,
+    config: {
+      ...config,
+      ai: {
+        ...config.ai,
+        bffBaseUrl: activeBffBaseUrl,
+      },
+    },
     siteCounts,
     siteSyncStates,
     latestSyncRuns,
     providerStatus,
     uiLanguage,
   });
+  const primaryFocusItem = focusQueue[0];
+  const currentContextLabel =
+    filters.site === 'all'
+      ? planningCaptureContext?.label ?? modeCopy.export.allSites
+      : SITE_LABELS[filters.site];
+  const bffStatusLabel =
+    bffResolution.source === 'manual'
+      ? modeCopy.connection.manual
+      : bffResolution.source === 'autodiscovered'
+      ? modeCopy.connection.autodiscovered
+        : modeCopy.connection.none;
+  const activeSidepanelHeader =
+    sidepanelMode === 'assistant'
+      ? {
+          title: modeCopy.assistant.title,
+          description: modeCopy.assistant.description,
+        }
+      : sidepanelMode === 'export'
+        ? {
+            title: modeCopy.export.title,
+            description: modeCopy.export.description,
+          }
+        : {
+            title: modeCopy.authorization.title,
+            description: modeCopy.authorization.description,
+          };
+  const assistantFactSummary = [
+    `${text.metrics.openAssignments} ${todaySnapshot?.totalAssignments ?? 0}`,
+    `${text.metrics.dueWithin48Hours} ${todaySnapshot?.dueSoonAssignments ?? 0}`,
+    `${text.metrics.unseenUpdates} ${currentRecentUpdates?.unseenCount ?? 0}`,
+  ].join(' · ');
+  const assistantReadinessSummary = activeBffBaseUrl
+    ? surfaceView.diagnostics.healthy
+      ? text.diagnostics.readyToContinue
+      : surfaceView.diagnostics.blockers[0] ?? text.diagnostics.blockedByEnvironmentOrRuntime
+    : modeCopy.assistant.noConnection;
+  const assistantReceiptSummary = `${text.meta.lastRefresh}: ${formatRelativeTime(uiLanguage, surfaceView.lastSuccessfulSync)}`;
+  const popupLauncherCopy = modeCopy.popup;
+  const authorizationRules = config.authorization.rules;
+  const allowedAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'allowed').length;
+  const confirmRequiredAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'confirm_required').length;
+  const blockedAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'blocked').length;
+
+  async function handleExportSelection() {
+    const exportResources = exportWorkbenchView?.resources ?? [];
+    const exportAssignments = exportWorkbenchView?.assignments ?? [];
+    const exportAnnouncements = exportWorkbenchView?.announcements ?? [];
+    const exportMessages = exportWorkbenchView?.messages ?? [];
+    const exportGrades = exportWorkbenchView?.grades ?? [];
+    const exportEvents = exportWorkbenchView?.events ?? [];
+    const exportAlerts = exportWorkbenchView?.alerts ?? [];
+    const exportRecentUpdates = exportWorkbenchView?.recentUpdates;
+
+    const scopedAssignments = filterSiteRecords(exportAssignments, exportScopeSite, exportCourseId);
+    const scopedAnnouncements = filterSiteRecords(exportAnnouncements, exportScopeSite, exportCourseId);
+    const scopedMessages = filterSiteRecords(exportMessages, exportScopeSite, exportCourseId);
+    const scopedGrades = filterSiteRecords(exportGrades, exportScopeSite, exportCourseId);
+    const scopedEvents = filterSiteRecords(exportEvents, exportScopeSite, exportCourseId);
+    const scopedResources = filterCourseResources(exportResources, exportScopeSite, exportCourseId);
+    const scopedAlerts = exportCourseId
+      ? []
+      : exportAlerts.filter((alert) => exportScopeSite === 'all' || alert.site === exportScopeSite);
+    const scopedRecentUpdates =
+      exportScopeSite === 'all'
+        ? exportRecentUpdates
+        : exportRecentUpdates
+            ? {
+                ...exportRecentUpdates,
+                items: exportRecentUpdates.items.filter((entry) => entry.site === exportScopeSite),
+                unseenCount: exportRecentUpdates.items.filter((entry) => entry.site === exportScopeSite).length,
+              }
+            : undefined;
+
+    let preset: ExportPreset = 'current_view';
+    let nextAssignments = scopedAssignments;
+    let nextAnnouncements = scopedAnnouncements;
+    let nextMessages = scopedMessages;
+    let nextGrades = scopedGrades;
+    let nextEvents = scopedEvents;
+    let nextResources = scopedResources;
+    let nextAlerts = scopedAlerts;
+    let nextRecentUpdates = exportCourseId ? undefined : scopedRecentUpdates;
+    let nextFocusQueue = exportCourseId ? [] : focusQueue.filter((item) => exportScopeSite === 'all' || item.site === exportScopeSite);
+    let nextWeeklyLoad = exportCourseId ? [] : weeklyLoad;
+    let nextChangeEvents = exportCourseId ? [] : recentChangeEvents.filter((event) => exportScopeSite === 'all' || event.site === exportScopeSite);
+
+    switch (exportFamily) {
+      case 'assignments':
+      case 'resources':
+        nextAnnouncements = [];
+        if (exportFamily !== 'resources') {
+          nextResources = [];
+        }
+        nextMessages = [];
+        nextGrades = [];
+        nextEvents = [];
+        nextAlerts = [];
+        nextRecentUpdates = undefined;
+        nextFocusQueue = [];
+        nextWeeklyLoad = [];
+        nextChangeEvents = [];
+        break;
+      case 'announcements':
+        nextAssignments = [];
+        nextMessages = [];
+        nextGrades = [];
+        nextEvents = [];
+        nextResources = [];
+        nextAlerts = [];
+        nextRecentUpdates = undefined;
+        nextFocusQueue = [];
+        nextWeeklyLoad = [];
+        nextChangeEvents = [];
+        break;
+      case 'messages':
+        nextAssignments = [];
+        nextAnnouncements = [];
+        nextGrades = [];
+        nextEvents = [];
+        nextResources = [];
+        nextAlerts = [];
+        nextRecentUpdates = undefined;
+        nextFocusQueue = [];
+        nextWeeklyLoad = [];
+        nextChangeEvents = [];
+        break;
+      case 'grades':
+        nextAssignments = [];
+        nextAnnouncements = [];
+        nextMessages = [];
+        nextEvents = [];
+        nextResources = [];
+        nextAlerts = [];
+        nextRecentUpdates = undefined;
+        nextFocusQueue = [];
+        nextWeeklyLoad = [];
+        nextChangeEvents = [];
+        break;
+      case 'deadlines':
+        preset = 'all_deadlines';
+        nextAssignments = scopedAssignments.filter((assignment) => Boolean(assignment.dueAt));
+        nextAnnouncements = [];
+        nextMessages = [];
+        nextGrades = [];
+        nextEvents = scopedEvents.filter((event) => event.eventKind === 'deadline');
+        nextResources = [];
+        nextAlerts = [];
+        nextRecentUpdates = undefined;
+        nextFocusQueue = [];
+        nextWeeklyLoad = [];
+        nextChangeEvents = [];
+        break;
+      default:
+        break;
+    }
+
+    const artifact = buildSurfaceExportArtifact({
+      preset,
+      format: selectedFormat,
+      viewTitleOverride: [
+        exportScopeSite === 'all' ? modeCopy.export.allSites : SITE_LABELS[exportScopeSite],
+        exportCourseId ? exportScopedCourses.find((course) => course.id === exportCourseId)?.label : undefined,
+        modeCopy.export.families[exportFamily].label,
+      ]
+        .filter(Boolean)
+        .join(' · '),
+      exportScope: {
+        site: exportScopeSite === 'all' ? undefined : exportScopeSite,
+        courseIdOrKey: exportCourseId || undefined,
+        resourceFamily: exportFamily === 'current_view' ? 'workspace_snapshot' : exportFamily,
+      },
+      authorization: config.authorization,
+      state: {
+        ...{
+          now,
+          uiLanguage,
+          filters: {
+            site: exportScopeSite === 'all' ? 'all' : exportScopeSite,
+            onlyUnseenUpdates: false,
+          },
+          currentResources: nextResources,
+          currentAssignments: nextAssignments,
+          currentAnnouncements: nextAnnouncements,
+          currentMessages: nextMessages,
+          currentGrades: nextGrades,
+          currentEvents: nextEvents,
+          currentAlerts: nextAlerts,
+          currentRecentUpdates: nextRecentUpdates,
+          workbenchResources: nextResources,
+          workbenchAssignments: nextAssignments,
+          workbenchAnnouncements: nextAnnouncements,
+          workbenchMessages: nextMessages,
+          workbenchGrades: nextGrades,
+          workbenchEvents: nextEvents,
+          priorityAlerts: nextAlerts,
+          focusQueue: nextFocusQueue,
+          planningSubstrates: [],
+          weeklyLoad: nextWeeklyLoad,
+          latestSyncRuns,
+          recentChangeEvents: nextChangeEvents,
+        },
+      },
+    });
+
+    const blob = buildDownloadPayload(artifact.format, artifact.content);
+    const url = URL.createObjectURL(blob);
+
+    try {
+      await browser.downloads.download({
+        url,
+        filename: artifact.filename,
+        saveAs: true,
+      });
+      setExportFeedback(text.feedback.downloadReady(artifact.filename));
+    } finally {
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+  }
 
   return (
     <main className={`surface surface--${surface}`}>
       <section className="surface__card">
-        <WorkbenchPanels
-          surface={surface}
-          copy={copy}
-          text={text}
-          uiLanguage={uiLanguage}
-          selectedFormatLabel={selectedFormatLabel}
-          filters={filters}
-          setFilters={setFilters}
-          todaySnapshot={todaySnapshot}
-          currentRecentUpdates={currentRecentUpdates}
-          syncFeedback={syncFeedback}
-          exportFeedback={exportFeedback}
-          currentSiteSelection={surfaceView.currentSiteSelection}
-          onSyncSite={handleSiteSync}
-          onExport={handleExport}
-          onOpenConfiguration={() => {
-            void browser.runtime.openOptionsPage();
-          }}
-          onOpenMainWorkbench={surface === 'popup' ? handleOpenMainWorkbench : undefined}
-          onMarkVisibleUpdatesSeen={handleMarkVisibleUpdatesSeen}
-          onExportDiagnostics={handleExportDiagnostics}
-          diagnostics={surfaceView.diagnostics}
-          focusQueue={focusQueue}
-          planningSubstrates={planningSubstrates}
-          weeklyLoad={weeklyLoad}
-          priorityAlerts={priorityAlerts}
-          criticalAlerts={surfaceView.criticalAlerts}
-          highAlerts={surfaceView.highAlerts}
-          mediumAlerts={surfaceView.mediumAlerts}
-          currentResources={currentResources}
-          currentAnnouncements={currentAnnouncements}
-          currentAssignments={currentAssignments}
-          currentMessages={currentMessages}
-          currentEvents={currentEvents}
-          orderedSiteStatus={surfaceView.orderedSiteStatus}
-          recentChangeEvents={recentChangeEvents}
-          latestSyncRun={surfaceView.latestSyncRun}
-          lastSuccessfulSync={surfaceView.lastSuccessfulSync}
-          onTogglePin={handleTogglePin}
-          onSnooze={handleSnooze}
-          onDismiss={handleDismiss}
-          onNote={handleNote}
-        />
-
         {surface === 'sidepanel' ? (
-          <AskAiPanel
-            text={text}
-            uiLanguage={uiLanguage}
-            config={config}
-            providerStatus={providerStatus}
-            providerStatusPending={providerStatusPending}
-            aiProvider={aiProvider}
-            aiModel={aiModel}
-            switchyardProvider={switchyardProvider}
-            switchyardLane={switchyardLane}
-            aiQuestion={aiQuestion}
-            aiPending={aiPending}
-            aiAnswer={aiAnswer}
-            aiStructuredAnswer={aiStructuredAnswer}
-            aiNotice={aiNotice}
-            aiError={aiError}
-            availableCourses={availableCourses}
-            advancedMaterialEnabled={advancedMaterialEnabled}
-            advancedMaterialCourseId={advancedMaterialCourseId}
-            advancedMaterialExcerpt={advancedMaterialExcerpt}
-            advancedMaterialAcknowledged={advancedMaterialAcknowledged}
-            structuredInputSummary={{
-              totalAssignments: todaySnapshot?.totalAssignments ?? 0,
-              dueSoonAssignments: todaySnapshot?.dueSoonAssignments ?? 0,
-              newGrades: todaySnapshot?.newGrades ?? 0,
-              recentUpdatesCount: currentRecentUpdates?.items.length ?? 0,
-              priorityAlertsCount: currentAlerts.length,
-              focusQueueCount: focusQueue.length,
-              weeklyLoadCount: weeklyLoad.length,
-              changeJournalCount: recentChangeEvents.length,
-              currentViewFormat: 'markdown',
-            }}
-            onProviderChange={(provider) => {
-              setAiProvider(provider);
-              setAiModel(getProviderModel(config, provider));
-            }}
-            onModelChange={setAiModel}
-            onSwitchyardProviderChange={setSwitchyardProvider}
-            onSwitchyardLaneChange={setSwitchyardLane}
-            onQuestionChange={setAiQuestion}
-            onAdvancedMaterialEnabledChange={(value) => {
-              setAdvancedMaterialEnabled(value);
-              if (!value) {
-                setAdvancedMaterialCourseId('');
-                setAdvancedMaterialExcerpt('');
-                setAdvancedMaterialAcknowledged(false);
-              }
-            }}
-            onAdvancedMaterialCourseChange={setAdvancedMaterialCourseId}
-            onAdvancedMaterialExcerptChange={setAdvancedMaterialExcerpt}
-            onAdvancedMaterialAcknowledgedChange={setAdvancedMaterialAcknowledged}
-            onAskAi={handleAskAi}
-            onRefreshProviderStatus={refreshProviderStatus}
-            onOpenConfiguration={() => {
-              void browser.runtime.openOptionsPage();
-            }}
-          />
-        ) : null}
+          <>
+            <div className="surface__mode-bar">
+              <div>
+                <p className="surface__eyebrow">{copy.eyebrow}</p>
+                <h1 className="surface__title surface__title--compact">{activeSidepanelHeader.title}</h1>
+                <p className="surface__copy surface__copy--compact">{activeSidepanelHeader.description}</p>
+              </div>
+              <div className="surface__mode-bar-actions">
+                <div className="surface__mode-switch" role="tablist" aria-label="Sidepanel modes">
+                  {SIDEPANEL_MODE_ORDER.map((mode) => (
+                    <button
+                      key={mode}
+                      className={`surface__chip ${sidepanelMode === mode ? 'surface__chip--active' : ''}`}
+                      onClick={() => setSidepanelMode(mode)}
+                      role="tab"
+                      type="button"
+                    >
+                      {modeCopy.modeNav[mode]}
+                    </button>
+                  ))}
+                </div>
+                <button className="surface__button surface__button--ghost" onClick={() => void handleCycleLanguagePreference()} type="button">
+                  {config.uiLanguage === 'auto' ? 'Auto' : config.uiLanguage === 'en' ? 'EN' : '中文'}
+                </button>
+                <span className={`surface__badge surface__badge--${activeBffBaseUrl ? 'success' : 'warning'}`}>
+                  {bffStatusLabel}
+                </span>
+              </div>
+            </div>
 
-        {surface === 'popup' ? (
-          <PopupQuickExportPanel text={text} onExport={handleExport} />
-        ) : null}
+            {sidepanelMode === 'assistant' ? (
+              <>
+                <div className="surface__grid surface__grid--hero-panels">
+                  <article className="surface__panel surface__panel--hero surface__panel--priority">
+                    <p className="surface__meta-label">{modeCopy.assistant.currentContext}</p>
+                    <strong>{currentContextLabel}</strong>
+                    <p className="surface__meta">{assistantFactSummary}</p>
+                    {primaryFocusItem ? (
+                      <>
+                        <p className="surface__item-lead">{primaryFocusItem.title}</p>
+                        {primaryFocusItem.summary ? <p>{primaryFocusItem.summary}</p> : null}
+                      </>
+                    ) : (
+                      <p>{text.nextUp.none}</p>
+                    )}
+                  </article>
 
-        {surface === 'options' ? (
-          <OptionsPanels
-            text={text}
-            uiLanguage={uiLanguage}
-            optionsDraft={optionsDraft}
-            setOptionsDraft={setOptionsDraft}
-            providerStatus={providerStatus}
-            providerStatusPending={providerStatusPending}
-            optionsFeedback={optionsFeedback}
-            onRefreshProviderStatus={refreshProviderStatus}
-            onSaveOptions={handleSaveOptions}
-            onExport={handleExport}
-          />
-        ) : null}
+                  <article className="surface__panel surface__panel--hero surface__panel--trust">
+                    <p className="surface__meta-label">{modeCopy.assistant.visibleFacts}</p>
+                    <strong>{assistantFactSummary}</strong>
+                    <p className="surface__meta">
+                      {modeCopy.assistant.activeConnection}: {bffStatusLabel}
+                    </p>
+                    <p className="surface__meta">{assistantReadinessSummary}</p>
+                    <p className="surface__meta">{assistantReceiptSummary}</p>
+                  </article>
+
+                  <article className="surface__panel surface__panel--hero surface__panel--actions">
+                    <h2>{modeCopy.assistant.title}</h2>
+                    <p>{modeCopy.assistant.trustSummary}</p>
+                    <div className="surface__actions surface__actions--wrap">
+                      <button className="surface__button" onClick={() => enterExportMode()} type="button">
+                        {modeCopy.assistant.openExport}
+                      </button>
+                      <button className="surface__button surface__button--secondary" onClick={() => setSidepanelMode('settings')} type="button">
+                        {modeCopy.assistant.openSettings}
+                      </button>
+                      <button
+                        className="surface__button surface__button--ghost"
+                        disabled={
+                          (!surfaceView.currentSiteSelection && !planningCaptureContext) ||
+                          syncFeedback.inFlightSite === surfaceView.currentSiteSelection
+                        }
+                        onClick={() =>
+                          surfaceView.currentSiteSelection
+                            ? void handleSiteSync(surfaceView.currentSiteSelection)
+                            : planningCaptureContext
+                              ? void handleCapturePlanningSubstrate()
+                              : undefined
+                        }
+                        type="button"
+                      >
+                        {surfaceView.currentSiteSelection
+                          ? text.quickActions.syncCurrentSite(SITE_LABELS[surfaceView.currentSiteSelection])
+                          : planningCaptureContext
+                            ? text.quickActions.capturePlanningSubstrate(planningCaptureContext.buttonLabel)
+                          : text.quickActions.selectSiteBeforeSync}
+                      </button>
+                    </div>
+                    {syncFeedback.message ? <p className="surface__feedback">{syncFeedback.message}</p> : null}
+                    {exportFeedback ? <p className="surface__feedback">{exportFeedback}</p> : null}
+                  </article>
+                </div>
+                <div className="surface__assistant-trust-strip" role="list" aria-label={modeCopy.authorization.title}>
+                  <span className="surface__assistant-trust-chip surface__assistant-trust-chip--success">{modeCopy.assistant.readOnly}</span>
+                  <span className="surface__assistant-trust-chip">{modeCopy.assistant.structuredOnly}</span>
+                  <span className="surface__assistant-trust-chip">{modeCopy.assistant.manualOnly}</span>
+                </div>
+
+                <AskAiPanel
+                  text={text}
+                  uiLanguage={uiLanguage}
+                  config={config}
+                  activeBffBaseUrl={activeBffBaseUrl}
+                  providerStatus={providerStatus}
+                  providerStatusPending={providerStatusPending}
+                  aiProvider={aiProvider}
+                  aiModel={aiModel}
+                  switchyardProvider={switchyardProvider}
+                  switchyardLane={switchyardLane}
+                  aiQuestion={aiQuestion}
+                  aiPending={aiPending}
+                  aiAnswer={aiAnswer}
+                  aiStructuredAnswer={aiStructuredAnswer}
+                  aiNotice={aiNotice}
+                  aiError={aiError}
+                  availableCourses={availableCourses}
+                  advancedMaterialEnabled={advancedMaterialEnabled}
+                  advancedMaterialCourseId={advancedMaterialCourseId}
+                  advancedMaterialExcerpt={advancedMaterialExcerpt}
+                  advancedMaterialAcknowledged={advancedMaterialAcknowledged}
+                  structuredInputSummary={{
+                    totalAssignments: todaySnapshot?.totalAssignments ?? 0,
+                    dueSoonAssignments: todaySnapshot?.dueSoonAssignments ?? 0,
+                    newGrades: todaySnapshot?.newGrades ?? 0,
+                    recentUpdatesCount: currentRecentUpdates?.items.length ?? 0,
+                    priorityAlertsCount: currentAlerts.length,
+                    focusQueueCount: focusQueue.length,
+                    weeklyLoadCount: weeklyLoad.length,
+                    changeJournalCount: recentChangeEvents.length,
+                    currentViewFormat: 'markdown',
+                  }}
+                  onProviderChange={(provider) => {
+                    setAiProvider(provider);
+                    setAiModel(getProviderModel(config, provider));
+                  }}
+                  onModelChange={setAiModel}
+                  onSwitchyardProviderChange={setSwitchyardProvider}
+                  onSwitchyardLaneChange={setSwitchyardLane}
+                  onQuestionChange={setAiQuestion}
+                  onAdvancedMaterialEnabledChange={(value) => {
+                    setAdvancedMaterialEnabled(value);
+                    if (!value) {
+                      setAdvancedMaterialCourseId('');
+                      setAdvancedMaterialExcerpt('');
+                      setAdvancedMaterialAcknowledged(false);
+                    }
+                  }}
+                  onAdvancedMaterialCourseChange={setAdvancedMaterialCourseId}
+                  onAdvancedMaterialExcerptChange={setAdvancedMaterialExcerpt}
+                  onAdvancedMaterialAcknowledgedChange={setAdvancedMaterialAcknowledged}
+                  onAskAi={handleAskAi}
+                  onRefreshProviderStatus={refreshProviderStatus}
+                  onOpenConfiguration={() => setSidepanelMode('settings')}
+                />
+
+                <details
+                  className="surface__workspace-detail"
+                  onToggle={(event) => setWorkspaceDetailsOpen((event.currentTarget as HTMLDetailsElement).open)}
+                  open={workspaceDetailsOpen}
+                >
+                  <summary className="surface__workspace-detail-summary">
+                    {workspaceDetailsOpen ? modeCopy.assistant.hideWorkspace : modeCopy.assistant.showWorkspace}
+                  </summary>
+                  <WorkbenchPanels
+                    surface={surface}
+                    copy={copy}
+                    text={text}
+                    uiLanguage={uiLanguage}
+                    selectedFormatLabel={selectedFormatLabel}
+                    filters={filters}
+                    setFilters={setFilters}
+                    todaySnapshot={todaySnapshot}
+                    currentRecentUpdates={currentRecentUpdates}
+                    syncFeedback={syncFeedback}
+                    exportFeedback={exportFeedback}
+                    currentSiteSelection={surfaceView.currentSiteSelection}
+                    onSyncSite={handleSiteSync}
+                    onExport={handleExport}
+                    onOpenConfiguration={() => setSidepanelMode('settings')}
+                    onMarkVisibleUpdatesSeen={handleMarkVisibleUpdatesSeen}
+                    onExportDiagnostics={handleExportDiagnostics}
+                    diagnostics={surfaceView.diagnostics}
+                    focusQueue={focusQueue}
+                    planningSubstrates={planningSubstrates}
+                    weeklyLoad={weeklyLoad}
+                    priorityAlerts={priorityAlerts}
+                    criticalAlerts={surfaceView.criticalAlerts}
+                    highAlerts={surfaceView.highAlerts}
+                    mediumAlerts={surfaceView.mediumAlerts}
+                    currentResources={currentResources}
+                    currentAnnouncements={currentAnnouncements}
+                    currentAssignments={currentAssignments}
+                    currentMessages={currentMessages}
+                    currentEvents={currentEvents}
+                    orderedSiteStatus={surfaceView.orderedSiteStatus}
+                    recentChangeEvents={recentChangeEvents}
+                    latestSyncRun={surfaceView.latestSyncRun}
+                    lastSuccessfulSync={surfaceView.lastSuccessfulSync}
+                    onTogglePin={handleTogglePin}
+                    onSnooze={handleSnooze}
+                    onDismiss={handleDismiss}
+                    onNote={handleNote}
+                  />
+                </details>
+              </>
+            ) : sidepanelMode === 'export' ? (
+              <>
+                <article className="surface__panel surface__panel--hero">
+                  <h2>{modeCopy.export.title}</h2>
+                  <p>{modeCopy.export.description}</p>
+                </article>
+                <div className="surface__grid surface__grid--split">
+                  <article className="surface__panel">
+                    <label className="surface__field">
+                      <span>{modeCopy.export.siteLabel}</span>
+                      <select
+                        value={exportScopeSite}
+                        onChange={(event) => setExportScopeSite(event.target.value as ExportScopeSite)}
+                      >
+                        <option value="all">{modeCopy.export.allSites}</option>
+                        {surfaceView.orderedSiteStatus.map((entry) => (
+                          <option key={entry.site} value={entry.site}>
+                            {SITE_LABELS[entry.site]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    {isCourseScopedExportSite(exportScopeSite) ? (
+                      <label className="surface__field">
+                        <span>{modeCopy.export.courseLabel}</span>
+                        <select value={exportCourseId} onChange={(event) => setExportCourseId(event.target.value)}>
+                          <option value="">{modeCopy.export.allCourses}</option>
+                          {exportScopedCourses.map((course) => (
+                            <option key={course.id} value={course.id}>
+                              {course.label}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="surface__meta">{modeCopy.export.courseScopedHint}</p>
+                      </label>
+                    ) : (
+                      <p className="surface__meta">{modeCopy.export.globalHint}</p>
+                    )}
+                    <label className="surface__field">
+                      <span>{modeCopy.export.formatLabel}</span>
+                      <select
+                        value={selectedFormat}
+                        onChange={(event) => setSelectedFormat(event.target.value as ExportFormat)}
+                      >
+                        {EXPORT_FORMAT_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="surface__actions surface__actions--wrap">
+                      <button
+                        className="surface__button"
+                        disabled={!exportFamilyCards.find((card) => card.family === exportFamily)?.exportable}
+                        onClick={() => void handleExportSelection()}
+                        type="button"
+                      >
+                        {modeCopy.export.exportButton}
+                      </button>
+                      <button className="surface__button surface__button--ghost" onClick={() => setSidepanelMode('assistant')} type="button">
+                        {modeCopy.modeNav.assistant}
+                      </button>
+                    </div>
+                    {exportFeedback ? <p className="surface__feedback">{exportFeedback}</p> : null}
+                  </article>
+
+                  <article className="surface__panel">
+                    <p className="surface__meta-label">{modeCopy.export.familyLabel}</p>
+                    <div className="surface__grid">
+                      {exportFamilyCards.map((card) => (
+                        <button
+                          key={card.family}
+                          className={`surface__resource-card ${exportFamily === card.family ? 'surface__resource-card--active' : ''}`}
+                          disabled={!card.exportable}
+                          onClick={() => setExportFamily(card.family)}
+                          type="button"
+                        >
+                          <div className="surface__item-header">
+                            <strong>{modeCopy.export.families[card.family].label}</strong>
+                            <span className={`surface__badge surface__badge--${card.status === 'available' ? 'success' : card.status === 'partial' ? 'warning' : 'danger'}`}>
+                              {modeCopy.export.badges[card.status]}
+                            </span>
+                          </div>
+                          <p>{modeCopy.export.families[card.family].description}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </article>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="surface__grid surface__grid--split">
+                  <article className="surface__panel surface__panel--trust">
+                    <h2>{modeCopy.connection.title}</h2>
+                    <p>{modeCopy.connection.description}</p>
+                    <p className="surface__meta">
+                      {modeCopy.connection.resolvedUrl}: {activeBffBaseUrl ?? modeCopy.connection.none}
+                    </p>
+                    <p className="surface__meta">
+                      {modeCopy.connection.checkedUrls}: {bffResolution.checkedUrls.join(' · ') || modeCopy.connection.none}
+                    </p>
+                    {bffResolution.error === 'manual_unreachable' ? (
+                      <p className="surface__feedback surface__feedback--error">{modeCopy.connection.manualUnreachable}</p>
+                    ) : null}
+                    <div className="surface__actions surface__actions--wrap">
+                      <button className="surface__button surface__button--ghost" onClick={() => void refreshProviderStatus()} type="button">
+                        {text.options.refreshBffStatus}
+                      </button>
+                      <button className="surface__button surface__button--secondary" onClick={() => void handleCycleLanguagePreference()} type="button">
+                        {config.uiLanguage === 'auto' ? 'Auto' : config.uiLanguage === 'en' ? 'EN' : '中文'}
+                      </button>
+                      <button
+                        className="surface__button surface__button--ghost"
+                        onClick={() => {
+                          void browser.runtime.openOptionsPage();
+                        }}
+                        type="button"
+                      >
+                        {text.quickActions.openOptions}
+                      </button>
+                    </div>
+                  </article>
+
+                  <article className="surface__panel surface__panel--actions">
+                    <h2>{modeCopy.authorization.title}</h2>
+                    <p>{modeCopy.authorization.description}</p>
+                    <div className="surface__stack">
+                      <p className="surface__meta-label">{modeCopy.authorization.currentReads}</p>
+                      <p className="surface__meta">Canvas assignments, announcements, inbox, deadlines, plus the current four-site read-only workspace.</p>
+                      <p className="surface__meta-label">{modeCopy.authorization.plannedReads}</p>
+                      <div className="surface__pill-row">
+                        <span className="surface__badge surface__badge--success">Canvas inbox</span>
+                        <span className="surface__badge surface__badge--warning">Canvas grades</span>
+                        <span className="surface__badge surface__badge--danger">Canvas syllabus</span>
+                        <span className="surface__badge surface__badge--danger">Canvas recordings</span>
+                      </div>
+                    </div>
+                  </article>
+                  <article className="surface__panel">
+                    <h2>{modeCopy.modeNav.settings}</h2>
+                    <p>{modeCopy.connection.description}</p>
+                    <div className="surface__stack">
+                      <p className="surface__meta">
+                        {text.options.defaultProvider}: {config.ai.defaultProvider}
+                      </p>
+                      <p className="surface__meta">
+                        {text.options.defaultExportFormat}: {config.defaultExportFormat.toUpperCase()}
+                      </p>
+                      <p className="surface__meta">
+                        {modeCopy.connection.overrideHint}
+                      </p>
+                      <div className="surface__actions surface__actions--wrap">
+                        <button
+                          className="surface__button"
+                          onClick={() => {
+                            void browser.runtime.openOptionsPage();
+                          }}
+                          type="button"
+                        >
+                          {text.quickActions.openOptions}
+                        </button>
+                        <button className="surface__button surface__button--secondary" onClick={() => setSidepanelMode('assistant')} type="button">
+                          {modeCopy.modeNav.assistant}
+                        </button>
+                      </div>
+                      {optionsFeedback ? <p className="surface__feedback">{optionsFeedback}</p> : null}
+                    </div>
+                  </article>
+                </div>
+              </>
+            )}
+          </>
+        ) : surface === 'popup' ? (
+          <>
+            <WorkbenchPanels
+              surface={surface}
+              copy={copy}
+              launcherCopy={popupLauncherCopy}
+              text={text}
+              uiLanguage={uiLanguage}
+              selectedFormatLabel={selectedFormatLabel}
+              filters={filters}
+              setFilters={setFilters}
+              todaySnapshot={todaySnapshot}
+              currentRecentUpdates={currentRecentUpdates}
+              syncFeedback={syncFeedback}
+              exportFeedback={exportFeedback}
+              currentSiteSelection={surfaceView.currentSiteSelection}
+              onSyncSite={handleSiteSync}
+              onExport={handleExport}
+              onOpenConfiguration={() => {
+                void browser.runtime.openOptionsPage();
+              }}
+              onOpenMainWorkbench={surface === 'popup' ? handleOpenMainWorkbench : undefined}
+              onOpenExportMode={surface === 'popup' ? () => void openSidepanelMode('export') : undefined}
+              onOpenSettingsMode={surface === 'popup' ? () => void openSidepanelMode('settings') : undefined}
+              onMarkVisibleUpdatesSeen={handleMarkVisibleUpdatesSeen}
+              onExportDiagnostics={handleExportDiagnostics}
+              diagnostics={surfaceView.diagnostics}
+              focusQueue={focusQueue}
+              planningSubstrates={planningSubstrates}
+              weeklyLoad={weeklyLoad}
+              priorityAlerts={priorityAlerts}
+              criticalAlerts={surfaceView.criticalAlerts}
+              highAlerts={surfaceView.highAlerts}
+              mediumAlerts={surfaceView.mediumAlerts}
+              currentResources={currentResources}
+              currentAnnouncements={currentAnnouncements}
+              currentAssignments={currentAssignments}
+              currentMessages={currentMessages}
+              currentEvents={currentEvents}
+              orderedSiteStatus={surfaceView.orderedSiteStatus}
+              recentChangeEvents={recentChangeEvents}
+              latestSyncRun={surfaceView.latestSyncRun}
+              lastSuccessfulSync={surfaceView.lastSuccessfulSync}
+              onTogglePin={handleTogglePin}
+              onSnooze={handleSnooze}
+              onDismiss={handleDismiss}
+              onNote={handleNote}
+            />
+          </>
+        ) : (
+          <>
+            <article className="surface__panel surface__panel--hero surface__panel--trust">
+              <div className="surface__section-head">
+                <div>
+                  <p className="surface__eyebrow">{copy.eyebrow}</p>
+                  <h1 className="surface__title surface__title--compact">{copy.title}</h1>
+                  <p className="surface__copy surface__copy--compact">{copy.description}</p>
+                </div>
+                <span className={`surface__badge surface__badge--${activeBffBaseUrl ? 'success' : 'warning'}`}>
+                  {bffStatusLabel}
+                </span>
+              </div>
+              <div className="surface__grid surface__grid--stats">
+                <article className="surface__metric">
+                  <span className="surface__metric-value">{allowedAuthorizationCount}</span>
+                  <span className="surface__metric-label">Allowed rules</span>
+                </article>
+                <article className="surface__metric">
+                  <span className="surface__metric-value">{confirmRequiredAuthorizationCount}</span>
+                  <span className="surface__metric-label">Confirm required</span>
+                </article>
+                <article className="surface__metric">
+                  <span className="surface__metric-value">{blockedAuthorizationCount}</span>
+                  <span className="surface__metric-label">Blocked</span>
+                </article>
+              </div>
+              <p className="surface__meta">
+                {modeCopy.connection.resolvedUrl}: {activeBffBaseUrl ?? modeCopy.connection.none}
+              </p>
+              <p className="surface__meta">
+                Policy version: {config.authorization.policyVersion} · {text.options.defaultProvider}: {config.ai.defaultProvider}
+              </p>
+            </article>
+
+            <OptionsPanels
+              text={text}
+              uiLanguage={uiLanguage}
+              optionsDraft={optionsDraft}
+              setOptionsDraft={setOptionsDraft}
+              providerStatus={providerStatus}
+              providerStatusPending={providerStatusPending}
+              optionsFeedback={optionsFeedback}
+              onRefreshProviderStatus={refreshProviderStatus}
+              onSaveOptions={handleSaveOptions}
+              onExport={handleExport}
+            />
+          </>
+        )}
       </section>
     </main>
   );

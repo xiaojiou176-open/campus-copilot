@@ -31,7 +31,12 @@ import {
   useWorkbenchView,
   type WorkbenchFilter,
 } from '@campus-copilot/storage';
-import { DEMO_IMPORTED_SNAPSHOT, snapshotFromImportedJson } from './import-export-snapshot';
+import {
+  applyImportedEnvelopeToArtifact,
+  DEMO_IMPORTED_SNAPSHOT,
+  parseImportedSnapshotArtifact,
+  type ImportedArtifactEnvelope,
+} from './import-export-snapshot';
 import { WebAiPanel } from './web-ai-panel';
 import { WebSupportRail, WebToolbar } from './web-toolbar';
 import { WebWorkbenchPanels } from './web-workbench-panels';
@@ -85,6 +90,7 @@ export function App() {
   const [aiStructured, setAiStructured] = useState<AiStructuredAnswer>();
   const [aiNotice, setAiNotice] = useState<string>();
   const [aiError, setAiError] = useState<string>();
+  const [importedEnvelope, setImportedEnvelope] = useState<ImportedArtifactEnvelope>();
   const [advancedMaterialEnabled, setAdvancedMaterialEnabled] = useState(false);
   const [advancedMaterialCourseId, setAdvancedMaterialCourseId] = useState('');
   const [advancedMaterialExcerpt, setAdvancedMaterialExcerpt] = useState('');
@@ -119,6 +125,7 @@ export function App() {
 
       if (existingCount === 0) {
         await replaceImportedWorkbenchSnapshot(DEMO_IMPORTED_SNAPSHOT);
+        setImportedEnvelope(undefined);
         setFeedback('Loaded demo workspace data on the shared schema/storage contract.');
       } else {
         setFeedback('Loaded the existing local web workspace snapshot.');
@@ -185,6 +192,59 @@ export function App() {
     [allCourses, filters.site],
   );
 
+  const currentViewExport = useMemo(() => {
+    if (!workbenchReady) {
+      return undefined;
+    }
+    const siteLabel = filters.site === 'all' ? 'All sites' : SITE_LABELS[filters.site];
+    return applyImportedEnvelopeToArtifact(
+      createExportArtifact({
+        preset: 'current_view',
+        format: 'markdown',
+        input: buildWorkbenchExportInput({
+          preset: 'current_view',
+          generatedAt: now,
+          filters,
+          exportScope: importedEnvelope?.scope,
+          packaging: importedEnvelope?.packaging,
+          resources: currentResources,
+          assignments: currentAssignments,
+          announcements: currentAnnouncements,
+          messages: currentMessages,
+          grades: currentGrades,
+          events: currentEvents,
+          alerts: currentAlerts,
+          recentUpdates,
+          focusQueue,
+          weeklyLoad,
+          syncRuns: latestSyncRuns,
+          changeEvents: recentChangeEvents,
+          presentation: {
+            viewTitle: `Web workbench (${siteLabel})`,
+          },
+        }),
+      }),
+      importedEnvelope,
+    );
+  }, [
+    workbenchReady,
+    filters,
+    now,
+    currentResources,
+    currentAssignments,
+    currentAnnouncements,
+    currentMessages,
+    currentGrades,
+    currentEvents,
+    currentAlerts,
+    recentUpdates,
+    focusQueue,
+    weeklyLoad,
+    latestSyncRuns,
+    recentChangeEvents,
+    importedEnvelope,
+  ]);
+
   function handleExport(preset: ExportPreset) {
     const siteLabel = filters.site === 'all' ? 'All sites' : SITE_LABELS[filters.site];
     const artifact = createExportArtifact({
@@ -217,14 +277,20 @@ export function App() {
 
   async function handleImportFile(file: File) {
     const raw = await file.text();
-    const snapshot = snapshotFromImportedJson(raw);
+    const { snapshot, envelope } = parseImportedSnapshotArtifact(raw);
     await replaceImportedWorkbenchSnapshot(snapshot);
+    setImportedEnvelope(envelope);
     setRefreshKey((current) => current + 1);
-    setFeedback('Imported a read-only workspace snapshot into the shared storage/read-model.');
+    setFeedback(
+      envelope
+        ? 'Imported a read-only workspace snapshot and kept its export/policy envelope visible in the web surface.'
+        : 'Imported a read-only workspace snapshot into the shared storage/read-model.',
+    );
   }
 
   async function handleResetDemo() {
     await replaceImportedWorkbenchSnapshot(DEMO_IMPORTED_SNAPSHOT);
+    setImportedEnvelope(undefined);
     setRefreshKey((current) => current + 1);
     setFeedback('Reset the web workbench to the bundled demo snapshot.');
   }
@@ -274,31 +340,17 @@ export function App() {
     setAiNotice(undefined);
 
     try {
-      const siteLabel = filters.site === 'all' ? 'All sites' : SITE_LABELS[filters.site];
-      const currentViewExport = createExportArtifact({
-        preset: 'current_view',
-        format: 'markdown',
-        input: buildWorkbenchExportInput({
-          preset: 'current_view',
-          generatedAt: now,
-          filters,
-          resources: currentResources,
-          assignments: currentAssignments,
-          announcements: currentAnnouncements,
-          messages: currentMessages,
-          grades: currentGrades,
-          events: currentEvents,
-          alerts: currentAlerts,
-          recentUpdates,
-          focusQueue,
-          weeklyLoad,
-          syncRuns: latestSyncRuns,
-          changeEvents: recentChangeEvents,
-          presentation: {
-            viewTitle: `Web workbench (${siteLabel})`,
-          },
-        }),
-      });
+      if (!currentViewExport) {
+        throw new Error('Load a workspace snapshot before asking for a cited answer.');
+      }
+
+      if (!currentViewExport.packaging.aiAllowed) {
+        throw new Error(
+          importedEnvelope?.packaging
+            ? 'This imported workspace carries review metadata, but the current web scope still does not have Layer 2 AI approval. Review the policy envelope before continuing.'
+            : 'The current web scope does not carry Layer 2 AI approval yet. Review the current policy envelope before asking AI.',
+        );
+      }
 
       const request = buildWorkbenchAiProxyRequest({
         provider,
@@ -511,6 +563,8 @@ export function App() {
             aiNotice={aiNotice}
             aiAnswer={aiAnswer}
             aiStructured={aiStructured}
+            currentViewExport={currentViewExport}
+            importedEnvelope={importedEnvelope}
             availableCourses={availableCourses}
             advancedMaterialEnabled={advancedMaterialEnabled}
             advancedMaterialCourseId={advancedMaterialCourseId}

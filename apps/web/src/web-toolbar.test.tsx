@@ -47,7 +47,8 @@ describe('web toolbar and support rail', () => {
       createElement(WebToolbar, toolbarProps),
     );
 
-    expect(html).toContain('Academic workbench');
+    expect(html).toContain('Student decision workspace');
+    expect(html).toContain('academic work and administrative signals stay grouped on the same decision desk');
     expect(html).toContain('Workspace truth');
     expect(html).toContain('Load / Import');
     expect(html).toContain('Filter / Export');

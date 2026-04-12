@@ -235,6 +235,9 @@ describe('workbench decision sections', () => {
     expect(markup).toContain('Homework 5 is due soon');
     expect(markup).toContain('This work is approaching its deadline and should stay near the top.');
     expect(markup).toContain('High');
+    expect(markup).toContain('One sorter, two ways to read it');
+    expect(markup).toContain('Academic');
+    expect(markup).toContain('Administrative');
     expect(markup).toContain('Planning Pulse');
     expect(markup).toContain('Allen School planning draft');
     expect(markup).toContain('Read-only');
@@ -256,6 +259,27 @@ describe('workbench operations sections', () => {
         text={getUiText('en')}
         uiLanguage="en"
         surface="sidepanel"
+        planningSubstrates={[
+          {
+            id: 'myplan:plan:1',
+            source: 'myplan',
+            fit: 'derived_planning_substrate',
+            readOnly: true,
+            capturedAt: '2026-04-01T00:00:00.000Z',
+            lastUpdatedAt: '2026-04-01T03:00:00.000Z',
+            planId: 'plan-1',
+            planLabel: 'Allen School planning draft',
+            termCount: 3,
+            plannedCourseCount: 9,
+            backupCourseCount: 2,
+            scheduleOptionCount: 4,
+            requirementGroupCount: 5,
+            programExplorationCount: 1,
+            degreeProgressSummary: 'Core degree requirements still need one systems elective.',
+            transferPlanningSummary: 'One transfer credit is still pending review.',
+            terms: [],
+          },
+        ]}
         currentResources={[
           {
             id: 'edstem:resource:1',
@@ -340,6 +364,8 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('https://us.edstem.org/api/resources/1/download/week-8-review-sheet.pdf?dl=1');
     expect(markup).toContain('Notice Signals');
     expect(markup).toContain('Spring quarter tuition is due.');
+    expect(markup).toContain('Administrative lane');
+    expect(markup).toContain('Planning Pulse stays in the academic/planning lane');
     expect(markup).toContain('Manual-only campus boundary');
     expect(markup).toContain('Not supported in the current product path');
     expect(markup).toContain('Register.UW automation not supported');
@@ -361,6 +387,7 @@ describe('workbench operations sections', () => {
         text={getUiText('en')}
         uiLanguage="en"
         surface="popup"
+        planningSubstrates={[]}
         currentResources={[]}
         currentAssignments={[]}
         currentAnnouncements={[]}

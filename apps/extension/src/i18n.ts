@@ -106,6 +106,7 @@ type UiText = {
     title: string;
     description: string;
     syncCurrentSite: (site: string) => string;
+    capturePlanningSubstrate: (surface: string) => string;
     selectSiteBeforeSync: string;
     syncInProgress: (site: string) => string;
     openExport: string;
@@ -146,6 +147,33 @@ type UiText = {
       plannedCourseCount: number;
       backupCourseCount: number;
       scheduleOptionCount: number;
+    }) => string;
+  };
+  groupedView: {
+    title: string;
+    heading: string;
+    description: string;
+    unifiedBadge: string;
+    academicBadge: string;
+    administrativeBadge: string;
+    academicSummary: (entry: {
+      focusCount: number;
+      weeklyDays: number;
+      alertCount: number;
+      updateCount: number;
+    }) => string;
+    administrativeSummary: (entry: {
+      focusCount: number;
+      alertCount: number;
+      updateCount: number;
+      planningVisible: boolean;
+    }) => string;
+    administrativeLaneTitle: string;
+    administrativeLaneDescription: string;
+    administrativeLaneMeta: (entry: {
+      noticeCount: number;
+      scheduleCount: number;
+      planningVisible: boolean;
     }) => string;
   };
   trustSummary: {
@@ -409,6 +437,9 @@ type UiText = {
     noVisibleUpdatesToMark: string;
     visibleUpdatesMarkedSeen: string;
     downloadReady: (filename: string) => string;
+    capturingPlanningSubstrate: string;
+    planningCaptureSuccess: (label: string) => string;
+    planningCapturePartial: (label: string) => string;
     syncSuccess: (site: string) => string;
     syncPartial: (site: string) => string;
     syncOutcome: (site: string, outcome: string) => string;
@@ -556,15 +587,15 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       sidepanelEyebrow: 'Campus Copilot Sidepanel',
       sidepanelTitle: 'Academic workbench',
       sidepanelDescription:
-        'This is not an empty chat box. It first turns four sites into one desk: what is happening today, what is blocked, and what changed recently.',
+        'This is not an empty chat box. It keeps academic work and administrative signals on one desk first, then helps you see what is happening today, what is blocked, and what changed recently.',
       popupEyebrow: 'Campus Copilot Popup',
       popupTitle: 'Quick pulse',
       popupDescription:
         'Popup stays lightweight and acts like a quick pulse check: sync status, priority counts, and the fastest way into the main workbench.',
       optionsEyebrow: 'Campus Copilot Options',
-      optionsTitle: 'Connection and runtime controls',
+      optionsTitle: 'Settings and trust center',
       optionsDescription:
-        'This page acts like a control cabinet: site configuration, the AI/BFF entry point, default export format, and boundary disclosure should all stay honest here.',
+        'This page should explain what the product can read, what AI may analyze, and which local runtime is active without turning into a mini workbench.',
     },
     meta: {
       noSyncYet: 'No sync yet',
@@ -619,6 +650,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       title: 'Quick Actions',
       description: 'These buttons act like the most useful desk drawers, so you can do high-value actions without detouring.',
       syncCurrentSite: (site) => `Sync ${site}`,
+      capturePlanningSubstrate: (surface) => `Capture ${surface}`,
       selectSiteBeforeSync: 'Select a site before syncing',
       syncInProgress: (site) => `Syncing ${site}...`,
       openExport: 'Open export',
@@ -653,6 +685,24 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       transferPlanningLabel: 'Transfer planning',
       termSummary: ({ termLabel, plannedCourseCount, backupCourseCount, scheduleOptionCount }) =>
         `${termLabel}: ${plannedCourseCount} planned · ${backupCourseCount} backup · ${scheduleOptionCount} option(s)`,
+    },
+    groupedView: {
+      title: 'Grouped student view',
+      heading: 'One sorter, two ways to read it',
+      description:
+        'The same decision desk now starts to separate academic work and planning from administrative signals without splitting them into two different products.',
+      unifiedBadge: 'Unified priority',
+      academicBadge: 'Academic',
+      administrativeBadge: 'Administrative',
+      academicSummary: ({ focusCount, weeklyDays, alertCount, updateCount }) =>
+        `${focusCount} ranked item(s), ${weeklyDays} active planning day(s), ${alertCount} alert(s), and ${updateCount} recent update(s) are currently reading as academic work.`,
+      administrativeSummary: ({ focusCount, alertCount, updateCount, planningVisible }) =>
+        `${focusCount} ranked admin item(s), ${alertCount} alert(s), and ${updateCount} recent update(s) are currently reading as administrative signals.${planningVisible ? ' Planning Pulse is tracked separately in the academic/planning lane.' : ''}`,
+      administrativeLaneTitle: 'Administrative lane',
+      administrativeLaneDescription:
+        'This keeps MyUW notice signals and schedule context visible as one real administrative line instead of burying them as side notes.',
+      administrativeLaneMeta: ({ noticeCount, scheduleCount, planningVisible }) =>
+        `${noticeCount} notice signal(s) · ${scheduleCount} schedule context item(s)${planningVisible ? ' · Planning Pulse stays in the academic/planning lane' : ''}`,
     },
     trustSummary: {
       title: 'Trust Summary',
@@ -934,6 +984,9 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       noVisibleUpdatesToMark: 'No visible updates need to be marked as seen in the current filter.',
       visibleUpdatesMarkedSeen: 'Recent updates in the current view are now marked as seen.',
       downloadReady: (filename) => `${filename} is ready to download.`,
+      capturingPlanningSubstrate: 'Capturing the current MyPlan / DARS page into Planning Pulse…',
+      planningCaptureSuccess: (label) => `${label} was captured into Planning Pulse.`,
+      planningCapturePartial: (label) => `${label} was captured, but the other MyPlan / DARS half is still missing.`,
       syncSuccess: (site) => `${site} sync succeeded and refreshed structured data.`,
       syncPartial: (site) => `${site} sync partially succeeded and still has resources to fill in.`,
       syncOutcome: (site, outcome) => `${site} sync finished with ${outcome}. Review the site status panel.`,
@@ -1138,13 +1191,13 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     hero: {
       sidepanelEyebrow: 'Campus Copilot 侧边栏',
       sidepanelTitle: '学习工作台',
-      sidepanelDescription: '这里不是空聊天框，而是先把四个站点整理成一张桌面：今天有什么、哪里卡住了、哪些变化还没看。',
+      sidepanelDescription: '这里不是空聊天框，而是先把学业任务和行政信号放到同一张桌面上，再帮你看清今天有什么、哪里卡住了、哪些变化还没看。',
       popupEyebrow: 'Campus Copilot 弹窗',
       popupTitle: '快速体温计',
       popupDescription: 'Popup 保持轻量，负责给你一个很快的体温计：有没有同步、有没有高优先级数字、要不要立刻打开主工作台。',
       optionsEyebrow: 'Campus Copilot 设置',
-      optionsTitle: '连接与运行时控制',
-      optionsDescription: '这页像控制柜：站点配置、AI/BFF 入口、默认导出格式和边界披露，都应该在这里说真话。',
+      optionsTitle: '设置与信任中心',
+      optionsDescription: '这页要讲清产品能读什么、AI 能分析什么、当前连的是哪条本地 runtime，而不是再变成一块迷你工作台。',
     },
     meta: {
       noSyncYet: '还没有同步',
@@ -1199,6 +1252,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       title: '快捷动作',
       description: '这些按钮像办公桌最顺手的四个抽屉，让你不用绕路就能做高价值动作。',
       syncCurrentSite: (site) => `同步 ${site}`,
+      capturePlanningSubstrate: (surface) => `抓取 ${surface}`,
       selectSiteBeforeSync: '先选择站点再同步',
       syncInProgress: (site) => `同步 ${site} 中…`,
       openExport: '打开导出',
@@ -1233,6 +1287,24 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       transferPlanningLabel: '转学规划',
       termSummary: ({ termLabel, plannedCourseCount, backupCourseCount, scheduleOptionCount }) =>
         `${termLabel}：${plannedCourseCount} 门计划 · ${backupCourseCount} 门备选 · ${scheduleOptionCount} 个排课选项`,
+    },
+    groupedView: {
+      title: '学生分组视图',
+      heading: '同一个排序器，两种阅读方式',
+      description:
+        '同一张决策桌面现在开始把学业与规划事项和行政信号分开给你看，但它们仍然属于同一个统一优先级系统。',
+      unifiedBadge: '统一优先级',
+      academicBadge: '学业',
+      administrativeBadge: '行政',
+      academicSummary: ({ focusCount, weeklyDays, alertCount, updateCount }) =>
+        `当前有 ${focusCount} 条学业排序项、${weeklyDays} 个活跃规划日、${alertCount} 条提醒和 ${updateCount} 条最近更新正在以学业线的方式显示。`,
+      administrativeSummary: ({ focusCount, alertCount, updateCount, planningVisible }) =>
+        `当前有 ${focusCount} 条行政排序项、${alertCount} 条提醒和 ${updateCount} 条最近更新正在以行政线的方式显示。${planningVisible ? ' 计划脉冲会单独保留在学业/规划线里。' : ''}`,
+      administrativeLaneTitle: '行政线',
+      administrativeLaneDescription:
+        '这里把 MyUW 提醒信号和时间表上下文收成一条真实行政线，而不是继续把它们埋在角落里。',
+      administrativeLaneMeta: ({ noticeCount, scheduleCount, planningVisible }) =>
+        `${noticeCount} 条提醒信号 · ${scheduleCount} 条时间上下文${planningVisible ? ' · 计划脉冲留在学业/规划线' : ''}`,
     },
     trustSummary: {
       title: '可信度摘要',
@@ -1511,6 +1583,9 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       noVisibleUpdatesToMark: '当前筛选下没有需要标记的更新。',
       visibleUpdatesMarkedSeen: '当前视图里的最近更新已标记为已查看。',
       downloadReady: (filename) => `${filename} 已准备下载。`,
+      capturingPlanningSubstrate: '正在把当前 MyPlan / DARS 页面写入计划脉冲…',
+      planningCaptureSuccess: (label) => `${label} 已写入计划脉冲。`,
+      planningCapturePartial: (label) => `${label} 已写入，但 MyPlan / DARS 另一半信息还没补齐。`,
       syncSuccess: (site) => `${site} 同步成功，结构化数据已刷新。`,
       syncPartial: (site) => `${site} 已部分同步成功，仍有资源需要后续补齐。`,
       syncOutcome: (site, outcome) => `${site} 同步结果为 ${outcome}，请查看站点状态面板。`,

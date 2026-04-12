@@ -1,4 +1,12 @@
-import { createExportArtifact, type ExportArtifact, type ExportFormat, type ExportPreset } from '@campus-copilot/exporter';
+import {
+  createExportArtifact,
+  type AuthorizationState,
+  type ExportArtifact,
+  type ExportFormat,
+  type ExportPackagingMetadata,
+  type ExportPreset,
+  type ExportScopeMetadata,
+} from '@campus-copilot/exporter';
 import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, TimelineEntry } from '@campus-copilot/schema';
 import type {
   ChangeEvent,
@@ -53,9 +61,13 @@ function selectPresetRecords<T>(preset: ExportPreset, current: T[], workbench: T
 export function buildSurfaceExportArtifact(input: {
   preset: ExportPreset;
   format: ExportFormat;
+  viewTitleOverride?: string;
+  exportScope?: Partial<ExportScopeMetadata>;
+  packaging?: Partial<ExportPackagingMetadata>;
+  authorization?: AuthorizationState;
   state: SurfaceCompositionState;
 }): ExportArtifact {
-  const { preset, format, state } = input;
+  const { preset, format, state, viewTitleOverride, exportScope, packaging, authorization } = input;
 
   return createExportArtifact({
     preset,
@@ -65,6 +77,10 @@ export function buildSurfaceExportArtifact(input: {
       generatedAt: state.now,
       uiLanguage: state.uiLanguage,
       filters: state.filters,
+      viewTitleOverride,
+      exportScope,
+      packaging,
+      authorization,
       resources: selectPresetRecords(preset, state.currentResources, state.workbenchResources),
       assignments: selectPresetRecords(preset, state.currentAssignments, state.workbenchAssignments),
       announcements: selectPresetRecords(preset, state.currentAnnouncements, state.workbenchAnnouncements),
@@ -88,6 +104,7 @@ export function buildSurfaceAiRequest(input: {
   switchyardLane?: SwitchyardLane;
   question: string;
   advancedMaterialAnalysis?: AdvancedMaterialAnalysisRequest;
+  authorization?: AuthorizationState;
   todaySnapshot: TodaySnapshot;
   state: SurfaceCompositionState;
 }): {
@@ -97,6 +114,7 @@ export function buildSurfaceAiRequest(input: {
   const currentViewExport = buildSurfaceExportArtifact({
     preset: 'current_view',
     format: 'markdown',
+    authorization: input.authorization,
     state: input.state,
   });
 

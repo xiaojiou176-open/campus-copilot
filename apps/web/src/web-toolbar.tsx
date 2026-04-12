@@ -90,13 +90,13 @@ export function WebToolbar(props: WebToolbarProps) {
       <section className="hero">
         <div className="hero-copy">
           <p className="eyebrow">Campus Copilot Web Workbench</p>
-          <h1>Academic workbench</h1>
+          <h1>Student decision workspace</h1>
           <p className="lede">
-            One local workspace for what changed, what is open, and what needs attention first.
+            One local workspace where academic work and administrative signals stay grouped on the same decision desk.
           </p>
           <p className="hero-support">
             This local-first academic decision workspace keeps shared storage, exported evidence, and
-            visible receipts in front. Cited AI explains the workspace after the facts are already visible.
+            visible receipts in front. Cited AI explains the workspace after the facts are already visible, not before.
           </p>
         </div>
         <div className="hero-card">

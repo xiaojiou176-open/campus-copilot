@@ -6,6 +6,7 @@ import {
 } from '@campus-copilot/ai';
 import { getAcademicAiCallerGuardrails } from './academic-safety-guards';
 import { formatProviderReason, formatProviderStatusError, type ProviderStatusLike } from './diagnostics';
+import { summarizeAuthorizationState } from './export-input';
 import { formatRelativeTime, type ResolvedUiLanguage } from './i18n';
 import { PROVIDER_OPTIONS } from './surface-shell-model';
 import { type UiText } from './surface-shell-view-helpers';
@@ -15,6 +16,7 @@ export function AskAiPanel(props: {
   text: UiText;
   uiLanguage: ResolvedUiLanguage;
   config: ExtensionConfig;
+  activeBffBaseUrl?: string;
   providerStatus: ProviderStatusLike;
   providerStatusPending: boolean;
   aiProvider: ProviderId;
@@ -60,6 +62,7 @@ export function AskAiPanel(props: {
     text,
     uiLanguage,
     config,
+    activeBffBaseUrl,
     providerStatus,
     providerStatusPending,
     aiProvider,
@@ -104,6 +107,7 @@ export function AskAiPanel(props: {
   const aiGuardrails = getAcademicAiCallerGuardrails();
   const redZoneHardStop = aiGuardrails.redZone.primaryHardStop;
   const advancedMaterialGuard = aiGuardrails.advancedMaterial;
+  const [readExportSummary, aiReadSummary] = summarizeAuthorizationState(config.authorization);
   const structuredInputs = [
     {
       label: text.askAi.structuredInputLabels.todaySnapshot,
@@ -223,6 +227,42 @@ export function AskAiPanel(props: {
                 <p className="surface__item-lead">{item.value}</p>
               </article>
             ))}
+          </div>
+        </div>
+
+        <div className="surface__group">
+          <div className="surface__section-head">
+            <div>
+              <h3>Policy review</h3>
+              <p className="surface__meta">The AI lane stays downstream from the shared export/auth skeleton, not a separate shadow rulebook.</p>
+            </div>
+          </div>
+          <div className="surface__evidence-grid">
+            <article className="surface__evidence-card">
+              <p className="surface__meta-label">Layer 1 read/export</p>
+              <p className="surface__item-lead">
+                {readExportSummary.allowed} allowed · {readExportSummary.partial} partial
+              </p>
+              <p className="surface__meta">
+                {readExportSummary.confirmRequired} confirm-required · {readExportSummary.blocked} blocked · {readExportSummary.total} total rules
+              </p>
+            </article>
+            <article className="surface__evidence-card">
+              <p className="surface__meta-label">Layer 2 AI read</p>
+              <p className="surface__item-lead">
+                {aiReadSummary.allowed} allowed · {aiReadSummary.confirmRequired} confirm-required
+              </p>
+              <p className="surface__meta">
+                {aiReadSummary.partial} partial · {aiReadSummary.blocked} blocked · {aiReadSummary.total} total rules
+              </p>
+            </article>
+            <article className="surface__evidence-card">
+              <p className="surface__meta-label">Request gate</p>
+              <p className="surface__item-lead">Current view export: {structuredInputSummary.currentViewFormat.toUpperCase()}</p>
+              <p className="surface__meta">
+                Ask AI still re-checks the current view packaging before anything leaves the extension.
+              </p>
+            </article>
           </div>
         </div>
 
@@ -384,7 +424,7 @@ export function AskAiPanel(props: {
           </div>
         </div>
       </details>
-      {!config.ai.bffBaseUrl ? <p aria-live="polite" className="surface__feedback">{text.askAi.missingBffFeedback}</p> : null}
+      {!activeBffBaseUrl ? <p aria-live="polite" className="surface__feedback">{text.askAi.missingBffFeedback}</p> : null}
       {aiNotice ? <p aria-live="polite" className="surface__feedback">{aiNotice}</p> : null}
       {aiError ? <p aria-live="polite" className="surface__feedback surface__feedback--error">{aiError}</p> : null}
       {parsedStructuredAnswer.success ? (

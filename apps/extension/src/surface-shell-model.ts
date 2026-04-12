@@ -9,6 +9,9 @@ import { buildDiagnosticsSummary, type DiagnosticsSummary, type ProviderStatusLi
 import type { ResolvedUiLanguage } from './i18n';
 
 export type SurfaceKind = 'sidepanel' | 'popup' | 'options';
+export type SidepanelMode = 'assistant' | 'export' | 'settings';
+
+export const SIDEPANEL_MODE_ORDER: SidepanelMode[] = ['assistant', 'export', 'settings'];
 
 export type AiResponsePayload = {
   ok?: boolean;

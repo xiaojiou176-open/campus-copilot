@@ -12,6 +12,20 @@ import type {
 } from '@campus-copilot/storage';
 import { LoadingStatValue, ReadyStateBlock, formatDateTime, formatWeeklyLoadSummary, getResourceActionLabel } from './web-view-helpers';
 
+const ADMINISTRATIVE_SITES = new Set<Site>(['myuw', 'time-schedule']);
+
+function isAdministrativeSite(site: Site) {
+  return ADMINISTRATIVE_SITES.has(site);
+}
+
+function getLaneLabel(site: Site) {
+  return isAdministrativeSite(site) ? 'Administrative' : 'Academic';
+}
+
+function getLaneBadgeClass(site: Site) {
+  return isAdministrativeSite(site) ? 'badge badge-warning' : 'badge badge-success';
+}
+
 export function WebWorkbenchPanels(props: {
   workbenchReady: boolean;
   todaySnapshot?: TodaySnapshot;
@@ -78,6 +92,13 @@ export function WebWorkbenchPanels(props: {
     const rightAt = Date.parse(right.lastUpdatedAt ?? right.capturedAt);
     return (Number.isNaN(rightAt) ? 0 : rightAt) - (Number.isNaN(leftAt) ? 0 : leftAt);
   })[0];
+  const academicFocusCount = props.focusQueue.filter((item) => !isAdministrativeSite(item.site)).length;
+  const administrativeFocusCount = props.focusQueue.filter((item) => isAdministrativeSite(item.site)).length;
+  const academicUpdateCount = props.recentChangeEvents.filter((event) => !isAdministrativeSite(event.site)).length;
+  const administrativeUpdateCount = props.recentChangeEvents.filter((event) => isAdministrativeSite(event.site)).length;
+  const academicWeeklyDays = props.weeklyLoad.filter((entry) => entry.items.some((item) => !isAdministrativeSite(item.site))).length;
+  const administrativeNoticeCount = props.currentAnnouncements.filter((announcement) => isAdministrativeSite(announcement.site)).length;
+  const administrativeScheduleCount = props.currentEvents.filter((event) => isAdministrativeSite(event.site)).length;
 
   return (
     <>
@@ -110,6 +131,35 @@ export function WebWorkbenchPanels(props: {
         </article>
       </section>
 
+      <section className="split-grid split-grid--secondary">
+        <article className="panel">
+          <p className="eyebrow">Grouped student view</p>
+          <h2>Academic lane</h2>
+          <p>Course work keeps the same priority sorter, but now reads as an explicit academic lane instead of a generic mixed list.</p>
+          <div className="badge-row">
+            <span className="badge">Unified priority</span>
+            <span className="badge badge-success">Academic</span>
+          </div>
+          <p className="meta">
+            {academicFocusCount} ranked item(s) · {academicWeeklyDays} active planning day(s) · {academicUpdateCount} change receipt(s)
+          </p>
+        </article>
+
+        <article className="panel">
+          <p className="eyebrow">Grouped student view</p>
+          <h2>Administrative lane</h2>
+          <p>MyUW signals and schedule context now read as one administrative line without splitting into a second product.</p>
+          <div className="badge-row">
+            <span className="badge">Unified priority</span>
+            <span className="badge badge-warning">Administrative</span>
+          </div>
+          <p className="meta">
+            {administrativeFocusCount} ranked item(s) · {administrativeUpdateCount} change receipt(s) · {administrativeNoticeCount} notice signal(s)
+          </p>
+          <p className="meta">{administrativeScheduleCount} schedule context item(s)</p>
+        </article>
+      </section>
+
       <section className="split-grid split-grid--primary">
         <article className="panel">
           <h2>Focus Queue</h2>
@@ -124,7 +174,10 @@ export function WebWorkbenchPanels(props: {
                 <article className="item" key={item.id}>
                   <div className="item-header">
                     <strong>{item.title}</strong>
-                    <span className="badge">score {item.score}</span>
+                    <div className="badge-row">
+                      <span className={getLaneBadgeClass(item.site)}>{getLaneLabel(item.site)}</span>
+                      <span className="badge">score {item.score}</span>
+                    </div>
                   </div>
                   {item.summary ? <p>{item.summary}</p> : null}
                   <p className="meta">
@@ -164,6 +217,7 @@ export function WebWorkbenchPanels(props: {
       </section>
 
       <section className="panel panel--planning">
+        <p className="eyebrow">Academic lane</p>
         <h2>Planning Pulse</h2>
         <p>
           A read-only summary of the shared MyPlan substrate, kept in the same decision lane as focus and load without
@@ -180,6 +234,7 @@ export function WebWorkbenchPanels(props: {
                 <div className="item-header">
                   <strong>{latestPlanningSubstrate.planLabel}</strong>
                   <div className="badge-row">
+                    <span className="badge badge-success">Academic</span>
                     <span className="badge">MyPlan</span>
                     <span className="badge">Read-only</span>
                   </div>
@@ -235,7 +290,10 @@ export function WebWorkbenchPanels(props: {
                 <article className="item" key={assignment.id}>
                   <div className="item-header">
                     <strong>{assignment.title}</strong>
-                    <span className="badge">{assignment.status}</span>
+                    <div className="badge-row">
+                      <span className={getLaneBadgeClass(assignment.site)}>{getLaneLabel(assignment.site)}</span>
+                      <span className="badge">{assignment.status}</span>
+                    </div>
                   </div>
                   {assignment.summary ? <p>{assignment.summary}</p> : null}
                   {assignment.detail ? <p className="meta">{assignment.detail}</p> : null}
@@ -263,6 +321,7 @@ export function WebWorkbenchPanels(props: {
                   <div className="item-header">
                     <strong>{message.title ?? 'Untitled discussion update'}</strong>
                     <div className="badge-row">
+                      <span className={getLaneBadgeClass(message.site)}>{getLaneLabel(message.site)}</span>
                       {message.unread ? <span className="badge badge-warning">unread</span> : null}
                       {message.instructorAuthored ? <span className="badge badge-success">staff</span> : null}
                     </div>
@@ -291,7 +350,10 @@ export function WebWorkbenchPanels(props: {
               <article className="item" key={resource.id}>
                 <div className="item-header">
                   <strong>{resource.title}</strong>
-                  <span className="badge">{resource.resourceKind}</span>
+                  <div className="badge-row">
+                    <span className={getLaneBadgeClass(resource.site)}>{getLaneLabel(resource.site)}</span>
+                    <span className="badge">{resource.resourceKind}</span>
+                  </div>
                 </div>
                 {resource.summary ? <p>{resource.summary}</p> : null}
                 {resource.detail ? <p className="meta">{resource.detail}</p> : null}
@@ -313,6 +375,7 @@ export function WebWorkbenchPanels(props: {
       </section>
 
       <section className="panel">
+        <p className="eyebrow">Administrative lane</p>
         <h2>Notice Signals</h2>
         <p>
           Existing announcement carriers stay visible here when they matter for planning, without inventing a standalone
@@ -328,7 +391,10 @@ export function WebWorkbenchPanels(props: {
               <article className="item" key={announcement.id}>
                 <div className="item-header">
                   <strong>{announcement.title}</strong>
-                  <span className="badge">{announcement.site === 'myuw' ? 'MyUW notice' : 'announcement'}</span>
+                  <div className="badge-row">
+                    <span className={getLaneBadgeClass(announcement.site)}>{getLaneLabel(announcement.site)}</span>
+                    <span className="badge">{announcement.site === 'myuw' ? 'MyUW notice' : 'announcement'}</span>
+                  </div>
                 </div>
                 {announcement.summary ? <p>{announcement.summary}</p> : null}
                 <p className="meta">
@@ -343,6 +409,7 @@ export function WebWorkbenchPanels(props: {
 
       <section className="split-grid split-grid--secondary">
         <article className="panel">
+          <p className="eyebrow">Administrative lane</p>
           <h2>Schedule Outlook</h2>
           <p>MyUW class and exam location context stays tied to the same event entities.</p>
           <div className="stack">
@@ -355,7 +422,10 @@ export function WebWorkbenchPanels(props: {
                 <article className="item" key={event.id}>
                   <div className="item-header">
                     <strong>{event.title}</strong>
-                    <span className="badge">{event.eventKind}</span>
+                    <div className="badge-row">
+                      <span className={getLaneBadgeClass(event.site)}>{getLaneLabel(event.site)}</span>
+                      <span className="badge">{event.eventKind}</span>
+                    </div>
                   </div>
                   {event.detail ?? event.summary ? <p>{event.detail ?? event.summary}</p> : null}
                   <p className="meta">
@@ -387,7 +457,10 @@ export function WebWorkbenchPanels(props: {
                 <article className="item" key={event.id}>
                   <div className="item-header">
                     <strong>{event.title}</strong>
-                    <span className="badge">{event.changeType}</span>
+                    <div className="badge-row">
+                      <span className={getLaneBadgeClass(event.site)}>{getLaneLabel(event.site)}</span>
+                      <span className="badge">{event.changeType}</span>
+                    </div>
                   </div>
                   <p>{event.summary}</p>
                   <p className="meta">

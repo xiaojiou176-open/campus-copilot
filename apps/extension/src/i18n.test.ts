@@ -47,6 +47,16 @@ describe('ui language resolution', () => {
     ).toBe('课程 1 · 资料 0 · 作业 2 · 公告 3 · 成绩 4 · 消息 5 · 事件 6');
   });
 
+  it('exposes grouped academic and administrative copy for the decision workspace', () => {
+    const en = getUiText('en');
+    const zh = getUiText('zh-CN');
+
+    expect(en.groupedView.heading).toBe('One sorter, two ways to read it');
+    expect(en.groupedView.academicBadge).toBe('Academic');
+    expect(zh.groupedView.heading).toBe('同一个排序器，两种阅读方式');
+    expect(zh.groupedView.administrativeBadge).toBe('行政');
+  });
+
   it('localizes options placeholders instead of hardcoding them in the component', () => {
     const en = getUiText('en');
     const zh = getUiText('zh-CN');

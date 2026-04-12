@@ -24,6 +24,18 @@ export interface WorkbenchPanelsProps {
     title: string;
     description: string;
   };
+  launcherCopy?: {
+    launchTitle: string;
+    launchDescription: string;
+    openAssistant: string;
+    openExport: string;
+    openSettings: string;
+    syncCurrentSite: string;
+    quickExportTitle: string;
+    quickExportDescription: string;
+    moreExports: string;
+    fewerExports: string;
+  };
   text: UiText;
   uiLanguage: ResolvedUiLanguage;
   selectedFormatLabel?: string;
@@ -42,6 +54,8 @@ export interface WorkbenchPanelsProps {
   onExport: (preset: ExportPreset) => Promise<void>;
   onOpenConfiguration: () => void;
   onOpenMainWorkbench?: () => Promise<void>;
+  onOpenExportMode?: () => void;
+  onOpenSettingsMode?: () => void;
   onMarkVisibleUpdatesSeen: () => Promise<void>;
   onExportDiagnostics: () => Promise<void>;
   diagnostics: DiagnosticsSummary;

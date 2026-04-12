@@ -1,4 +1,4 @@
-import type { PriorityReason } from '@campus-copilot/schema';
+import type { PriorityReason, Site } from '@campus-copilot/schema';
 import { formatDateTime, formatRelativeTime } from './i18n';
 import { SITE_LABELS } from './surface-shell-model';
 import { getAcademicRedZoneHardStops } from './academic-safety-guards';
@@ -30,6 +30,7 @@ import type { WorkbenchPanelsProps } from './workbench-panels-props';
 type OverviewSectionProps = Pick<
   WorkbenchPanelsProps,
   | 'copy'
+  | 'launcherCopy'
   | 'text'
   | 'uiLanguage'
   | 'selectedFormatLabel'
@@ -47,6 +48,8 @@ type OverviewSectionProps = Pick<
   | 'onExport'
   | 'onOpenConfiguration'
   | 'onOpenMainWorkbench'
+  | 'onOpenExportMode'
+  | 'onOpenSettingsMode'
   | 'onMarkVisibleUpdatesSeen'
   | 'diagnostics'
   | 'onExportDiagnostics'
@@ -79,6 +82,7 @@ type OperationsSectionProps = Pick<
   | 'text'
   | 'uiLanguage'
   | 'surface'
+  | 'planningSubstrates'
   | 'currentResources'
   | 'currentAnnouncements'
   | 'currentAssignments'
@@ -92,6 +96,20 @@ type OperationsSectionProps = Pick<
   | 'latestSyncRun'
   | 'recentChangeEvents'
 >;
+
+const ADMINISTRATIVE_SITES = new Set<Site>(['myuw', 'time-schedule']);
+
+function isAdministrativeSite(site: Site) {
+  return ADMINISTRATIVE_SITES.has(site);
+}
+
+function getLaneBadgeTone(site: Site) {
+  return isAdministrativeSite(site) ? 'warning' : 'success';
+}
+
+function getLaneBadgeLabel(site: Site, text: WorkbenchPanelsProps['text']) {
+  return isAdministrativeSite(site) ? text.groupedView.administrativeBadge : text.groupedView.academicBadge;
+}
 
 function getWeeklyLoadTone(entry: DecisionSectionProps['weeklyLoad'][number]) {
   if ((entry.overdueCount ?? 0) > 0 || entry.totalScore >= 200) {
@@ -128,6 +146,7 @@ function renderAlertGroup(
   title: string,
   alerts: DecisionSectionProps['priorityAlerts'],
   uiLanguage: DecisionSectionProps['uiLanguage'],
+  text: WorkbenchPanelsProps['text'],
 ) {
   if (alerts.length === 0) {
     return null;
@@ -140,9 +159,14 @@ function renderAlertGroup(
         <article className="surface__item" key={alert.id}>
           <div className="surface__item-header">
             <strong>{formatAlertTitle(alert, uiLanguage)}</strong>
-            <span className={`surface__badge surface__badge--${alert.importance}`}>
-              {formatAlertImportanceLabel(alert.importance, uiLanguage)}
-            </span>
+            <div className="surface__pill-row">
+              <span className={`surface__badge surface__badge--${getLaneBadgeTone(alert.site)}`}>
+                {getLaneBadgeLabel(alert.site, text)}
+              </span>
+              <span className={`surface__badge surface__badge--${alert.importance}`}>
+                {formatAlertImportanceLabel(alert.importance, uiLanguage)}
+              </span>
+            </div>
           </div>
           <p>{formatAlertSummary(alert, uiLanguage)}</p>
           <p className="surface__meta">
@@ -199,6 +223,7 @@ function getLocalizedReasonLabel(reason: PriorityReason | undefined, text: Workb
 
 export function WorkbenchOverviewSections({
   copy,
+  launcherCopy,
   text,
   uiLanguage,
   selectedFormatLabel,
@@ -216,6 +241,8 @@ export function WorkbenchOverviewSections({
   onExport,
   onOpenConfiguration,
   onOpenMainWorkbench,
+  onOpenExportMode,
+  onOpenSettingsMode,
   onMarkVisibleUpdatesSeen,
   diagnostics,
   onExportDiagnostics,
@@ -598,15 +625,34 @@ export function WorkbenchOverviewSections({
 
           <article className="surface__panel surface__panel--hero surface__panel--fast-actions">
             <div>
-              <h2>{text.popup.fastActionsTitle}</h2>
-              <p>{text.popup.fastActionsDescription}</p>
+              <h2>{launcherCopy?.launchTitle ?? text.popup.fastActionsTitle}</h2>
+              <p>{launcherCopy?.launchDescription ?? text.popup.fastActionsDescription}</p>
             </div>
-            <div className="surface__actions surface__actions--wrap">
+            <div className="surface__launcher-actions">
               {onOpenMainWorkbench ? (
                 <button className="surface__button" onClick={() => void onOpenMainWorkbench()}>
-                  {text.quickActions.openMainWorkbench}
+                  {launcherCopy?.openAssistant ?? text.quickActions.openMainWorkbench}
                 </button>
               ) : null}
+              {onOpenExportMode ? (
+                <button className="surface__button surface__button--secondary" onClick={() => onOpenExportMode()}>
+                  {launcherCopy?.openExport ?? text.quickActions.openExport}
+                </button>
+              ) : null}
+              {onOpenSettingsMode ? (
+                <button className="surface__button surface__button--ghost" onClick={() => onOpenSettingsMode()}>
+                  {launcherCopy?.openSettings ?? text.quickActions.openOptions}
+                </button>
+              ) : (
+                <button className="surface__button surface__button--ghost" onClick={() => void onExport('current_view')}>
+                  {text.quickActions.exportCurrentView}
+                </button>
+              )}
+            </div>
+            <div className="surface__launcher-secondary">
+              <p className="surface__meta">
+                {launcherCopy?.syncCurrentSite ?? text.quickActions.selectSiteBeforeSync}
+              </p>
               <button
                 className="surface__button surface__button--secondary"
                 disabled={!currentSiteSelection || syncFeedback.inFlightSite === currentSiteSelection}
@@ -617,9 +663,6 @@ export function WorkbenchOverviewSections({
                     ? text.quickActions.syncInProgress(SITE_LABELS[currentSiteSelection])
                     : text.quickActions.syncCurrentSite(SITE_LABELS[currentSiteSelection])
                   : text.quickActions.selectSiteBeforeSync}
-              </button>
-              <button className="surface__button surface__button--ghost" onClick={() => void onExport('current_view')}>
-                {text.quickActions.exportCurrentView}
               </button>
             </div>
             {syncFeedback.message ? (
@@ -752,9 +795,58 @@ export function WorkbenchDecisionSections({
       toSortableTimestamp(right.lastUpdatedAt ?? right.capturedAt) -
       toSortableTimestamp(left.lastUpdatedAt ?? left.capturedAt),
   )[0];
+  const academicFocusCount = focusQueue.filter((item) => !isAdministrativeSite(item.site)).length;
+  const administrativeFocusCount = focusQueue.filter((item) => isAdministrativeSite(item.site)).length;
+  const academicAlertCount = priorityAlerts.filter((alert) => !isAdministrativeSite(alert.site)).length;
+  const administrativeAlertCount = priorityAlerts.filter((alert) => isAdministrativeSite(alert.site)).length;
+  const academicUpdateCount = currentRecentUpdates?.items.filter((entry) => !isAdministrativeSite(entry.site)).length ?? 0;
+  const administrativeUpdateCount = currentRecentUpdates?.items.filter((entry) => isAdministrativeSite(entry.site)).length ?? 0;
+  const academicWeeklyDays = weeklyLoad.filter((entry) => entry.items.some((item) => !isAdministrativeSite(item.site))).length;
 
   return (
     <>
+      <article className="surface__panel">
+        <p className="surface__eyebrow">{text.groupedView.title}</p>
+        <h2>{text.groupedView.heading}</h2>
+        <p>{text.groupedView.description}</p>
+        <div className="surface__grid surface__grid--split">
+          <article className="surface__item">
+            <div className="surface__item-header">
+              <strong>{text.groupedView.academicBadge}</strong>
+              <div className="surface__pill-row">
+                <span className="surface__badge surface__badge--neutral">{text.groupedView.unifiedBadge}</span>
+                <span className="surface__badge surface__badge--success">{text.groupedView.academicBadge}</span>
+              </div>
+            </div>
+            <p>
+              {text.groupedView.academicSummary({
+                focusCount: academicFocusCount,
+                weeklyDays: academicWeeklyDays,
+                alertCount: academicAlertCount,
+                updateCount: academicUpdateCount,
+              })}
+            </p>
+          </article>
+          <article className="surface__item">
+            <div className="surface__item-header">
+              <strong>{text.groupedView.administrativeBadge}</strong>
+              <div className="surface__pill-row">
+                <span className="surface__badge surface__badge--neutral">{text.groupedView.unifiedBadge}</span>
+                <span className="surface__badge surface__badge--warning">{text.groupedView.administrativeBadge}</span>
+              </div>
+            </div>
+            <p>
+              {text.groupedView.administrativeSummary({
+                focusCount: administrativeFocusCount,
+                alertCount: administrativeAlertCount,
+                updateCount: administrativeUpdateCount,
+                planningVisible: Boolean(latestPlanningSubstrate),
+              })}
+            </p>
+          </article>
+        </div>
+      </article>
+
       <div className="surface__grid surface__grid--split">
         <article className="surface__panel">
           <h2>{text.focusQueue.title}</h2>
@@ -771,6 +863,9 @@ export function WorkbenchDecisionSections({
                   <div className="surface__item-header">
                     <strong>{item.title}</strong>
                     <div className="surface__pill-row">
+                      <span className={`surface__badge surface__badge--${getLaneBadgeTone(item.site)}`}>
+                        {getLaneBadgeLabel(item.site, text)}
+                      </span>
                       <span className="surface__badge surface__badge--neutral">{item.score}</span>
                       {item.reasons[0] ? (
                         <span className={`surface__badge surface__badge--${item.reasons[0].importance}`}>
@@ -906,9 +1001,9 @@ export function WorkbenchDecisionSections({
           <h2>{text.priorityAlerts.title}</h2>
           <p>{text.priorityAlerts.description}</p>
           <div className="surface__stack">
-            {renderAlertGroup(text.priorityAlerts.critical, criticalAlerts, uiLanguage)}
-            {renderAlertGroup(text.priorityAlerts.high, highAlerts, uiLanguage)}
-            {renderAlertGroup(text.priorityAlerts.medium, mediumAlerts, uiLanguage)}
+            {renderAlertGroup(text.priorityAlerts.critical, criticalAlerts, uiLanguage, text)}
+            {renderAlertGroup(text.priorityAlerts.high, highAlerts, uiLanguage, text)}
+            {renderAlertGroup(text.priorityAlerts.medium, mediumAlerts, uiLanguage, text)}
             {priorityAlerts.length === 0 ? <p>{text.priorityAlerts.none}</p> : null}
           </div>
         </article>
@@ -922,9 +1017,14 @@ export function WorkbenchDecisionSections({
                 <article className="surface__item" key={entry.id}>
                   <div className="surface__item-header">
                     <strong>{formatTimelineTitle(entry, uiLanguage)}</strong>
-                    <span className="surface__badge surface__badge--neutral">
-                      {formatTimelineKindLabel(entry.timelineKind, uiLanguage)}
-                    </span>
+                    <div className="surface__pill-row">
+                      <span className={`surface__badge surface__badge--${getLaneBadgeTone(entry.site)}`}>
+                        {getLaneBadgeLabel(entry.site, text)}
+                      </span>
+                      <span className="surface__badge surface__badge--neutral">
+                        {formatTimelineKindLabel(entry.timelineKind, uiLanguage)}
+                      </span>
+                    </div>
                   </div>
                   {formatTimelineSummary(entry, uiLanguage) ? <p>{formatTimelineSummary(entry, uiLanguage)}</p> : null}
                   <p className="surface__meta">
@@ -940,6 +1040,7 @@ export function WorkbenchDecisionSections({
       </div>
 
       <article className="surface__panel">
+        <p className="surface__eyebrow">{text.groupedView.academicBadge}</p>
         <h2>{text.planningPulse.title}</h2>
         <p>{text.planningPulse.description}</p>
         <div className="surface__stack">
@@ -948,6 +1049,7 @@ export function WorkbenchDecisionSections({
               <div className="surface__item-header">
                 <strong>{latestPlanningSubstrate.planLabel}</strong>
                 <div className="surface__pill-row">
+                  <span className="surface__badge surface__badge--success">{text.groupedView.academicBadge}</span>
                   <span className="surface__badge surface__badge--neutral">MyPlan</span>
                   <span className="surface__badge surface__badge--neutral">{text.planningPulse.readOnlyBadge}</span>
                 </div>
@@ -1003,6 +1105,7 @@ export function WorkbenchOperationsSections({
   text,
   uiLanguage,
   surface,
+  planningSubstrates,
   currentResources,
   currentAnnouncements,
   currentAssignments,
@@ -1018,6 +1121,14 @@ export function WorkbenchOperationsSections({
   if (surface === 'popup') {
     return null;
   }
+
+  const latestPlanningSubstrate = [...planningSubstrates].sort(
+    (left, right) =>
+      toSortableTimestamp(right.lastUpdatedAt ?? right.capturedAt) -
+      toSortableTimestamp(left.lastUpdatedAt ?? left.capturedAt),
+  )[0];
+  const administrativeNoticeCount = currentAnnouncements.filter((announcement) => isAdministrativeSite(announcement.site)).length;
+  const administrativeScheduleCount = currentEvents.filter((event) => isAdministrativeSite(event.site)).length;
 
   const noticeSignalsCopy =
     uiLanguage === 'en'
@@ -1072,9 +1183,14 @@ export function WorkbenchOperationsSections({
                 <article className="surface__item" key={assignment.id}>
                   <div className="surface__item-header">
                     <strong>{assignment.title}</strong>
-                    <span className="surface__badge surface__badge--neutral">
-                      {formatAssignmentStatus(assignment.status, uiLanguage)}
-                    </span>
+                    <div className="surface__pill-row">
+                      <span className={`surface__badge surface__badge--${getLaneBadgeTone(assignment.site)}`}>
+                        {getLaneBadgeLabel(assignment.site, text)}
+                      </span>
+                      <span className="surface__badge surface__badge--neutral">
+                        {formatAssignmentStatus(assignment.status, uiLanguage)}
+                      </span>
+                    </div>
                   </div>
                   <p className="surface__meta">
                     {SITE_LABELS[assignment.site]} · {assignment.dueAt ? text.currentTasks.dueAt(formatDateTime(uiLanguage, assignment.dueAt)) : text.meta.noTimeProvided}
@@ -1103,7 +1219,12 @@ export function WorkbenchOperationsSections({
                 <article className="surface__item" key={resource.id}>
                   <div className="surface__item-header">
                     <strong>{resource.title}</strong>
-                    <span className="surface__badge surface__badge--neutral">{resource.resourceKind}</span>
+                    <div className="surface__pill-row">
+                      <span className={`surface__badge surface__badge--${getLaneBadgeTone(resource.site)}`}>
+                        {getLaneBadgeLabel(resource.site, text)}
+                      </span>
+                      <span className="surface__badge surface__badge--neutral">{resource.resourceKind}</span>
+                    </div>
                   </div>
                   {resource.summary ? <p>{resource.summary}</p> : null}
                   {resource.detail ? <p className="surface__meta">{resource.detail}</p> : null}
@@ -1141,6 +1262,9 @@ export function WorkbenchOperationsSections({
                   <div className="surface__item-header">
                     <strong>{message.title ?? text.discussionHighlights.untitled}</strong>
                     <div className="surface__pill-row">
+                      <span className={`surface__badge surface__badge--${getLaneBadgeTone(message.site)}`}>
+                        {getLaneBadgeLabel(message.site, text)}
+                      </span>
                       {message.unread ? (
                         <span className="surface__badge surface__badge--warning">{text.discussionHighlights.unread}</span>
                       ) : null}
@@ -1163,6 +1287,19 @@ export function WorkbenchOperationsSections({
       </div>
 
       <article className="surface__panel">
+        <p className="surface__eyebrow">{text.groupedView.administrativeBadge}</p>
+        <h2>{text.groupedView.administrativeLaneTitle}</h2>
+        <p>{text.groupedView.administrativeLaneDescription}</p>
+        <p className="surface__meta">
+          {text.groupedView.administrativeLaneMeta({
+            noticeCount: administrativeNoticeCount,
+            scheduleCount: administrativeScheduleCount,
+            planningVisible: Boolean(latestPlanningSubstrate),
+          })}
+        </p>
+      </article>
+
+      <article className="surface__panel">
         <h2>{noticeSignalsCopy.title}</h2>
         <p>{noticeSignalsCopy.description}</p>
         <div className="surface__stack">
@@ -1171,9 +1308,14 @@ export function WorkbenchOperationsSections({
               <article className="surface__item" key={announcement.id}>
                 <div className="surface__item-header">
                   <strong>{announcement.title}</strong>
-                  <span className="surface__badge surface__badge--neutral">
-                    {announcement.site === 'myuw' ? noticeSignalsCopy.myuwBadge : noticeSignalsCopy.defaultBadge}
-                  </span>
+                  <div className="surface__pill-row">
+                    <span className={`surface__badge surface__badge--${getLaneBadgeTone(announcement.site)}`}>
+                      {getLaneBadgeLabel(announcement.site, text)}
+                    </span>
+                    <span className="surface__badge surface__badge--neutral">
+                      {announcement.site === 'myuw' ? noticeSignalsCopy.myuwBadge : noticeSignalsCopy.defaultBadge}
+                    </span>
+                  </div>
                 </div>
                 {announcement.summary ? <p>{announcement.summary}</p> : null}
                 <p className="surface__meta">
@@ -1225,7 +1367,12 @@ export function WorkbenchOperationsSections({
                 <article className="surface__item" key={event.id}>
                   <div className="surface__item-header">
                     <strong>{event.title}</strong>
-                    <span className="surface__badge surface__badge--neutral">{event.eventKind}</span>
+                    <div className="surface__pill-row">
+                      <span className={`surface__badge surface__badge--${getLaneBadgeTone(event.site)}`}>
+                        {getLaneBadgeLabel(event.site, text)}
+                      </span>
+                      <span className="surface__badge surface__badge--neutral">{event.eventKind}</span>
+                    </div>
                   </div>
                   {event.detail ?? event.summary ? <p>{event.detail ?? event.summary}</p> : null}
                   <p className="surface__meta">
@@ -1310,9 +1457,14 @@ export function WorkbenchOperationsSections({
               <article className="surface__item" key={event.id}>
                 <div className="surface__item-header">
                   <strong>{formatChangeEventTitle(event, uiLanguage)}</strong>
-                  <span className="surface__badge surface__badge--neutral">
-                    {formatChangeTypeLabel(event.changeType, uiLanguage)}
-                  </span>
+                  <div className="surface__pill-row">
+                    <span className={`surface__badge surface__badge--${getLaneBadgeTone(event.site)}`}>
+                      {getLaneBadgeLabel(event.site, text)}
+                    </span>
+                    <span className="surface__badge surface__badge--neutral">
+                      {formatChangeTypeLabel(event.changeType, uiLanguage)}
+                    </span>
+                  </div>
                 </div>
                 <p>{formatChangeEventSummary(event, uiLanguage, text)}</p>
                 {event.previousValue || event.nextValue ? (

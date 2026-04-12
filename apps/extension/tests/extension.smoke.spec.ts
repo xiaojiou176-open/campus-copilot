@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 const CONFIG_KEY = 'campusCopilotConfig';
 const SITE_STATE_KEY = '__campus_copilot_mock_site_states__';
@@ -319,6 +319,12 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
       const originalFetch = window.fetch.bind(window);
       window.fetch = async (input, init) => {
         const url = typeof input === 'string' ? input : input.toString();
+        if (url.endsWith('/health')) {
+          const config = getStorageState()[configKey];
+          return new Response(null, {
+            status: config?.ai?.bffBaseUrl && url.startsWith(config.ai.bffBaseUrl) ? 200 : 503,
+          });
+        }
         if (url.includes('/api/providers/status')) {
           const config = getStorageState()[configKey];
           return new Response(
@@ -397,12 +403,100 @@ test.beforeEach(async ({ page }) => {
   await installExtensionMocks(page);
 });
 
+async function expandDetailedWorkspace(page: Page, label: string) {
+  const trigger = page.getByText(label, { exact: true });
+  if (await trigger.isVisible()) {
+    await trigger.click();
+  }
+}
+
+async function assertOptionsTrustCenter(page: Page) {
+  await expect(page.getByRole('heading', { name: 'Settings and trust center' })).toBeVisible();
+  await expect(page.getByText('Authorization skeleton')).toBeVisible();
+  await expect(page.getByLabel('All sites · Layer 1 read/export')).toBeVisible();
+  await expect(page.getByLabel('All sites · Layer 2 AI read/analysis')).toBeVisible();
+  await expect(page.getByLabel('canvas · Layer 1 read/export')).toBeVisible();
+  await expect(page.getByLabel('canvas · Layer 2 AI read/analysis')).toBeVisible();
+}
+
+async function seedTechnicalConfig(
+  page: Page,
+  input: {
+    bffBaseUrl?: string;
+    edStemThreadsPath?: string;
+    globalLayer2Status?: string;
+  },
+) {
+  await page.evaluate(
+    ({ configKey, bffBaseUrl, edStemThreadsPath, globalLayer2Status }) => {
+      const storageKey = '__extension_storage__';
+      const raw = window.localStorage.getItem(storageKey);
+      const state = raw ? JSON.parse(raw) : {};
+      const currentConfig = state[configKey] ?? {};
+      const currentAuthorization = currentConfig.authorization ?? { policyVersion: 'wave1-skeleton', rules: [] };
+      const nextRules = (currentAuthorization.rules ?? []).filter(
+        (rule: { id?: string; layer?: string; resourceFamily?: string; site?: string; courseIdOrKey?: string }) =>
+          !(
+            !rule.site &&
+            !rule.courseIdOrKey &&
+            rule.layer === 'layer2_ai_read_analysis' &&
+            rule.resourceFamily === 'workspace_snapshot'
+          ),
+      );
+
+      if (globalLayer2Status) {
+        nextRules.push({
+          id: 'global-layer2_ai_read_analysis-workspace',
+          layer: 'layer2_ai_read_analysis',
+          status: globalLayer2Status,
+          resourceFamily: 'workspace_snapshot',
+          label: 'All sites AI read/analysis status',
+        });
+      }
+
+      state[configKey] = {
+        ...currentConfig,
+        ai: {
+          ...currentConfig.ai,
+          ...(bffBaseUrl ? { bffBaseUrl } : {}),
+        },
+        sites: {
+          ...currentConfig.sites,
+          edstem: {
+            ...currentConfig.sites?.edstem,
+            ...(edStemThreadsPath ? { threadsPath: edStemThreadsPath } : {}),
+          },
+        },
+        authorization: {
+          ...currentAuthorization,
+          rules: nextRules,
+        },
+      };
+
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
+    },
+    {
+      configKey: CONFIG_KEY,
+      bffBaseUrl: input.bffBaseUrl,
+      edStemThreadsPath: input.edStemThreadsPath,
+      globalLayer2Status: input.globalLayer2Status,
+    },
+  );
+}
+
 test('opens the built sidepanel and shows four site status cards', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
 
-  await expect(page.getByRole('heading', { name: 'Academic workbench' })).toBeVisible({
+  await expect(page.getByRole('heading', { name: 'Your campus companion for this page' }).first()).toBeVisible({
     timeout: 10000,
   });
+  await expect(page.getByRole('tab', { name: 'Assistant' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Export' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Settings' })).toBeVisible();
+  await expect(page.getByText('Structured facts only')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Ask AI about this workspace' })).toBeVisible();
+  await expect(page.getByText(/BFF base URL is not configured yet/).first()).toBeVisible();
+  await expandDetailedWorkspace(page, 'Show detailed workspace');
   await expect(page.getByRole('heading', { name: 'Diagnostics' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Next Up' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Trust Summary' })).toBeVisible();
@@ -411,7 +505,6 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByRole('heading', { name: 'Change Journal' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Discussion Highlights' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Schedule Outlook' })).toBeVisible();
-  await expect(page.getByText('Provider not ready: OpenAI, Gemini')).toBeVisible();
   await expect(page.getByText('Fresh sites')).toBeVisible();
   await expect(page.getByText('Stale sites')).toBeVisible();
   await expect(page.getByText('Not synced sites')).toBeVisible();
@@ -423,21 +516,30 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByRole('button', { name: 'Sync Gradescope' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sync EdStem' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sync MyUW' })).toBeVisible();
-  await expect(page.getByText('BFF base URL is still missing')).toBeVisible();
   await expect(page.locator('body')).not.toContainText('gradescope_courses_optional_collector_failed');
 });
 
-test('saves options config, syncs edstem, and records export downloads', async ({ page, baseURL }) => {
+test('saves settings/auth center changes, syncs edstem, and records export downloads', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
-
-  await page.getByLabel('EdStem threads path').fill('/api/courses/90031/threads?limit=30&sort=new');
-  await page.getByLabel('BFF base URL').fill('http://127.0.0.1:8787');
+  await assertOptionsTrustCenter(page);
+  await page.getByLabel('All sites · Layer 2 AI read/analysis').selectOption('allowed');
   await page.getByRole('button', { name: 'Save configuration' }).click();
   await expect(page.getByText('Configuration saved.')).toBeVisible();
 
+  await gotoSmokePage(page, baseURL, '/options.html');
+  await assertOptionsTrustCenter(page);
+  await expect(page.getByLabel('All sites · Layer 2 AI read/analysis')).toHaveValue('allowed');
+
+  await seedTechnicalConfig(page, {
+    bffBaseUrl: 'http://127.0.0.1:8787',
+    edStemThreadsPath: '/api/courses/90031/threads?limit=30&sort=new',
+    globalLayer2Status: 'allowed',
+  });
+
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
+  await expandDetailedWorkspace(page, 'Show detailed workspace');
   await page.getByRole('button', { name: 'Sync EdStem' }).click();
-  await expect(page.getByText('EdStem sync succeeded')).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'EdStem sync succeeded' })).toBeVisible();
   await page.evaluate(async () => {
     const openCampusCopilotDb = () =>
       new Promise<IDBDatabase>((resolve, reject) => {
@@ -498,24 +600,38 @@ test('saves options config, syncs edstem, and records export downloads', async (
     });
   });
   await page.reload();
-  const edStemStatusCard = page
+  await expandDetailedWorkspace(page, 'Show detailed workspace');
+  const siteStatusPanel = page.locator('article.surface__panel').filter({
+    has: page.getByRole('heading', { name: 'Site Status' }),
+  });
+  const edStemStatusCard = siteStatusPanel
     .locator('article.surface__item')
     .filter({ has: page.locator('strong', { hasText: /^EdStem$/ }) });
   await expect(
-    edStemStatusCard.getByText(
-      'Courses 1 · Resources 0 · Assignments 0 · Announcements 0 · Grades 0 · Messages 1 · Events 0',
-    ),
+    edStemStatusCard
+      .locator('p.surface__meta')
+      .filter({ hasText: 'Courses 1 · Resources 0 · Assignments 0 · Announcements 0 · Grades 0 · Messages 1 · Events 0' })
+      .first(),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Open export' }).click();
-  const downloadPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
-  expect(downloadPayload).toContain('current-view');
+  await page.getByRole('button', { name: 'EdStem', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Export this page' }).click();
+  await page.getByRole('button', { name: 'Export selection' }).click();
+  const downloadPayload = JSON.parse(
+    (await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY)) ?? '{}',
+  );
+  const exportedText = await page.evaluate(async (downloadUrl) => fetch(downloadUrl).then((response) => response.text()), downloadPayload.url);
+  expect(downloadPayload.filename).toContain('current-view');
+  expect(exportedText).toContain('Wrapping up the quarter');
+  expect(exportedText).not.toContain('Homework 5');
 });
 
 test('asks ai after provider config exists', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
-  await page.getByLabel('BFF base URL').fill('http://127.0.0.1:8787');
-  await page.getByRole('button', { name: 'Save configuration' }).click();
+  await seedTechnicalConfig(page, {
+    bffBaseUrl: 'http://127.0.0.1:8787',
+    globalLayer2Status: 'allowed',
+  });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
   const askAiPanel = page.locator('article.surface__panel').filter({
@@ -536,33 +652,23 @@ test('asks ai after provider config exists', async ({ page, baseURL }) => {
   await expect(page.getByRole('link', { name: 'Homework 5' })).toBeVisible();
 });
 
-test('popup exposes all formal export presets, including recent updates and all deadlines', async ({ page, baseURL }) => {
+test('popup stays launcher-first and keeps extra export presets behind disclosure', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/popup.html');
-  const quickPulsePanel = page.locator('article.surface__panel').filter({
-    has: page.getByRole('heading', { name: 'Quick pulse exports' }),
-  });
 
-  await expect(page.getByRole('button', { name: 'Weekly assignments' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Recent updates' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'All deadlines' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Focus queue' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Weekly load' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Change journal' })).toBeVisible();
-  await expect(quickPulsePanel.getByRole('button', { name: /^Current view/ })).toBeVisible();
-
-  await page.getByRole('button', { name: 'Recent updates' }).click();
-  let downloadPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
-  expect(downloadPayload).toContain('recent-updates');
-
-  await page.getByRole('button', { name: 'All deadlines' }).click();
-  downloadPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
-  expect(downloadPayload).toContain('all-deadlines');
+  await expect(page.getByRole('button', { name: 'Open assistant' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Quick export' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Settings/Auth' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Current view' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Recent updates' })).toHaveCount(0);
+  await expect(page.getByText('More export shortcuts')).toHaveCount(0);
 });
 
 test('shows provider not ready when selected provider is unavailable in bff status', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
-  await page.getByLabel('BFF base URL').fill('http://127.0.0.1:8787');
-  await page.getByRole('button', { name: 'Save configuration' }).click();
+  await seedTechnicalConfig(page, {
+    bffBaseUrl: 'http://127.0.0.1:8787',
+    globalLayer2Status: 'allowed',
+  });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
   await page.locator('summary').filter({ hasText: 'Advanced runtime settings' }).click();
@@ -590,11 +696,13 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
     has: page.getByRole('heading', { name: '围绕这张工作台来问 AI' }),
   });
 
-  await expect(page.getByText('被环境或运行时阻塞')).toBeVisible();
-  await expect(page.getByRole('heading', { name: '现在先做什么' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '这页的校园伴随助手' }).first()).toBeVisible();
   await expect(chineseAskAiPanel.getByRole('heading', { name: 'AI 当前能看见什么' })).toBeVisible();
   await expect(chineseAskAiPanel.getByText('今日快照', { exact: true })).toBeVisible();
   await expect(chineseAskAiPanel.getByText(/待办作业 \d+ · 48 小时内截止 \d+ · 新成绩 \d+/)).toBeVisible();
+  await expandDetailedWorkspace(page, '展开详细工作台');
+  await expect(page.getByText('被环境或运行时阻塞')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '现在先做什么' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '可信度摘要' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '专注队列' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '本周负荷' })).toBeVisible();
@@ -606,7 +714,7 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
   await expect(page.getByText('新鲜站点')).toBeVisible();
   await expect(page.getByText('陈旧站点')).toBeVisible();
   await expect(page.getByText('未同步站点')).toBeVisible();
-  await page.getByRole('button', { name: 'MyUW', exact: true }).click();
+  await page.getByRole('button', { name: 'MyUW', exact: true }).first().click();
   const myUwStatusCard = page
     .locator('article.surface__item')
     .filter({ has: page.locator('strong', { hasText: /^MyUW$/ }) });
@@ -614,6 +722,6 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
   await expect(syncMyUwButton).toBeVisible();
   await syncMyUwButton.click();
 
-  await expect(page.getByText('MyUW 已部分同步成功')).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'MyUW 已部分同步成功' })).toBeVisible();
   await expect(page.getByText('当前筛选下还没有结构化任务。')).toBeVisible();
 });
