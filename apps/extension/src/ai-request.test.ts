@@ -170,11 +170,14 @@ describe('ai request wiring', () => {
     expect(request.body.messages[0]?.content).toContain('Advanced material analysis stays default-disabled');
     expect(request.body.messages[0]?.content).toContain('Current site policy overlay: Canvas.');
     expect(request.body.messages[1]?.content).toContain('Homework 5 is due soon');
-    expect(request.body.messages[1]?.content).toContain('Due date changed from empty to empty.');
     expect(request.body.messages[1]?.content).toContain('current-view.md');
-    expect(request.body.messages[1]?.content).toContain('Finish this before lunch');
-    expect(request.body.messages[1]?.content).toContain('"syncRuns"');
-    expect(request.body.messages[1]?.content).toContain('"changeCount":2');
+    expect(request.body.messages[1]?.content).toContain('"contentRedacted":true');
+    expect(request.body.messages[1]?.content).toContain('"redactionReason":"ai_not_allowed_for_current_view_export"');
+    expect(request.body.messages[1]?.content).toContain('"focusQueueCount":1');
+    expect(request.body.messages[1]?.content).toContain('"recentChangesCount":1');
+    expect(request.body.messages[1]?.content).toContain('"syncRunsCount":1');
+    expect(request.body.messages[1]?.content).not.toContain('Finish this before lunch');
+    expect(request.body.messages[1]?.content).not.toContain('截止时间从昨晚改到了明晚。');
   });
 
   it('rejects raw material questions before the extension can proxy them to the shared AI seam', () => {
