@@ -142,8 +142,44 @@ function decodeHtml(value: string) {
     .replace(/&amp;/gi, '&');
 }
 
+function stripHtmlTags(value: string) {
+  let result = '';
+  let insideTag = false;
+  let quote: '"' | "'" | null = null;
+
+  for (const char of value) {
+    if (!insideTag) {
+      if (char === '<') {
+        insideTag = true;
+        result += ' ';
+        continue;
+      }
+      result += char;
+      continue;
+    }
+
+    if (quote) {
+      if (char === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+
+    if (char === '>') {
+      insideTag = false;
+    }
+  }
+
+  return result;
+}
+
 function stripTags(value: string) {
-  return decodeHtml(value.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  return decodeHtml(stripHtmlTags(value)).replace(/\s+/g, ' ').trim();
 }
 
 function normalizeWhitespace(value: string) {
@@ -262,23 +298,211 @@ function cleanHtml(input: string) {
   return removableTags.reduce((current, tagName) => stripHtmlElementBlock(current, tagName), stripHtmlComments(input));
 }
 
-function extractTitle(html: string) {
-  const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  return match ? normalizeWhitespace(match[1]) : undefined;
+function findTagEnd(input: string, startIndex: number) {
+  let quote: '"' | "'" | null = null;
+
+  for (let index = startIndex; index < input.length; index += 1) {
+    const char = input[index];
+    if (quote) {
+      if (char === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+
+    if (char === '>') {
+      return index;
+    }
+  }
+
+  return -1;
 }
 
-function extractFirstText(html: string, pattern: RegExp) {
-  const match = html.match(pattern);
-  return match ? normalizeWhitespace(match[1]) : undefined;
+function findOpeningTagStart(lowerInput: string, tagName: string, fromIndex: number) {
+  const openToken = `<${tagName}`;
+  let cursor = fromIndex;
+  while (cursor < lowerInput.length) {
+    const start = lowerInput.indexOf(openToken, cursor);
+    if (start === -1) {
+      return -1;
+    }
+    if (isHtmlTagBoundary(lowerInput[start + openToken.length])) {
+      return start;
+    }
+    cursor = start + openToken.length;
+  }
+  return -1;
+}
+
+function findClosingTagStart(lowerInput: string, tagName: string, fromIndex: number) {
+  const closeToken = `</${tagName}`;
+  let cursor = fromIndex;
+  while (cursor < lowerInput.length) {
+    const start = lowerInput.indexOf(closeToken, cursor);
+    if (start === -1) {
+      return -1;
+    }
+    if (isHtmlTagBoundary(lowerInput[start + closeToken.length])) {
+      return start;
+    }
+    cursor = start + closeToken.length;
+  }
+  return -1;
+}
+
+function isSelfClosingTag(openTag: string) {
+  return /\/\s*>$/.test(openTag);
+}
+
+function findMatchingClosingTag(input: string, lowerInput: string, tagName: string, fromIndex: number) {
+  let cursor = fromIndex;
+  let depth = 1;
+
+  while (cursor < input.length) {
+    const nextOpen = findOpeningTagStart(lowerInput, tagName, cursor);
+    const nextClose = findClosingTagStart(lowerInput, tagName, cursor);
+
+    if (nextClose === -1) {
+      return null;
+    }
+
+    if (nextOpen !== -1 && nextOpen < nextClose) {
+      const nestedOpenEnd = findTagEnd(input, nextOpen);
+      if (nestedOpenEnd === -1) {
+        return null;
+      }
+      const nestedOpenTag = input.slice(nextOpen, nestedOpenEnd + 1);
+      if (!isSelfClosingTag(nestedOpenTag)) {
+        depth += 1;
+      }
+      cursor = nestedOpenEnd + 1;
+      continue;
+    }
+
+    const closeEnd = findTagEnd(input, nextClose);
+    if (closeEnd === -1) {
+      return null;
+    }
+    depth -= 1;
+    if (depth === 0) {
+      return {
+        closeStart: nextClose,
+        closeEnd: closeEnd + 1,
+      };
+    }
+    cursor = closeEnd + 1;
+  }
+
+  return null;
+}
+
+type HtmlTagMatch = {
+  openTag: string;
+  innerHtml: string;
+  startIndex: number;
+  endIndex: number;
+};
+
+function collectTagMatches(html: string, tagName: string, predicate?: (openTag: string) => boolean) {
+  const matches: HtmlTagMatch[] = [];
+  const lowerHtml = html.toLowerCase();
+  let cursor = 0;
+
+  while (cursor < html.length) {
+    const start = findOpeningTagStart(lowerHtml, tagName, cursor);
+    if (start === -1) {
+      break;
+    }
+
+    const openTagEnd = findTagEnd(html, start);
+    if (openTagEnd === -1) {
+      break;
+    }
+
+    const openTag = html.slice(start, openTagEnd + 1);
+    if (isSelfClosingTag(openTag)) {
+      if (!predicate || predicate(openTag)) {
+        matches.push({
+          openTag,
+          innerHtml: '',
+          startIndex: start,
+          endIndex: openTagEnd + 1,
+        });
+      }
+      cursor = openTagEnd + 1;
+      continue;
+    }
+
+    const closing = findMatchingClosingTag(html, lowerHtml, tagName, openTagEnd + 1);
+    if (!closing) {
+      break;
+    }
+
+    const shouldInclude = !predicate || predicate(openTag);
+    if (shouldInclude) {
+      matches.push({
+        openTag,
+        innerHtml: html.slice(openTagEnd + 1, closing.closeStart),
+        startIndex: start,
+        endIndex: closing.closeEnd,
+      });
+      cursor = closing.closeEnd;
+      continue;
+    }
+
+    cursor = openTagEnd + 1;
+  }
+
+  return matches;
+}
+
+function getAttributeValue(openTag: string, attributeName: string) {
+  const doubleQuoted = openTag.match(new RegExp(`\\b${attributeName}\\s*=\\s*"([^"]*)"`, 'i'));
+  if (doubleQuoted) {
+    return doubleQuoted[1];
+  }
+  const singleQuoted = openTag.match(new RegExp(`\\b${attributeName}\\s*=\\s*'([^']*)'`, 'i'));
+  return singleQuoted?.[1];
+}
+
+function hasClassToken(openTag: string, classToken: string) {
+  const classes = getAttributeValue(openTag, 'class');
+  if (!classes) {
+    return false;
+  }
+  return classes
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .includes(classToken.toLowerCase());
+}
+
+function findFirstTagText(html: string, tagName: string, predicate?: (openTag: string) => boolean) {
+  const match = collectTagMatches(html, tagName, predicate)[0];
+  return match ? normalizeWhitespace(match.innerHtml) : undefined;
+}
+
+function collectTagTexts(html: string, tagName: string, predicate?: (openTag: string) => boolean) {
+  return collectTagMatches(html, tagName, predicate)
+    .map((match) => normalizeWhitespace(match.innerHtml))
+    .filter(Boolean);
+}
+
+function extractTitle(html: string) {
+  return findFirstTagText(html, 'title');
 }
 
 function extractAnchors(html: string, baseUrl: string) {
   const anchors: Array<{ href: string; text: string }> = [];
-  const anchorPattern = /<a\b[^>]*href\s*=\s*"([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
 
-  for (const match of html.matchAll(anchorPattern)) {
-    const href = match[1]?.trim();
-    const text = normalizeWhitespace(match[2] ?? '');
+  for (const anchor of collectTagMatches(html, 'a', (openTag) => Boolean(getAttributeValue(openTag, 'href')))) {
+    const href = getAttributeValue(anchor.openTag, 'href')?.trim();
+    const text = normalizeWhitespace(anchor.innerHtml);
     if (!href || !text) {
       continue;
     }
@@ -294,15 +518,6 @@ function extractAnchors(html: string, baseUrl: string) {
   }
 
   return anchors;
-}
-
-function extractSectionBlock(html: string, sectionHeading: string) {
-  const pattern = new RegExp(
-    `<h\\d[^>]*>[^<]*${sectionHeading}[^<]*<\\/h\\d>([\\s\\S]*?)(?:<h\\d|$)`,
-    'i',
-  );
-  const match = html.match(pattern);
-  return match ? match[1] : undefined;
 }
 
 function supportsHost(url: string) {
@@ -369,23 +584,26 @@ function detectFamilyFromPath(restPath: string) {
 
 function detectFamilyFromHtml(html: string) {
   const title = extractTitle(html)?.toLowerCase() ?? '';
-  if (title.includes('syllabus') || html.match(/doc-title[^>]*>\s*[^<]*syllabus/i)) {
+  const lowerHtml = html.toLowerCase();
+  const h1Text = findFirstTagText(html, 'h1')?.toLowerCase() ?? '';
+  const docTitle = findFirstTagText(html, 'span', (openTag) => hasClassToken(openTag, 'doc-title'))?.toLowerCase() ?? '';
+  if (title.includes('syllabus') || docTitle.includes('syllabus')) {
     return 'syllabus' as const;
   }
   if (
     title.includes('calendar') ||
     title.includes('schedule') ||
     html.includes('Assignments and Tests') ||
-    html.match(/id\s*=\s*"course-calendar"/i) ||
-    html.match(/class\s*=\s*"day\s+[A-Za-z]+"/i)
+    lowerHtml.includes('id="course-calendar"') ||
+    lowerHtml.includes('class="day ')
   ) {
     return 'schedule' as const;
   }
   if (
     title.includes('tasks') ||
     title.includes('assignments') ||
-    html.match(/Course Assignments with Release and Due Dates/i) ||
-    html.match(/id\s*=\s*"concept-checks"/i)
+    lowerHtml.includes('course assignments with release and due dates') ||
+    lowerHtml.includes('id="concept-checks"')
   ) {
     return 'assignments' as const;
   }
@@ -398,7 +616,7 @@ function detectFamilyFromHtml(html: string) {
   if (title.includes('polic')) {
     return 'policies' as const;
   }
-  if (title.includes('home') || html.match(/welcome to\s+[A-Z]{2,}\s*\d+/i)) {
+  if (title.includes('home') || h1Text.includes('welcome to')) {
     return 'home' as const;
   }
   return null;
@@ -428,9 +646,9 @@ function inferCourseTitle(html: string, courseCode: string) {
   }
 
   const heroTitle =
-    extractFirstText(html, /class\s*=\s*"doc-title"[^>]*>([\s\S]*?)<\/span>/i) ??
-    extractFirstText(html, /<h2[^>]*class\s*=\s*"subtitle"[^>]*>([\s\S]*?)<\/h2>/i) ??
-    extractFirstText(html, /<h1[^>]*>([\s\S]*?)<\/h1>/i) ??
+    findFirstTagText(html, 'span', (openTag) => hasClassToken(openTag, 'doc-title')) ??
+    findFirstTagText(html, 'h2', (openTag) => hasClassToken(openTag, 'subtitle')) ??
+    findFirstTagText(html, 'h1') ??
     undefined;
 
   if (!heroTitle) {
@@ -616,12 +834,9 @@ function buildLinkResources(
 
 function extractHomeAnnouncement(html: string, course: CourseSiteCourse, pageUrl: string, now: string) {
   const title =
-    extractFirstText(html, /<h2[^>]*class\s*=\s*"subtitle"[^>]*>([\s\S]*?)<\/h2>/i) ??
-    extractFirstText(html, /<h1[^>]*>([\s\S]*?)<\/h1>/i);
-  const bullets = Array.from(html.matchAll(/<li>([\s\S]*?)<\/li>/gi))
-    .map((match) => normalizeWhitespace(match[1] ?? ''))
-    .filter(Boolean)
-    .slice(0, 3);
+    findFirstTagText(html, 'h2', (openTag) => hasClassToken(openTag, 'subtitle')) ??
+    findFirstTagText(html, 'h1');
+  const bullets = collectTagTexts(html, 'li').slice(0, 3);
 
   if (!title) {
     return undefined;
@@ -643,21 +858,19 @@ function extractHomeAnnouncement(html: string, course: CourseSiteCourse, pageUrl
 function extractScheduleTableEvents(html: string, course: CourseSiteCourse, pageUrl: string, year: number) {
   const events: CourseSiteEvent[] = [];
 
-  for (const row of html.matchAll(/<tr[^>]*class\s*=\s*"data-row"[^>]*>([\s\S]*?)<\/tr>/gi)) {
-    const block = row[1] ?? '';
-    const heading = extractFirstText(block, /<strong>([\s\S]*?)<\/strong>/i);
+  for (const row of collectTagMatches(html, 'tr', (openTag) => hasClassToken(openTag, 'data-row'))) {
+    const block = row.innerHtml;
+    const heading = findFirstTagText(block, 'strong');
     if (!heading) {
       continue;
     }
 
-    const meta = extractFirstText(block, /<div[^>]*class\s*=\s*"meta"[^>]*>([\s\S]*?)<\/div>/i);
+    const meta = findFirstTagText(block, 'div', (openTag) => hasClassToken(openTag, 'meta'));
     const split = heading.split(/[—-]/).map((part) => part.trim()).filter(Boolean);
     const dateText = split[0] ?? heading;
     const itemTitle = split.slice(1).join(' — ') || heading;
     const startAt = parseMonthDay(dateText, year);
-    const resourceHint = Array.from(block.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/gi))
-      .map((match) => normalizeWhitespace(match[1] ?? ''))
-      .filter(Boolean)
+    const resourceHint = collectTagTexts(block, 'a')
       .slice(0, 3)
       .join(' · ');
 
@@ -675,8 +888,8 @@ function extractScheduleTableEvents(html: string, course: CourseSiteCourse, page
       detail: normalizeWhitespace(heading),
     });
 
-    for (const note of block.matchAll(/<div[^>]*class\s*=\s*"chip-note"[^>]*>[\s\S]*?<strong>([\s\S]*?)<\/strong>[\s\S]*?<\/div>/gi)) {
-      const noteTitle = normalizeWhitespace(note[1] ?? '');
+    for (const note of collectTagMatches(block, 'div', (openTag) => hasClassToken(openTag, 'chip-note'))) {
+      const noteTitle = findFirstTagText(note.innerHtml, 'strong') ?? '';
       if (!noteTitle) {
         continue;
       }
@@ -700,19 +913,28 @@ function extractScheduleTableEvents(html: string, course: CourseSiteCourse, page
 
 function extractCalendarGridEvents(html: string, course: CourseSiteCourse, pageUrl: string) {
   const events: CourseSiteEvent[] = [];
-  const dayPattern = /<div[^>]*class\s*=\s*"day[^"]*"[^>]*date\s*=\s*"([^"]+)"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/gi;
 
-  for (const dayMatch of html.matchAll(dayPattern)) {
-    const dayIso = dayMatch[1]!;
-    const body = dayMatch[2] ?? '';
+  for (const dayMatch of collectTagMatches(
+    html,
+    'div',
+    (openTag) => hasClassToken(openTag, 'day') && Boolean(getAttributeValue(openTag, 'date')),
+  )) {
+    const dayIso = getAttributeValue(dayMatch.openTag, 'date');
+    if (!dayIso) {
+      continue;
+    }
+    const body = dayMatch.innerHtml;
 
-    for (const lecture of body.matchAll(/<details[^>]*class\s*=\s*"([^"]*)"[^>]*>[\s\S]*?<summary>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/gi)) {
-      const classes = lecture[1]?.toLowerCase() ?? '';
-      const title = normalizeWhitespace(lecture[2] ?? '');
-      const trailing = normalizeWhitespace(lecture[3] ?? '').slice(0, 160);
+    for (const lecture of collectTagMatches(body, 'details')) {
+      const classes = getAttributeValue(lecture.openTag, 'class')?.toLowerCase() ?? '';
+      const title = findFirstTagText(lecture.innerHtml, 'summary') ?? '';
       if (!title) {
         continue;
       }
+
+      const summaryTag = collectTagMatches(lecture.innerHtml, 'summary')[0];
+      const trailingHtml = summaryTag ? lecture.innerHtml.slice(summaryTag.endIndex) : lecture.innerHtml;
+      const trailingSummary = normalizeWhitespace(trailingHtml).slice(0, 160);
 
       events.push({
         id: `course-sites:event:${courseSlugKey(course)}:${slugify(`${dayIso}-${title}`)}`,
@@ -723,13 +945,13 @@ function extractCalendarGridEvents(html: string, course: CourseSiteCourse, pageU
         courseId: course.id,
         eventKind: classes.includes('exam') || title.toLowerCase().includes('exam') ? 'exam' : 'class',
         title,
-        summary: trailing || undefined,
+        summary: trailingSummary || undefined,
         startAt: `${dayIso}T12:00:00${inferPacificOffset(Number.parseInt(dayIso.slice(5, 7), 10))}`,
       });
     }
 
-    for (const assignment of body.matchAll(/<div[^>]*class\s*=\s*"assignment[^"]*"[^>]*>([\s\S]*?)<\/div>/gi)) {
-      const title = normalizeWhitespace(assignment[1] ?? '');
+    for (const assignment of collectTagMatches(body, 'div', (openTag) => hasClassToken(openTag, 'assignment'))) {
+      const title = normalizeWhitespace(assignment.innerHtml);
       if (!title) {
         continue;
       }
@@ -754,8 +976,8 @@ function extractCalendarGridEvents(html: string, course: CourseSiteCourse, pageU
 function extractAssignmentsTable(html: string, course: CourseSiteCourse, pageUrl: string, year: number) {
   const assignments: CourseSiteAssignment[] = [];
 
-  for (const row of html.matchAll(/<tr>([\s\S]*?)<\/tr>/gi)) {
-    const block = row[1] ?? '';
+  for (const row of collectTagMatches(html, 'tr')) {
+    const block = row.innerHtml;
     const links = extractAnchors(block, pageUrl);
     if (links.length === 0) {
       continue;
@@ -770,9 +992,9 @@ function extractAssignmentsTable(html: string, course: CourseSiteCourse, pageUrl
       continue;
     }
 
-    const cells = Array.from(block.matchAll(/<(?:td|th)[^>]*>([\s\S]*?)<\/(?:td|th)>/gi)).map((match) =>
-      normalizeWhitespace(match[1] ?? ''),
-    );
+    const cells = [...collectTagMatches(block, 'td'), ...collectTagMatches(block, 'th')]
+      .sort((left, right) => left.startIndex - right.startIndex)
+      .map((cell) => normalizeWhitespace(cell.innerHtml));
     const release = cells.at(-2);
     const due = cells.at(-1);
     assignments.push({
@@ -800,11 +1022,13 @@ function extractTasksAssignmentsAndEvents(html: string, course: CourseSiteCourse
   const assignments: CourseSiteAssignment[] = [];
   const events: CourseSiteEvent[] = [];
 
-  const headingPattern = /<h2[^>]*id\s*=\s*"([^"]+)"[^>]*>([\s\S]*?)<\/h2>([\s\S]*?)(?=<h[12][^>]*id\s*=|$)/gi;
-  for (const section of html.matchAll(headingPattern)) {
-    const rawId = section[1] ?? '';
-    const title = normalizeWhitespace(section[2] ?? '');
-    const block = section[3] ?? '';
+  const headings = collectTagMatches(html, 'h2', (openTag) => Boolean(getAttributeValue(openTag, 'id')));
+  for (let index = 0; index < headings.length; index += 1) {
+    const section = headings[index]!;
+    const rawId = getAttributeValue(section.openTag, 'id') ?? '';
+    const title = normalizeWhitespace(section.innerHtml);
+    const nextHeadingStart = headings[index + 1]?.startIndex ?? html.length;
+    const block = html.slice(section.endIndex, nextHeadingStart);
     if (!title) {
       continue;
     }
@@ -821,7 +1045,7 @@ function extractTasksAssignmentsAndEvents(html: string, course: CourseSiteCourse
         url: `${pageUrl}#${rawId}`,
         courseId: course.id,
         title,
-        summary: extractFirstText(block, /<p>([\s\S]*?)<\/p>/i),
+        summary: findFirstTagText(block, 'p'),
         dueAt,
         status: 'unknown',
       });
@@ -839,7 +1063,7 @@ function extractTasksAssignmentsAndEvents(html: string, course: CourseSiteCourse
         courseId: course.id,
         eventKind: 'exam',
         title,
-        summary: extractFirstText(block, /<p>([\s\S]*?)<\/p>/i),
+        summary: findFirstTagText(block, 'p'),
         startAt,
       });
     }
@@ -885,8 +1109,8 @@ export function extractCourseSiteSnapshot(ctx: CourseSitesAdapterContext): Cours
     detection.termCode,
   );
   const summary =
-    extractFirstText(html, /<p>([\s\S]*?)<\/p>/i) ??
-    extractFirstText(html, /<li>([\s\S]*?)<\/li>/i);
+    findFirstTagText(html, 'p') ??
+    findFirstTagText(html, 'li');
   const pageResource = buildPageResource(course, detection.family, ctx.url, summary, ctx.now);
   const warnings: string[] = [];
 
