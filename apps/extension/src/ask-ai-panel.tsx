@@ -185,8 +185,9 @@ export function AskAiPanel(props: {
               <div>
                 <h3>{text.askAi.questionBox}</h3>
                 <p className="surface__meta">
-                  Ask from the visible workspace first. Supporting evidence and runtime controls stay behind this
-                  composer instead of taking over the whole panel.
+                  {uiLanguage === 'zh-CN'
+                    ? '先从眼前这张工作台发问。支持证据和运行时控件都退到这个提问框之后，不再抢整块面板的主叙事。'
+                    : 'Ask from the visible workspace first. Supporting evidence and runtime controls stay behind this composer instead of taking over the whole panel.'}
                 </p>
               </div>
               <span className="surface__badge surface__badge--neutral">{selectedProviderLabel}</span>
@@ -237,7 +238,9 @@ export function AskAiPanel(props: {
               <div className="surface__item-header">
                 <div className="surface__status-intro-copy">
                   <p className="surface__meta-label">{text.askAi.runtimeSummary}</p>
-                  <p className="surface__item-lead">Companion trust snapshot</p>
+                  <p className="surface__item-lead">
+                    {uiLanguage === 'zh-CN' ? '伴随可信快照' : 'Companion trust snapshot'}
+                  </p>
                   <p className="surface__meta">
                     {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
                     {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}

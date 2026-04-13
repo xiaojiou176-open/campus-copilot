@@ -30,6 +30,27 @@ type WebToolbarProps = WebToolbarBaseProps & {
   onExportChangeJournal: () => void;
 };
 
+type WebOrientationHeaderProps = Pick<WebToolbarProps, 'ready' | 'now'>;
+
+type WebToolbarControlsProps = Pick<
+  WebToolbarProps,
+  | 'feedback'
+  | 'exportFormat'
+  | 'exportFormats'
+  | 'filters'
+  | 'siteOrder'
+  | 'siteLabels'
+  | 'onLoadDemo'
+  | 'onImportFile'
+  | 'onExportFormatChange'
+  | 'onSiteFilterChange'
+  | 'onOnlyUnseenChange'
+  | 'onExportCurrentView'
+  | 'onExportFocusQueue'
+  | 'onExportWeeklyLoad'
+  | 'onExportChangeJournal'
+>;
+
 export function WebSupportRail(props: WebToolbarBaseProps) {
   return (
     <section className="support-grid" aria-label="Workspace trust and diagnostics">
@@ -87,125 +108,136 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
   );
 }
 
+export function WebOrientationHeader(props: WebOrientationHeaderProps) {
+  return (
+    <section className="hero">
+      <div className="hero-copy">
+        <p className="eyebrow">Orientation header</p>
+        <h1>Student decision workspace</h1>
+        <p className="lede">
+          One local workspace where academic work and administrative signals stay grouped on the same decision desk.
+        </p>
+        <p className="hero-support">
+          Start with the trust row and explanation row, then use the tools to load, filter, and export the exact
+          slice you want to review. Cited AI explains the workspace after the facts are already visible, not before.
+        </p>
+      </div>
+      <div className="hero-card">
+        <p>Workspace truth</p>
+        <strong>{props.ready ? 'Shared storage/read-model loaded' : 'Bootstrapping local workspace'}</strong>
+        <span>Last refresh {formatRelativeTime(props.now)}</span>
+        <span className="hero-card-note">Local-first, read-only, and review-first on the same schema/export contract.</span>
+      </div>
+    </section>
+  );
+}
+
+export function WebToolbarControls(props: WebToolbarControlsProps) {
+  return (
+    <section className="toolbar-card" aria-label="Workbench toolbar">
+      <div className="toolbar-groups">
+        <section className="toolbar-group toolbar-group--primary" aria-labelledby="web-load-import-group">
+          <div className="toolbar-group-header">
+            <p className="eyebrow" id="web-load-import-group">
+              Load / Import
+            </p>
+            <p className="toolbar-group-copy">
+              Bring a local snapshot into the desk first so the trust center, AI rail, and decision workspace all
+              read from the same stored truth.
+            </p>
+          </div>
+          <div className="toolbar-row toolbar-row--actions">
+            <label className="file-button file-button--primary">
+              Import current-view JSON
+              <input
+                type="file"
+                accept="application/json"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) {
+                    void props.onImportFile(file);
+                  }
+                }}
+              />
+            </label>
+            <button type="button" className="quiet-button" onClick={() => void props.onLoadDemo()}>
+              Load demo workspace
+            </button>
+          </div>
+        </section>
+
+        <section className="toolbar-group toolbar-group--secondary" aria-labelledby="web-filter-export-group">
+          <div className="toolbar-group-header">
+            <p className="eyebrow" id="web-filter-export-group">
+              Filter / Export
+            </p>
+            <p className="toolbar-group-copy">
+              Use these controls after the trust row has shown the current boundary, envelope, and receipts for the
+              slice you want to review.
+            </p>
+          </div>
+          <div className="toolbar-row toolbar-row-fields">
+            <label>
+              Site filter
+              <select
+                value={props.filters.site}
+                onChange={(event) => props.onSiteFilterChange(event.target.value as WorkbenchFilter['site'])}
+              >
+                <option value="all">All sites</option>
+                {props.siteOrder.map((site) => (
+                  <option key={site} value={site}>
+                    {props.siteLabels[site]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={props.filters.onlyUnseenUpdates}
+                onChange={(event) => props.onOnlyUnseenChange(event.target.checked)}
+              />
+              <span className="toggle-label">Only unseen updates</span>
+            </label>
+            <label>
+              Export format
+              <select value={props.exportFormat} onChange={(event) => props.onExportFormatChange(event.target.value as ExportFormat)}>
+                {props.exportFormats.map((format) => (
+                  <option key={format} value={format}>
+                    {format.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="toolbar-row toolbar-row--actions toolbar-row--secondary-actions">
+            <button type="button" className="secondary-button secondary-button--strong" onClick={props.onExportCurrentView}>
+              Export current view
+            </button>
+            <button type="button" className="quiet-button" onClick={props.onExportFocusQueue}>
+              Export focus queue
+            </button>
+            <button type="button" className="quiet-button" onClick={props.onExportWeeklyLoad}>
+              Export weekly load
+            </button>
+            <button type="button" className="quiet-button" onClick={props.onExportChangeJournal}>
+              Export change journal
+            </button>
+          </div>
+        </section>
+      </div>
+      <p className="feedback" role="status">
+        {props.feedback}
+      </p>
+    </section>
+  );
+}
+
 export function WebToolbar(props: WebToolbarProps) {
   return (
     <>
-      <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">Orientation header</p>
-          <h1>Student decision workspace</h1>
-          <p className="lede">
-            One local workspace where academic work and administrative signals stay grouped on the same decision desk.
-          </p>
-          <p className="hero-support">
-            Start with the trust row and explanation row, then use the tools to load, filter, and export the exact
-            slice you want to review. Cited AI explains the workspace after the facts are already visible, not before.
-          </p>
-        </div>
-        <div className="hero-card">
-          <p>Workspace truth</p>
-          <strong>{props.ready ? 'Shared storage/read-model loaded' : 'Bootstrapping local workspace'}</strong>
-          <span>Last refresh {formatRelativeTime(props.now)}</span>
-          <span className="hero-card-note">Local-first, read-only, and review-first on the same schema/export contract.</span>
-        </div>
-      </section>
-
-      <section className="toolbar-card" aria-label="Workbench toolbar">
-        <div className="toolbar-groups">
-          <section className="toolbar-group toolbar-group--primary" aria-labelledby="web-load-import-group">
-            <div className="toolbar-group-header">
-              <p className="eyebrow" id="web-load-import-group">
-                Load / Import
-              </p>
-              <p className="toolbar-group-copy">
-                Bring a local snapshot into the desk first so the trust center, AI rail, and decision workspace all
-                read from the same stored truth.
-              </p>
-            </div>
-            <div className="toolbar-row toolbar-row--actions">
-              <label className="file-button file-button--primary">
-                Import current-view JSON
-                <input
-                  type="file"
-                  accept="application/json"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) {
-                      void props.onImportFile(file);
-                    }
-                  }}
-                />
-              </label>
-              <button type="button" className="quiet-button" onClick={() => void props.onLoadDemo()}>
-                Load demo workspace
-              </button>
-            </div>
-          </section>
-
-          <section className="toolbar-group toolbar-group--secondary" aria-labelledby="web-filter-export-group">
-            <div className="toolbar-group-header">
-              <p className="eyebrow" id="web-filter-export-group">
-                Filter / Export
-              </p>
-              <p className="toolbar-group-copy">
-                Use these controls after the trust row has shown the current boundary, envelope, and receipts for the
-                slice you want to review.
-              </p>
-            </div>
-            <div className="toolbar-row toolbar-row-fields">
-              <label>
-                Site filter
-                <select
-                  value={props.filters.site}
-                  onChange={(event) => props.onSiteFilterChange(event.target.value as WorkbenchFilter['site'])}
-                >
-                  <option value="all">All sites</option>
-                  {props.siteOrder.map((site) => (
-                    <option key={site} value={site}>
-                      {props.siteLabels[site]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="toggle">
-                <input
-                  type="checkbox"
-                  checked={props.filters.onlyUnseenUpdates}
-                  onChange={(event) => props.onOnlyUnseenChange(event.target.checked)}
-                />
-                <span className="toggle-label">Only unseen updates</span>
-              </label>
-              <label>
-                Export format
-                <select value={props.exportFormat} onChange={(event) => props.onExportFormatChange(event.target.value as ExportFormat)}>
-                  {props.exportFormats.map((format) => (
-                    <option key={format} value={format}>
-                      {format.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="toolbar-row toolbar-row--actions toolbar-row--secondary-actions">
-              <button type="button" className="secondary-button secondary-button--strong" onClick={props.onExportCurrentView}>
-                Export current view
-              </button>
-              <button type="button" className="quiet-button" onClick={props.onExportFocusQueue}>
-                Export focus queue
-              </button>
-              <button type="button" className="quiet-button" onClick={props.onExportWeeklyLoad}>
-                Export weekly load
-              </button>
-              <button type="button" className="quiet-button" onClick={props.onExportChangeJournal}>
-                Export change journal
-              </button>
-            </div>
-          </section>
-        </div>
-        <p className="feedback" role="status">
-          {props.feedback}
-        </p>
-      </section>
+      <WebOrientationHeader ready={props.ready} now={props.now} />
+      <WebToolbarControls {...props} />
     </>
   );
 }

@@ -38,7 +38,7 @@ import {
   type ImportedArtifactEnvelope,
 } from './import-export-snapshot';
 import { WebAiPanel } from './web-ai-panel';
-import { WebSupportRail, WebToolbar } from './web-toolbar';
+import { WebOrientationHeader, WebSupportRail, WebToolbarControls } from './web-toolbar';
 import { WebWorkbenchPanels } from './web-workbench-panels';
 import { formatRelativeTime } from './web-view-helpers';
 
@@ -501,38 +501,9 @@ export function App() {
       </a>
       <main id="workbench-content" className="web-shell" tabIndex={-1}>
         <div className="web-shell__header">
-          <WebToolbar
+          <WebOrientationHeader
             ready={ready}
             now={now}
-            feedback={feedback}
-            exportFormat={exportFormat}
-            exportFormats={EXPORT_FORMATS}
-            filters={filters}
-            siteOrder={SITE_ORDER}
-            siteLabels={SITE_LABELS}
-            topSyncRun={topSyncRun}
-            populatedSiteCount={populatedSiteCount}
-            trackedEntityCount={trackedEntityCount}
-            unseenUpdateCount={recentUpdates?.unseenCount ?? 0}
-            onLoadDemo={handleResetDemo}
-            onImportFile={handleImportFile}
-            onExportFormatChange={setExportFormat}
-            onSiteFilterChange={(site) =>
-              setFilters((current) => ({
-                ...current,
-                site,
-              }))
-            }
-            onOnlyUnseenChange={(onlyUnseenUpdates) =>
-              setFilters((current) => ({
-                ...current,
-                onlyUnseenUpdates,
-              }))
-            }
-            onExportCurrentView={() => handleExport('current_view')}
-            onExportFocusQueue={() => handleExport('focus_queue')}
-            onExportWeeklyLoad={() => handleExport('weekly_load')}
-            onExportChangeJournal={() => handleExport('change_journal')}
           />
         </div>
 
@@ -587,6 +558,36 @@ export function App() {
             onAdvancedMaterialExcerptChange={setAdvancedMaterialExcerpt}
             onAdvancedMaterialAcknowledgedChange={setAdvancedMaterialAcknowledged}
             onAskAi={handleAskAi}
+          />
+        </div>
+
+        <div className="web-shell__toolbar-lane">
+          <WebToolbarControls
+            feedback={feedback}
+            exportFormat={exportFormat}
+            exportFormats={EXPORT_FORMATS}
+            filters={filters}
+            siteOrder={SITE_ORDER}
+            siteLabels={SITE_LABELS}
+            onLoadDemo={handleResetDemo}
+            onImportFile={handleImportFile}
+            onExportFormatChange={setExportFormat}
+            onSiteFilterChange={(site) =>
+              setFilters((current) => ({
+                ...current,
+                site,
+              }))
+            }
+            onOnlyUnseenChange={(onlyUnseenUpdates) =>
+              setFilters((current) => ({
+                ...current,
+                onlyUnseenUpdates,
+              }))
+            }
+            onExportCurrentView={() => handleExport('current_view')}
+            onExportFocusQueue={() => handleExport('focus_queue')}
+            onExportWeeklyLoad={() => handleExport('weekly_load')}
+            onExportChangeJournal={() => handleExport('change_journal')}
           />
         </div>
 

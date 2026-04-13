@@ -490,9 +490,28 @@ function inferModality(noteLines: string[]) {
 
 function splitTimeRange(timeText: string) {
   const match = timeText.match(/^(?<start>\d{3,4})-(?<end>\d{3,4}[A-Z]?)$/);
+  if (match?.groups?.start && match.groups.end) {
+    return {
+      startTime: match.groups.start,
+      endTime: match.groups.end,
+    };
+  }
+
+  const humanMatch = timeText.match(
+    /^(?<start>\d{1,2}(?::\d{2})?)(?:\s*(?<startMeridiem>[AP]M))?\s*-\s*(?<end>\d{1,2}(?::\d{2})?)(?:\s*(?<endMeridiem>[AP]M))$/i,
+  );
+  if (humanMatch?.groups?.start && humanMatch.groups.end) {
+    const startMeridiem = humanMatch.groups.startMeridiem?.toUpperCase();
+    const endMeridiem = humanMatch.groups.endMeridiem?.toUpperCase();
+    return {
+      startTime: startMeridiem || endMeridiem ? `${humanMatch.groups.start} ${startMeridiem ?? endMeridiem}` : humanMatch.groups.start,
+      endTime: endMeridiem || startMeridiem ? `${humanMatch.groups.end} ${endMeridiem ?? startMeridiem}` : humanMatch.groups.end,
+    };
+  }
+
   return {
-    startTime: match?.groups?.start,
-    endTime: match?.groups?.end,
+    startTime: undefined,
+    endTime: undefined,
   };
 }
 
@@ -531,6 +550,9 @@ function parseSection(sectionHtml: string, courseKey: string, warnings: string[]
   }
   if (modality) {
     warnings.push(`modality_is_note_derived:${courseKey}:${prefixMatch.groups.sectionId}`);
+  }
+  if (noteMeeting) {
+    warnings.push(`meeting_pattern_is_note_derived:${courseKey}:${prefixMatch.groups.sectionId}`);
   }
 
   return {
@@ -663,7 +685,7 @@ export function extractPublicCourseOfferingsPrototype(input: {
       sectionCode: section.sectionId,
       sln: section.sln,
       meetingPatternText:
-        section.meetingMode === 'arranged'
+        section.meetingMode === 'arranged' && section.daysSource === 'row' && section.timeSource === 'row'
           ? 'to be arranged'
           : `${section.meetingDays} ${section.timeText}`.trim(),
       modality:

@@ -620,6 +620,19 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
 
   await page.getByRole('button', { name: 'EdStem', exact: true }).first().click();
   await page.getByRole('button', { name: 'Export this page' }).click();
+  const exportReviewPanel = page.locator('article.surface__panel').filter({
+    has: page.getByText('Review & export'),
+  });
+  await expect(exportReviewPanel.getByText('Trust review comes before the export action.')).toBeVisible();
+  await expect(exportReviewPanel.getByText('AI visibility')).toBeVisible();
+  await expect(exportReviewPanel.getByText(/AI analysis (allowed|blocked)/)).toBeVisible();
+  await expect(exportReviewPanel.getByText('Risk label')).toBeVisible();
+  await expect(exportReviewPanel.getByText(/(High|Medium|Low) risk/)).toBeVisible();
+  await expect(exportReviewPanel.getByText('Match confidence')).toBeVisible();
+  await expect(exportReviewPanel.getByText(/(High|Medium|Low) match confidence/)).toBeVisible();
+  await expect(exportReviewPanel.getByText('Provenance')).toBeVisible();
+  await expect(exportReviewPanel.getByText('Unified local read model')).toBeVisible();
+  await expect(exportReviewPanel.getByText('EdStem session-backed discussion carrier')).toBeVisible();
   await page.getByRole('button', { name: 'Export selection' }).click();
   const downloadPayload = JSON.parse(
     (await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY)) ?? '{}',
@@ -733,7 +746,7 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: '变化账本' })).toBeVisible();
   const chineseRuntimeSummary = chineseAskAiPanel.locator('aside.surface__status-intro');
-  await expect(chineseRuntimeSummary.getByText('Companion trust snapshot')).toBeVisible();
+  await expect(chineseRuntimeSummary.getByText('伴随可信快照')).toBeVisible();
   await expect(chineseRuntimeSummary.getByText(/未就绪 · 缺少 API key/)).toBeVisible();
   await expect(page.getByText('新鲜站点')).toBeVisible();
   await expect(page.getByText('陈旧站点')).toBeVisible();

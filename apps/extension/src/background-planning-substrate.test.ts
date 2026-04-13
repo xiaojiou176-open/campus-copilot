@@ -63,6 +63,114 @@ describe('background planning substrate capture', () => {
     expect(record.degreeProgressSummary).toContain('not exposed');
   });
 
+  it('promotes embedded MyPlan bootstrap counts into the shared planning substrate without claiming audit completion', () => {
+    const record = buildMyPlanPlanningSubstrateFromHtml({
+      url: 'https://myplan.uw.edu/plan/#/sp26',
+      capturedAt: '2026-04-11T12:00:00-07:00',
+      pageHtml: `
+        <main data-myplan-auth="authenticated" data-myplan-surface="planning">
+          <h1 class="mb-0 fw-bold">Spring 2026 Current Quarter</h1>
+          <div class="card-body">
+            <h2 class="mb-0">Issues to Resolve</h2>
+            Resolve issues with your planned courses before registration.
+          </div>
+          <h3 class="mb-0 d-inline align-middle h3">CSE 421</h3>
+          <a class="d-block lead me-4" href="/course/#/courses/CSE 421?id=1">Introduction to Algorithms</a>
+          <div>3 Credits</div>
+          <script id="myplan-bootstrap" type="application/json">
+            {
+              "authentication": {
+                "state": "authenticated",
+                "sessionKind": "netid"
+              },
+              "carrier": {
+                "kind": "authenticated_html_bootstrap",
+                "shellTitle": "MyPlan Academic Planner"
+              },
+              "plan": {
+                "id": "plan-redacted-spring",
+                "label": "Computer Science transfer plan",
+                "lastUpdatedAt": "2026-04-10T09:00:00-07:00",
+                "terms": [
+                  {
+                    "termCode": "sp26",
+                    "termLabel": "Spring 2026",
+                    "planStatus": "draft",
+                    "plannedCourses": [
+                      { "id": "cse421", "code": "CSE 421", "title": "Introduction to Algorithms" },
+                      { "id": "cse331", "code": "CSE 331", "title": "Software Design and Implementation" }
+                    ],
+                    "backupCourses": [
+                      { "id": "math300", "code": "MATH 300", "title": "Mathematical Reasoning" }
+                    ],
+                    "scheduleOptions": [
+                      { "id": "balanced", "label": "Balanced load", "plannedCourseIds": ["cse421", "cse331"] }
+                    ]
+                  },
+                  {
+                    "termCode": "su26",
+                    "termLabel": "Summer 2026",
+                    "plannedCourses": [
+                      { "id": "info340", "code": "INFO 340", "title": "Client-Side Development" }
+                    ],
+                    "backupCourses": [],
+                    "scheduleOptions": [
+                      { "id": "summer", "label": "Summer focus", "plannedCourseIds": ["info340"] }
+                    ]
+                  }
+                ],
+                "degreeProgress": {
+                  "summary": "90 of 180 credits complete",
+                  "completedCredits": 90,
+                  "remainingCredits": 90
+                },
+                "requirementGroups": [
+                  { "id": "core", "label": "Core requirements", "status": "in_progress" }
+                ],
+                "transferPlanningSummary": "Transfer pathway reviewed against UW prerequisite expectations.",
+                "programExplorationResults": [
+                  {
+                    "id": "informatics-bs",
+                    "label": "Informatics B.S.",
+                    "kind": "major",
+                    "summary": "Backup planning path for HCI-heavy study plans."
+                  }
+                ]
+              }
+            }
+          </script>
+        </main>
+      `,
+    });
+
+    expect(record.planId).toBe('plan-redacted-spring');
+    expect(record.planLabel).toBe('Computer Science transfer plan');
+    expect(record.lastUpdatedAt).toBe('2026-04-10T09:00:00-07:00');
+    expect(record.termCount).toBe(2);
+    expect(record.plannedCourseCount).toBe(3);
+    expect(record.backupCourseCount).toBe(1);
+    expect(record.scheduleOptionCount).toBe(2);
+    expect(record.programExplorationCount).toBe(1);
+    expect(record.requirementGroupCount).toBe(0);
+    expect(record.degreeProgressSummary).toContain('not exposed');
+    expect(record.transferPlanningSummary).toContain('Transfer pathway reviewed');
+    expect(record.terms[0]).toMatchObject({
+      termCode: 'sp26',
+      termLabel: 'Spring 2026',
+      plannedCourseCount: 2,
+      backupCourseCount: 1,
+      scheduleOptionCount: 1,
+    });
+    expect(record.terms[0]?.summary).toContain('draft plan.');
+    expect(record.terms[1]).toMatchObject({
+      termCode: 'su26',
+      termLabel: 'Summer 2026',
+      plannedCourseCount: 1,
+      backupCourseCount: 0,
+      scheduleOptionCount: 1,
+    });
+  });
+
   it('merges a DARS audit page into an existing planning substrate', () => {
     const record = buildMyPlanPlanningSubstrateFromHtml({
       url: 'https://myplan.uw.edu/audit/#/degree',

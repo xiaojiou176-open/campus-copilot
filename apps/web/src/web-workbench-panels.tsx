@@ -162,6 +162,62 @@ export function WebWorkbenchPanels(props: {
         </section>
       ) : null}
 
+      <section className="split-grid split-grid--primary">
+        <article className="panel">
+          <h2>Focus Queue</h2>
+          <p>Decision-first ranking on the shared read-model.</p>
+          <div className="stack">
+            <ReadyStateBlock
+              ready={props.workbenchReady}
+              hasItems={props.focusQueue.length > 0}
+              emptyState={<p>No focus items are active yet.</p>}
+            >
+              {props.focusQueue.slice(0, 6).map((item) => (
+                <article className="item" key={item.id}>
+                  <div className="item-header">
+                    <strong>{item.title}</strong>
+                    <div className="badge-row">
+                      <span className={getLaneBadgeClass(item.site)}>{getLaneLabel(item.site)}</span>
+                      <span className="badge">score {item.score}</span>
+                    </div>
+                  </div>
+                  {item.summary ? <p>{item.summary}</p> : null}
+                  <p className="meta">
+                    {props.siteLabels[item.site]}
+                    {item.dueAt ? ` · due ${formatDateTime(item.dueAt)}` : ''}
+                  </p>
+                </article>
+              ))}
+            </ReadyStateBlock>
+          </div>
+        </article>
+
+        <article className="panel">
+          <h2>Weekly Load</h2>
+          <p>Planning view computed from the same normalized entities.</p>
+          <div className="stack">
+            <ReadyStateBlock
+              ready={props.workbenchReady}
+              hasItems={props.weeklyLoad.length > 0}
+              emptyState={<p>No dated workload is visible yet.</p>}
+            >
+              {props.weeklyLoad.map((entry) => (
+                <article className="item" key={entry.dateKey}>
+                  <div className="item-header">
+                    <strong>{entry.dateKey}</strong>
+                    <span className="badge">score {entry.totalScore}</span>
+                  </div>
+                  <p>{formatWeeklyLoadSummary(entry)}</p>
+                  <p className="meta">
+                    assignments {entry.assignmentCount} · events {entry.eventCount ?? 0} · due soon {entry.dueSoonCount}
+                  </p>
+                </article>
+              ))}
+            </ReadyStateBlock>
+          </div>
+        </article>
+      </section>
+
       <section className="stats-grid stats-grid--quiet">
         <article className="stat-card">
           <span>Open assignments</span>
@@ -312,59 +368,6 @@ export function WebWorkbenchPanels(props: {
           </div>
         </article>
 
-        <article className="panel">
-          <h2>Focus Queue</h2>
-          <p>Decision-first ranking on the shared read-model.</p>
-          <div className="stack">
-            <ReadyStateBlock
-              ready={props.workbenchReady}
-              hasItems={props.focusQueue.length > 0}
-              emptyState={<p>No focus items are active yet.</p>}
-            >
-              {props.focusQueue.slice(0, 6).map((item) => (
-                <article className="item" key={item.id}>
-                  <div className="item-header">
-                    <strong>{item.title}</strong>
-                    <div className="badge-row">
-                      <span className={getLaneBadgeClass(item.site)}>{getLaneLabel(item.site)}</span>
-                      <span className="badge">score {item.score}</span>
-                    </div>
-                  </div>
-                  {item.summary ? <p>{item.summary}</p> : null}
-                  <p className="meta">
-                    {props.siteLabels[item.site]}
-                    {item.dueAt ? ` · due ${formatDateTime(item.dueAt)}` : ''}
-                  </p>
-                </article>
-              ))}
-            </ReadyStateBlock>
-          </div>
-        </article>
-
-        <article className="panel">
-          <h2>Weekly Load</h2>
-          <p>Planning view computed from the same normalized entities.</p>
-          <div className="stack">
-            <ReadyStateBlock
-              ready={props.workbenchReady}
-              hasItems={props.weeklyLoad.length > 0}
-              emptyState={<p>No dated workload is visible yet.</p>}
-            >
-              {props.weeklyLoad.map((entry) => (
-                <article className="item" key={entry.dateKey}>
-                  <div className="item-header">
-                    <strong>{entry.dateKey}</strong>
-                    <span className="badge">score {entry.totalScore}</span>
-                  </div>
-                  <p>{formatWeeklyLoadSummary(entry)}</p>
-                  <p className="meta">
-                    assignments {entry.assignmentCount} · events {entry.eventCount ?? 0} · due soon {entry.dueSoonCount}
-                  </p>
-                </article>
-              ))}
-            </ReadyStateBlock>
-          </div>
-        </article>
       </section>
 
       <section className="split-grid split-grid--primary">

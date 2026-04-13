@@ -8,6 +8,22 @@ import {
 import { extractPageHtml, getActiveTabContext, type SyncTargetOverride } from './background-tab-context';
 
 type PlanningCaptureKind = 'plan' | 'audit';
+type MyPlanBootstrapTermSummary = {
+  termCode: string;
+  termLabel: string;
+  planStatus?: 'draft' | 'saved' | 'submitted';
+  plannedCourseCount: number;
+  backupCourseCount: number;
+  scheduleOptionCount: number;
+};
+type MyPlanBootstrapPlanningSummary = {
+  planId: string;
+  planLabel: string;
+  lastUpdatedAt?: string;
+  transferPlanningSummary?: string;
+  programExplorationCount: number;
+  terms: MyPlanBootstrapTermSummary[];
+};
 
 function decodeEntities(input: string) {
   return input
@@ -21,6 +37,182 @@ function decodeEntities(input: string) {
 
 function stripTags(input: string) {
   return decodeEntities(input.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function readNonEmptyString(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return typeof value === 'string' && value.trim().length > 0 ? value.trim() : undefined;
+}
+
+function readRecordArray(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return Array.isArray(value) ? value.filter(isRecord) : [];
+}
+
+function normalizeTermIdentity(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function termSummariesMatch(
+  left: Pick<MyPlanBootstrapTermSummary, 'termCode' | 'termLabel'>,
+  right: Pick<MyPlanBootstrapTermSummary, 'termCode' | 'termLabel'>,
+) {
+  return (
+    normalizeTermIdentity(left.termCode) === normalizeTermIdentity(right.termCode) ||
+    normalizeTermIdentity(left.termLabel) === normalizeTermIdentity(right.termLabel)
+  );
+}
+
+function extractEmbeddedMyPlanBootstrap(pageHtml: string) {
+  const authState = pageHtml.match(/data-myplan-auth\s*=\s*(['"])(?<value>.*?)\1/i)?.groups?.value?.trim();
+  if (authState !== 'authenticated') {
+    return undefined;
+  }
+
+  for (const match of pageHtml.matchAll(/<script\b(?<attrs>[^>]*)>(?<body>[\s\S]*?)<\/script>/gi)) {
+    const attrs = match.groups?.attrs ?? '';
+    const body = match.groups?.body ?? '';
+    const id = attrs.match(/\bid\s*=\s*(['"])(?<value>.*?)\1/i)?.groups?.value?.trim();
+    const type = attrs.match(/\btype\s*=\s*(['"])(?<value>.*?)\1/i)?.groups?.value?.trim();
+    if (id !== 'myplan-bootstrap' || type !== 'application/json') {
+      continue;
+    }
+
+    try {
+      return JSON.parse(body) as unknown;
+    } catch {
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
+function buildBootstrapPlanningSummary(pageHtml: string): MyPlanBootstrapPlanningSummary | undefined {
+  const rawBootstrap = extractEmbeddedMyPlanBootstrap(pageHtml);
+  if (!isRecord(rawBootstrap)) {
+    return undefined;
+  }
+
+  const plan = rawBootstrap.plan;
+  if (!isRecord(plan)) {
+    return undefined;
+  }
+
+  const planId = readNonEmptyString(plan, 'id');
+  const planLabel = readNonEmptyString(plan, 'label');
+  if (!planId || !planLabel) {
+    return undefined;
+  }
+
+  const terms = readRecordArray(plan, 'terms')
+    .map((term): MyPlanBootstrapTermSummary | undefined => {
+      const termCode = readNonEmptyString(term, 'termCode');
+      const termLabel = readNonEmptyString(term, 'termLabel');
+      if (!termCode || !termLabel) {
+        return undefined;
+      }
+
+      const planStatus = readNonEmptyString(term, 'planStatus');
+      const normalizedPlanStatus =
+        planStatus === 'draft' || planStatus === 'saved' || planStatus === 'submitted' ? planStatus : undefined;
+
+      return {
+        termCode,
+        termLabel,
+        planStatus: normalizedPlanStatus,
+        plannedCourseCount: readRecordArray(term, 'plannedCourses').length,
+        backupCourseCount: readRecordArray(term, 'backupCourses').length,
+        scheduleOptionCount: readRecordArray(term, 'scheduleOptions').length,
+      };
+    })
+    .filter((term): term is MyPlanBootstrapTermSummary => Boolean(term));
+
+  if (terms.length === 0) {
+    return undefined;
+  }
+
+  return {
+    planId,
+    planLabel,
+    lastUpdatedAt: readNonEmptyString(plan, 'lastUpdatedAt'),
+    transferPlanningSummary: readNonEmptyString(plan, 'transferPlanningSummary'),
+    programExplorationCount: readRecordArray(plan, 'programExplorationResults').length,
+    terms,
+  };
+}
+
+function buildPlanningTermSummary(
+  term: Pick<MyPlanBootstrapTermSummary, 'plannedCourseCount' | 'backupCourseCount' | 'scheduleOptionCount' | 'planStatus'>,
+  options?: {
+    visiblePlannedCourseCount?: number;
+    issuesSummary?: string;
+  },
+) {
+  const parts = [];
+  if (term.planStatus) {
+    parts.push(`${term.planStatus} plan.`);
+  }
+  parts.push(
+    `${term.plannedCourseCount} planned course(s), ${term.backupCourseCount} backup option(s), ${term.scheduleOptionCount} schedule option(s).`,
+  );
+  if (options?.visiblePlannedCourseCount != null) {
+    const visibleSummary =
+      options.issuesSummary && options.issuesSummary.length > 0
+        ? `${options.visiblePlannedCourseCount} visible planned/issue course card(s) captured from the MyPlan planning page. ${options.issuesSummary}`
+        : `${options.visiblePlannedCourseCount} visible planned/issue course card(s) captured from the MyPlan planning page.`;
+    parts.push(visibleSummary);
+  } else if (options?.issuesSummary) {
+    parts.push(options.issuesSummary);
+  }
+  return parts.join(' ').trim();
+}
+
+function mergeBootstrapTerms(
+  previousTerms: PlanningSubstrateOwner['terms'],
+  visibleTerm: PlanningSubstrateOwner['terms'][number] | undefined,
+  bootstrapSummary: MyPlanBootstrapPlanningSummary,
+  visibleIssuesSummary?: string,
+) {
+  const bootstrapTerms: PlanningSubstrateOwner['terms'] = bootstrapSummary.terms.map((term) => ({
+    termCode: term.termCode,
+    termLabel: term.termLabel,
+    plannedCourseCount: term.plannedCourseCount,
+    backupCourseCount: term.backupCourseCount,
+    scheduleOptionCount: term.scheduleOptionCount,
+    summary: buildPlanningTermSummary(term),
+  }));
+
+  let nextTerms: PlanningSubstrateOwner['terms'] = [...bootstrapTerms];
+  if (visibleTerm) {
+    const matchedBootstrap = bootstrapSummary.terms.find((term) => termSummariesMatch(term, visibleTerm));
+    const enrichedVisibleTerm = matchedBootstrap
+      ? {
+          ...visibleTerm,
+          plannedCourseCount: Math.max(visibleTerm.plannedCourseCount, matchedBootstrap.plannedCourseCount),
+          backupCourseCount: matchedBootstrap.backupCourseCount,
+          scheduleOptionCount: matchedBootstrap.scheduleOptionCount,
+          summary: buildPlanningTermSummary(matchedBootstrap, {
+            visiblePlannedCourseCount: visibleTerm.plannedCourseCount,
+            issuesSummary: visibleIssuesSummary,
+          }),
+        }
+      : visibleTerm;
+    const remainingBootstrapTerms = bootstrapTerms.filter((term) => !termSummariesMatch(term, enrichedVisibleTerm));
+    nextTerms = [enrichedVisibleTerm, ...remainingBootstrapTerms];
+  }
+
+  for (const previousTerm of previousTerms) {
+    if (!nextTerms.some((term) => termSummariesMatch(term, previousTerm))) {
+      nextTerms.push(previousTerm);
+    }
+  }
+
+  return nextTerms;
 }
 
 function detectPlanningCaptureKind(url: string | undefined): PlanningCaptureKind | undefined {
@@ -75,9 +267,9 @@ function buildPlanningBase(previous: PlanningSubstrateOwner | undefined, capture
     fit: 'derived_planning_substrate' as const,
     readOnly: true as const,
     capturedAt,
-    lastUpdatedAt: capturedAt,
     planId: previous?.planId ?? 'myplan-live',
     planLabel: previous?.planLabel ?? 'MyPlan live planning workspace',
+    lastUpdatedAt: previous?.lastUpdatedAt,
     termCount: previous?.termCount ?? 0,
     plannedCourseCount: previous?.plannedCourseCount ?? 0,
     backupCourseCount: previous?.backupCourseCount ?? 0,
@@ -97,6 +289,7 @@ function buildPlanCaptureFromHtml(
   previous: PlanningSubstrateOwner | undefined,
 ): PlanningSubstrateOwner {
   const base = buildPlanningBase(previous, capturedAt);
+  const bootstrapSummary = buildBootstrapPlanningSummary(pageHtml);
   const headingMatch = pageHtml.match(/<h1[^>]*>\s*(?<heading>[\s\S]*?)\s*<\/h1>/i);
   const rawHeading = stripTags(headingMatch?.groups?.heading ?? '');
   const termLabel = rawHeading.replace(/\s*Current Quarter$/i, '').trim() || 'Current MyPlan term';
@@ -162,19 +355,24 @@ function buildPlanCaptureFromHtml(
         ? `${plannedCourseCount} visible planned/issue course card(s) captured from the MyPlan planning page. ${issuesSummary}`
         : issuesSummary || `${plannedCourseCount} visible planned/issue course card(s) captured from the MyPlan planning page.`,
   };
-  const terms = mergeTerms(base.terms, nextTerm);
+  const terms = bootstrapSummary
+    ? mergeBootstrapTerms(base.terms, nextTerm, bootstrapSummary, issuesSummary)
+    : mergeTerms(base.terms, nextTerm);
 
   return {
     ...base,
-    planLabel: base.planLabel === 'MyPlan live planning workspace' ? termLabel : base.planLabel,
+    planId: bootstrapSummary?.planId ?? base.planId,
+    planLabel:
+      base.planLabel === 'MyPlan live planning workspace' ? bootstrapSummary?.planLabel ?? termLabel : base.planLabel,
+    lastUpdatedAt: bootstrapSummary?.lastUpdatedAt ?? base.lastUpdatedAt,
     terms,
     termCount: terms.length,
     plannedCourseCount: sumCounts(terms, 'plannedCourseCount'),
     backupCourseCount: sumCounts(terms, 'backupCourseCount'),
     scheduleOptionCount: sumCounts(terms, 'scheduleOptionCount'),
     degreeProgressSummary,
-    transferPlanningSummary,
-    programExplorationCount: base.programExplorationCount,
+    transferPlanningSummary: bootstrapSummary?.transferPlanningSummary ?? transferPlanningSummary,
+    programExplorationCount: bootstrapSummary?.programExplorationCount ?? base.programExplorationCount,
     requirementGroupCount: base.requirementGroupCount,
   };
 }

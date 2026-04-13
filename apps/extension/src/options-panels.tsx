@@ -315,7 +315,7 @@ export function OptionsPanels(props: {
         </article>
 
         <article className="surface__panel">
-          <h2>{uiLanguage === 'zh-CN' ? 'Language + AI/BFF status summary' : 'Language + AI/BFF status summary'}</h2>
+          <h2>{uiLanguage === 'zh-CN' ? '语言 + AI/BFF 状态摘要' : 'Language + AI/BFF status summary'}</h2>
           <p>
             {uiLanguage === 'zh-CN'
               ? '先确认语言、当前 BFF 可达性和 provider readiness；只有真的需要 override 时才进入 advanced。'
@@ -918,7 +918,7 @@ export function OptionsPanels(props: {
       </details>
 
       <article className="surface__panel">
-        <h2>{uiLanguage === 'zh-CN' ? 'Export defaults' : 'Export defaults'}</h2>
+        <h2>{uiLanguage === 'zh-CN' ? '导出默认值' : 'Export defaults'}</h2>
         <p>
           {uiLanguage === 'zh-CN'
             ? '默认导出格式放在最后一段，因为它是工作台偏好，不是第一屏的 trust blocker。'

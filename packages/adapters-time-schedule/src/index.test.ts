@@ -8,6 +8,7 @@ import {
   TIME_SCHEDULE_PROMOTION_HOLDS,
   type PublicCourseOfferingCourse,
   extractPublicCourseOfferingsPage,
+  extractPublicCourseOfferingsPrototype,
   extractScheduleRootSnapshot,
 } from './index';
 
@@ -77,6 +78,46 @@ describe('adapters-time-schedule limited shared landing', () => {
         locationSource: 'note',
       }),
     );
+    expect(cse590?.sections[0].meetings[0]).toEqual(
+      expect.objectContaining({
+        days: 'TUESDAYS',
+        rawTime: '1:00-1:50 PM',
+        startTime: '1:00 PM',
+        endTime: '1:50 PM',
+        daysSource: 'note',
+        timeSource: 'note',
+      }),
+    );
+    expect(page.warnings).toContain('meeting_pattern_is_note_derived:CSE 590:K');
+    expect(page.warnings).toContain('location_can_be_note_derived:CSE 590:K');
+  });
+
+  it('carries note-derived meeting timing into the productized public-offerings prototype', () => {
+    const prototype = extractPublicCourseOfferingsPrototype({
+      html: readFixture('public-course-offerings-cse.html'),
+      sourceUrl: 'https://www.washington.edu/students/timeschd/pub/SPR2026/cse.html',
+      quarterLabel: 'Spring Quarter 2026',
+    });
+    const cse590 = prototype.courses.find((course) => course.courseKey === 'CSE 590');
+    const seminar = cse590?.offerings.find((offering) => offering.sectionCode === 'K');
+
+    expect(seminar?.meetings[0]).toEqual(
+      expect.objectContaining({
+        days: 'TUESDAYS',
+        rawTime: '1:00-1:50 PM',
+        startTime: '1:00 PM',
+        endTime: '1:50 PM',
+      }),
+    );
+    expect(
+      prototype.events.find((event) => event.sectionIdentity === 'CSE 590:K:12821'),
+    ).toEqual(
+      expect.objectContaining({
+        meetingPatternText: 'TUESDAYS 1:00-1:50 PM',
+        location: 'CSE 624',
+      }),
+    );
+    expect(prototype.warnings).toContain('meeting_pattern_is_note_derived:CSE 590:K');
   });
 
   it('treats modality as note-derived partial proof instead of a row-backed field', () => {

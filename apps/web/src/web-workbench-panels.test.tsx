@@ -157,7 +157,7 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('3 term(s) · 9 planned course(s) · 2 backup course(s) · 4 schedule option(s)');
     expect(html).toContain('Degree progress: Core degree requirements still need one systems elective.');
     expect(html).toContain('Spring 2026: 3 planned · 1 backup · 2 option(s)');
-    expect(html.indexOf('Auth &amp; Export Management')).toBeGreaterThan(html.indexOf('Administrative lane'));
-    expect(html.indexOf('Auth &amp; Export Management')).toBeLessThan(html.indexOf('Focus Queue'));
+    expect(html.indexOf('Focus Queue')).toBeLessThan(html.indexOf('Auth &amp; Export Management'));
+    expect(html.indexOf('Weekly Load')).toBeLessThan(html.indexOf('Auth &amp; Export Management'));
   });
 });

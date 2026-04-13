@@ -135,6 +135,8 @@ describe('core contracts', () => {
     expect(request.body.messages[1]?.role).toBe('user');
     expect(request.body.messages[1]?.content).toContain('get_planning_substrates');
     expect(request.body.messages[1]?.content).toContain('"scope"');
+    expect(request.body.messages[1]?.content).toContain('"contentRedacted":true');
+    expect(request.body.messages[1]?.content).not.toContain('# Current view');
   });
 
   it('accepts planning substrates from the shared workbench view contract', () => {
@@ -275,6 +277,83 @@ describe('core contracts', () => {
     expect(request.body.messages[0]?.content).toContain('explicitly opted in to advanced material analysis');
     expect(request.body.messages[1]?.content).toContain('get_opted_in_course_material_excerpt');
     expect(request.body.messages[1]?.content).toContain('Canvas · CSE 142');
+  });
+
+  it('redacts export-first administrative detail from the AI request when the current view is not AI-allowed', () => {
+    const request = buildWorkbenchAiProxyRequest({
+      provider: 'gemini',
+      model: 'gemini-2.5-flash',
+      question: 'Can you explain the transcript issue?',
+      todaySnapshot: {
+        totalAssignments: 0,
+        dueSoonAssignments: 0,
+        recentUpdates: 0,
+        newGrades: 0,
+        riskAlerts: 1,
+        syncedSites: 4,
+      },
+      recentUpdates: [],
+      alerts: [],
+      focusQueue: [],
+      weeklyLoad: [],
+      syncRuns: [],
+      recentChanges: [],
+      workbenchView: {
+        planningSubstrates: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [
+          {
+            id: 'admin:transcript:1',
+            family: 'transcript',
+            title: 'Transcript summary',
+            summary: 'GPA detail and transcript standing stay export-first until a stronger lane is promoted.',
+            importance: 'high',
+            aiDefault: 'blocked',
+            authoritySource: 'myuw summary lane',
+            sourceSurface: 'myuw',
+            updatedAt: '2026-04-12T08:00:00.000Z',
+          },
+        ],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+      },
+      currentViewExport: {
+        preset: 'current_view',
+        format: 'markdown',
+        filename: 'current-view.md',
+        mimeType: 'text/markdown',
+        scope: {
+          scopeType: 'current_view',
+          preset: 'current_view',
+          site: 'myuw',
+          resourceFamily: 'workspace_snapshot',
+        },
+        packaging: {
+          authorizationLevel: 'confirm_required',
+          aiAllowed: false,
+          riskLabel: 'high',
+          matchConfidence: 'medium',
+          provenance: [
+            {
+              sourceType: 'derived_read_model',
+              label: 'Administrative summary-first substrate',
+              readOnly: true,
+            },
+          ],
+        },
+        content: '# Current view\nTranscript summary\nGPA detail and transcript standing stay export-first until a stronger lane is promoted.',
+      },
+    });
+
+    expect(request.body.messages[1]?.content).toContain('"redactionReason":"ai_not_allowed_for_current_view_export"');
+    expect(request.body.messages[1]?.content).toContain('"reviewRequiredAdministrativeFamilies":["transcript"]');
+    expect(request.body.messages[1]?.content).toContain('"administrativeSummariesCount":1');
+    expect(request.body.messages[1]?.content).not.toContain('GPA detail and transcript standing stay export-first');
   });
 
   it('normalizes local BFF base URLs', () => {

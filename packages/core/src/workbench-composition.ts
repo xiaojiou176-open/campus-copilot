@@ -187,6 +187,63 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
   };
 }
 
+function buildAiDecisionContext(args: BuildWorkbenchAiProxyRequestArgs, presentation: BuildWorkbenchAiProxyRequestArgs['presentation']) {
+  return {
+    focusQueue: presentation?.focusQueue ?? args.focusQueue,
+    weeklyLoad: presentation?.weeklyLoad ?? args.weeklyLoad,
+    syncRuns: args.syncRuns,
+    recentChanges: presentation?.changeEvents ?? args.recentChanges,
+    courseClusters:
+      presentation?.courseClusters ?? args.workbenchView?.courseClusters ?? [],
+    workItemClusters:
+      presentation?.workItemClusters ?? args.workbenchView?.workItemClusters ?? [],
+    administrativeSummaries:
+      presentation?.administrativeSummaries ?? args.workbenchView?.administrativeSummaries ?? [],
+    mergeHealth: presentation?.mergeHealth ?? args.workbenchView?.mergeHealth,
+  };
+}
+
+function buildAiExportToolPayload(args: BuildWorkbenchAiProxyRequestArgs, presentation: BuildWorkbenchAiProxyRequestArgs['presentation']) {
+  const decisionContext = buildAiDecisionContext(args, presentation);
+
+  if (args.currentViewExport.packaging.aiAllowed) {
+    return {
+      filename: args.currentViewExport.filename,
+      format: args.currentViewExport.format,
+      scope: args.currentViewExport.scope,
+      packaging: args.currentViewExport.packaging,
+      content: args.currentViewExport.content,
+      decisionContext,
+    };
+  }
+
+  return {
+    filename: args.currentViewExport.filename,
+    format: args.currentViewExport.format,
+    scope: args.currentViewExport.scope,
+    packaging: args.currentViewExport.packaging,
+    contentRedacted: true,
+    redactionReason: 'ai_not_allowed_for_current_view_export' as const,
+    reviewRequiredAdministrativeFamilies: Array.from(
+      new Set(
+        decisionContext.administrativeSummaries
+          .filter((summary) => summary.aiDefault !== 'allowed')
+          .map((summary) => summary.family),
+      ),
+    ),
+    decisionContext: {
+      focusQueueCount: decisionContext.focusQueue.length,
+      weeklyLoadCount: decisionContext.weeklyLoad.length,
+      syncRunsCount: decisionContext.syncRuns.length,
+      recentChangesCount: decisionContext.recentChanges.length,
+      courseClustersCount: decisionContext.courseClusters.length,
+      workItemClustersCount: decisionContext.workItemClusters.length,
+      administrativeSummariesCount: decisionContext.administrativeSummaries.length,
+      mergeHealth: decisionContext.mergeHealth,
+    },
+  };
+}
+
 export function buildWorkbenchAiProxyRequest(args: BuildWorkbenchAiProxyRequestArgs) {
   const presentation = args.presentation;
   const sitePolicyOverlay = args.sitePolicyOverlay ?? getAiSitePolicyOverlay(args.currentViewExport.scope.site);
@@ -209,26 +266,7 @@ export function buildWorkbenchAiProxyRequest(args: BuildWorkbenchAiProxyRequestA
     },
     {
       name: 'export_current_view' as const,
-      payload: {
-        filename: args.currentViewExport.filename,
-        format: args.currentViewExport.format,
-        scope: args.currentViewExport.scope,
-        packaging: args.currentViewExport.packaging,
-        content: args.currentViewExport.content,
-        decisionContext: {
-          focusQueue: presentation?.focusQueue ?? args.focusQueue,
-          weeklyLoad: presentation?.weeklyLoad ?? args.weeklyLoad,
-          syncRuns: args.syncRuns,
-          recentChanges: presentation?.changeEvents ?? args.recentChanges,
-          courseClusters:
-            presentation?.courseClusters ?? args.workbenchView?.courseClusters ?? [],
-          workItemClusters:
-            presentation?.workItemClusters ?? args.workbenchView?.workItemClusters ?? [],
-          administrativeSummaries:
-            presentation?.administrativeSummaries ?? args.workbenchView?.administrativeSummaries ?? [],
-          mergeHealth: presentation?.mergeHealth ?? args.workbenchView?.mergeHealth,
-        },
-      },
+      payload: buildAiExportToolPayload(args, presentation),
     },
     {
       name: 'get_planning_substrates' as const,

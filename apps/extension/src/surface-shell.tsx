@@ -8,8 +8,7 @@ import {
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
 } from '@campus-copilot/ai';
-import type { ExportFormat, ExportPreset } from '@campus-copilot/exporter';
-import { createExportArtifact } from '@campus-copilot/exporter';
+import type { ExportFormat, ExportPreset, ExportProvenanceEntry } from '@campus-copilot/exporter';
 import {
   CAPTURE_PLANNING_SUBSTRATE_COMMAND,
   GET_SITE_SYNC_STATUS_COMMAND,
@@ -1081,6 +1080,38 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     if (status === 'blocked') return 'Blocked';
     return 'Unset';
   };
+  const formatRiskLabel = (riskLabel: 'low' | 'medium' | 'high') => {
+    if (uiLanguage === 'zh-CN') {
+      if (riskLabel === 'high') return '高风险';
+      if (riskLabel === 'medium') return '中风险';
+      return '低风险';
+    }
+    if (riskLabel === 'high') return 'High risk';
+    if (riskLabel === 'medium') return 'Medium risk';
+    return 'Low risk';
+  };
+  const formatMatchConfidenceLabel = (matchConfidence: 'low' | 'medium' | 'high') => {
+    if (uiLanguage === 'zh-CN') {
+      if (matchConfidence === 'high') return '高匹配置信度';
+      if (matchConfidence === 'medium') return '中匹配置信度';
+      return '低匹配置信度';
+    }
+    if (matchConfidence === 'high') return 'High match confidence';
+    if (matchConfidence === 'medium') return 'Medium match confidence';
+    return 'Low match confidence';
+  };
+  const formatProvenanceSourceType = (sourceType: ExportProvenanceEntry['sourceType']) => {
+    if (uiLanguage === 'zh-CN') {
+      if (sourceType === 'official_api') return '官方 API';
+      if (sourceType === 'session_interface') return '会话载体';
+      if (sourceType === 'page_state') return '页面状态';
+      return '派生读模型';
+    }
+    if (sourceType === 'official_api') return 'official API';
+    if (sourceType === 'session_interface') return 'session-backed carrier';
+    if (sourceType === 'page_state') return 'page-state carrier';
+    return 'derived read model';
+  };
   const exportLayer1Rule =
     getWorkspaceAuthorizationRule('layer1_read_export', exportScopeSite) ?? getWorkspaceAuthorizationRule('layer1_read_export');
   const exportLayer2Rule =
@@ -1130,12 +1161,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
           ? '先审 scope、授权和深度，再决定是否导出这个 packet。'
           : 'Review scope, authorization, and depth before deciding to export this packet.';
 
-  function enterExportMode(nextSite: ExportScopeSite = preferredExportSite) {
-    setExportScopeSite(nextSite);
-    setSidepanelMode('export');
-  }
-
-  async function handleExportSelection() {
+  function buildSelectedExportArtifact() {
     const exportResources = exportWorkbenchView?.resources ?? [];
     const exportAssignments = exportWorkbenchView?.assignments ?? [];
     const exportAnnouncements = exportWorkbenchView?.announcements ?? [];
@@ -1287,7 +1313,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
         break;
     }
 
-    const artifact = buildSurfaceExportArtifact({
+    return buildSurfaceExportArtifact({
       preset,
       format: selectedFormat,
       viewTitleOverride: [
@@ -1304,40 +1330,140 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
       },
       authorization: config.authorization,
       state: {
-        ...{
-          now,
-          uiLanguage,
-          filters: {
-            site: exportScopeSite === 'all' ? 'all' : exportScopeSite,
-            onlyUnseenUpdates: false,
-          },
-          currentResources: nextResources,
-          currentAssignments: nextAssignments,
-          currentAnnouncements: nextAnnouncements,
-          currentMessages: nextMessages,
-          currentGrades: nextGrades,
-          currentEvents: nextEvents,
-          currentAlerts: nextAlerts,
-          currentRecentUpdates: nextRecentUpdates,
-          workbenchResources: nextResources,
-          workbenchAssignments: nextAssignments,
-          workbenchAnnouncements: nextAnnouncements,
-          workbenchMessages: nextMessages,
-          workbenchGrades: nextGrades,
-          workbenchEvents: nextEvents,
-          priorityAlerts: nextAlerts,
-          focusQueue: nextFocusQueue,
-          planningSubstrates: [],
-          weeklyLoad: nextWeeklyLoad,
-          latestSyncRuns,
-          recentChangeEvents: nextChangeEvents,
-          courseClusters,
-          workItemClusters,
-          administrativeSummaries,
-          mergeHealth,
+        now,
+        uiLanguage,
+        filters: {
+          site: exportScopeSite === 'all' ? 'all' : exportScopeSite,
+          onlyUnseenUpdates: false,
         },
+        currentResources: nextResources,
+        currentAssignments: nextAssignments,
+        currentAnnouncements: nextAnnouncements,
+        currentMessages: nextMessages,
+        currentGrades: nextGrades,
+        currentEvents: nextEvents,
+        currentAlerts: nextAlerts,
+        currentRecentUpdates: nextRecentUpdates,
+        workbenchResources: nextResources,
+        workbenchAssignments: nextAssignments,
+        workbenchAnnouncements: nextAnnouncements,
+        workbenchMessages: nextMessages,
+        workbenchGrades: nextGrades,
+        workbenchEvents: nextEvents,
+        priorityAlerts: nextAlerts,
+        focusQueue: nextFocusQueue,
+        planningSubstrates: [],
+        weeklyLoad: nextWeeklyLoad,
+        latestSyncRuns,
+        recentChangeEvents: nextChangeEvents,
+        courseClusters,
+        workItemClusters,
+        administrativeSummaries,
+        mergeHealth,
       },
     });
+  }
+
+  const exportReviewArtifact = useMemo(
+    () => buildSelectedExportArtifact(),
+    [
+      administrativeSummaries,
+      config.authorization,
+      courseClusters,
+      exportCourseId,
+      exportFamily,
+      exportScopeSite,
+      exportScopedCourses,
+      exportWorkbenchView,
+      focusQueue,
+      latestSyncRuns,
+      mergeHealth,
+      modeCopy,
+      now,
+      recentChangeEvents,
+      selectedFormat,
+      uiLanguage,
+      weeklyLoad,
+      workItemClusters,
+    ],
+  );
+  const exportReviewPackaging = exportReviewArtifact.packaging;
+  const exportAiAllowedLead =
+    uiLanguage === 'zh-CN'
+      ? exportReviewPackaging.aiAllowed
+        ? 'AI 分析已允许'
+        : 'AI 分析保持阻止'
+      : exportReviewPackaging.aiAllowed
+        ? 'AI analysis allowed'
+        : 'AI analysis blocked';
+  const exportAiAllowedDetail =
+    exportReviewPackaging.aiAllowed
+      ? uiLanguage === 'zh-CN'
+        ? 'Layer 2 当前允许 AI 在这个 packet 上做分析，但不改变导出或站外写边界。'
+        : 'Layer 2 currently allows AI analysis for this packet without changing export or external-write boundaries.'
+      : uiLanguage === 'zh-CN'
+        ? 'Layer 2 仍然比导出更严格；就算能导出，这个 packet 也不会自动开放给 AI。'
+        : 'Layer 2 stays stricter than export here; an exportable packet does not automatically become AI-readable.';
+  const exportRiskLead = formatRiskLabel(exportReviewPackaging.riskLabel);
+  const exportRiskDetail =
+    exportReviewPackaging.riskLabel === 'high'
+      ? uiLanguage === 'zh-CN'
+        ? '这个 packet 需要更高强度的 operator 判断，不应被当成低风险素材。'
+        : 'This packet needs stronger operator judgment and should not be treated as low-risk material.'
+      : exportReviewPackaging.riskLabel === 'medium'
+        ? uiLanguage === 'zh-CN'
+          ? '当前允许 review-first 地继续，但仍需要看清 carrier 和授权边界。'
+          : 'This can proceed review-first, but the carrier and authorization boundary still need to stay visible.'
+        : uiLanguage === 'zh-CN'
+          ? '当前风险标签较低，但仍按 review-first desk 展示，不做静默导出假设。'
+          : 'This currently carries a lower risk label, but it still stays on the review-first desk instead of assuming silent export.';
+  const exportMatchLead = formatMatchConfidenceLabel(exportReviewPackaging.matchConfidence);
+  const exportMatchDetail =
+    exportReviewPackaging.matchConfidence === 'high'
+      ? uiLanguage === 'zh-CN'
+        ? '当前 packet 的作用域和载体比较稳定，operator 只需要做常规核对。'
+        : 'This packet currently maps through a more stable scope and carrier lane, so normal operator review is usually enough.'
+      : exportReviewPackaging.matchConfidence === 'medium'
+        ? uiLanguage === 'zh-CN'
+          ? '当前仍有一定的合并或作用域不确定性，所以 review 不该被跳过。'
+          : 'There is still some scope or merge uncertainty here, so the review step should stay visible.'
+        : uiLanguage === 'zh-CN'
+          ? '当前匹配把握较弱，适合先停在 review，而不是假装已经 fully resolved。'
+          : 'Confidence is weaker here, so it is more honest to stop at review than to pretend the packet is fully resolved.';
+  const exportProvenanceEntries = exportReviewPackaging.provenance;
+  const exportProvenanceLead =
+    exportProvenanceEntries[0]?.label ??
+    (uiLanguage === 'zh-CN' ? '当前 packet 没有来源标签' : 'No provenance label on this packet');
+  const exportProvenanceSourceSummary =
+    exportProvenanceEntries.length > 0
+      ? Array.from(new Set(exportProvenanceEntries.map((entry) => formatProvenanceSourceType(entry.sourceType)))).join(' · ')
+      : uiLanguage === 'zh-CN'
+        ? '暂无来源类型'
+        : 'No provenance types yet';
+  const exportProvenanceDetail =
+    exportProvenanceEntries.length > 0
+      ? uiLanguage === 'zh-CN'
+        ? `${exportProvenanceEntries.length} 条只读来源线索 · ${exportProvenanceSourceSummary}`
+        : `${exportProvenanceEntries.length} read-only provenance lanes · ${exportProvenanceSourceSummary}`
+      : uiLanguage === 'zh-CN'
+        ? '当前 review 卡还没有拿到来源明细。'
+        : 'This review card does not currently have provenance detail.';
+  const exportProvenanceSecondary =
+    exportProvenanceEntries.length > 1
+      ? exportProvenanceEntries
+          .slice(1, 3)
+          .map((entry) => entry.label)
+          .join(' · ')
+      : undefined;
+  const exportScopeReceipt = [exportScopeLabel, exportCourseLabel ?? modeCopy.export.allCourses, selectedFormatLabel].join(' · ');
+
+  function enterExportMode(nextSite: ExportScopeSite = preferredExportSite) {
+    setExportScopeSite(nextSite);
+    setSidepanelMode('export');
+  }
+
+  async function handleExportSelection() {
+    const artifact = exportReviewArtifact;
 
     const blob = buildDownloadPayload(artifact.format, artifact.content);
     const url = URL.createObjectURL(blob);
@@ -1645,6 +1771,9 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       <p className="surface__meta">
                         {exportReviewDescription} {uiLanguage === 'zh-CN' ? '先看 trust review，再点导出。' : 'Trust review comes before the export action.'}
                       </p>
+                      <p className="surface__meta">
+                        {uiLanguage === 'zh-CN' ? '当前 packet receipt：' : 'Current packet receipt: '} {exportScopeReceipt}
+                      </p>
                     </div>
                     <span
                       className={`surface__badge surface__badge--${
@@ -1670,28 +1799,30 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       <p className="surface__meta">{exportDepthDetail}</p>
                     </article>
                     <article className="surface__evidence-card">
-                      <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? 'Packet honesty' : 'Packet honesty'}</p>
+                      <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '导出包诚实度' : 'Packet honesty'}</p>
                       <p className="surface__item-lead">{selectedExportFamilyCard?.status === 'blocked' ? exportReviewStatus : exportReviewTitle}</p>
                       <p className="surface__meta">{exportPacketHonesty}</p>
                     </article>
                     <article className="surface__evidence-card">
-                      <p className="surface__meta-label">{modeCopy.export.siteLabel}</p>
-                      <p className="surface__item-lead">{exportScopeLabel}</p>
-                      <p className="surface__meta">
-                        {surfaceView.currentSiteSelection === exportScopeSite ? modeCopy.assistant.currentContext : modeCopy.export.globalHint}
-                      </p>
+                      <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? 'AI 可见性' : 'AI visibility'}</p>
+                      <p className="surface__item-lead">{exportAiAllowedLead}</p>
+                      <p className="surface__meta">{exportAiAllowedDetail}</p>
                     </article>
                     <article className="surface__evidence-card">
-                      <p className="surface__meta-label">{modeCopy.export.courseLabel}</p>
-                      <p className="surface__item-lead">{exportCourseLabel ?? modeCopy.export.allCourses}</p>
-                      <p className="surface__meta">
-                        {isCourseScopedExportSite(exportScopeSite) ? modeCopy.export.courseScopedHint : modeCopy.export.globalHint}
-                      </p>
+                      <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '风险标签' : 'Risk label'}</p>
+                      <p className="surface__item-lead">{exportRiskLead}</p>
+                      <p className="surface__meta">{exportRiskDetail}</p>
                     </article>
                     <article className="surface__evidence-card">
-                      <p className="surface__meta-label">{modeCopy.export.formatLabel}</p>
-                      <p className="surface__item-lead">{selectedFormatLabel}</p>
-                      <p className="surface__meta">{modeCopy.assistant.readOnly}</p>
+                      <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '匹配把握' : 'Match confidence'}</p>
+                      <p className="surface__item-lead">{exportMatchLead}</p>
+                      <p className="surface__meta">{exportMatchDetail}</p>
+                    </article>
+                    <article className="surface__evidence-card">
+                      <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '来源线索' : 'Provenance'}</p>
+                      <p className="surface__item-lead">{exportProvenanceLead}</p>
+                      <p className="surface__meta">{exportProvenanceDetail}</p>
+                      {exportProvenanceSecondary ? <p className="surface__meta">{exportProvenanceSecondary}</p> : null}
                     </article>
                   </div>
                   <p className="surface__item-lead">
