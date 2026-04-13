@@ -73,7 +73,7 @@ function extractEmbeddedMyPlanBootstrap(pageHtml: string) {
     return undefined;
   }
 
-  for (const match of pageHtml.matchAll(/<script\b(?<attrs>[^>]*)>(?<body>[\s\S]*?)<\/script>/gi)) {
+  for (const match of pageHtml.matchAll(/<script\b(?<attrs>[^>]*)>(?<body>[\s\S]*?)<\/script\s*>/gi)) {
     const attrs = match.groups?.attrs ?? '';
     const body = match.groups?.body ?? '';
     const id = attrs.match(/\bid\s*=\s*(['"])(?<value>.*?)\1/i)?.groups?.value?.trim();

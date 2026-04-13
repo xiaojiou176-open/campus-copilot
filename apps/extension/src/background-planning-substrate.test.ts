@@ -138,7 +138,7 @@ describe('background planning substrate capture', () => {
                 ]
               }
             }
-          </script>
+          </script >
         </main>
       `,
     });
