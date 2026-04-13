@@ -159,4 +159,30 @@ describe('@campus-copilot/adapters-course-sites', () => {
       }).family,
     ).toBe('assignments');
   });
+
+  it('does not let script/comment noise override visible page-family markers', () => {
+    expect(
+      detectCourseSitePageFamily({
+        url: 'https://courses.cs.washington.edu/courses/cse332/26sp/custom.html',
+        pageHtml: `<html><head><title>Course shell</title></head><body><!--${'<!--'.repeat(
+          256,
+        )} hidden marker --!><script>Assignments and Tests</script foo="bar"><h1>Welcome to CSE 332</h1></body></html>`,
+      }).family,
+    ).toBe('home');
+  });
+
+  it('decodes encoded text once instead of collapsing double-escaped entities', () => {
+    const extraction = extractCourseSiteSnapshot({
+      url: 'https://courses.cs.washington.edu/courses/cse332/26sp/syllabus.html',
+      pageHtml:
+        '<html><head><title>CSE 332 Syllabus</title></head><body><p>Use &amp;lt;code&amp;gt; and &amp;amp; carefully.</p></body></html>',
+      now: '2026-04-11T12:00:00-07:00',
+    });
+
+    expect(extraction.snapshot.resources?.[0]).toEqual(
+      expect.objectContaining({
+        summary: 'Use &lt;code&gt; and &amp; carefully.',
+      }),
+    );
+  });
 });

@@ -134,12 +134,12 @@ const HOME_SELF_PATHS = new Set(['/', '/index.html']);
 function decodeHtml(value: string) {
   return value
     .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
-    .replace(/&#x27;/gi, "'");
+    .replace(/&#x27;/gi, "'")
+    .replace(/&amp;/gi, '&');
 }
 
 function stripTags(value: string) {
@@ -158,12 +158,108 @@ function slugify(value: string) {
     .slice(0, 80);
 }
 
+const HTML_TAG_BOUNDARY_CHARS = new Set([' ', '\t', '\n', '\r', '\f', '/', '>']);
+
+function isHtmlTagBoundary(char: string | undefined) {
+  return char === undefined || HTML_TAG_BOUNDARY_CHARS.has(char);
+}
+
+function findHtmlTagStart(lowerInput: string, tagName: string, fromIndex: number) {
+  const openToken = `<${tagName}`;
+  let cursor = fromIndex;
+  while (cursor < lowerInput.length) {
+    const start = lowerInput.indexOf(openToken, cursor);
+    if (start === -1) {
+      return -1;
+    }
+    if (isHtmlTagBoundary(lowerInput[start + openToken.length])) {
+      return start;
+    }
+    cursor = start + openToken.length;
+  }
+  return -1;
+}
+
+function findHtmlTagBlockEnd(lowerInput: string, tagName: string, fromIndex: number) {
+  const closeToken = `</${tagName}`;
+  let cursor = fromIndex;
+  while (cursor < lowerInput.length) {
+    const closeStart = lowerInput.indexOf(closeToken, cursor);
+    if (closeStart === -1) {
+      return -1;
+    }
+    if (!isHtmlTagBoundary(lowerInput[closeStart + closeToken.length])) {
+      cursor = closeStart + closeToken.length;
+      continue;
+    }
+    const closeEnd = lowerInput.indexOf('>', closeStart + closeToken.length);
+    return closeEnd === -1 ? -1 : closeEnd + 1;
+  }
+  return -1;
+}
+
+function stripHtmlElementBlock(input: string, tagName: 'script' | 'style' | 'noscript') {
+  const lowerInput = input.toLowerCase();
+  let result = '';
+  let cursor = 0;
+
+  while (cursor < input.length) {
+    const start = findHtmlTagStart(lowerInput, tagName, cursor);
+    if (start === -1) {
+      result += input.slice(cursor);
+      break;
+    }
+
+    result += `${input.slice(cursor, start)} `;
+    const end = findHtmlTagBlockEnd(lowerInput, tagName, start + tagName.length + 1);
+    if (end === -1) {
+      break;
+    }
+    cursor = end;
+  }
+
+  return result;
+}
+
+function findHtmlCommentEnd(input: string, fromIndex: number) {
+  const standardEnd = input.indexOf('-->', fromIndex);
+  const bangEnd = input.indexOf('--!>', fromIndex);
+
+  if (standardEnd === -1) {
+    return bangEnd === -1 ? -1 : bangEnd + 4;
+  }
+  if (bangEnd === -1) {
+    return standardEnd + 3;
+  }
+  return Math.min(standardEnd + 3, bangEnd + 4);
+}
+
+function stripHtmlComments(input: string) {
+  let result = '';
+  let cursor = 0;
+
+  while (cursor < input.length) {
+    const commentStart = input.indexOf('<!--', cursor);
+    if (commentStart === -1) {
+      result += input.slice(cursor);
+      break;
+    }
+
+    result += `${input.slice(cursor, commentStart)} `;
+    const commentEnd = findHtmlCommentEnd(input, commentStart + 4);
+    if (commentEnd === -1) {
+      break;
+    }
+    cursor = commentEnd;
+  }
+
+  return result;
+}
+
 function cleanHtml(input: string) {
-  return input
-    .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<noscript\b[\s\S]*?<\/noscript>/gi, ' ');
+  // This is a noise stripper for read-only extraction heuristics, not a sanitizer.
+  const removableTags = ['script', 'style', 'noscript'] as const;
+  return removableTags.reduce((current, tagName) => stripHtmlElementBlock(current, tagName), stripHtmlComments(input));
 }
 
 function extractTitle(html: string) {
