@@ -416,6 +416,7 @@ async function assertOptionsTrustCenter(page: Page) {
     has: page.getByRole('heading', { name: 'Authorization center' }),
   });
   await expect(authorizationPanel.getByText('Keep Layer 1 read/export separate from Layer 2 AI analysis')).toBeVisible();
+  await authorizationPanel.locator('summary').filter({ hasText: 'Detailed authorization controls' }).click();
   await expect(authorizationPanel.getByLabel('All sites · Layer 1 read/export')).toBeVisible();
   await expect(authorizationPanel.getByLabel('All sites · Layer 2 AI read/analysis')).toBeVisible();
   await expect(authorizationPanel.getByLabel('Canvas · Layer 1 read/export')).toBeVisible();
@@ -498,7 +499,7 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByRole('tab', { name: 'Settings' })).toBeVisible();
   await expect(page.getByText('Structured facts only')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ask AI about this workspace' })).toBeVisible();
-  await expect(page.getByText(/BFF base URL is not configured yet/).first()).toBeVisible();
+  await expect(page.getByText('No local companion/BFF is currently reachable.').first()).toBeVisible();
   await expandDetailedWorkspace(page, 'Show detailed workspace');
   await expect(page.getByRole('heading', { name: 'Diagnostics' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Next Up' })).toBeVisible();
@@ -643,6 +644,7 @@ test('asks ai after provider config exists', async ({ page, baseURL }) => {
   const visibleEvidenceCard = askAiPanel
     .locator('article.surface__status-card--success article.surface__evidence-card')
     .first();
+  await askAiPanel.locator('summary').filter({ hasText: 'Policy review and visible evidence' }).click();
   await expect(askAiPanel.getByRole('heading', { name: 'What AI can see' })).toBeVisible();
   await expect(visibleEvidenceCard.getByText('Today snapshot', { exact: true })).toBeVisible();
   await expect(visibleEvidenceCard.getByText(/Open assignments \d+ · Due within 48 hours \d+ · New grades \d+/)).toBeVisible();
@@ -713,6 +715,7 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
     .first();
 
   await expect(page.getByRole('heading', { name: '这页的校园伴随助手' }).first()).toBeVisible();
+  await chineseAskAiPanel.locator('summary').filter({ hasText: '策略审核与可见证据' }).click();
   await expect(chineseAskAiPanel.getByRole('heading', { name: 'AI 当前能看见什么' })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText('今日快照', { exact: true })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText(/待办作业 \d+ · 48 小时内截止 \d+ · 新成绩 \d+/)).toBeVisible();

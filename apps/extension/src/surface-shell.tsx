@@ -906,11 +906,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     });
   }
 
-  function enterExportMode(nextSite: ExportScopeSite = filters.site === 'all' ? 'all' : filters.site) {
-    setExportScopeSite(nextSite);
-    setSidepanelMode('export');
-  }
-
   const selectedFormatLabel =
     EXPORT_FORMAT_OPTIONS.find((option) => option.value === selectedFormat)?.label ?? selectedFormat;
 
@@ -931,8 +926,9 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     uiLanguage,
   });
   const primaryFocusItem = focusQueue[0];
-  const currentContextLabel =
-    filters.site === 'all'
+  const currentContextLabel = surfaceView.currentSiteSelection
+    ? SITE_LABELS[surfaceView.currentSiteSelection]
+    : filters.site === 'all'
       ? planningCaptureContext?.label ?? modeCopy.export.allSites
       : SITE_LABELS[filters.site];
   const bffStatusLabel =
@@ -972,6 +968,139 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const allowedAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'allowed').length;
   const confirmRequiredAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'confirm_required').length;
   const blockedAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'blocked').length;
+  const authorizationStatusVariant =
+    blockedAuthorizationCount > 0 ? 'warning' : confirmRequiredAuthorizationCount > 0 ? 'neutral' : 'success';
+  const authorizationStatusLabel =
+    uiLanguage === 'zh-CN'
+      ? `授权 ${confirmRequiredAuthorizationCount} 待确认 · ${blockedAuthorizationCount} 受阻`
+      : `Auth ${confirmRequiredAuthorizationCount} confirm · ${blockedAuthorizationCount} blocked`;
+  const preferredExportSite: ExportScopeSite =
+    surfaceView.currentSiteSelection ?? (filters.site === 'all' ? 'all' : filters.site);
+  const exportScopeLabel = exportScopeSite === 'all' ? modeCopy.export.allSites : SITE_LABELS[exportScopeSite];
+  const exportCourseLabel = exportCourseId
+    ? exportScopedCourses.find((course) => course.id === exportCourseId)?.label
+    : undefined;
+  const selectedExportFamilyCard = exportFamilyCards.find((card) => card.family === exportFamily);
+  const exportResources = exportWorkbenchView?.resources ?? [];
+  const exportAssignments = exportWorkbenchView?.assignments ?? [];
+  const exportAnnouncements = exportWorkbenchView?.announcements ?? [];
+  const exportMessages = exportWorkbenchView?.messages ?? [];
+  const exportGrades = exportWorkbenchView?.grades ?? [];
+  const exportEvents = exportWorkbenchView?.events ?? [];
+  const scopedExportAssignments = filterSiteRecords(exportAssignments, exportScopeSite, exportCourseId);
+  const scopedExportAnnouncements = filterSiteRecords(exportAnnouncements, exportScopeSite, exportCourseId);
+  const scopedExportMessages = filterSiteRecords(exportMessages, exportScopeSite, exportCourseId);
+  const scopedExportGrades = filterSiteRecords(exportGrades, exportScopeSite, exportCourseId);
+  const scopedExportEvents = filterSiteRecords(exportEvents, exportScopeSite, exportCourseId);
+  const scopedExportResources = filterCourseResources(exportResources, exportScopeSite, exportCourseId);
+  const exportReviewCount =
+    exportFamily === 'resources'
+      ? scopedExportResources.length
+      : exportFamily === 'assignments'
+        ? scopedExportAssignments.length
+        : exportFamily === 'announcements'
+          ? scopedExportAnnouncements.length
+          : exportFamily === 'messages'
+            ? scopedExportMessages.length
+            : exportFamily === 'grades'
+              ? scopedExportGrades.length
+              : exportFamily === 'deadlines'
+                ? scopedExportAssignments.filter((assignment) => Boolean(assignment.dueAt)).length +
+                  scopedExportEvents.filter((event) => event.eventKind === 'deadline').length
+                : exportFamily === 'course_panorama'
+                  ? courseClusters.length
+                  : exportFamily === 'administrative_snapshot'
+                    ? administrativeSummaries.length
+                    : exportFamily === 'cluster_merge_review'
+                      ? workItemClusters.length + courseClusters.length
+                      : scopedExportResources.length +
+                        scopedExportAssignments.length +
+                        scopedExportAnnouncements.length +
+                        scopedExportMessages.length +
+                        scopedExportGrades.length +
+                        scopedExportEvents.length;
+  const exportReviewStatus =
+    selectedExportFamilyCard?.status === 'blocked'
+      ? modeCopy.export.badges.blocked
+      : selectedExportFamilyCard?.status === 'partial'
+        ? modeCopy.export.badges.partial
+        : modeCopy.export.badges.available;
+  const exportReviewTitle = modeCopy.export.families[exportFamily].label;
+  const exportReviewDescription = modeCopy.export.families[exportFamily].description;
+  const exportTrustSummary =
+    exportFamily === 'administrative_snapshot'
+      ? 'Summary-first and review-first. AI stays more restrictive than read/export for this packet.'
+      : exportFamily === 'cluster_merge_review'
+        ? 'Review-first packet for authority and possible-match checks before anything leaves the extension.'
+        : isCourseScopedExportSite(exportScopeSite)
+          ? 'Course scope narrows the packet before export, so review stays tied to one course lane.'
+          : 'Whole-site export stays truthful when the source does not map cleanly to one course lane.';
+  const getWorkspaceAuthorizationRule = (
+    layer: 'layer1_read_export' | 'layer2_ai_read_analysis',
+    site?: ExportScopeSite,
+  ) =>
+    authorizationRules.find(
+      (rule) =>
+        rule.layer === layer &&
+        rule.resourceFamily === 'workspace_snapshot' &&
+        !rule.courseIdOrKey &&
+        (site && site !== 'all' ? rule.site === site : !rule.site),
+    );
+  const formatAuthorizationStatusLabel = (status: string | undefined) => {
+    if (uiLanguage === 'zh-CN') {
+      if (status === 'allowed') return '已允许';
+      if (status === 'partial') return '部分';
+      if (status === 'confirm_required') return '需确认';
+      if (status === 'blocked') return '已阻止';
+      return '未设置';
+    }
+    if (status === 'allowed') return 'Allowed';
+    if (status === 'partial') return 'Partial';
+    if (status === 'confirm_required') return 'Confirm required';
+    if (status === 'blocked') return 'Blocked';
+    return 'Unset';
+  };
+  const exportLayer1Rule =
+    getWorkspaceAuthorizationRule('layer1_read_export', exportScopeSite) ?? getWorkspaceAuthorizationRule('layer1_read_export');
+  const exportLayer2Rule =
+    getWorkspaceAuthorizationRule('layer2_ai_read_analysis', exportScopeSite) ?? getWorkspaceAuthorizationRule('layer2_ai_read_analysis');
+  const highSensitivityLayer1Rules = authorizationRules.filter(
+    (rule) => rule.layer === 'layer1_read_export' && rule.resourceFamily?.endsWith('_summary'),
+  );
+  const highSensitivityLayer2Rules = authorizationRules.filter(
+    (rule) => rule.layer === 'layer2_ai_read_analysis' && rule.resourceFamily?.endsWith('_summary'),
+  );
+  const exportAuthorizationLead =
+    exportFamily === 'administrative_snapshot'
+      ? uiLanguage === 'zh-CN'
+        ? `高敏摘要导出 ${highSensitivityLayer1Rules.filter((rule) => rule.status === 'confirm_required').length} 项需确认 · AI ${highSensitivityLayer2Rules.filter((rule) => rule.status === 'blocked').length} 项保持阻止`
+        : `${highSensitivityLayer1Rules.filter((rule) => rule.status === 'confirm_required').length} high-sensitivity summaries require Layer 1 confirmation · ${highSensitivityLayer2Rules.filter((rule) => rule.status === 'blocked').length} stay AI-blocked`
+      : `${formatAuthorizationStatusLabel(exportLayer1Rule?.status)} · ${formatAuthorizationStatusLabel(exportLayer2Rule?.status)}`;
+  const exportAuthorizationDetail =
+    exportFamily === 'administrative_snapshot'
+      ? uiLanguage === 'zh-CN'
+        ? '这组导出保持 summary-first / export-first；AI 不会因为能导出就自动获得读取权限。'
+        : 'This packet stays summary-first and export-first; AI does not inherit access just because export is allowed.'
+      : uiLanguage === 'zh-CN'
+        ? `当前导出按 ${exportScopeLabel} 的 Layer 1 / Layer 2 工作区授权来解释边界。`
+        : `This export follows the current Layer 1 / Layer 2 workspace authorization for ${exportScopeLabel}.`;
+  const exportDepthDetail =
+    selectedExportFamilyCard?.status === 'partial'
+      ? uiLanguage === 'zh-CN'
+        ? '这条资源族已经 landed，但仍是部分深度，不会伪装成 full parity。'
+        : 'This family is landed but still partial depth; it should not be treated as full parity.'
+      : selectedExportFamilyCard?.status === 'blocked'
+        ? uiLanguage === 'zh-CN'
+          ? '当前 carrier 还没到可导出产品面，这里只允许诚实地显示为 blocked。'
+          : 'The carrier is not productized for export yet, so this stays honestly blocked.'
+        : uiLanguage === 'zh-CN'
+          ? '这条资源族当前已经处在可导出的 landed 路径上。'
+          : 'This family is currently on the landed export path.';
+
+  function enterExportMode(nextSite: ExportScopeSite = preferredExportSite) {
+    setExportScopeSite(nextSite);
+    setSidepanelMode('export');
+  }
 
   async function handleExportSelection() {
     const exportResources = exportWorkbenchView?.resources ?? [];
@@ -1201,7 +1330,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               <div>
                 <p className="surface__eyebrow">{copy.eyebrow}</p>
                 <h1 className="surface__title surface__title--compact">{activeSidepanelHeader.title}</h1>
-                <p className="surface__copy surface__copy--compact">{activeSidepanelHeader.description}</p>
+                {sidepanelMode === 'assistant' ? null : <p className="surface__copy surface__copy--compact">{activeSidepanelHeader.description}</p>}
               </div>
               <div className="surface__mode-bar-actions">
                 <div className="surface__mode-switch" role="tablist" aria-label="Sidepanel modes">
@@ -1223,6 +1352,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 <span className={`surface__badge surface__badge--${activeBffBaseUrl ? 'success' : 'warning'}`}>
                   {bffStatusLabel}
                 </span>
+                <span className={`surface__badge surface__badge--${authorizationStatusVariant}`}>{authorizationStatusLabel}</span>
               </div>
             </div>
 
@@ -1242,49 +1372,18 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     </div>
                     <p className="surface__item-lead">{primaryFocusItem ? primaryFocusItem.title : text.nextUp.none}</p>
                     {primaryFocusItem?.summary ? <p>{primaryFocusItem.summary}</p> : null}
-                    <div className="surface__summary-grid surface__summary-grid--compact surface__summary-grid--slim">
-                      <div className="surface__summary-cell surface__summary-cell--slim">
-                        <strong className="surface__summary-value">{todaySnapshot?.dueSoonAssignments ?? 0}</strong>
-                        <span className="surface__summary-label">{text.metrics.dueWithin48Hours}</span>
-                      </div>
-                      <div className="surface__summary-cell surface__summary-cell--slim">
-                        <strong className="surface__summary-value">{currentRecentUpdates?.unseenCount ?? 0}</strong>
-                        <span className="surface__summary-label">{text.metrics.unseenUpdates}</span>
-                      </div>
-                      <div className="surface__summary-cell surface__summary-cell--slim">
-                        <strong className="surface__summary-value">{currentAlerts.length}</strong>
-                        <span className="surface__summary-label">{text.askAi.structuredInputLabels.priorityAlerts}</span>
-                      </div>
-                    </div>
+                    <p className="surface__meta">
+                      {text.metrics.dueWithin48Hours} {todaySnapshot?.dueSoonAssignments ?? 0} · {text.metrics.unseenUpdates}{' '}
+                      {currentRecentUpdates?.unseenCount ?? 0} · {text.askAi.structuredInputLabels.priorityAlerts}{' '}
+                      {currentAlerts.length}
+                    </p>
                     <p className="surface__meta">{assistantReadinessSummary}</p>
-                    <p className="surface__meta">{assistantReceiptSummary}</p>
                     <div className="surface__actions surface__actions--wrap">
                       <button className="surface__button" onClick={() => enterExportMode()} type="button">
                         {modeCopy.assistant.openExport}
                       </button>
                       <button className="surface__button surface__button--secondary" onClick={() => setSidepanelMode('settings')} type="button">
                         {modeCopy.assistant.openSettings}
-                      </button>
-                      <button
-                        className="surface__button surface__button--ghost"
-                        disabled={
-                          (!surfaceView.currentSiteSelection && !planningCaptureContext) ||
-                          syncFeedback.inFlightSite === surfaceView.currentSiteSelection
-                        }
-                        onClick={() =>
-                          surfaceView.currentSiteSelection
-                            ? void handleSiteSync(surfaceView.currentSiteSelection)
-                            : planningCaptureContext
-                              ? void handleCapturePlanningSubstrate()
-                              : undefined
-                        }
-                        type="button"
-                      >
-                        {surfaceView.currentSiteSelection
-                          ? text.quickActions.syncCurrentSite(SITE_LABELS[surfaceView.currentSiteSelection])
-                          : planningCaptureContext
-                            ? text.quickActions.capturePlanningSubstrate(planningCaptureContext.buttonLabel)
-                          : text.quickActions.selectSiteBeforeSync}
                       </button>
                     </div>
                     {syncFeedback.message ? <p className="surface__feedback">{syncFeedback.message}</p> : null}
@@ -1295,6 +1394,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   <span className="surface__assistant-trust-chip surface__assistant-trust-chip--success">{modeCopy.assistant.readOnly}</span>
                   <span className="surface__assistant-trust-chip">{modeCopy.assistant.structuredOnly}</span>
                   <span className="surface__assistant-trust-chip">{modeCopy.assistant.manualOnly}</span>
+                  <span className="surface__assistant-trust-chip">{assistantReceiptSummary}</span>
                 </div>
 
                 <AskAiPanel
@@ -1416,9 +1516,18 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 <article className="surface__panel surface__panel--hero">
                   <h2>{modeCopy.export.title}</h2>
                   <p>{modeCopy.export.description}</p>
+                  <div className="surface__actions surface__actions--wrap surface__actions--tight">
+                    <span className="surface__badge surface__badge--neutral">1 · {modeCopy.export.siteLabel}</span>
+                    <span className="surface__badge surface__badge--neutral">2 · {modeCopy.export.familyLabel}</span>
+                    <span className="surface__badge surface__badge--neutral">3 · {modeCopy.export.formatLabel}</span>
+                    <span className="surface__badge surface__badge--neutral">
+                      4 · {uiLanguage === 'zh-CN' ? '审核并导出' : 'Review & export'}
+                    </span>
+                  </div>
                 </article>
                 <div className="surface__grid surface__grid--split">
                   <article className="surface__panel">
+                    <p className="surface__meta-label">1 · {modeCopy.export.siteLabel}</p>
                     <label className="surface__field">
                       <span>{modeCopy.export.siteLabel}</span>
                       <select
@@ -1449,6 +1558,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     ) : (
                       <p className="surface__meta">{modeCopy.export.globalHint}</p>
                     )}
+                    <p className="surface__meta-label">3 · {modeCopy.export.formatLabel}</p>
                     <label className="surface__field">
                       <span>{modeCopy.export.formatLabel}</span>
                       <select
@@ -1463,14 +1573,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       </select>
                     </label>
                     <div className="surface__actions surface__actions--wrap">
-                      <button
-                        className="surface__button"
-                        disabled={!exportFamilyCards.find((card) => card.family === exportFamily)?.exportable}
-                        onClick={() => void handleExportSelection()}
-                        type="button"
-                      >
-                        {modeCopy.export.exportButton}
-                      </button>
                       <button className="surface__button surface__button--ghost" onClick={() => setSidepanelMode('assistant')} type="button">
                         {modeCopy.modeNav.assistant}
                       </button>
@@ -1479,7 +1581,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   </article>
 
                   <article className="surface__panel">
-                    <p className="surface__meta-label">{modeCopy.export.familyLabel}</p>
+                    <p className="surface__meta-label">2 · {modeCopy.export.familyLabel}</p>
                     <div className="surface__grid">
                       {exportFamilyCards.map((card) => (
                         <button
@@ -1501,6 +1603,75 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     </div>
                   </article>
                 </div>
+                <article className="surface__panel surface__panel--trust">
+                  <p className="surface__meta-label">4 · {uiLanguage === 'zh-CN' ? '审核并导出' : 'Review & export'}</p>
+                  <div className="surface__item-header">
+                    <div>
+                      <strong>{exportReviewTitle}</strong>
+                      <p className="surface__meta">{exportReviewDescription}</p>
+                    </div>
+                    <span
+                      className={`surface__badge surface__badge--${
+                        selectedExportFamilyCard?.status === 'blocked'
+                          ? 'danger'
+                          : selectedExportFamilyCard?.status === 'partial'
+                            ? 'warning'
+                            : 'success'
+                      }`}
+                    >
+                      {exportReviewStatus}
+                    </span>
+                  </div>
+                  <div className="surface__evidence-grid surface__evidence-grid--compact">
+                    <article className="surface__evidence-card">
+                      <p className="surface__meta-label">{modeCopy.export.siteLabel}</p>
+                      <p className="surface__item-lead">{exportScopeLabel}</p>
+                      <p className="surface__meta">
+                        {surfaceView.currentSiteSelection === exportScopeSite ? modeCopy.assistant.currentContext : modeCopy.export.globalHint}
+                      </p>
+                    </article>
+                    <article className="surface__evidence-card">
+                      <p className="surface__meta-label">{modeCopy.export.courseLabel}</p>
+                      <p className="surface__item-lead">{exportCourseLabel ?? modeCopy.export.allCourses}</p>
+                      <p className="surface__meta">
+                        {isCourseScopedExportSite(exportScopeSite) ? modeCopy.export.courseScopedHint : modeCopy.export.globalHint}
+                      </p>
+                    </article>
+                    <article className="surface__evidence-card">
+                      <p className="surface__meta-label">{modeCopy.export.formatLabel}</p>
+                      <p className="surface__item-lead">{selectedFormatLabel}</p>
+                      <p className="surface__meta">{modeCopy.assistant.readOnly}</p>
+                    </article>
+                    <article className="surface__evidence-card">
+                      <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '授权摘要' : 'Authorization summary'}</p>
+                      <p className="surface__item-lead">{exportAuthorizationLead}</p>
+                      <p className="surface__meta">{exportAuthorizationDetail}</p>
+                    </article>
+                    <article className="surface__evidence-card">
+                      <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '深度状态' : 'Depth status'}</p>
+                      <p className="surface__item-lead">{exportReviewStatus}</p>
+                      <p className="surface__meta">{exportDepthDetail}</p>
+                    </article>
+                  </div>
+                  <p className="surface__item-lead">
+                    {uiLanguage === 'zh-CN' ? '本次导出预计包含' : 'This export currently includes'} {exportReviewCount}{' '}
+                    {uiLanguage === 'zh-CN' ? '项结构化结果。' : 'structured items.'}
+                  </p>
+                  <p className="surface__meta">{exportTrustSummary}</p>
+                  <div className="surface__actions surface__actions--wrap">
+                    <button
+                      className="surface__button"
+                      disabled={!selectedExportFamilyCard?.exportable}
+                      onClick={() => void handleExportSelection()}
+                      type="button"
+                    >
+                      {modeCopy.export.exportButton}
+                    </button>
+                    <button className="surface__button surface__button--secondary" onClick={() => setSidepanelMode('settings')} type="button">
+                      {modeCopy.modeNav.settings}
+                    </button>
+                  </div>
+                </article>
               </>
             ) : (
               <>

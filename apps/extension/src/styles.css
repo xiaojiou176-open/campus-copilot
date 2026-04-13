@@ -343,6 +343,60 @@ textarea {
   border-color: rgba(22, 128, 68, 0.18);
 }
 
+.surface--sidepanel .surface__card {
+  padding: 16px;
+}
+
+.surface--sidepanel .surface__mode-bar {
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.surface--sidepanel .surface__panel {
+  padding: 14px;
+}
+
+.surface--sidepanel .surface__assistant-stage {
+  gap: 12px;
+}
+
+.surface--sidepanel .surface__assistant-trust-strip {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.surface--sidepanel .surface__assistant-trust-chip {
+  padding: 6px 10px;
+  font-size: 0.82rem;
+}
+
+.surface--sidepanel .surface__ask-ai-flow,
+.surface--sidepanel .surface__ask-ai-shell,
+.surface--sidepanel .surface__ask-ai-sidebar {
+  gap: 10px;
+}
+
+.surface--sidepanel .surface__ask-ai-flow--compact {
+  grid-template-columns: minmax(0, 1.08fr) minmax(220px, 0.72fr);
+}
+
+.surface--sidepanel .surface__question-card,
+.surface--sidepanel .surface__question-card--primary,
+.surface--sidepanel .surface__status-intro,
+.surface--sidepanel .surface__status-card,
+.surface--sidepanel .surface__advanced-settings {
+  padding: 12px 14px;
+}
+
+.surface--sidepanel .surface__advanced-settings-summary {
+  padding: 12px 14px;
+}
+
+.surface--sidepanel .surface__advanced-settings-body {
+  gap: 10px;
+  padding: 0 14px 14px;
+}
+
 .surface__panel h2,
 .surface__panel h3 {
   margin: 0 0 8px;

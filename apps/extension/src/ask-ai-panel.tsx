@@ -153,6 +153,14 @@ export function AskAiPanel(props: {
       value: structuredInputSummary.currentViewFormat.toUpperCase(),
     },
   ];
+  const trustSnapshot = [
+    `${structuredInputs[0].label}: ${structuredInputs[0].value}`,
+    `${structuredInputs[3].label}: ${structuredInputs[3].value}`,
+    `${structuredInputs[8].label}: ${structuredInputs[8].value}`,
+  ].join(' · ');
+  const policyReviewLabel = uiLanguage === 'zh-CN' ? '策略审核与可见证据' : 'Policy review and visible evidence';
+  const structuredLedgerLabel = uiLanguage === 'zh-CN' ? '结构化输入账本' : 'Structured input ledger';
+  const suggestedPromptsLabel = uiLanguage === 'zh-CN' ? '建议问题' : 'Suggested prompts';
 
   return (
     <article className="surface__panel surface__panel--ask-ai">
@@ -179,7 +187,7 @@ export function AskAiPanel(props: {
             <label className="surface__field">
               <span>{text.askAi.question}</span>
               <textarea
-                rows={4}
+                rows={3}
                 value={aiQuestion}
                 onChange={(event) => onQuestionChange(event.target.value)}
                 placeholder={text.askAi.placeholder}
@@ -195,77 +203,111 @@ export function AskAiPanel(props: {
                 </button>
               ) : null}
             </div>
-            <div className="surface__suggestion-strip" aria-label={text.askAi.suggestedPrompts}>
-              {Object.values(text.askAi.suggestions).map((suggestion) => (
-                <button
-                  key={suggestion}
-                  className="surface__button surface__button--ghost"
-                  onClick={() => onQuestionChange(suggestion)}
-                  type="button"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
+            <details className="surface__advanced-settings">
+              <summary className="surface__advanced-settings-summary">
+                <span>{suggestedPromptsLabel}</span>
+                <span className="surface__badge surface__badge--neutral">{Object.values(text.askAi.suggestions).length}</span>
+              </summary>
+              <div className="surface__advanced-settings-body">
+                <div className="surface__suggestion-strip" aria-label={text.askAi.suggestedPrompts}>
+                  {Object.values(text.askAi.suggestions).map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      className="surface__button surface__button--ghost"
+                      onClick={() => onQuestionChange(suggestion)}
+                      type="button"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </details>
           </div>
 
           <div className="surface__ask-ai-sidebar">
-            <article className="surface__status-card surface__status-card--success">
-              <div className="surface__item-header">
-                <h3>{text.askAi.whatAiCanSee}</h3>
-                <span className="surface__badge surface__badge--success">{text.meta.ready}</span>
-              </div>
-              <div className="surface__evidence-grid surface__evidence-grid--compact">
-                <article className="surface__evidence-card" key={structuredInputs[0].label}>
-                  <p className="surface__meta-label">{structuredInputs[0].label}</p>
-                  <p className="surface__item-lead">{structuredInputs[0].value}</p>
-                </article>
-                <article className="surface__evidence-card" key={structuredInputs[3].label}>
-                  <p className="surface__meta-label">{structuredInputs[3].label}</p>
-                  <p className="surface__item-lead">{structuredInputs[3].value}</p>
-                </article>
-                <article className="surface__evidence-card" key={structuredInputs[9].label}>
-                  <p className="surface__meta-label">{structuredInputs[9].label}</p>
-                  <p className="surface__item-lead">{structuredInputs[9].value}</p>
-                </article>
-              </div>
-              <p className="surface__meta">
-                {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
-                {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
-              </p>
-            </article>
-
-            <article className="surface__status-card surface__status-card--warning">
-              <div className="surface__item-header">
-                <h3>{text.askAi.guardrailsTitle}</h3>
-                <span className="surface__badge surface__badge--danger">{text.askAi.manualOnlyBadge}</span>
-              </div>
-              <p className="surface__item-lead">{text.askAi.whatAiCannotDo}</p>
-              <p className="surface__meta">{text.askAi.redZoneDescription}</p>
-              <p className="surface__meta">{aiGuardrails.redZone.summary}</p>
-              <p className="surface__meta">{redZoneHardStop.manualOnlyNote}</p>
-            </article>
-
             <aside aria-live="polite" className="surface__status-intro surface__status-intro--compact surface__status-intro--supporting">
               <div className="surface__item-header">
                 <div className="surface__status-intro-copy">
                   <p className="surface__meta-label">{text.askAi.runtimeSummary}</p>
+                  <p className="surface__item-lead">{selectedProviderLabel}</p>
                   <p className="surface__meta">
-                    {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
-                    {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)} · {text.meta.lastChecked}:{' '}
-                    {formatRelativeTime(uiLanguage, providerStatus.checkedAt)}
-                    {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error, uiLanguage)}` : ''}
+                    {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
+                    {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
                   </p>
+                  <p className="surface__meta">{trustSnapshot}</p>
+                  <p className="surface__meta">{text.askAi.manualOnlyBadge}</p>
                 </div>
-                <span className="surface__badge surface__badge--neutral">{selectedProviderLabel}</span>
+                <span className={`surface__badge surface__badge--${selectedProviderReady ? 'success' : 'warning'}`}>
+                  {selectedProviderReady ? text.meta.ready : text.meta.notReady}
+                </span>
               </div>
             </aside>
+
+            <details className="surface__advanced-settings">
+              <summary className="surface__advanced-settings-summary">
+                <span>{policyReviewLabel}</span>
+                <span className="surface__badge surface__badge--neutral">{structuredInputs.length} items</span>
+              </summary>
+              <div className="surface__advanced-settings-body">
+                <article className="surface__status-card surface__status-card--success">
+                  <div className="surface__item-header">
+                    <h3>{text.askAi.whatAiCanSee}</h3>
+                    <span className="surface__badge surface__badge--success">{text.meta.ready}</span>
+                  </div>
+                  <div className="surface__evidence-grid surface__evidence-grid--compact">
+                    <article className="surface__evidence-card" key={structuredInputs[0].label}>
+                      <p className="surface__meta-label">{structuredInputs[0].label}</p>
+                      <p className="surface__item-lead">{structuredInputs[0].value}</p>
+                    </article>
+                    <article className="surface__evidence-card" key={structuredInputs[3].label}>
+                      <p className="surface__meta-label">{structuredInputs[3].label}</p>
+                      <p className="surface__item-lead">{structuredInputs[3].value}</p>
+                    </article>
+                    <article className="surface__evidence-card" key={structuredInputs[9].label}>
+                      <p className="surface__meta-label">{structuredInputs[9].label}</p>
+                      <p className="surface__item-lead">{structuredInputs[9].value}</p>
+                    </article>
+                  </div>
+                  <p className="surface__meta">
+                    {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
+                    {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
+                  </p>
+                </article>
+
+                <article className="surface__status-card surface__status-card--warning">
+                  <div className="surface__item-header">
+                    <h3>{text.askAi.guardrailsTitle}</h3>
+                    <span className="surface__badge surface__badge--danger">{text.askAi.manualOnlyBadge}</span>
+                  </div>
+                  <p className="surface__item-lead">{text.askAi.whatAiCannotDo}</p>
+                  <p className="surface__meta">{text.askAi.redZoneDescription}</p>
+                  <p className="surface__meta">{aiGuardrails.redZone.summary}</p>
+                  <p className="surface__meta">{redZoneHardStop.manualOnlyNote}</p>
+                </article>
+
+                <aside aria-live="polite" className="surface__status-intro surface__status-intro--compact surface__status-intro--supporting">
+                  <div className="surface__item-header">
+                    <div className="surface__status-intro-copy">
+                      <p className="surface__meta-label">{text.askAi.runtimeSummary}</p>
+                      <p className="surface__meta">
+                        {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
+                        {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)} · {text.meta.lastChecked}:{' '}
+                        {formatRelativeTime(uiLanguage, providerStatus.checkedAt)}
+                        {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error, uiLanguage)}` : ''}
+                      </p>
+                    </div>
+                    <span className="surface__badge surface__badge--neutral">{selectedProviderLabel}</span>
+                  </div>
+                </aside>
+              </div>
+            </details>
           </div>
         </div>
 
         <details className="surface__advanced-settings">
           <summary className="surface__advanced-settings-summary">
-            <span>Policy review and visible evidence</span>
+            <span>{structuredLedgerLabel}</span>
             <span className="surface__badge surface__badge--neutral">{structuredInputs.length} items</span>
           </summary>
           <div className="surface__advanced-settings-body">

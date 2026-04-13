@@ -19,6 +19,49 @@ const AUTHORIZATION_STATUS_OPTIONS: Array<ExtensionConfig['authorization']['rule
   'blocked',
 ];
 
+function getAuthorizationStatusTone(status: ExtensionConfig['authorization']['rules'][number]['status']) {
+  if (status === 'allowed') {
+    return 'success';
+  }
+  if (status === 'blocked') {
+    return 'danger';
+  }
+  return 'warning';
+}
+
+function formatAuthorizationStatusLabel(
+  status: ExtensionConfig['authorization']['rules'][number]['status'],
+  uiLanguage: ResolvedUiLanguage,
+) {
+  if (uiLanguage === 'zh-CN') {
+    switch (status) {
+      case 'allowed':
+        return '已允许';
+      case 'partial':
+        return '部分';
+      case 'confirm_required':
+        return '需确认';
+      case 'blocked':
+        return '已阻止';
+      default:
+        return status;
+    }
+  }
+
+  switch (status) {
+    case 'allowed':
+      return 'Allowed';
+    case 'partial':
+      return 'Partial';
+    case 'confirm_required':
+      return 'Confirm required';
+    case 'blocked':
+      return 'Blocked';
+    default:
+      return status;
+  }
+}
+
 function getSiteAuthorizationStatus(
   config: ExtensionConfig,
   site: (typeof MANAGED_POLICY_SITES)[number],
@@ -161,6 +204,19 @@ export function OptionsPanels(props: {
   const blockedResourceFamilyCount = ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS.filter(
     (family) => getResourceFamilyAuthorizationStatus(optionsDraft, family.resourceFamily, 'layer2_ai_read_analysis') === 'blocked',
   ).length;
+  const globalLayer1Status = getWorkspaceAuthorizationStatus(optionsDraft, 'layer1_read_export');
+  const globalLayer2Status = getWorkspaceAuthorizationStatus(optionsDraft, 'layer2_ai_read_analysis');
+  const detailedAuthorizationControlsLabel =
+    uiLanguage === 'zh-CN' ? '详细授权控制' : 'Detailed authorization controls';
+  const siteAuthorizationSnapshotLabel =
+    uiLanguage === 'zh-CN' ? '站点授权快照' : 'Site authorization snapshot';
+  const highSensitivitySnapshotLabel =
+    uiLanguage === 'zh-CN' ? '高敏感资源族' : 'High-sensitivity families';
+  const managedSiteAuthorizationSnapshot = MANAGED_POLICY_SITES.map((site) => ({
+    site,
+    layer1: getSiteAuthorizationStatus(optionsDraft, site, 'layer1_read_export'),
+    layer2: getSiteAuthorizationStatus(optionsDraft, site, 'layer2_ai_read_analysis'),
+  }));
 
   return (
     <div className="surface__grid surface__grid--split">
@@ -228,121 +284,180 @@ export function OptionsPanels(props: {
       <article className="surface__panel">
         <h2>{text.options.authorizationCenter}</h2>
         <p>{text.options.authorizationCenterDescription}</p>
-        <div className="surface__stack">
-          <p className="surface__meta">
-            Layer 1 controls structured read/export. Layer 2 controls AI read/analysis separately.
-          </p>
-          <p className="surface__meta">
-            The current high-sensitivity lanes are summary-first and export-first. AI remains more restrictive than read/export.
-          </p>
-        </div>
-        <div className="surface__grid surface__grid--split">
-          <label className="surface__field">
-            <span>All sites · Layer 1 read/export</span>
-            <select
-              value={getWorkspaceAuthorizationStatus(optionsDraft, 'layer1_read_export')}
-              onChange={(event) =>
-                setOptionsDraft((current) =>
-                  updateWorkspaceAuthorizationStatus(
-                    current,
-                    'layer1_read_export',
-                    event.target.value as ExtensionConfig['authorization']['rules'][number]['status'],
-                  ),
-                )
-              }
-            >
-              {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
-                <option key={`global-layer1-${option}`} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="surface__field">
-            <span>All sites · Layer 2 AI read/analysis</span>
-            <select
-              value={getWorkspaceAuthorizationStatus(optionsDraft, 'layer2_ai_read_analysis')}
-              onChange={(event) =>
-                setOptionsDraft((current) =>
-                  updateWorkspaceAuthorizationStatus(
-                    current,
-                    'layer2_ai_read_analysis',
-                    event.target.value as ExtensionConfig['authorization']['rules'][number]['status'],
-                  ),
-                )
-              }
-            >
-              {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
-                <option key={`global-layer2-${option}`} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        {MANAGED_POLICY_SITES.map((site) => (
-          <div className="surface__grid surface__grid--split" key={site}>
-            <label className="surface__field">
-              <span>{SITE_LABELS[site]} · Layer 1 read/export</span>
-              <select
-                value={getSiteAuthorizationStatus(optionsDraft, site, 'layer1_read_export')}
-                onChange={(event) =>
-                  setOptionsDraft((current) =>
-                    updateSiteAuthorizationStatus(
-                      current,
-                      site,
-                      'layer1_read_export',
-                      event.target.value as ExtensionConfig['authorization']['rules'][number]['status'],
-                    ),
-                  )
-                }
-              >
-                {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
-                  <option key={`${site}-layer1-${option}`} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="surface__field">
-              <span>{SITE_LABELS[site]} · Layer 2 AI read/analysis</span>
-              <select
-                value={getSiteAuthorizationStatus(optionsDraft, site, 'layer2_ai_read_analysis')}
-                onChange={(event) =>
-                  setOptionsDraft((current) =>
-                    updateSiteAuthorizationStatus(
-                      current,
-                      site,
-                      'layer2_ai_read_analysis',
-                      event.target.value as ExtensionConfig['authorization']['rules'][number]['status'],
-                    ),
-                  )
-                }
-              >
-                {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
-                  <option key={`${site}-layer2-${option}`} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
+        <div className="surface__summary-grid surface__summary-grid--compact surface__summary-grid--slim">
+          <div className="surface__summary-cell surface__summary-cell--slim">
+            <strong className="surface__summary-value">{allowedCount(optionsDraft)}</strong>
+            <span className="surface__summary-label">{text.meta.ready}</span>
           </div>
-        ))}
-        <div className="surface__stack">
-          <h3>{text.options.highSensitivityFamilies}</h3>
-          <p className="surface__meta">
-            These entries describe current summary-first admin lanes. They do not imply a standalone detail runtime or AI-ready record lane.
-          </p>
-          {ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS.map((family) => (
-            <div className="surface__stack" key={family.resourceFamily}>
-              <p className="surface__meta">
-                <strong>{family.label}</strong> · Layer 1 {getResourceFamilyAuthorizationStatus(optionsDraft, family.resourceFamily, 'layer1_read_export')} · Layer 2{' '}
-                {getResourceFamilyAuthorizationStatus(optionsDraft, family.resourceFamily, 'layer2_ai_read_analysis')}
-              </p>
-              <p className="surface__meta">{family.note}</p>
-            </div>
-          ))}
+          <div className="surface__summary-cell surface__summary-cell--slim">
+            <strong className="surface__summary-value">{confirmRequiredCount(optionsDraft)}</strong>
+            <span className="surface__summary-label">{text.options.confirmRequired}</span>
+          </div>
+          <div className="surface__summary-cell surface__summary-cell--slim">
+            <strong className="surface__summary-value">{blockedResourceFamilyCount}</strong>
+            <span className="surface__summary-label">{text.options.blockedFamilies}</span>
+          </div>
         </div>
+        <div className="surface__evidence-grid surface__evidence-grid--compact">
+          <article className="surface__evidence-card">
+            <p className="surface__meta-label">All sites · Layer 1 read/export</p>
+            <p className="surface__item-lead">{formatAuthorizationStatusLabel(globalLayer1Status, uiLanguage)}</p>
+            <p className="surface__meta">Structured read/export for the current workspace.</p>
+          </article>
+          <article className="surface__evidence-card">
+            <p className="surface__meta-label">All sites · Layer 2 AI read/analysis</p>
+            <p className="surface__item-lead">{formatAuthorizationStatusLabel(globalLayer2Status, uiLanguage)}</p>
+            <p className="surface__meta">AI remains separately gated from read/export.</p>
+          </article>
+        </div>
+        <div className="surface__stack">
+          <h3>{siteAuthorizationSnapshotLabel}</h3>
+          <div className="surface__grid">
+            {managedSiteAuthorizationSnapshot.map((entry) => (
+              <article className="surface__evidence-card" key={entry.site}>
+                <div className="surface__item-header">
+                  <strong>{SITE_LABELS[entry.site]}</strong>
+                  <span className={`surface__badge surface__badge--${getAuthorizationStatusTone(entry.layer2)}`}>
+                    {formatAuthorizationStatusLabel(entry.layer2, uiLanguage)}
+                  </span>
+                </div>
+                <p className="surface__meta">
+                  Layer 1 {formatAuthorizationStatusLabel(entry.layer1, uiLanguage)} · Layer 2 {formatAuthorizationStatusLabel(entry.layer2, uiLanguage)}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+        <div className="surface__stack">
+          <h3>{highSensitivitySnapshotLabel}</h3>
+          <p className="surface__meta">
+            These entries stay summary-first and export-first. AI remains more restrictive than read/export.
+          </p>
+          <div className="surface__grid">
+            {ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS.map((family) => (
+              <article className="surface__evidence-card" key={family.resourceFamily}>
+                <div className="surface__item-header">
+                  <strong>{family.label}</strong>
+                  <span
+                    className={`surface__badge surface__badge--${getAuthorizationStatusTone(
+                      getResourceFamilyAuthorizationStatus(optionsDraft, family.resourceFamily, 'layer2_ai_read_analysis'),
+                    )}`}
+                  >
+                    {formatAuthorizationStatusLabel(
+                      getResourceFamilyAuthorizationStatus(optionsDraft, family.resourceFamily, 'layer2_ai_read_analysis'),
+                      uiLanguage,
+                    )}
+                  </span>
+                </div>
+                <p className="surface__meta">
+                  Layer 1 {formatAuthorizationStatusLabel(getResourceFamilyAuthorizationStatus(optionsDraft, family.resourceFamily, 'layer1_read_export'), uiLanguage)} · Layer 2{' '}
+                  {formatAuthorizationStatusLabel(getResourceFamilyAuthorizationStatus(optionsDraft, family.resourceFamily, 'layer2_ai_read_analysis'), uiLanguage)}
+                </p>
+                <p className="surface__meta">{family.note}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+        <details className="surface__advanced-settings">
+          <summary className="surface__advanced-settings-summary">
+            <span>{detailedAuthorizationControlsLabel}</span>
+            <span className="surface__badge surface__badge--neutral">{MANAGED_POLICY_SITES.length + 2} rows</span>
+          </summary>
+          <div className="surface__advanced-settings-body">
+            <div className="surface__grid surface__grid--split">
+              <label className="surface__field">
+                <span>All sites · Layer 1 read/export</span>
+                <select
+                  value={globalLayer1Status}
+                  onChange={(event) =>
+                    setOptionsDraft((current) =>
+                      updateWorkspaceAuthorizationStatus(
+                        current,
+                        'layer1_read_export',
+                        event.target.value as ExtensionConfig['authorization']['rules'][number]['status'],
+                      ),
+                    )
+                  }
+                >
+                  {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
+                    <option key={`global-layer1-${option}`} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="surface__field">
+                <span>All sites · Layer 2 AI read/analysis</span>
+                <select
+                  value={globalLayer2Status}
+                  onChange={(event) =>
+                    setOptionsDraft((current) =>
+                      updateWorkspaceAuthorizationStatus(
+                        current,
+                        'layer2_ai_read_analysis',
+                        event.target.value as ExtensionConfig['authorization']['rules'][number]['status'],
+                      ),
+                    )
+                  }
+                >
+                  {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
+                    <option key={`global-layer2-${option}`} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            {MANAGED_POLICY_SITES.map((site) => (
+              <div className="surface__grid surface__grid--split" key={site}>
+                <label className="surface__field">
+                  <span>{SITE_LABELS[site]} · Layer 1 read/export</span>
+                  <select
+                    value={getSiteAuthorizationStatus(optionsDraft, site, 'layer1_read_export')}
+                    onChange={(event) =>
+                      setOptionsDraft((current) =>
+                        updateSiteAuthorizationStatus(
+                          current,
+                          site,
+                          'layer1_read_export',
+                          event.target.value as ExtensionConfig['authorization']['rules'][number]['status'],
+                        ),
+                      )
+                    }
+                  >
+                    {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
+                      <option key={`${site}-layer1-${option}`} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="surface__field">
+                  <span>{SITE_LABELS[site]} · Layer 2 AI read/analysis</span>
+                  <select
+                    value={getSiteAuthorizationStatus(optionsDraft, site, 'layer2_ai_read_analysis')}
+                    onChange={(event) =>
+                      setOptionsDraft((current) =>
+                        updateSiteAuthorizationStatus(
+                          current,
+                          site,
+                          'layer2_ai_read_analysis',
+                          event.target.value as ExtensionConfig['authorization']['rules'][number]['status'],
+                        ),
+                      )
+                    }
+                  >
+                    {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
+                      <option key={`${site}-layer2-${option}`} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            ))}
+          </div>
+        </details>
       </article>
 
       <article className="surface__panel">
@@ -614,4 +729,8 @@ export function OptionsPanels(props: {
 
 function confirmRequiredCount(optionsDraft: ExtensionConfig) {
   return optionsDraft.authorization.rules.filter((rule) => rule.status === 'confirm_required').length;
+}
+
+function allowedCount(optionsDraft: ExtensionConfig) {
+  return optionsDraft.authorization.rules.filter((rule) => rule.status === 'allowed').length;
 }

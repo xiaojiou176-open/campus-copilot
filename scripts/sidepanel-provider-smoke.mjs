@@ -523,6 +523,26 @@ function buildChromeMocks() {
             gemini: defaultProvider === 'gemini' ? defaultModel : 'gemini-2.5-flash',
           },
         },
+        authorization: {
+          policyVersion: 'sidepanel-smoke',
+          updatedAt: new Date().toISOString(),
+          rules: [
+            {
+              id: 'global-layer1-read-export-workspace',
+              layer: 'layer1_read_export',
+              status: 'allowed',
+              resourceFamily: 'workspace_snapshot',
+              label: 'All sites structured read/export',
+            },
+            {
+              id: 'global-layer2-ai-read-workspace',
+              layer: 'layer2_ai_read_analysis',
+              status: 'allowed',
+              resourceFamily: 'workspace_snapshot',
+              label: 'All sites AI read/analysis status',
+            },
+          ],
+        },
         sites: {
           edstem: {},
         },
@@ -709,20 +729,20 @@ try {
 
   await page.goto(sidepanelUrl);
   const providerLabel = defaultProvider === 'gemini' ? 'Gemini' : 'OpenAI';
-  const providerReadyCard = page
-    .locator('.surface__status-card')
+  const providerReadySummary = page
+    .locator('.surface__status-intro')
     .filter({ hasText: providerLabel })
     .filter({ hasText: providerReadyStatusLabel })
     .filter({ hasText: providerConfiguredReasonLabel })
     .first();
-  if (!(await providerReadyCard.isVisible().catch(() => false))) {
+  if (!(await providerReadySummary.isVisible().catch(() => false))) {
     await page.getByRole('button', { name: refreshProviderLabel }).click().catch(() => {});
   }
-  await providerReadyCard.waitFor({ timeout: 20000 });
+  await providerReadySummary.waitFor({ timeout: 20000 });
   if (screenshotPath) {
     await seedPublicScreenshotData(page);
     await page.reload();
-    await providerReadyCard.waitFor({ timeout: 20000 });
+    await providerReadySummary.waitFor({ timeout: 20000 });
     mkdirSync(dirname(screenshotPath), { recursive: true });
     await capturePublicProofScreenshot(page, screenshotPath);
   }
