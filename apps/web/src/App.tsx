@@ -73,6 +73,53 @@ function downloadArtifact(artifact: ExportArtifact) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+type BuildWebCurrentViewArtifactArgs = Omit<
+  Parameters<typeof buildWorkbenchExportInput>[0],
+  'preset' | 'generatedAt' | 'presentation' | 'exportScope' | 'packaging'
+> & {
+  now: string;
+  format: ExportFormat;
+  importedEnvelope?: ImportedArtifactEnvelope;
+};
+
+export function buildWebCurrentViewArtifact(args: BuildWebCurrentViewArtifactArgs) {
+  const siteLabel = args.filters.site === 'all' ? 'All sites' : SITE_LABELS[args.filters.site];
+
+  return applyImportedEnvelopeToArtifact(
+    createExportArtifact({
+      preset: 'current_view',
+      format: args.format,
+      input: buildWorkbenchExportInput({
+        preset: 'current_view',
+        generatedAt: args.now,
+        filters: args.filters,
+        exportScope: args.importedEnvelope?.scope,
+        packaging: args.importedEnvelope?.packaging,
+        resources: args.resources,
+        assignments: args.assignments,
+        announcements: args.announcements,
+        messages: args.messages,
+        grades: args.grades,
+        events: args.events,
+        alerts: args.alerts,
+        recentUpdates: args.recentUpdates,
+        focusQueue: args.focusQueue,
+        weeklyLoad: args.weeklyLoad,
+        syncRuns: args.syncRuns,
+        changeEvents: args.changeEvents,
+        courseClusters: args.courseClusters,
+        workItemClusters: args.workItemClusters,
+        administrativeSummaries: args.administrativeSummaries,
+        mergeHealth: args.mergeHealth,
+        presentation: {
+          viewTitle: `Web workbench (${siteLabel})`,
+        },
+      }),
+    }),
+    args.importedEnvelope,
+  );
+}
+
 export function App() {
   const [ready, setReady] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -201,40 +248,28 @@ export function App() {
     if (!workbenchReady) {
       return undefined;
     }
-    const siteLabel = filters.site === 'all' ? 'All sites' : SITE_LABELS[filters.site];
-    return applyImportedEnvelopeToArtifact(
-      createExportArtifact({
-        preset: 'current_view',
-        format: 'markdown',
-        input: buildWorkbenchExportInput({
-          preset: 'current_view',
-          generatedAt: now,
-          filters,
-          exportScope: importedEnvelope?.scope,
-          packaging: importedEnvelope?.packaging,
-          resources: currentResources,
-          assignments: currentAssignments,
-          announcements: currentAnnouncements,
-          messages: currentMessages,
-          grades: currentGrades,
-          events: currentEvents,
-          alerts: currentAlerts,
-          recentUpdates,
-          focusQueue,
-          weeklyLoad,
-          syncRuns: latestSyncRuns,
-          changeEvents: recentChangeEvents,
-          courseClusters,
-          workItemClusters,
-          administrativeSummaries,
-          mergeHealth,
-          presentation: {
-            viewTitle: `Web workbench (${siteLabel})`,
-          },
-        }),
-      }),
+    return buildWebCurrentViewArtifact({
+      now,
+      format: 'markdown',
+      filters,
       importedEnvelope,
-    );
+      resources: currentResources,
+      assignments: currentAssignments,
+      announcements: currentAnnouncements,
+      messages: currentMessages,
+      grades: currentGrades,
+      events: currentEvents,
+      alerts: currentAlerts,
+      recentUpdates,
+      focusQueue,
+      weeklyLoad,
+      syncRuns: latestSyncRuns,
+      changeEvents: recentChangeEvents,
+      courseClusters,
+      workItemClusters,
+      administrativeSummaries,
+      mergeHealth,
+    });
   }, [
     workbenchReady,
     filters,
@@ -256,30 +291,54 @@ export function App() {
 
   function handleExport(preset: ExportPreset) {
     const siteLabel = filters.site === 'all' ? 'All sites' : SITE_LABELS[filters.site];
-    const artifact = createExportArtifact({
-      preset,
-      format: exportFormat,
-      input: buildWorkbenchExportInput({
-        preset,
-        generatedAt: now,
-        filters,
-        resources: currentResources,
-        assignments: currentAssignments,
-        announcements: currentAnnouncements,
-        messages: currentMessages,
-        grades: currentGrades,
-        events: currentEvents,
-        alerts: currentAlerts,
-        recentUpdates,
-        focusQueue,
-        weeklyLoad,
-        syncRuns: latestSyncRuns,
-        changeEvents: recentChangeEvents,
-        presentation: {
-          viewTitle: `Web workbench (${siteLabel})`,
-        },
-      }),
-    });
+    const artifact =
+      preset === 'current_view'
+        ? buildWebCurrentViewArtifact({
+            now,
+            format: exportFormat,
+            filters,
+            importedEnvelope,
+            resources: currentResources,
+            assignments: currentAssignments,
+            announcements: currentAnnouncements,
+            messages: currentMessages,
+            grades: currentGrades,
+            events: currentEvents,
+            alerts: currentAlerts,
+            recentUpdates,
+            focusQueue,
+            weeklyLoad,
+            syncRuns: latestSyncRuns,
+            changeEvents: recentChangeEvents,
+            courseClusters,
+            workItemClusters,
+            administrativeSummaries,
+            mergeHealth,
+          })
+        : createExportArtifact({
+            preset,
+            format: exportFormat,
+            input: buildWorkbenchExportInput({
+              preset,
+              generatedAt: now,
+              filters,
+              resources: currentResources,
+              assignments: currentAssignments,
+              announcements: currentAnnouncements,
+              messages: currentMessages,
+              grades: currentGrades,
+              events: currentEvents,
+              alerts: currentAlerts,
+              recentUpdates,
+              focusQueue,
+              weeklyLoad,
+              syncRuns: latestSyncRuns,
+              changeEvents: recentChangeEvents,
+              presentation: {
+                viewTitle: `Web workbench (${siteLabel})`,
+              },
+            }),
+          });
     downloadArtifact(artifact);
     setFeedback(`Downloaded ${artifact.filename} from the same exporter contract used by the extension.`);
   }
@@ -507,6 +566,32 @@ export function App() {
           />
         </div>
 
+        <div className="web-shell__decision-lane" aria-label="Decision workspace">
+          <WebWorkbenchPanels
+            workbenchReady={workbenchReady}
+            todaySnapshot={todaySnapshot ?? undefined}
+            recentUpdates={recentUpdates ?? undefined}
+            currentViewExport={currentViewExport}
+            importedEnvelope={importedEnvelope}
+            focusQueue={focusQueue}
+            planningSubstrates={planningSubstrates}
+            weeklyLoad={weeklyLoad}
+            courseClusters={courseClusters}
+            workItemClusters={workItemClusters}
+            administrativeSummaries={administrativeSummaries}
+            mergeHealth={mergeHealth}
+            currentAssignments={currentAssignments}
+            currentMessages={currentMessages}
+            currentResources={currentResources}
+            currentAnnouncements={currentAnnouncements}
+            currentEvents={currentEvents}
+            recentChangeEvents={recentChangeEvents}
+            countsBySite={countsBySite}
+            topSyncRun={topSyncRun}
+            siteLabels={SITE_LABELS}
+          />
+        </div>
+
         <div className="web-shell__overview-lanes">
           <div className="web-shell__support-lane">
             <WebSupportRail
@@ -588,32 +673,6 @@ export function App() {
             onExportFocusQueue={() => handleExport('focus_queue')}
             onExportWeeklyLoad={() => handleExport('weekly_load')}
             onExportChangeJournal={() => handleExport('change_journal')}
-          />
-        </div>
-
-        <div className="web-shell__decision-lane" aria-label="Decision workspace">
-          <WebWorkbenchPanels
-            workbenchReady={workbenchReady}
-            todaySnapshot={todaySnapshot ?? undefined}
-            recentUpdates={recentUpdates ?? undefined}
-            currentViewExport={currentViewExport}
-            importedEnvelope={importedEnvelope}
-            focusQueue={focusQueue}
-            planningSubstrates={planningSubstrates}
-            weeklyLoad={weeklyLoad}
-            courseClusters={courseClusters}
-            workItemClusters={workItemClusters}
-            administrativeSummaries={administrativeSummaries}
-            mergeHealth={mergeHealth}
-            currentAssignments={currentAssignments}
-            currentMessages={currentMessages}
-            currentResources={currentResources}
-            currentAnnouncements={currentAnnouncements}
-            currentEvents={currentEvents}
-            recentChangeEvents={recentChangeEvents}
-            countsBySite={countsBySite}
-            topSyncRun={topSyncRun}
-            siteLabels={SITE_LABELS}
           />
         </div>
       </main>

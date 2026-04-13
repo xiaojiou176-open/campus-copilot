@@ -98,6 +98,8 @@ export interface BuildWorkbenchAiProxyRequestArgs {
   presentation?: Omit<WorkbenchPresentationOverrides, 'viewTitle'>;
 }
 
+type PlanningPulseCoverageStatus = 'missing' | 'metadata_only' | 'plan_only' | 'audit_only' | 'plan_and_audit';
+
 function buildDefaultViewTitle(preset: ExportPreset, filters: WorkbenchFilter) {
   const siteLabel = filters.site === 'all' ? 'All sites' : filters.site;
 
@@ -203,6 +205,80 @@ function buildAiDecisionContext(args: BuildWorkbenchAiProxyRequestArgs, presenta
   };
 }
 
+function buildPlanningSubstrateToolPayload(planningSubstrates: WorkbenchView['planningSubstrates'] = []) {
+  const orderedPlanningSubstrates = [...planningSubstrates].sort((left, right) =>
+    right.capturedAt.localeCompare(left.capturedAt),
+  );
+  const latestPlanning = orderedPlanningSubstrates[0];
+
+  if (!latestPlanning) {
+    return {
+      lane: 'summary_first_read_only_planning_lane' as const,
+      posture: 'planning_only_not_registration_or_enrollment_proof' as const,
+      coverageStatus: 'missing' as PlanningPulseCoverageStatus,
+      summary:
+        'Planning Pulse has no current MyPlan/DARS capture in this workbench view yet, so planning guidance still needs a fresh manual capture.',
+      exactMissingSlice: 'No shared MyPlan/DARS planning substrate is present in the current workbench view.',
+      operatorNotes: [
+        'Planning Pulse is a shared planning summary lane, not MyPlan parity or registration automation.',
+        'Absent planning capture should be treated as missing evidence, not as an all-clear state.',
+      ],
+      records: [],
+    };
+  }
+
+  const hasPlanCapture =
+    latestPlanning.termCount > 0 ||
+    latestPlanning.plannedCourseCount > 0 ||
+    latestPlanning.backupCourseCount > 0 ||
+    latestPlanning.scheduleOptionCount > 0;
+  const hasAuditCapture =
+    latestPlanning.requirementGroupCount > 0 || Boolean(latestPlanning.degreeProgressSummary);
+
+  let coverageStatus: PlanningPulseCoverageStatus = 'metadata_only';
+  let exactMissingSlice = 'Current capture needs a stronger planning/audit continuation before it can claim a complete Planning Pulse lane.';
+
+  if (hasPlanCapture && hasAuditCapture) {
+    coverageStatus = 'plan_and_audit';
+    exactMissingSlice =
+      'Current Planning Pulse capture includes both plan context and audit-summary context, but it still stays summary-first and read-only.';
+  } else if (hasPlanCapture) {
+    coverageStatus = 'plan_only';
+    exactMissingSlice =
+      'Current Planning Pulse capture includes MyPlan plan context, but the DARS/degree-audit half is still missing from this shared lane.';
+  } else if (hasAuditCapture) {
+    coverageStatus = 'audit_only';
+    exactMissingSlice =
+      'Current Planning Pulse capture includes DARS/degree-audit summary context, but the MyPlan term/plan half is still missing from this shared lane.';
+  }
+
+  return {
+    lane: 'summary_first_read_only_planning_lane' as const,
+    posture: 'planning_only_not_registration_or_enrollment_proof' as const,
+    coverageStatus,
+    summary: `${latestPlanning.planLabel} currently tracks ${latestPlanning.termCount} term(s), ${latestPlanning.plannedCourseCount} planned course(s), ${latestPlanning.backupCourseCount} backup option(s), ${latestPlanning.scheduleOptionCount} schedule option(s), and ${latestPlanning.requirementGroupCount} requirement group(s) in the shared Planning Pulse lane.`,
+    exactMissingSlice,
+    latestCapture: {
+      id: latestPlanning.id,
+      capturedAt: latestPlanning.capturedAt,
+      planLabel: latestPlanning.planLabel,
+      planId: latestPlanning.planId,
+      termCount: latestPlanning.termCount,
+      plannedCourseCount: latestPlanning.plannedCourseCount,
+      backupCourseCount: latestPlanning.backupCourseCount,
+      scheduleOptionCount: latestPlanning.scheduleOptionCount,
+      requirementGroupCount: latestPlanning.requirementGroupCount,
+      degreeProgressSummary: latestPlanning.degreeProgressSummary,
+      transferPlanningSummary: latestPlanning.transferPlanningSummary,
+    },
+    operatorNotes: [
+      'Planning Pulse stays a shared planning summary lane, not proof of enrollment entitlement or registration execution state.',
+      'Requirement and degree-progress signals remain summary-first until a stronger standalone detail lane is promoted.',
+    ],
+    records: orderedPlanningSubstrates,
+  };
+}
+
 function buildAiExportToolPayload(args: BuildWorkbenchAiProxyRequestArgs, presentation: BuildWorkbenchAiProxyRequestArgs['presentation']) {
   const decisionContext = buildAiDecisionContext(args, presentation);
 
@@ -247,6 +323,7 @@ function buildAiExportToolPayload(args: BuildWorkbenchAiProxyRequestArgs, presen
 export function buildWorkbenchAiProxyRequest(args: BuildWorkbenchAiProxyRequestArgs) {
   const presentation = args.presentation;
   const sitePolicyOverlay = args.sitePolicyOverlay ?? getAiSitePolicyOverlay(args.currentViewExport.scope.site);
+  const planningSubstrates = args.planningSubstrates ?? args.workbenchView?.planningSubstrates ?? [];
   const advancedMaterialAnalysis = args.advancedMaterialAnalysis ?? {
     enabled: false,
     policy: 'default_disabled',
@@ -270,7 +347,7 @@ export function buildWorkbenchAiProxyRequest(args: BuildWorkbenchAiProxyRequestA
     },
     {
       name: 'get_planning_substrates' as const,
-      payload: args.planningSubstrates ?? args.workbenchView?.planningSubstrates ?? [],
+      payload: buildPlanningSubstrateToolPayload(planningSubstrates),
     },
   ];
 

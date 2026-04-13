@@ -252,6 +252,18 @@ export function OptionsPanels(props: {
     uiLanguage === 'zh-CN'
       ? '当前还没有记录任何课程级 AI opt-in。'
       : 'No course-level AI opt-ins have been captured yet.';
+  const connectionSummaryTitle =
+    uiLanguage === 'zh-CN' ? '连接与边界摘要' : 'Connection and boundary summary';
+  const connectionSummaryDescription =
+    uiLanguage === 'zh-CN'
+      ? '先确认当前 readiness、两层授权和高敏边界，再决定要不要往下改配置或导出。'
+      : 'Confirm readiness, the two-layer authorization posture, and high-sensitivity boundaries before changing settings or exporting.';
+  const configurationActionsTitle =
+    uiLanguage === 'zh-CN' ? '配置动作' : 'Configuration actions';
+  const configurationActionsDescription =
+    uiLanguage === 'zh-CN'
+      ? '保存、刷新和导出放到 trust/boundary 摘要之后，避免首屏先变成控制台。'
+      : 'Save, refresh, and export stay after the trust and boundary summary so the first screen does not read like a control console.';
   const managedSiteAuthorizationSnapshot = MANAGED_POLICY_SITES.map((site) => ({
     site,
     layer1: getSiteAuthorizationStatus(optionsDraft, site, 'layer1_read_export'),
@@ -272,46 +284,40 @@ export function OptionsPanels(props: {
     <div className="surface__stack">
       <div className="surface__grid surface__grid--split">
         <article className="surface__panel">
-        <h2>{text.options.configurationTitle}</h2>
-        <p>{text.options.configurationDescription}</p>
-        <div className="surface__summary-grid surface__summary-grid--compact surface__summary-grid--slim">
-          <div className="surface__summary-cell surface__summary-cell--slim">
-            <strong className="surface__summary-value">{readyProviderCount}</strong>
-            <span className="surface__summary-label">{text.options.readyProviders}</span>
+          <h2>{connectionSummaryTitle}</h2>
+          <p>{connectionSummaryDescription}</p>
+          <div className="surface__summary-grid surface__summary-grid--compact surface__summary-grid--slim">
+            <div className="surface__summary-cell surface__summary-cell--slim">
+              <strong className="surface__summary-value">{readyProviderCount}</strong>
+              <span className="surface__summary-label">{text.options.readyProviders}</span>
+            </div>
+            <div className="surface__summary-cell surface__summary-cell--slim">
+              <strong className="surface__summary-value">{confirmRequiredCount(optionsDraft)}</strong>
+              <span className="surface__summary-label">{text.options.confirmRequired}</span>
+            </div>
+            <div className="surface__summary-cell surface__summary-cell--slim">
+              <strong className="surface__summary-value">{blockedResourceFamilyCount}</strong>
+              <span className="surface__summary-label">{text.options.blockedFamilies}</span>
+            </div>
           </div>
-          <div className="surface__summary-cell surface__summary-cell--slim">
-            <strong className="surface__summary-value">{confirmRequiredCount(optionsDraft)}</strong>
-            <span className="surface__summary-label">{text.options.confirmRequired}</span>
+          <div className="surface__stack">
+            <p className="surface__meta">
+              {uiLanguage === 'zh-CN' ? '工作台 Layer 1' : 'Workspace Layer 1'}:{' '}
+              {formatAuthorizationStatusLabel(globalLayer1Status, uiLanguage)}
+              {' · '}
+              {uiLanguage === 'zh-CN' ? '工作台 Layer 2' : 'Workspace Layer 2'}:{' '}
+              {formatAuthorizationStatusLabel(globalLayer2Status, uiLanguage)}
+            </p>
+            <p className="surface__meta">
+              {text.options.defaultProvider}: {optionsDraft.ai.defaultProvider}
+              {' · '}
+              {text.options.defaultExportFormat}: {optionsDraft.defaultExportFormat.toUpperCase()}
+            </p>
+            <p className="surface__meta">
+              {text.meta.lastChecked}: {formatRelativeTime(uiLanguage, providerStatus.checkedAt)}
+              {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error, uiLanguage)}` : ''}
+            </p>
           </div>
-          <div className="surface__summary-cell surface__summary-cell--slim">
-            <strong className="surface__summary-value">{blockedResourceFamilyCount}</strong>
-            <span className="surface__summary-label">{text.options.blockedFamilies}</span>
-          </div>
-        </div>
-        <div className="surface__stack">
-          <p className="surface__meta">
-            {text.options.defaultProvider}: {optionsDraft.ai.defaultProvider}
-          </p>
-          <p className="surface__meta">
-            {text.options.defaultExportFormat}: {optionsDraft.defaultExportFormat.toUpperCase()}
-          </p>
-          <p className="surface__meta">
-            {text.meta.lastChecked}: {formatRelativeTime(uiLanguage, providerStatus.checkedAt)}
-            {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error, uiLanguage)}` : ''}
-          </p>
-        </div>
-        <div className="surface__actions surface__actions--wrap">
-          <button className="surface__button" onClick={() => void onSaveOptions()}>
-            {text.options.saveConfiguration}
-          </button>
-          <button className="surface__button surface__button--ghost" disabled={providerStatusPending} onClick={() => void onRefreshProviderStatus()}>
-            {providerStatusPending ? text.options.refreshingBffStatus : text.options.refreshBffStatus}
-          </button>
-          <button className="surface__button surface__button--secondary" onClick={() => void onExport('current_view')}>
-            {text.options.exportCurrentView}
-          </button>
-        </div>
-        {optionsFeedback ? <p className="surface__feedback">{optionsFeedback}</p> : null}
         </article>
 
         <article className="surface__panel">
@@ -680,6 +686,27 @@ export function OptionsPanels(props: {
             <li key={bullet}>{bullet}</li>
           ))}
         </ul>
+      </article>
+
+      <article className="surface__panel">
+        <h2>{configurationActionsTitle}</h2>
+        <p>{configurationActionsDescription}</p>
+        <div className="surface__actions surface__actions--wrap">
+          <button className="surface__button" onClick={() => void onSaveOptions()}>
+            {text.options.saveConfiguration}
+          </button>
+          <button
+            className="surface__button surface__button--ghost"
+            disabled={providerStatusPending}
+            onClick={() => void onRefreshProviderStatus()}
+          >
+            {providerStatusPending ? text.options.refreshingBffStatus : text.options.refreshBffStatus}
+          </button>
+          <button className="surface__button surface__button--secondary" onClick={() => void onExport('current_view')}>
+            {text.options.exportCurrentView}
+          </button>
+        </div>
+        {optionsFeedback ? <p className="surface__feedback">{optionsFeedback}</p> : null}
       </article>
 
       <article className="surface__panel">

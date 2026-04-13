@@ -110,7 +110,7 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
 
 export function WebOrientationHeader(props: WebOrientationHeaderProps) {
   return (
-    <section className="hero">
+    <section className="hero hero--orientation">
       <div className="hero-copy">
         <p className="eyebrow">Orientation header</p>
         <h1>Student decision workspace</h1>
@@ -118,11 +118,11 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
           One local workspace where academic work and administrative signals stay grouped on the same decision desk.
         </p>
         <p className="hero-support">
-          Start with the trust row and explanation row, then use the tools to load, filter, and export the exact
-          slice you want to review. Cited AI explains the workspace after the facts are already visible, not before.
+          Start with the decision lane first, then use the trust row, AI rail, and tool drawer to review the exact
+          slice you want to explain or export. Cited AI follows the workspace after the facts are already visible.
         </p>
       </div>
-      <div className="hero-card">
+      <div className="hero-card hero-card--orientation">
         <p>Workspace truth</p>
         <strong>{props.ready ? 'Shared storage/read-model loaded' : 'Bootstrapping local workspace'}</strong>
         <span>Last refresh {formatRelativeTime(props.now)}</span>
@@ -134,7 +134,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
 
 export function WebToolbarControls(props: WebToolbarControlsProps) {
   return (
-    <section className="toolbar-card" aria-label="Workbench toolbar">
+    <section className="toolbar-card toolbar-card--supporting" aria-label="Workbench toolbar">
       <div className="toolbar-groups">
         <section className="toolbar-group toolbar-group--primary" aria-labelledby="web-load-import-group">
           <div className="toolbar-group-header">
@@ -142,8 +142,8 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
               Load / Import
             </p>
             <p className="toolbar-group-copy">
-              Bring a local snapshot into the desk first so the trust center, AI rail, and decision workspace all
-              read from the same stored truth.
+              Load or refresh the desk after you have your bearings. These controls support the workbench instead of
+              taking over the first fold.
             </p>
           </div>
           <div className="toolbar-row toolbar-row--actions">
@@ -172,8 +172,8 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
               Filter / Export
             </p>
             <p className="toolbar-group-copy">
-              Use these controls after the trust row has shown the current boundary, envelope, and receipts for the
-              slice you want to review.
+              Filter and export only after the decision lane and trust desk have shown the current boundary,
+              envelope, and receipts for the slice you want to review.
             </p>
           </div>
           <div className="toolbar-row toolbar-row-fields">

@@ -233,7 +233,7 @@ export function AskAiPanel(props: {
             </details>
           </div>
 
-          <div className="surface__ask-ai-sidebar">
+          <div className="surface__ask-ai-sidebar surface__ask-ai-sidebar--supporting">
             <aside aria-live="polite" className="surface__status-intro surface__status-intro--compact surface__status-intro--supporting">
               <div className="surface__item-header">
                 <div className="surface__status-intro-copy">
@@ -254,7 +254,7 @@ export function AskAiPanel(props: {
               </div>
             </aside>
 
-            <details className="surface__advanced-settings">
+            <details className="surface__advanced-settings surface__advanced-settings--supporting">
               <summary className="surface__advanced-settings-summary">
                 <span>{policyReviewLabel}</span>
                 <span className="surface__badge surface__badge--neutral">{structuredInputs.length} items</span>

@@ -411,16 +411,23 @@ async function expandDetailedWorkspace(page: Page, label: string) {
 }
 
 async function assertOptionsTrustCenter(page: Page) {
-  await expect(page.getByRole('heading', { name: 'Settings and authorization' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Connection and boundary summary' })).toBeVisible();
   const authorizationPanel = page.locator('article.surface__panel').filter({
     has: page.getByRole('heading', { name: 'Authorization center' }),
   });
+  const configurationActionsHeading = page.getByRole('heading', { name: 'Configuration actions' });
   await expect(authorizationPanel.getByText('Keep Layer 1 read/export separate from Layer 2 AI analysis')).toBeVisible();
   await authorizationPanel.locator('summary').filter({ hasText: 'Detailed authorization controls' }).click();
   await expect(authorizationPanel.getByLabel('All sites · Layer 1 read/export')).toBeVisible();
   await expect(authorizationPanel.getByLabel('All sites · Layer 2 AI read/analysis')).toBeVisible();
   await expect(authorizationPanel.getByLabel('Canvas · Layer 1 read/export')).toBeVisible();
   await expect(authorizationPanel.getByLabel('Canvas · Layer 2 AI read/analysis')).toBeVisible();
+  await expect(configurationActionsHeading).toBeVisible();
+  const authorizationBox = await authorizationPanel.boundingBox();
+  const configurationActionsBox = await configurationActionsHeading.boundingBox();
+  expect(authorizationBox).not.toBeNull();
+  expect(configurationActionsBox).not.toBeNull();
+  expect(authorizationBox!.y).toBeLessThan(configurationActionsBox!.y);
 }
 
 async function seedTechnicalConfig(
@@ -624,13 +631,19 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
     has: page.getByText('Review & export'),
   });
   await expect(exportReviewPanel.getByText('Trust review comes before the export action.')).toBeVisible();
-  await expect(exportReviewPanel.getByText('AI visibility')).toBeVisible();
+  await expect(exportReviewPanel.getByText('AI visibility', { exact: true })).toBeVisible();
   await expect(exportReviewPanel.getByText(/AI analysis (allowed|blocked)/)).toBeVisible();
-  await expect(exportReviewPanel.getByText('Risk label')).toBeVisible();
+  await expect(
+    exportReviewPanel.locator('p.surface__meta-label').filter({ hasText: /^Risk label$/ }),
+  ).toBeVisible();
   await expect(exportReviewPanel.getByText(/(High|Medium|Low) risk/)).toBeVisible();
-  await expect(exportReviewPanel.getByText('Match confidence')).toBeVisible();
+  await expect(
+    exportReviewPanel.locator('p.surface__meta-label').filter({ hasText: /^Match confidence$/ }),
+  ).toBeVisible();
   await expect(exportReviewPanel.getByText(/(High|Medium|Low) match confidence/)).toBeVisible();
-  await expect(exportReviewPanel.getByText('Provenance')).toBeVisible();
+  await expect(
+    exportReviewPanel.locator('p.surface__meta-label').filter({ hasText: /^Provenance$/ }),
+  ).toBeVisible();
   await expect(exportReviewPanel.getByText('Unified local read model')).toBeVisible();
   await expect(exportReviewPanel.getByText('EdStem session-backed discussion carrier')).toBeVisible();
   await page.getByRole('button', { name: 'Export selection' }).click();

@@ -2,6 +2,33 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createCampusCopilotApiServer, loadApiEnv } from './index';
 
 const servers: Array<import('node:http').Server> = [];
+const TRANSIENT_LOOPBACK_RETRY_COUNT = 3;
+const TRANSIENT_LOOPBACK_RETRY_DELAY_MS = 150;
+
+function isTransientLoopbackConnectError(error: unknown) {
+  return (
+    error instanceof Error &&
+    /EADDRNOTAVAIL/.test(error.message) &&
+    /127\.0\.0\.1/.test(error.message)
+  );
+}
+
+async function fetchWithTransientLoopbackRetry(url: string) {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < TRANSIENT_LOOPBACK_RETRY_COUNT; attempt += 1) {
+    try {
+      return await fetch(url);
+    } catch (error) {
+      lastError = error;
+      if (!isTransientLoopbackConnectError(error) || attempt === TRANSIENT_LOOPBACK_RETRY_COUNT - 1) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, TRANSIENT_LOOPBACK_RETRY_DELAY_MS));
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('fetch failed without an error object');
+}
 
 afterEach(async () => {
   await Promise.all(
@@ -44,7 +71,7 @@ describe('api server runtime', () => {
       throw new Error('Expected an inet server address.');
     }
 
-    const response = await fetch(`http://127.0.0.1:${address.port}/health`);
+    const response = await fetchWithTransientLoopbackRetry(`http://127.0.0.1:${address.port}/health`);
     const payload = (await response.json()) as { ok: boolean; service: string };
 
     expect(response.status).toBe(200);

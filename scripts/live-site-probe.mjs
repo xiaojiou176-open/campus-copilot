@@ -239,12 +239,28 @@ function probeJson(url, path) {
 }
 
 async function probeCdpVersion(url) {
-  const versionResult = await probeJson(url, '/json/version');
-  if (versionResult.ok && typeof versionResult.parsed?.webSocketDebuggerUrl === 'string') {
-    return versionResult;
-  }
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const versionResult = await probeJson(url, '/json/version');
+    if (versionResult.ok && typeof versionResult.parsed?.webSocketDebuggerUrl === 'string') {
+      return versionResult;
+    }
 
-  return probeJson(url, '/json/version/');
+    const trailingSlashResult = await probeJson(url, '/json/version/');
+    if (trailingSlashResult.ok && typeof trailingSlashResult.parsed?.webSocketDebuggerUrl === 'string') {
+      return trailingSlashResult;
+    }
+
+    const transientLoopbackFailure =
+      [versionResult.error, trailingSlashResult.error].some(
+        (error) => typeof error === 'string' && error.includes('EADDRNOTAVAIL 127.0.0.1'),
+      );
+
+    if (!transientLoopbackFailure || attempt === 2) {
+      return trailingSlashResult;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
 }
 
 async function probeCdpTargets(url) {

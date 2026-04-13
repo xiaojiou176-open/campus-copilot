@@ -163,7 +163,7 @@ export function WebWorkbenchPanels(props: {
       ) : null}
 
       <section className="split-grid split-grid--primary">
-        <article className="panel">
+        <article className="panel panel--decision">
           <h2>Focus Queue</h2>
           <p>Decision-first ranking on the shared read-model.</p>
           <div className="stack">
@@ -192,7 +192,7 @@ export function WebWorkbenchPanels(props: {
           </div>
         </article>
 
-        <article className="panel">
+        <article className="panel panel--decision">
           <h2>Weekly Load</h2>
           <p>Planning view computed from the same normalized entities.</p>
           <div className="stack">
@@ -266,7 +266,7 @@ export function WebWorkbenchPanels(props: {
         </article>
       </section>
 
-      <section className="panel">
+      <section className="panel panel--supporting">
         <p className="eyebrow">Trust center</p>
         <h2>Auth &amp; Export Management</h2>
         <p>

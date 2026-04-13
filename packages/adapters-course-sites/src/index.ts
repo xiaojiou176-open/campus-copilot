@@ -682,12 +682,12 @@ function toIsoDate(year: number, month: number, day: number, hour = 12, minute =
 }
 
 function parseMonthDay(value: string, year: number) {
-  const monthDay = value.match(/\b([A-Z][a-z]{2})\s+(\d{1,2})\b/);
+  const monthDay = value.match(/\b([A-Z][a-z]+)\s+(\d{1,2})\b/);
   if (!monthDay) {
     return undefined;
   }
 
-  const month = MONTH_INDEX[monthDay[1]!.toLowerCase()];
+  const month = MONTH_INDEX[monthDay[1]!.slice(0, 3).toLowerCase()];
   const day = Number.parseInt(monthDay[2]!, 10);
   if (!month || !Number.isFinite(day)) {
     return undefined;
@@ -701,6 +701,36 @@ function parseMonthDay(value: string, year: number) {
   let hour = Number.parseInt(timeMatch[1]!, 10);
   const minute = Number.parseInt(timeMatch[2]!, 10);
   const meridiem = timeMatch[3]!.toLowerCase();
+  if (meridiem === 'pm' && hour < 12) {
+    hour += 12;
+  }
+  if (meridiem === 'am' && hour === 12) {
+    hour = 0;
+  }
+  return toIsoDate(year, month, day, hour, minute);
+}
+
+function parseMonthDayEnd(value: string, year: number) {
+  const monthDay = value.match(/\b([A-Z][a-z]+)\s+(\d{1,2})\b/);
+  if (!monthDay) {
+    return undefined;
+  }
+
+  const month = MONTH_INDEX[monthDay[1]!.slice(0, 3).toLowerCase()];
+  const day = Number.parseInt(monthDay[2]!, 10);
+  if (!month || !Number.isFinite(day)) {
+    return undefined;
+  }
+
+  const timeMatches = Array.from(value.matchAll(/(\d{1,2}):(\d{2})\s*(am|pm)/gi));
+  const endTime = timeMatches[1];
+  if (!endTime) {
+    return undefined;
+  }
+
+  let hour = Number.parseInt(endTime[1]!, 10);
+  const minute = Number.parseInt(endTime[2]!, 10);
+  const meridiem = endTime[3]!.toLowerCase();
   if (meridiem === 'pm' && hour < 12) {
     hour += 12;
   }
@@ -763,6 +793,25 @@ function dedupeById<T extends { id: string }>(items: T[]) {
 
 function courseSlugKey(course: Pick<CourseSiteCourse, 'code' | 'title'>) {
   return (course.code ?? course.title).replace(/\s+/g, '').toLowerCase();
+}
+
+function extractLocationHint(text: string | undefined) {
+  if (!text) {
+    return undefined;
+  }
+
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return undefined;
+  }
+
+  const compactRoomMatch = normalized.match(/\bin\s+([A-Z]{2,}\s+\d{1,4}[A-Z]?)\b/);
+  if (compactRoomMatch?.[1]) {
+    return compactRoomMatch[1];
+  }
+
+  const namedRoomMatch = normalized.match(/\bin\s+([A-Za-z0-9]+(?:\s+[A-Za-z0-9]+){0,3}\s+room\s+[A-Z]?\d+[A-Z]?)\b/i);
+  return namedRoomMatch?.[1];
 }
 
 function extractRelevantLinks(html: string, baseUrl: string, family: CourseSitePageFamily) {
@@ -1053,7 +1102,8 @@ function extractTasksAssignmentsAndEvents(html: string, course: CourseSiteCourse
     }
 
     if (rawId.startsWith('exam') || title.toLowerCase().includes('exam')) {
-      const startAt = parseMonthDay(block, year);
+      const detail = collectTagTexts(block, 'p').join(' ').trim() || undefined;
+      const startAt = parseMonthDay(detail ?? block, year);
       events.push({
         id: `course-sites:event:${courseSlugKey(course)}:${slugify(title)}`,
         kind: 'event',
@@ -1064,7 +1114,10 @@ function extractTasksAssignmentsAndEvents(html: string, course: CourseSiteCourse
         eventKind: 'exam',
         title,
         summary: findFirstTagText(block, 'p'),
+        detail,
+        location: extractLocationHint(detail),
         startAt,
+        endAt: parseMonthDayEnd(detail ?? block, year),
       });
     }
   }

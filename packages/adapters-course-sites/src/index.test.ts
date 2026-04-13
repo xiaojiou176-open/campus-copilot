@@ -118,6 +118,17 @@ describe('@campus-copilot/adapters-course-sites', () => {
     if (tasksResult.ok) {
       expect(tasksResult.snapshot.assignments?.some((assignment) => assignment.title.includes('CC0'))).toBe(true);
       expect(tasksResult.snapshot.events?.some((event) => event.title === 'Exam 1')).toBe(true);
+      expect(tasksResult.snapshot.events).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            title: 'Exam 2',
+            startAt: '2026-06-11T12:30:00-07:00',
+            endAt: '2026-06-11T14:20:00-07:00',
+            location: 'BAG 131',
+            detail: expect.stringContaining('June 11 in BAG 131'),
+          }),
+        ]),
+      );
     }
   });
 
