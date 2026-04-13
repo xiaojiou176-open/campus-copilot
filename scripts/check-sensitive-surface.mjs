@@ -45,6 +45,23 @@ export const sensitiveFixtureForbiddenContentRules = [
     code: 'fixture_stable_identifier_key',
   },
   {
+    pattern: /"(?:assignment_id|thread_id)"\s*:\s*\d+/gi,
+    code: 'fixture_sensitive_numeric_id_key',
+  },
+  {
+    pattern: /"id"\s*:\s*"(?:notice|event)-\d+"/gi,
+    code: 'fixture_sensitive_named_id_key',
+  },
+  {
+    pattern:
+      /(?:https?:\/\/(?:gradescope\.example\.test|myuw\.example\.edu)|\/)(?:courses\/\d+(?:\/assignments\/\d+(?:\/submissions\/\d+)?)?|us\/courses\/\d+(?:\/discussion\/\d+(?:\?comment=\d+)?)?|notices\/\d+|events\/\d+)/gi,
+    code: 'fixture_sensitive_identifier_url',
+  },
+  {
+    pattern: /data-comment-id="\d+"/gi,
+    code: 'fixture_sensitive_dom_id_attr',
+  },
+  {
     pattern:
       /\b(?:Registration window opens|Advising session|Campus update|Registration deadline|Project kickoff|Recent staff reply|Unread follow-up|Allen School Career Board|Career-related events)\b/g,
     code: 'fixture_reidentifiable_title',
@@ -53,6 +70,66 @@ export const sensitiveFixtureForbiddenContentRules = [
     pattern:
       /\b(?:Unofficial Transcript|Financial Aid Status|Student Fiscal Services \(SFS\)|Total Educational Borrowing|Estimated Monthly Loan Payment)\b/g,
     code: 'fixture_admin_raw_marker',
+  },
+];
+
+const grandfatheredSensitiveFixtureMatches = [
+  {
+    code: 'fixture_sensitive_numeric_id_key',
+    filePattern: /^packages\/adapters-gradescope\/src\/__fixtures__\/live\/(?:internal|course-internal)-grades\.json$/,
+    matchPattern: /"assignment_id"\s*:\s*(?:9|7421057)/,
+  },
+  {
+    code: 'fixture_sensitive_numeric_id_key',
+    filePattern: /^packages\/adapters-edstem\/src\/__fixtures__\/live\/(?:unread|recent)-activity\.json$/,
+    matchPattern: /"thread_id"\s*:\s*7/,
+  },
+  {
+    code: 'fixture_sensitive_named_id_key',
+    filePattern: /^packages\/adapters-myuw\/src\/__fixtures__\/live\/(?:page-state\.json|script-payload\.html)$/,
+    matchPattern: /"id"\s*:\s*"(?:notice|event)-[12]"/,
+  },
+  {
+    code: 'fixture_sensitive_identifier_url',
+    filePattern: /^packages\/adapters-gradescope\/src\/__fixtures__\/live\/(?:course-sidebar|dashboard-course-boxes)\.html$/,
+    matchPattern: /\/courses\/1211108/,
+  },
+  {
+    code: 'fixture_sensitive_identifier_url',
+    filePattern: /^packages\/adapters-gradescope\/src\/__fixtures__\/live\/course-page-row\.html$/,
+    matchPattern: /\/courses\/1211108\/assignments\/7421057\/submissions\/380090124/,
+  },
+  {
+    code: 'fixture_sensitive_identifier_url',
+    filePattern:
+      /^packages\/adapters-gradescope\/src\/__fixtures__\/live\/submission-question-detail(?:-evaluations|-multi)?\.html$/,
+    matchPattern: /\/courses\/(?:1064763|1144890|1211108)/,
+  },
+  {
+    code: 'fixture_sensitive_identifier_url',
+    filePattern: /^packages\/adapters-gradescope\/src\/__fixtures__\/live\/(?:course-)?internal-(?:assignments|grades)\.json$/,
+    matchPattern:
+      /https:\/\/gradescope\.example\.test\/courses\/course-17\/assignments\/assignment-9\/submissions\/submission-1/,
+  },
+  {
+    code: 'fixture_sensitive_identifier_url',
+    filePattern: /^packages\/adapters-edstem\/src\/__fixtures__\/live\/dashboard(?:-profile13)?\.html$/,
+    matchPattern: /\/us\/courses\/(?:488|855|90031)/,
+  },
+  {
+    code: 'fixture_sensitive_identifier_url',
+    filePattern: /^packages\/adapters-edstem\/src\/__fixtures__\/live\/thread-detail-page\.html$/,
+    matchPattern: /\/us\/courses\/855\/discussion\/709033(?:\?comment=\d+)?/,
+  },
+  {
+    code: 'fixture_sensitive_dom_id_attr',
+    filePattern: /^packages\/adapters-edstem\/src\/__fixtures__\/live\/thread-detail-page\.html$/,
+    matchPattern: /data-comment-id="(?:1645665|1645724|1651940|1654435)"/,
+  },
+  {
+    code: 'fixture_sensitive_identifier_url',
+    filePattern: /^packages\/adapters-myuw\/src\/__fixtures__\/live\/(?:page-state\.json|script-payload\.html|visible-dom\.html)$/,
+    matchPattern: /(?:https:\/\/myuw\.example\.edu)?\/(?:notices|events)\/[12]/,
   },
 ];
 
@@ -73,6 +150,12 @@ function getLineNumber(text, index) {
 function buildFailure(code, { file, content, matchIndex, prefix = '', objectId = '' }) {
   const objectSuffix = objectId.length > 0 ? `@${objectId}` : '';
   return `${prefix}${code}:${file}${objectSuffix}:${getLineNumber(content, matchIndex)}`;
+}
+
+function isGrandfatheredSensitiveFixtureMatch({ code, file, matchedText }) {
+  return grandfatheredSensitiveFixtureMatches.some(
+    (rule) => rule.code === code && rule.filePattern.test(file) && rule.matchPattern.test(matchedText),
+  );
 }
 
 function isFixtureLikePath(file) {
@@ -159,23 +242,24 @@ export function collectFixtureContentFailures({ file, buffer, prefix = '', objec
 
   if (isFixtureLikePath(file)) {
     for (const rule of fixtureForbiddenContentRules) {
-      const match = rule.pattern.exec(content);
-      rule.pattern.lastIndex = 0;
-      if (!match) {
-        continue;
+      let match;
+      while ((match = rule.pattern.exec(content)) !== null) {
+        failures.push(buildFailure(rule.code, { file, content, matchIndex: match.index, prefix, objectId }));
       }
-      failures.push(buildFailure(rule.code, { file, content, matchIndex: match.index, prefix, objectId }));
+      rule.pattern.lastIndex = 0;
     }
   }
 
   if (isSensitiveFixturePath(file)) {
     for (const rule of sensitiveFixtureForbiddenContentRules) {
-      const match = rule.pattern.exec(content);
-      rule.pattern.lastIndex = 0;
-      if (!match) {
-        continue;
+      let match;
+      while ((match = rule.pattern.exec(content)) !== null) {
+        if (isGrandfatheredSensitiveFixtureMatch({ code: rule.code, file, matchedText: match[0] })) {
+          continue;
+        }
+        failures.push(buildFailure(rule.code, { file, content, matchIndex: match.index, prefix, objectId }));
       }
-      failures.push(buildFailure(rule.code, { file, content, matchIndex: match.index, prefix, objectId }));
+      rule.pattern.lastIndex = 0;
     }
   }
 

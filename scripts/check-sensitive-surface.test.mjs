@@ -128,6 +128,68 @@ test('flags high-sensitivity live fixtures with real host urls and stable ids', 
   assert.match(failures.join('\n'), /fixture_real_host_url:packages\/adapters-gradescope\/src\/__fixtures__\/live\/example\.json:5/);
 });
 
+test('flags newly introduced durable numeric ids and relative-or-example identifier urls in sensitive fixtures', () => {
+  const gradescopeFixture = JSON.stringify(
+    {
+      assignment_id: 7421057,
+      url: 'https://gradescope.example.test/courses/1211108/assignments/7421057/submissions/380090124',
+    },
+    null,
+    2,
+  );
+  const edstemFixture = [
+    '<div class="discuss-comment" data-comment-id="1645665">',
+    '  <a href="/us/courses/855/discussion/709033?comment=1645665">redacted-text</a>',
+    '</div>',
+  ].join('\n');
+  const myuwFixture = JSON.stringify(
+    {
+      id: 'notice-27',
+      url: 'https://myuw.example.edu/notices/27',
+    },
+    null,
+    2,
+  );
+
+  const gradescopeFailures = collectFixtureContentFailures({
+    file: 'packages/adapters-gradescope/src/__fixtures__/live/new-sensitive.json',
+    buffer: Buffer.from(gradescopeFixture, 'utf8'),
+  });
+  const edstemFailures = collectFixtureContentFailures({
+    file: 'packages/adapters-edstem/src/__fixtures__/live/new-thread.html',
+    buffer: Buffer.from(edstemFixture, 'utf8'),
+  });
+  const myuwFailures = collectFixtureContentFailures({
+    file: 'packages/adapters-myuw/src/__fixtures__/live/new-page-state.json',
+    buffer: Buffer.from(myuwFixture, 'utf8'),
+  });
+
+  assert.match(
+    gradescopeFailures.join('\n'),
+    /fixture_sensitive_numeric_id_key:packages\/adapters-gradescope\/src\/__fixtures__\/live\/new-sensitive\.json:2/,
+  );
+  assert.match(
+    gradescopeFailures.join('\n'),
+    /fixture_sensitive_identifier_url:packages\/adapters-gradescope\/src\/__fixtures__\/live\/new-sensitive\.json:3/,
+  );
+  assert.match(
+    edstemFailures.join('\n'),
+    /fixture_sensitive_identifier_url:packages\/adapters-edstem\/src\/__fixtures__\/live\/new-thread\.html:2/,
+  );
+  assert.match(
+    edstemFailures.join('\n'),
+    /fixture_sensitive_dom_id_attr:packages\/adapters-edstem\/src\/__fixtures__\/live\/new-thread\.html:1/,
+  );
+  assert.match(
+    myuwFailures.join('\n'),
+    /fixture_sensitive_named_id_key:packages\/adapters-myuw\/src\/__fixtures__\/live\/new-page-state\.json:2/,
+  );
+  assert.match(
+    myuwFailures.join('\n'),
+    /fixture_sensitive_identifier_url:packages\/adapters-myuw\/src\/__fixtures__\/live\/new-page-state\.json:3/,
+  );
+});
+
 test('flags admin inline samples that still contain raw markers', () => {
   const fixture = [
     'const accountsHtml = `',
@@ -141,6 +203,64 @@ test('flags admin inline samples that still contain raw markers', () => {
   });
 
   assert.match(failures.join('\n'), /fixture_admin_raw_marker:apps\/extension\/src\/background-admin-high-sensitivity-substrate\.test\.ts:2/);
+});
+
+test('keeps current redacted baseline sensitive fixtures grandfathered while tightening future matches', () => {
+  const gradescopeFixture = JSON.stringify(
+    {
+      assignment_id: 7421057,
+      url: 'https://gradescope.example.test/courses/course-17/assignments/assignment-9/submissions/submission-1',
+    },
+    null,
+    2,
+  );
+  const edstemFixture = [
+    '<div class="discuss-comment" data-comment-id="1645665">',
+    '  <a href="/us/courses/855/discussion/709033?comment=1645665">redacted-text</a>',
+    '</div>',
+  ].join('\n');
+  const myuwFixture = JSON.stringify(
+    {
+      id: 'notice-1',
+      url: 'https://myuw.example.edu/notices/1',
+    },
+    null,
+    2,
+  );
+
+  const gradescopeFailures = collectFixtureContentFailures({
+    file: 'packages/adapters-gradescope/src/__fixtures__/live/course-internal-grades.json',
+    buffer: Buffer.from(gradescopeFixture, 'utf8'),
+  });
+  const edstemFailures = collectFixtureContentFailures({
+    file: 'packages/adapters-edstem/src/__fixtures__/live/thread-detail-page.html',
+    buffer: Buffer.from(edstemFixture, 'utf8'),
+  });
+  const myuwFailures = collectFixtureContentFailures({
+    file: 'packages/adapters-myuw/src/__fixtures__/live/page-state.json',
+    buffer: Buffer.from(myuwFixture, 'utf8'),
+  });
+
+  assert.deepEqual(gradescopeFailures, []);
+  assert.deepEqual(edstemFailures, []);
+  assert.deepEqual(myuwFailures, []);
+});
+
+test('still flags later sensitive matches in a file even when the first match is grandfathered', () => {
+  const fixture = [
+    '<a href="/courses/1211108">existing baseline</a>',
+    '<a href="/courses/9999999/assignments/8888888/submissions/7777777">new leak</a>',
+  ].join('\n');
+
+  const failures = collectFixtureContentFailures({
+    file: 'packages/adapters-gradescope/src/__fixtures__/live/course-sidebar.html',
+    buffer: Buffer.from(fixture, 'utf8'),
+  });
+
+  assert.match(
+    failures.join('\n'),
+    /fixture_sensitive_identifier_url:packages\/adapters-gradescope\/src\/__fixtures__\/live\/course-sidebar\.html:2/,
+  );
 });
 
 test('does not flag public exemplar fixtures just because they contain public absolute urls', () => {
