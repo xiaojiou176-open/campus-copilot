@@ -522,6 +522,7 @@ describe('exporter package', () => {
     ).toBe(false);
     expect(artifact.content).toContain('"administrativeSummaries": 1');
     expect(artifact.content).toContain('"authorization_level": "confirm_required"');
+    expect(artifact.content).toContain('"detailRuntimeStatus": "pending"');
   });
 
   it('ignores caller-supplied packaging overrides that would overstate authorization truth', () => {
@@ -590,5 +591,6 @@ describe('exporter package', () => {
       ),
     ).toBe(true);
     expect(artifact.content).toContain('carrier_not_landed');
+    expect(artifact.content).toContain('detail runtime blocked missing carrier');
   });
 });

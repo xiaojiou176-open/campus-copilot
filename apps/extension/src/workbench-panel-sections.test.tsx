@@ -394,6 +394,7 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Spring quarter tuition is due.');
     expect(markup).toContain('Administrative lane');
     expect(markup).toContain('Planning Pulse stays in the academic/planning lane');
+    expect(markup).toContain('detail runtime pending');
     expect(markup).toContain('Manual-only campus boundary');
     expect(markup).toContain('Not supported in the current product path');
     expect(markup).toContain('Register.UW automation not supported');

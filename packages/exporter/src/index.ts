@@ -1372,7 +1372,9 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       outcome: '',
       changeCount: '',
       summary: summary.summary,
-      detail: summary.nextAction ?? '',
+      detail: [summary.detailRuntimeStatus ? `detail runtime ${summary.detailRuntimeStatus.replace(/_/g, ' ')}` : '', summary.nextAction ?? '']
+        .filter(Boolean)
+        .join(' · '),
       url: '',
       relation: summary.family,
     });
@@ -1676,8 +1678,9 @@ function renderMarkdown(dataset: ExportDataset) {
     renderMarkdownSection(
       'Administrative Summaries',
       dataset.administrativeSummaries.map((summary) => {
+        const detailRuntime = summary.detailRuntimeStatus ? `; detail runtime ${summary.detailRuntimeStatus.replace(/_/g, ' ')}` : '';
         const nextAction = summary.nextAction ? ` - next: ${summary.nextAction}` : '';
-        return `- ${summary.title} (${summary.family}; AI ${summary.aiDefault}) - ${summary.summary}${nextAction}`;
+        return `- ${summary.title} (${summary.family}; AI ${summary.aiDefault}${detailRuntime}) - ${summary.summary}${nextAction}`;
       }),
     ),
   );

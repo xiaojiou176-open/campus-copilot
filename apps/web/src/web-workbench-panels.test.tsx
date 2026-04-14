@@ -156,6 +156,7 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Read/export partial · AI blocked');
     expect(html).toContain('Allowed: planning substrates, degree requirement summaries, schedule option context.');
     expect(html).toContain('Review-ready summaries: transcript.');
+    expect(html).toContain('detail runtime pending');
     expect(html).toContain('Planning Pulse');
     expect(html).toContain('Allen School planning draft');
     expect(html).toContain('3 term(s) · 9 planned course(s) · 2 backup course(s) · 4 schedule option(s)');
