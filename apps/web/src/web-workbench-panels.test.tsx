@@ -490,5 +490,8 @@ describe('web workbench planning pulse', () => {
 
     expect(html).toContain('canvas · gradescope · course-sites · authority course-sites · course page');
     expect(html).toContain('authority course-sites · assignment row');
+    expect(html).toContain('Accept');
+    expect(html).toContain('Review later');
+    expect(html).toContain('Dismiss');
   });
 });

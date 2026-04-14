@@ -4,6 +4,8 @@ import type { Site } from '@campus-copilot/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
+  ClusterReviewDecision,
+  ClusterReviewTargetKind,
   CourseCluster,
   FocusQueueItem,
   MergeHealthSummary,
@@ -108,6 +110,79 @@ function formatClusterAuthoritySummary(input: {
     return `authority ${authority}`;
   }
   return `${input.relatedSites.join(' · ')} · authority ${authority}`;
+}
+
+function getClusterReviewStatusText(decision: ClusterReviewDecision | undefined, needsReview: boolean) {
+  if (decision === 'accepted') {
+    return 'Accepted locally';
+  }
+  if (decision === 'review_later') {
+    return 'Review later';
+  }
+  if (decision === 'dismissed') {
+    return 'Dismissed locally';
+  }
+  return needsReview ? 'Possible match' : 'Merged';
+}
+
+function getClusterReviewStatusClass(decision: ClusterReviewDecision | undefined, needsReview: boolean) {
+  if (decision === 'accepted') {
+    return 'badge badge-success';
+  }
+  if (decision === 'review_later') {
+    return 'badge badge-warning';
+  }
+  if (decision === 'dismissed') {
+    return 'badge';
+  }
+  return needsReview ? 'badge badge-warning' : 'badge badge-success';
+}
+
+function renderClusterReviewControls(input: {
+  targetKind: ClusterReviewTargetKind;
+  cluster: {
+    id: string;
+    needsReview: boolean;
+    reviewDecision?: ClusterReviewDecision;
+  };
+  onSetClusterReviewDecision: (input: {
+    targetKind: ClusterReviewTargetKind;
+    targetId: string;
+    decision: ClusterReviewDecision;
+  }) => Promise<void>;
+}) {
+  if (!input.cluster.needsReview && !input.cluster.reviewDecision) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="badge-row">
+        <span className={getClusterReviewStatusClass(input.cluster.reviewDecision, input.cluster.needsReview)}>
+          {getClusterReviewStatusText(input.cluster.reviewDecision, input.cluster.needsReview)}
+        </span>
+      </div>
+      <div className="button-row">
+        {(['accepted', 'review_later', 'dismissed'] as const).map((decision) => (
+          <button
+            key={decision}
+            className={`button button--small ${input.cluster.reviewDecision === decision ? '' : 'button--ghost'}`}
+            disabled={input.cluster.reviewDecision === decision}
+            onClick={() => {
+              void input.onSetClusterReviewDecision({
+                targetKind: input.targetKind,
+                targetId: input.cluster.id,
+                decision,
+              });
+            }}
+            type="button"
+          >
+            {decision === 'accepted' ? 'Accept' : decision === 'review_later' ? 'Review later' : 'Dismiss'}
+          </button>
+        ))}
+      </div>
+    </>
+  );
 }
 
 function getAssignmentReviewSummary(assignment: {
@@ -239,7 +314,17 @@ export function WebWorkbenchPanels(props: {
   }>;
   topSyncRun?: SyncRun;
   siteLabels: Record<Site, string>;
+  onSetClusterReviewDecision?: (input: {
+    targetKind: ClusterReviewTargetKind;
+    targetId: string;
+    decision: ClusterReviewDecision;
+  }) => Promise<void>;
 }) {
+  const handleClusterReviewDecision =
+    props.onSetClusterReviewDecision ??
+    (async () => {
+      /* no-op for static render/test-only callers */
+    });
   const latestPlanningSubstrate = [...props.planningSubstrates].sort((left, right) => {
     const leftAt = Date.parse(left.lastUpdatedAt ?? left.capturedAt);
     const rightAt = Date.parse(right.lastUpdatedAt ?? right.capturedAt);
@@ -626,7 +711,9 @@ export function WebWorkbenchPanels(props: {
                     <strong>{cluster.displayTitle}</strong>
                     <div className="badge-row">
                       <span className="badge">{cluster.confidenceBand}</span>
-                      {cluster.needsReview ? <span className="badge badge-warning">Possible match</span> : <span className="badge badge-success">Merged</span>}
+                      <span className={getClusterReviewStatusClass(cluster.reviewDecision, cluster.needsReview)}>
+                        {getClusterReviewStatusText(cluster.reviewDecision, cluster.needsReview)}
+                      </span>
                     </div>
                   </div>
                   <p>{cluster.summary}</p>
@@ -637,6 +724,11 @@ export function WebWorkbenchPanels(props: {
                       relatedSites: cluster.relatedSites,
                     })}
                   </p>
+                  {renderClusterReviewControls({
+                    targetKind: 'course_cluster',
+                    cluster,
+                    onSetClusterReviewDecision: handleClusterReviewDecision,
+                  })}
                 </article>
               ))}
             </ReadyStateBlock>
@@ -659,6 +751,9 @@ export function WebWorkbenchPanels(props: {
                     <div className="badge-row">
                       <span className="badge">{cluster.workType}</span>
                       <span className={cluster.needsReview ? 'badge badge-warning' : 'badge badge-success'}>{cluster.confidenceBand}</span>
+                      <span className={getClusterReviewStatusClass(cluster.reviewDecision, cluster.needsReview)}>
+                        {getClusterReviewStatusText(cluster.reviewDecision, cluster.needsReview)}
+                      </span>
                     </div>
                   </div>
                   <p>{cluster.summary}</p>
@@ -669,6 +764,11 @@ export function WebWorkbenchPanels(props: {
                     })}
                     {cluster.dueAt ? ` · due ${formatDateTime(cluster.dueAt)}` : ''}
                   </p>
+                  {renderClusterReviewControls({
+                    targetKind: 'work_item_cluster',
+                    cluster,
+                    onSetClusterReviewDecision: handleClusterReviewDecision,
+                  })}
                 </article>
               ))}
             </ReadyStateBlock>

@@ -18,6 +18,9 @@ import type { Course, Site } from '@campus-copilot/schema';
 import {
   campusCopilotDb,
   replaceImportedWorkbenchSnapshot,
+  setClusterReviewDecision,
+  type ClusterReviewDecision,
+  type ClusterReviewTargetKind,
   useAllCourses,
   useAllPlanningSubstrates,
   useAllSiteEntityCounts,
@@ -363,6 +366,16 @@ export function App() {
     setFeedback('Reset the web workbench to the bundled demo snapshot.');
   }
 
+  async function handleSetClusterReviewDecision(input: {
+    targetKind: ClusterReviewTargetKind;
+    targetId: string;
+    decision: ClusterReviewDecision;
+  }) {
+    await setClusterReviewDecision(input);
+    setRefreshKey((current) => current + 1);
+    setFeedback(`Saved a local ${input.targetKind.replace(/_/g, ' ')} review decision in the shared workspace.`);
+  }
+
   async function handleAskAi() {
     if (!question.trim()) {
       setAiError('Enter a question before asking for a cited answer.');
@@ -567,7 +580,7 @@ export function App() {
         </div>
 
         <div className="web-shell__decision-lane" aria-label="Decision workspace">
-          <WebWorkbenchPanels
+            <WebWorkbenchPanels
             workbenchReady={workbenchReady}
             todaySnapshot={todaySnapshot ?? undefined}
             recentUpdates={recentUpdates ?? undefined}
@@ -585,11 +598,12 @@ export function App() {
             currentResources={currentResources}
             currentAnnouncements={currentAnnouncements}
             currentEvents={currentEvents}
-            recentChangeEvents={recentChangeEvents}
-            countsBySite={countsBySite}
-            topSyncRun={topSyncRun}
-            siteLabels={SITE_LABELS}
-          />
+              recentChangeEvents={recentChangeEvents}
+              countsBySite={countsBySite}
+              topSyncRun={topSyncRun}
+              siteLabels={SITE_LABELS}
+              onSetClusterReviewDecision={handleSetClusterReviewDecision}
+            />
         </div>
 
         <section className="web-shell__overview-band" aria-label="Trust, AI, and export review">
