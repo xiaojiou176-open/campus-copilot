@@ -41,6 +41,7 @@ function getResourceSemanticLabel(resource: {
   id: string;
   resourceKind: 'file' | 'link' | 'embed' | 'other';
   resourceGroup?: { key: string; label: string; memberCount?: number };
+  resourceModule?: { key: string; label: string; itemType: string };
   summary?: string;
   source?: { resourceType?: string };
 }) {
@@ -76,6 +77,21 @@ function getResourceSemanticLabel(resource: {
   }
 
   return resource.resourceKind;
+}
+
+function getResourceContextSummary(resource: {
+  resourceGroup?: { key: string; label: string; memberCount?: number };
+  resourceModule?: { key: string; label: string; itemType: string };
+}) {
+  const parts: string[] = [];
+  if (resource.resourceModule) {
+    parts.push(`Module: ${resource.resourceModule.label} · ${resource.resourceModule.itemType.replace(/_/g, ' ')}`);
+  }
+  if (resource.resourceGroup) {
+    const count = resource.resourceGroup.memberCount != null ? ` · ${resource.resourceGroup.memberCount} items` : '';
+    parts.push(`Resource set: ${resource.resourceGroup.label}${count}`);
+  }
+  return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
 function getAssignmentReviewSummary(assignment: {
@@ -177,6 +193,7 @@ export function WebWorkbenchPanels(props: {
     title: string;
     resourceKind: 'file' | 'link' | 'embed' | 'other';
     resourceGroup?: { key: string; label: string; memberCount?: number };
+    resourceModule?: { key: string; label: string; itemType: string };
     summary?: string;
     detail?: string;
     releasedAt?: string;
@@ -748,6 +765,7 @@ export function WebWorkbenchPanels(props: {
                 </div>
                 {resource.summary ? <p>{resource.summary}</p> : null}
                 {resource.detail ? <p className="meta">{resource.detail}</p> : null}
+                {getResourceContextSummary(resource) ? <p className="meta">{getResourceContextSummary(resource)}</p> : null}
                 <p className="meta">
                   {props.siteLabels[resource.site]}
                   {resource.releasedAt ? ` · released ${formatDateTime(resource.releasedAt)}` : ''}

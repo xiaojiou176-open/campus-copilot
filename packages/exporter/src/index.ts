@@ -307,6 +307,10 @@ interface CsvRow {
   summary: string;
   detail: string;
   url: string;
+  resourceGroupLabel?: string;
+  resourceGroupCount?: string;
+  resourceModuleLabel?: string;
+  resourceModuleItemType?: string;
   relation?: string;
 }
 
@@ -977,6 +981,10 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       summary: formatOptionalString(resource.summary),
       detail: formatOptionalString(resource.detail),
       url: formatOptionalString(resource.url),
+      resourceGroupLabel: formatOptionalString(resource.resourceGroup?.label),
+      resourceGroupCount: formatOptionalNumber(resource.resourceGroup?.memberCount),
+      resourceModuleLabel: formatOptionalString(resource.resourceModule?.label),
+      resourceModuleItemType: formatOptionalString(resource.resourceModule?.itemType),
     });
   }
 
@@ -1442,6 +1450,10 @@ function renderCsv(dataset: ExportDataset) {
     'summary',
     'detail',
     'url',
+    'resourceGroupLabel',
+    'resourceGroupCount',
+    'resourceModuleLabel',
+    'resourceModuleItemType',
     'relation',
   ];
   const lines = [headers.join(',')];
@@ -1498,7 +1510,14 @@ function renderMarkdown(dataset: ExportDataset) {
         const summary = resource.summary ? ` - ${resource.summary}` : '';
         const detail = resource.detail ? ` - detail ${resource.detail}` : '';
         const kind = ` - kind ${resource.resourceKind}`;
-        return `- ${resource.title} (${resource.site})${kind}${releasedAt}${summary}${detail}`;
+        const group =
+          resource.resourceGroup != null
+            ? ` - resource set ${resource.resourceGroup.label}${
+                resource.resourceGroup.memberCount != null ? ` (${resource.resourceGroup.memberCount} items)` : ''
+              }`
+            : '';
+        const module = resource.resourceModule != null ? ` - module ${resource.resourceModule.label} (${resource.resourceModule.itemType})` : '';
+        return `- ${resource.title} (${resource.site})${kind}${releasedAt}${summary}${detail}${group}${module}`;
       }),
     ),
   );

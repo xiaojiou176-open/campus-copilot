@@ -280,6 +280,34 @@ function getResourceSemanticLabel(resource: OperationsSectionProps['currentResou
   return resource.resourceKind;
 }
 
+function formatResourceContextSummary(
+  resource: OperationsSectionProps['currentResources'][number],
+  uiLanguage: WorkbenchPanelsProps['uiLanguage'],
+) {
+  const parts: string[] = [];
+  if (resource.resourceModule) {
+    parts.push(
+      uiLanguage === 'zh-CN'
+        ? `模块: ${resource.resourceModule.label} · ${resource.resourceModule.itemType.replace(/_/g, ' ')}`
+        : `Module: ${resource.resourceModule.label} · ${resource.resourceModule.itemType.replace(/_/g, ' ')}`,
+    );
+  }
+  if (resource.resourceGroup) {
+    const count =
+      resource.resourceGroup.memberCount != null
+        ? uiLanguage === 'zh-CN'
+          ? `${resource.resourceGroup.memberCount} 项`
+          : `${resource.resourceGroup.memberCount} items`
+        : undefined;
+    parts.push(
+      uiLanguage === 'zh-CN'
+        ? `资源组: ${resource.resourceGroup.label}${count ? ` · ${count}` : ''}`
+        : `Resource set: ${resource.resourceGroup.label}${count ? ` · ${count}` : ''}`,
+    );
+  }
+  return parts.length > 0 ? parts.join(' · ') : undefined;
+}
+
 function getAssignmentReviewSummary(assignment: OperationsSectionProps['currentAssignments'][number]) {
   const questions = assignment.reviewSummary?.questions ?? [];
   if (questions.length === 0) {
@@ -1681,6 +1709,9 @@ export function WorkbenchOperationsSections({
                     {SITE_LABELS[resource.site]}
                     {resource.releasedAt ? ` · ${text.currentResources.releasedAt(formatDateTime(uiLanguage, resource.releasedAt))}` : ''}
                   </p>
+                  {formatResourceContextSummary(resource, uiLanguage) ? (
+                    <p className="surface__meta">{formatResourceContextSummary(resource, uiLanguage)}</p>
+                  ) : null}
                   {resource.downloadUrl ? (
                     <p className="surface__meta">
                       <a

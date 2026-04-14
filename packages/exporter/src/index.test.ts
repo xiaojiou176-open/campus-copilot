@@ -77,6 +77,35 @@ const baseInput = {
       postedAt: '2026-03-23T20:00:00-07:00',
     },
   ],
+  resources: [
+    {
+      id: 'edstem:resource:1',
+      kind: 'resource' as const,
+      site: 'edstem' as const,
+      source: {
+        site: 'edstem' as const,
+        resourceId: 'resource-1',
+        resourceType: 'resource',
+      },
+      courseId: 'edstem:course:1',
+      title: 'Status board',
+      resourceKind: 'file' as const,
+      resourceGroup: {
+        key: 'edstem:resource-group:1:homework',
+        label: 'Homework',
+        memberCount: 2,
+      },
+      resourceModule: {
+        key: 'canvas:module:1:week-1',
+        label: 'Week 1',
+        itemType: 'assignment',
+      },
+      summary: 'Week 8 review set',
+      detail: 'PDF · 452 KB',
+      releasedAt: '2026-03-25T09:00:00-07:00',
+      url: 'https://edstem.org/us/courses/1/resources/1',
+    },
+  ],
   messages: [
     {
       id: 'edstem:message:3',
@@ -323,8 +352,11 @@ describe('exporter package', () => {
 
     expect(artifact.mimeType).toBe('text/csv');
     expect(artifact.content).toContain(',detail,');
+    expect(artifact.content).toContain(',resourceGroupLabel,resourceGroupCount,resourceModuleLabel,resourceModuleItemType,');
     expect(artifact.content).toContain('Submitted draft is already in Canvas.');
     expect(artifact.content).toContain('Q1 1 / 1 · Correct; Q2 0 / 1 · Incorrect');
+    expect(artifact.content).toContain('Homework');
+    expect(artifact.content).toContain('Week 1');
   });
 
   it('builds focus queue as markdown without re-deriving scores', () => {
@@ -351,6 +383,8 @@ describe('exporter package', () => {
     });
 
     expect(artifact.content).toContain('review Q1 1 / 1 (Correct)');
+    expect(artifact.content).toContain('resource set Homework (2 items)');
+    expect(artifact.content).toContain('module Week 1 (assignment)');
   });
 
   it('builds weekly load as csv rows', () => {

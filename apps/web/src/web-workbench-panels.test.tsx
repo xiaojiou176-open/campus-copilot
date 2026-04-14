@@ -217,6 +217,19 @@ describe('web workbench planning pulse', () => {
             detail: 'ZIP · A. Using - Spring 2026 · Download file',
             downloadUrl: 'https://edstem.org/us/courses/96846/resources/1',
           },
+          {
+            id: 'canvas:resource:module-item:42:7001:8107',
+            site: 'canvas',
+            title: 'Checkpoint 1',
+            resourceKind: 'link',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'assignment',
+            },
+            summary: 'Week 1',
+            detail: 'Assignment · Week 1',
+          },
         ],
         currentAnnouncements: [],
         currentEvents: [],
@@ -237,6 +250,8 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Study Materials');
     expect(html).toContain('lesson');
     expect(html).toContain('resource set');
+    expect(html).toContain('Resource set: A. Using - Spring 2026 · 2 items');
+    expect(html).toContain('Module: Week 1 · assignment');
     expect(html).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
     expect(html).toContain('ZIP · A. Using - Spring 2026 · Download file');
   });

@@ -303,6 +303,22 @@ describe('workbench operations sections', () => {
             downloadUrl: 'https://us.edstem.org/api/resources/1/download/week-8-review-sheet.pdf?dl=1',
             releasedAt: '2026-04-03T09:00:00.000Z',
           },
+          {
+            id: 'canvas:resource:module-item:42:7001:8107',
+            kind: 'resource',
+            site: 'canvas',
+            source: { site: 'canvas', resourceId: '42:7001:8107', resourceType: 'assignment_reference' },
+            courseId: 'canvas:course:42',
+            resourceKind: 'link',
+            title: 'Checkpoint 1',
+            summary: 'Week 1',
+            detail: 'Assignment · Week 1',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'assignment',
+            },
+          },
         ]}
         currentAssignments={[
           {
@@ -369,6 +385,8 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Study Materials');
     expect(markup).toContain('Week 8 review sheet');
     expect(markup).toContain('resource set');
+    expect(markup).toContain('Resource set: Homework · 2 items');
+    expect(markup).toContain('Module: Week 1 · assignment');
     expect(markup).toContain('Download file · PDF · 452 KB');
     expect(markup).toContain('Open download');
     expect(markup).toContain('https://us.edstem.org/api/resources/1/download/week-8-review-sheet.pdf?dl=1');
