@@ -63,9 +63,15 @@ importers:
       '@campus-copilot/adapters-gradescope':
         specifier: workspace:*
         version: link:../../packages/adapters-gradescope
+      '@campus-copilot/adapters-myplan':
+        specifier: workspace:*
+        version: link:../../packages/adapters-myplan
       '@campus-copilot/adapters-myuw':
         specifier: workspace:*
         version: link:../../packages/adapters-myuw
+      '@campus-copilot/adapters-time-schedule':
+        specifier: workspace:*
+        version: link:../../packages/adapters-time-schedule
       '@campus-copilot/ai':
         specifier: workspace:*
         version: link:../../packages/ai
