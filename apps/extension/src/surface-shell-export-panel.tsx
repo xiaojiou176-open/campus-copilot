@@ -566,8 +566,8 @@ export function SurfaceShellExportPanel(props: {
   const exportAuthorizationDetail =
     exportFamily === 'administrative_snapshot'
       ? uiLanguage === 'zh-CN'
-        ? '这组导出已经是 landed summary lane，并继续保持 export-first；AI 不会因为能导出就自动获得读取权限。'
-        : 'This packet is already on a landed summary lane and still stays export-first; AI does not inherit access just because export is allowed.'
+        ? '这组导出当前停在 review-first summary，并继续保持 export-first；AI 不会因为能导出就自动获得读取权限。'
+        : 'This packet currently stays at the review-first summary level and still stays export-first; AI does not inherit access just because export is allowed.'
       : uiLanguage === 'zh-CN'
         ? `当前导出按 ${exportScopeLabel} 的 Layer 1 / Layer 2 工作区授权来解释边界。`
         : `This export follows the current Layer 1 / Layer 2 workspace authorization for ${exportScopeLabel}.`;
@@ -586,8 +586,8 @@ export function SurfaceShellExportPanel(props: {
   const exportPacketHonesty =
     exportFamily === 'administrative_snapshot'
       ? uiLanguage === 'zh-CN'
-        ? '高敏摘要现在是 landed summary lane；导出允许不等于 AI 自动继承读取。'
-        : 'High-sensitivity summaries now sit on landed summary lanes; export allowed does not mean AI automatically inherits read access.'
+        ? '高敏摘要当前停在 review-first summary；导出允许不等于 AI 自动继承读取。'
+        : 'High-sensitivity summaries currently stay at the review-first summary level; export allowed does not mean AI automatically inherit read access.'
       : selectedExportFamilyCard?.status === 'blocked'
         ? uiLanguage === 'zh-CN'
           ? '当前只允许诚实地停在 review blocked，不把未产品化 carrier 包装成可导出。'

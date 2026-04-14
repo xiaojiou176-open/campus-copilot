@@ -40,6 +40,7 @@ function getResourceSemanticLabel(resource: {
   site: Site;
   id: string;
   resourceKind: 'file' | 'link' | 'embed' | 'other';
+  resourceGroup?: { key: string; label: string; memberCount?: number };
   summary?: string;
   source?: { resourceType?: string };
 }) {
@@ -69,8 +70,8 @@ function getResourceSemanticLabel(resource: {
     if (resource.id.startsWith('edstem:lesson:')) {
       return 'lesson';
     }
-    if (resource.summary) {
-      return 'grouped resource';
+    if (resource.resourceGroup?.memberCount && resource.resourceGroup.memberCount > 1) {
+      return 'resource set';
     }
   }
 
@@ -112,11 +113,18 @@ function getAssignmentReviewSummary(assignment: {
   });
   const remaining = questions.length - visible.length;
 
-  return `Review summary: ${visible.join('; ')}${remaining > 0 ? `; +${remaining} more` : ''}`;
+  return `Question breakdown: ${visible.join('; ')}${remaining > 0 ? `; +${remaining} more` : ''}`;
+}
+
+function getAssignmentActionSummary(assignment: { actionHints?: string[] }) {
+  if (!assignment.actionHints || assignment.actionHints.length === 0) {
+    return undefined;
+  }
+  return `Available actions: ${assignment.actionHints.join(' · ')}`;
 }
 
 function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
-  return summary.laneStatus === 'carrier_not_landed' ? 'carrier not landed' : 'landed summary lane';
+  return summary.laneStatus === 'carrier_not_landed' ? 'capture needed' : 'summary ready';
 }
 
 export function WebWorkbenchPanels(props: {
@@ -150,6 +158,7 @@ export function WebWorkbenchPanels(props: {
         annotationCount?: number;
       }>;
     };
+    actionHints?: string[];
   }>;
   currentMessages: Array<{
     id: string;
@@ -167,6 +176,7 @@ export function WebWorkbenchPanels(props: {
     source?: { resourceType?: string };
     title: string;
     resourceKind: 'file' | 'link' | 'embed' | 'other';
+    resourceGroup?: { key: string; label: string; memberCount?: number };
     summary?: string;
     detail?: string;
     releasedAt?: string;
@@ -509,7 +519,7 @@ export function WebWorkbenchPanels(props: {
                       }. Forbidden AI objects: ${currentOverlay.forbiddenAiObjects.join(', ') || 'none'}. `
                     : 'Choose a site-scoped slice to review the active site overlay and carrier honesty notes. '}
                   {summaryFamilies.length > 0
-                    ? `Landed summary lanes: ${summaryFamilies.join(', ')}. `
+                    ? `Review-ready summaries: ${summaryFamilies.join(', ')}. `
                     : 'No administrative summary families are visible in this slice. '}
                   {exportFirstFamilies.length > 0
                     ? `Export-first families in this view: ${exportFirstFamilies.join(', ')}. `
@@ -628,7 +638,7 @@ export function WebWorkbenchPanels(props: {
 
       <section className="panel">
         <h2>Administrative snapshots</h2>
-        <p>High-sensitivity administrative surfaces appear here as landed summary lanes and still prefer export/review before AI.</p>
+        <p>High-sensitivity administrative surfaces appear here as review-first summaries and still prefer export/review before AI.</p>
         <div className="stack">
           <ReadyStateBlock
             ready={props.workbenchReady}
@@ -676,6 +686,7 @@ export function WebWorkbenchPanels(props: {
                   </div>
                   {assignment.summary ? <p>{assignment.summary}</p> : null}
                   {assignment.detail ? <p className="meta">{assignment.detail}</p> : null}
+                  {getAssignmentActionSummary(assignment) ? <p className="meta">{getAssignmentActionSummary(assignment)}</p> : null}
                   {getAssignmentReviewSummary(assignment) ? <p className="meta">{getAssignmentReviewSummary(assignment)}</p> : null}
                   <p className="meta">
                     {props.siteLabels[assignment.site]}

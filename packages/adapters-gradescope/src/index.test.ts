@@ -1067,6 +1067,11 @@ describe('GradescopeApiClient', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Actions: Download graded copy | Submission history | Request regrade (Please select a question.)');
+      expect(result.snapshot.assignments?.[0]?.actionHints).toEqual([
+        'Download graded copy',
+        'Submission history',
+        'Request regrade (Please select a question.)',
+      ]);
     }
   });
 

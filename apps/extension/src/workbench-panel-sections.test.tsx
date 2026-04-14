@@ -293,6 +293,11 @@ describe('workbench operations sections', () => {
             courseId: 'edstem:course:11',
             resourceKind: 'file',
             title: 'Week 8 review sheet',
+            resourceGroup: {
+              key: 'edstem:resource-group:11:homework',
+              label: 'Homework',
+              memberCount: 2,
+            },
             summary: 'Homework',
             detail: 'Download file · PDF · 452 KB',
             downloadUrl: 'https://us.edstem.org/api/resources/1/download/week-8-review-sheet.pdf?dl=1',
@@ -363,7 +368,7 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Q1 1 / 1 · Correct; Q2 0 / 1 · Incorrect');
     expect(markup).toContain('Study Materials');
     expect(markup).toContain('Week 8 review sheet');
-    expect(markup).toContain('grouped resource');
+    expect(markup).toContain('resource set');
     expect(markup).toContain('Download file · PDF · 452 KB');
     expect(markup).toContain('Open download');
     expect(markup).toContain('https://us.edstem.org/api/resources/1/download/week-8-review-sheet.pdf?dl=1');
@@ -509,6 +514,7 @@ describe('workbench operations sections', () => {
             status: 'graded',
             summary: 'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations]',
             detail: 'Actions: Download graded copy | Submission history | Request regrade (Please select a question.)',
+            actionHints: ['Download graded copy', 'Submission history', 'Request regrade (Please select a question.)'],
             reviewSummary: {
               questions: [
                 {
@@ -536,8 +542,8 @@ describe('workbench operations sections', () => {
       />,
     );
 
-    expect(markup).toContain('Review summary: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations]');
-    expect(markup).toContain('Actions: Download graded copy | Submission history | Request regrade');
+    expect(markup).toContain('Question breakdown: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations]');
+    expect(markup).toContain('Available actions: Download graded copy · Submission history · Request regrade (Please select a question.)');
   });
 
   it('shows local review decision controls for cluster matches instead of leaving possible matches read-only', () => {

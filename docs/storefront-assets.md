@@ -7,6 +7,7 @@ It is not the main front-door narrative.
 Think of it like the evidence drawer behind the storefront window:
 
 - `README.md` and the docs hub explain what the product is
+- those front doors currently explain the **Campus Copilot** flagship, while any future **OpenCampus** umbrella layer should route back to the same flagship proof instead of replacing it with a generic brand shell
 - this file inventories the visuals and examples that prove that story is real
 - official listing or marketplace presence still depends on owner-controlled
   actions outside this file
@@ -22,7 +23,7 @@ The rule is simple:
 Use this file when you want to review or refresh proof assets after the product
 story is already clear.
 
-Do not use it as the first explanation of what Campus Copilot is.
+Do not use it as the first explanation of the OpenCampus family or the Campus Copilot flagship.
 
 ## Asset Inventory
 

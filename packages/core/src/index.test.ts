@@ -92,7 +92,7 @@ describe('core contracts', () => {
           planLabel: 'Student Plan',
           currentStage: 'partial_shared_landing',
           runtimePosture: 'comparison_oriented_planning_substrate',
-          currentTruth: 'MyPlan is a real planning lane and already a landed summary lane.',
+          currentTruth: 'MyPlan is a real planning lane and already a review-first summary lane.',
           termCount: 2,
           plannedCourseCount: 6,
           backupCourseCount: 1,
@@ -309,7 +309,7 @@ describe('core contracts', () => {
 
     expect(request.body.messages[0]?.content).toContain('Current site policy overlay: MyPlan.');
     expect(request.body.messages[1]?.content).toContain('"coverageStatus":"plan_and_audit"');
-    expect(request.body.messages[1]?.content).toContain('is now a landed summary lane, but it still stays read-only and detail/runtime-lane pending');
+    expect(request.body.messages[1]?.content).toContain('now behaves like a review-first summary lane, but it still stays read-only and detail/runtime-lane pending');
     expect(request.body.messages[1]?.content).toContain('Transfer equivalency review remains manual.');
   });
 
@@ -401,6 +401,7 @@ describe('core contracts', () => {
             id: 'admin:transcript:1',
             family: 'transcript',
             laneStatus: 'landed_summary_lane',
+            detailRuntimeStatus: 'pending',
             title: 'Transcript summary',
             summary: 'GPA detail and transcript standing stay export-first until a stronger lane is promoted.',
             importance: 'high',
@@ -436,7 +437,7 @@ describe('core contracts', () => {
           provenance: [
             {
               sourceType: 'derived_read_model',
-              label: 'Administrative landed summary lane',
+              label: 'Administrative summary surface',
               readOnly: true,
             },
           ],
@@ -479,11 +480,12 @@ describe('core contracts', () => {
             id: 'admin:transcript:1',
             family: 'transcript',
             laneStatus: 'carrier_not_landed',
+            detailRuntimeStatus: 'blocked_missing_carrier',
             title: 'Transcript summary',
             summary: 'Transcript detail is still review-first until a stronger lawful lane lands.',
             importance: 'high',
             aiDefault: 'blocked',
-            authoritySource: 'myuw candidate lane (carrier not landed)',
+            authoritySource: 'myuw candidate summary (capture needed)',
             sourceSurface: 'myuw',
             updatedAt: '2026-04-12T08:00:00.000Z',
           },
@@ -514,7 +516,7 @@ describe('core contracts', () => {
           provenance: [
             {
               sourceType: 'derived_read_model',
-              label: 'Administrative landed summary lane',
+              label: 'Administrative summary surface',
               readOnly: true,
             },
           ],

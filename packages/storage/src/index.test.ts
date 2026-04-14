@@ -432,6 +432,7 @@ describe('storage package', () => {
       title: 'Homework before refresh',
       dueAt: '2026-03-25T23:59:00-07:00',
       status: 'todo',
+      actionHints: [],
     };
     const assignmentAfter: Assignment = {
       ...assignmentBefore,

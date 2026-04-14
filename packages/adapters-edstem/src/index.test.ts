@@ -25,6 +25,10 @@ const lessonPaths: EdStemPathConfig = {
   threadsPath: '/api/courses/96846/threads?limit=30&sort=new',
 };
 
+const lessonDetailPaths: EdStemPathConfig = {
+  threadsPath: '/api/courses/96846/threads?limit=30&sort=new',
+};
+
 function readFixture(relativePath: string) {
   return readFileSync(new URL(`./__fixtures__/live/${relativePath}`, import.meta.url), 'utf8');
 }
@@ -616,6 +620,11 @@ describe('EdStemApiClient', () => {
           id: 'edstem:resource:101887',
           courseId: 'edstem:course:90031',
           resourceKind: 'file',
+          resourceGroup: {
+            key: 'edstem:resource-group:90031:redacted-category',
+            label: 'redacted-category',
+            memberCount: 2,
+          },
           fileExtension: '.pdf',
           sizeBytes: 2280609,
           summary: 'redacted-category',
@@ -624,6 +633,11 @@ describe('EdStemApiClient', () => {
         }),
         expect.objectContaining({
           id: 'edstem:resource:101262',
+          resourceGroup: {
+            key: 'edstem:resource-group:90031:redacted-category',
+            label: 'redacted-category',
+            memberCount: 2,
+          },
           detail: 'Download file · PDF · 451 KB',
         }),
       ]);
@@ -706,6 +720,91 @@ describe('EdStemApiClient', () => {
     }
   });
 
+  it('captures multi-member resource groups from the DOM carrier as a shared resourceGroup context', async () => {
+    const client = new EdStemApiClient(
+      async (path) => {
+        if (path === '/api/user') {
+          return {
+            ok: true,
+            status: 200,
+            responseUrl: 'https://us.edstem.org/api/user',
+            bodyText: JSON.stringify({
+              courses: [
+                {
+                  course: {
+                    id: 90031,
+                    code: 'redacted-course-code',
+                    name: 'redacted-text',
+                  },
+                },
+              ],
+            }),
+            contentType: 'application/json',
+          };
+        }
+
+        if (path === '/api/courses/90031/threads?limit=30&sort=new') {
+          return {
+            ok: true,
+            status: 200,
+            responseUrl: 'https://us.edstem.org/api/courses/90031/threads?limit=30&sort=new',
+            bodyText: JSON.stringify({ threads: [], users: [] }),
+            contentType: 'application/json',
+          };
+        }
+
+        if (path === '/api/courses/90031/resources') {
+          return {
+            ok: false,
+            code: 'request_failed',
+            message: 'mocked resources outage',
+            status: 500,
+          };
+        }
+
+        return {
+          ok: false,
+          code: 'request_failed',
+          message: `No mock payload for ${path}`,
+          status: 500,
+        };
+      },
+      resourcePaths,
+    );
+
+    const adapter = createEdStemAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://edstem.org/us/courses/90031/resources',
+      site: 'edstem',
+      now: '2026-04-14T11:00:00-07:00',
+      pageHtml: readFixture('resources-page-multi-group.html'),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.resources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            title: 'redacted-resource-a',
+            resourceGroup: {
+              key: 'edstem:resource-group:90031:redacted-group',
+              label: 'redacted-group',
+              memberCount: 2,
+            },
+          }),
+          expect.objectContaining({
+            title: 'redacted-resource-b',
+            resourceGroup: {
+              key: 'edstem:resource-group:90031:redacted-group',
+              label: 'redacted-group',
+              memberCount: 2,
+            },
+          }),
+        ]),
+      );
+    }
+  });
+
   it('collects EdStem lessons from the authenticated lessons DOM carrier', async () => {
     const client = new EdStemApiClient(
       okExecutor({
@@ -755,6 +854,58 @@ describe('EdStemApiClient', () => {
         ]),
       );
       expect(result.outcome).toBe('partial_success');
+    }
+  });
+
+  it('collects EdStem lesson detail from the authenticated private lesson carrier', async () => {
+    const client = new EdStemApiClient(
+      okExecutor({
+        '/api/user': {
+          courses: [
+            {
+              course: {
+                id: 96846,
+                code: 'CSE 312 - 26sp',
+                name: 'Foundations of Computing II',
+              },
+            },
+          ],
+        },
+        '/api/courses/96846/threads?limit=30&sort=new': {
+          threads: [],
+          users: [],
+        },
+        '/api/lessons/redacted-lesson-a?view=1': readJsonFixture('/lesson-detail-api.json'),
+      }),
+      lessonDetailPaths,
+    );
+
+    const adapter = createEdStemAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://edstem.org/us/courses/96846/lessons/redacted-lesson-a',
+      site: 'edstem',
+      now: '2026-04-14T10:00:00-07:00',
+      pageHtml: '<html><body>lesson detail</body></html>',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.resources).toEqual([
+        expect.objectContaining({
+          id: 'edstem:lesson:redacted-lesson-a',
+          courseId: 'edstem:course:96846',
+          resourceKind: 'link',
+          source: expect.objectContaining({
+            resourceType: 'lesson_detail',
+          }),
+          title: '[HW1 problem 7(a)] redacted lesson title',
+          summary: 'python lesson · attempted · 3 slides',
+          detail:
+            'State: scheduled · Due: 2026-04-09T16:59:00+10:00 · Locks: 2026-04-12T16:59:00+10:00 · Solutions: 2026-04-13T04:00:00+10:00 · Late submissions allowed · Slides: 1 · redacted slide title 1 · completed; 2 · redacted slide title 2 · unseen; 3 · redacted coding challenge · unseen',
+        }),
+      ]);
+      expect(result.outcome).toBe('success');
+      expect(result.health.reason).toBe('edstem_sync_success');
     }
   });
 

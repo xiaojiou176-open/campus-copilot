@@ -216,6 +216,7 @@ export interface ExportInput {
     id: string;
     family: string;
     laneStatus?: 'landed_summary_lane' | 'carrier_not_landed';
+    detailRuntimeStatus?: 'pending' | 'blocked_missing_carrier';
     title: string;
     summary: string;
     importance: string;
@@ -591,10 +592,10 @@ function buildDefaultProvenance(input: {
   if (input.scope.resourceFamily === 'administrative_snapshot' || input.normalized.administrativeSummaries.length > 0) {
     entries.push({
       sourceType: 'derived_read_model',
-      label: 'Administrative landed summary lane',
+      label: 'Administrative summary surface',
       detail: hasAdministrativeCarrierPlaceholders(input.normalized.administrativeSummaries)
-        ? 'High-sensitivity academic and administrative records stay review-first and export-first. Some rows are still blocker placeholders, so their presence does not mean every family has a landed summary lane.'
-        : 'High-sensitivity academic and administrative records now flow through landed summary lanes and stay export-first until a stronger detail/runtime lane is promoted.',
+        ? 'High-sensitivity academic and administrative records stay review-first and export-first. Some rows are still blocker placeholders, so their presence does not mean every family has a summary-ready lane yet.'
+        : 'High-sensitivity academic and administrative records now flow through summary-ready review surfaces and stay export-first until a stronger detail/runtime lane is promoted.',
       readOnly: true,
     });
   }
@@ -628,7 +629,7 @@ function buildDefaultProvenance(input: {
       entries.push({
         sourceType: 'session_interface',
         label: 'MyUW student-status carrier',
-        detail: 'Notice and schedule signals can promote into the decision desk while transcript, finaid, and account detail stay on landed summary lanes with detail/runtime promotion still pending.',
+        detail: 'Notice and schedule signals can promote into the decision desk while transcript, finaid, and account detail stay at the review-first summary level with detail/runtime promotion still pending.',
         readOnly: true,
       });
       break;
@@ -636,7 +637,7 @@ function buildDefaultProvenance(input: {
       entries.push({
         sourceType: 'page_state',
         label: 'MyPlan planning substrate capture',
-        detail: 'Current MyPlan depth is a landed summary lane: comparison-oriented, read-only, and still awaiting stronger live/runtime promotion.',
+        detail: 'Current MyPlan depth is a review-first summary lane: comparison-oriented, read-only, and still awaiting stronger live/runtime promotion.',
         readOnly: true,
       });
       break;
@@ -1525,8 +1526,10 @@ function renderMarkdown(dataset: ExportDataset) {
               })
               .join('; ')}`
           : '';
+        const actionHints =
+          assignment.actionHints && assignment.actionHints.length > 0 ? ` - actions ${assignment.actionHints.join(' | ')}` : '';
         const score = assignment.score !== undefined || assignment.maxScore !== undefined ? ` - score ${assignment.score ?? '-'} / ${assignment.maxScore ?? '-'}` : '';
-        return `- ${assignment.title} (${assignment.site}, ${assignment.status})${detail}${score}${summary}${fullDetail}${reviewSummary}`;
+        return `- ${assignment.title} (${assignment.site}, ${assignment.status})${detail}${score}${summary}${fullDetail}${actionHints}${reviewSummary}`;
       }),
     ),
   );
