@@ -90,12 +90,24 @@ describe('core contracts', () => {
           capturedAt: '2026-04-10T08:00:00.000Z',
           planId: 'student-plan',
           planLabel: 'Student Plan',
+          currentStage: 'partial_shared_landing',
+          runtimePosture: 'comparison_oriented_planning_substrate',
+          currentTruth: 'MyPlan is a real planning lane but still summary-first.',
           termCount: 2,
           plannedCourseCount: 6,
           backupCourseCount: 1,
           scheduleOptionCount: 3,
           requirementGroupCount: 0,
           programExplorationCount: 2,
+          exactBlockers: [
+            {
+              id: 'shared_planning_substrate_contract',
+              class: 'repo-owned blocker',
+              summary: 'Shared planning promotion still needs a source-aware merge.',
+              whyItStopsPromotion: 'The adapter proof exists, but shared storage/core promotion is not done yet.',
+            },
+          ],
+          hardDeferredMoves: ['registration handoff'],
           terms: [],
         },
       ],
@@ -135,7 +147,8 @@ describe('core contracts', () => {
     expect(request.body.messages[1]?.role).toBe('user');
     expect(request.body.messages[1]?.content).toContain('get_planning_substrates');
     expect(request.body.messages[1]?.content).toContain('"coverageStatus":"plan_only"');
-    expect(request.body.messages[1]?.content).toContain('DARS/degree-audit half is still missing');
+    expect(request.body.messages[1]?.content).toContain('"currentStage":"partial_shared_landing"');
+    expect(request.body.messages[1]?.content).toContain('shared_planning_substrate_contract');
     expect(request.body.messages[1]?.content).toContain('"scope"');
     expect(request.body.messages[1]?.content).toContain('"contentRedacted":true');
     expect(request.body.messages[1]?.content).not.toContain('# Current view');
@@ -176,6 +189,8 @@ describe('core contracts', () => {
             scheduleOptionCount: 3,
             requirementGroupCount: 4,
             programExplorationCount: 2,
+            exactBlockers: [],
+            hardDeferredMoves: [],
             terms: [],
           },
         ],
@@ -259,6 +274,8 @@ describe('core contracts', () => {
           programExplorationCount: 2,
           degreeProgressSummary: 'Core requirements still need one systems elective.',
           transferPlanningSummary: 'Transfer equivalency review remains manual.',
+          exactBlockers: [],
+          hardDeferredMoves: [],
           terms: [],
         },
       ],
@@ -431,6 +448,84 @@ describe('core contracts', () => {
     expect(request.body.messages[1]?.content).toContain('"reviewRequiredAdministrativeFamilies":["transcript"]');
     expect(request.body.messages[1]?.content).toContain('"administrativeSummariesCount":1');
     expect(request.body.messages[1]?.content).not.toContain('GPA detail and transcript standing stay export-first');
+  });
+
+  it('keeps the AI request redacted when packaging claims aiAllowed but export authorization is still review-first', () => {
+    const request = buildWorkbenchAiProxyRequest({
+      provider: 'gemini',
+      model: 'gemini-2.5-flash',
+      question: 'Can you summarize the transcript lane?',
+      todaySnapshot: {
+        totalAssignments: 0,
+        dueSoonAssignments: 0,
+        recentUpdates: 0,
+        newGrades: 0,
+        riskAlerts: 1,
+        syncedSites: 4,
+      },
+      recentUpdates: [],
+      alerts: [],
+      focusQueue: [],
+      weeklyLoad: [],
+      syncRuns: [],
+      recentChanges: [],
+      workbenchView: {
+        planningSubstrates: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [
+          {
+            id: 'admin:transcript:1',
+            family: 'transcript',
+            title: 'Transcript summary',
+            summary: 'Transcript detail is still review-first until a stronger lawful lane lands.',
+            importance: 'high',
+            aiDefault: 'blocked',
+            authoritySource: 'myuw candidate lane (carrier not landed)',
+            sourceSurface: 'myuw',
+            updatedAt: '2026-04-12T08:00:00.000Z',
+          },
+        ],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+      },
+      currentViewExport: {
+        preset: 'current_view',
+        format: 'markdown',
+        filename: 'current-view.md',
+        mimeType: 'text/markdown',
+        scope: {
+          scopeType: 'current_view',
+          preset: 'current_view',
+          site: 'myuw',
+          resourceFamily: 'workspace_snapshot',
+        },
+        packaging: {
+          authorizationLevel: 'confirm_required',
+          aiAllowed: true,
+          riskLabel: 'high',
+          matchConfidence: 'medium',
+          provenance: [
+            {
+              sourceType: 'derived_read_model',
+              label: 'Administrative summary-first substrate',
+              readOnly: true,
+            },
+          ],
+        },
+        content: '# Current view\nTranscript summary\nTranscript detail is still review-first until a stronger lawful lane lands.',
+      },
+    });
+
+    expect(request.body.messages[1]?.content).toContain('"contentRedacted":true');
+    expect(request.body.messages[1]?.content).toContain('"reviewRequiredAdministrativeFamilies":["transcript"]');
+    expect(request.body.messages[1]?.content).not.toContain(
+      'Transcript detail is still review-first until a stronger lawful lane lands.',
+    );
   });
 
   it('normalizes local BFF base URLs', () => {

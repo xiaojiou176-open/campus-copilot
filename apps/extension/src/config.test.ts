@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS,
   buildNextConfig,
   getDefaultExtensionConfig,
   getEdStemPathConfig,
@@ -51,6 +52,12 @@ describe('extension config', () => {
         (rule) => rule.resourceFamily === 'transcript_summary' && rule.layer === 'layer1_read_export' && rule.status === 'confirm_required',
       ),
     ).toBe(true);
+    expect(
+      ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS.find((family) => family.resourceFamily === 'degree_audit_summary')?.note,
+    ).toContain('explicit blocker');
+    expect(
+      config.authorization.rules.find((rule) => rule.id === 'tuition-account-layer1-summary')?.reason,
+    ).toContain('absence of a carrier must stay explicit');
   });
 
   it('merges partial updates without dropping nested models or site config', async () => {

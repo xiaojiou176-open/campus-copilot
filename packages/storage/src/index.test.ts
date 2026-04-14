@@ -152,6 +152,18 @@ describe('storage package', () => {
       programExplorationCount: 2,
       degreeProgressSummary: '90 of 180 credits planned or completed',
       transferPlanningSummary: 'Transfer credits still need manual review.',
+      currentStage: 'partial_shared_landing',
+      runtimePosture: 'comparison_oriented_planning_substrate',
+      currentTruth: 'MyPlan is a real planning lane but still summary-first.',
+      exactBlockers: [
+        {
+          id: 'plan_audit_dual_capture',
+          class: 'repo-owned blocker',
+          summary: 'Planning Pulse still needs both plan context and audit-summary context before it can claim complete shared coverage.',
+          whyItStopsPromotion: 'A single MyPlan or DARS capture still leaves the other half missing from the shared Planning Pulse lane.',
+        },
+      ],
+      hardDeferredMoves: ['registration handoff'],
       terms: [
         {
           termCode: '2026-spring',
@@ -167,6 +179,8 @@ describe('storage package', () => {
     expect(owner.fit).toBe('derived_planning_substrate');
     expect(owner.source).toBe('myplan');
     expect(owner.readOnly).toBe(true);
+    expect(owner.currentStage).toBe('partial_shared_landing');
+    expect(owner.exactBlockers[0]?.id).toBe('plan_audit_dual_capture');
     expect(owner.termCount).toBe(2);
     expect(owner.terms[0]?.termCode).toBe('2026-spring');
 
@@ -266,8 +280,44 @@ describe('storage package', () => {
       termCount: 2,
       plannedCourseCount: 6,
     });
+    const timeScheduleOwner = storage.PlanningSubstrateOwnerSchema.parse({
+      id: 'time-schedule:planning-substrate:spring-2026',
+      source: 'time-schedule',
+      fit: 'derived_planning_substrate',
+      readOnly: true,
+      capturedAt: '2026-04-10T09:30:00.000Z',
+      planId: 'time-schedule:spring-2026',
+      planLabel: 'Time Schedule · Spring 2026',
+      termCount: 1,
+      plannedCourseCount: 12,
+      backupCourseCount: 0,
+      scheduleOptionCount: 18,
+      requirementGroupCount: 0,
+      programExplorationCount: 0,
+      currentStage: 'partial_shared_landing',
+      runtimePosture: 'public_course_offerings_planning_lane',
+      currentTruth: 'Time Schedule is a public planning carrier, not authenticated schedule parity.',
+      exactBlockers: [
+        {
+          id: 'netid_richer_schedule_view',
+          class: 'owner-manual later',
+          summary: 'Richer authenticated schedule view still needs live proof.',
+          whyItStopsPromotion: 'The public planning lane is real, but the NetID-only lane still needs canonical corroboration.',
+        },
+      ],
+      hardDeferredMoves: ['registration helper'],
+      terms: [
+        {
+          termCode: 'spring-2026',
+          termLabel: 'Spring 2026',
+          plannedCourseCount: 12,
+          backupCourseCount: 0,
+          scheduleOptionCount: 18,
+        },
+      ],
+    });
 
-    await putPlanningSubstrates([olderOwner, newerOwner], db);
+    await putPlanningSubstrates([olderOwner, newerOwner, timeScheduleOwner], db);
 
     const allSitesView = await getWorkbenchView(
       '2026-04-10T09:30:00.000Z',
@@ -278,6 +328,7 @@ describe('storage package', () => {
       db,
     );
     expect(allSitesView.planningSubstrates.map((item) => item.id)).toEqual([
+      'time-schedule:planning-substrate:spring-2026',
       'myplan:student-plan:newer',
       'myplan:student-plan:older',
     ]);

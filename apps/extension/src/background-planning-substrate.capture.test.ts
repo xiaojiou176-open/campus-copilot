@@ -48,6 +48,8 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
     const stored = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
     expect(stored?.termCount).toBe(1);
     expect(stored?.plannedCourseCount).toBe(2);
+    expect(stored?.currentStage).toBe('partial_shared_landing');
+    expect(stored?.exactBlockers[0]?.id).toBe('plan_audit_dual_capture');
     expect(stored?.degreeProgressSummary).toContain('not exposed');
   });
 
@@ -96,6 +98,7 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
     expect(stored?.termCount).toBe(1);
     expect(stored?.requirementGroupCount).toBe(2);
     expect(stored?.degreeProgressSummary).toContain('At least one requirement still incomplete');
+    expect(stored?.exactBlockers ?? []).toHaveLength(0);
   });
 
   it('captures live-style MyPlan issue cards with longer course blocks', async () => {

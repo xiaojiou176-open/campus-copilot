@@ -68,7 +68,14 @@ export function formatWeeklyLoadSummary(entry: WeeklyLoadEntry) {
 const LOADING_INLINE_COPY = 'Loading shared workbench data...';
 
 export function LoadingInlineState() {
-  return <p>{LOADING_INLINE_COPY}</p>;
+  return (
+    <div className="loading-inline-state" aria-busy="true">
+      <p>{LOADING_INLINE_COPY}</p>
+      <div className="loading-inline-row" />
+      <div className="loading-inline-row loading-inline-row--wide" />
+      <div className="loading-inline-row" />
+    </div>
+  );
 }
 
 export function ReadyStateBlock({

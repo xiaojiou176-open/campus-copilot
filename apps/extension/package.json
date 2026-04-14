@@ -15,6 +15,8 @@
     "@campus-copilot/adapters-course-sites": "workspace:*",
     "@campus-copilot/adapters-edstem": "workspace:*",
     "@campus-copilot/adapters-gradescope": "workspace:*",
+    "@campus-copilot/adapters-myplan": "workspace:*",
+    "@campus-copilot/adapters-time-schedule": "workspace:*",
     "@campus-copilot/adapters-myuw": "workspace:*",
     "@campus-copilot/ai": "workspace:*",
     "@campus-copilot/core": "workspace:*",

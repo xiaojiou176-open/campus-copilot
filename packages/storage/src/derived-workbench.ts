@@ -15,7 +15,7 @@ import {
   isWithinUpcomingHours,
   matchesSiteFilter,
 } from './storage-shared.ts';
-import { getPlanningSubstratesBySource } from './planning-substrate.ts';
+import { getAllPlanningSubstrates } from './planning-substrate.ts';
 import { getAdministrativeSummaries, getAllCourseClusters, getAllWorkItemClusters, getMergeHealthSummary } from './cluster-substrate.ts';
 
 export async function getTodaySnapshot(now: string, db: CampusCopilotDB = campusCopilotDb): Promise<TodaySnapshot> {
@@ -73,7 +73,7 @@ export async function getWorkbenchView(
       db.events.toArray(),
       getPriorityAlerts(now, db),
       getRecentUpdates(now, 20, db),
-      parsedFilters.site === 'all' ? getPlanningSubstratesBySource('myplan', db) : Promise.resolve([]),
+      parsedFilters.site === 'all' ? getAllPlanningSubstrates(db) : Promise.resolve([]),
       getAllCourseClusters(db),
       getAllWorkItemClusters(db),
       getAdministrativeSummaries(db),

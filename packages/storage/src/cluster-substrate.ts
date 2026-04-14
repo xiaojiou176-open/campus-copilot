@@ -542,23 +542,36 @@ function buildAdministrativeSummaries(
   const summaries: AdministrativeSummary[] = [];
   const landedFamilies = new Set<string>();
   const latestPlanning = [...planningSubstrates].sort((left, right) => right.capturedAt.localeCompare(left.capturedAt))[0];
+  const latestMyPlan = [...planningSubstrates]
+    .filter((entry) => entry.source === 'myplan')
+    .sort((left, right) => right.capturedAt.localeCompare(left.capturedAt))[0];
+  const blockerUpdatedAt =
+    [
+      latestPlanning?.capturedAt,
+      ...announcements.map((announcement) => announcement.postedAt),
+      ...events.map((event) => event.startAt ?? event.endAt),
+      ...adminCarriers.map((carrier) => carrier.updatedAt),
+    ]
+      .filter((value): value is string => Boolean(value))
+      .sort((left, right) => left.localeCompare(right))
+      .at(-1) ?? '1970-01-01T00:00:00.000Z';
 
-  if (latestPlanning && (latestPlanning.degreeProgressSummary || latestPlanning.requirementGroupCount > 0)) {
+  if (latestMyPlan && (latestMyPlan.degreeProgressSummary || latestMyPlan.requirementGroupCount > 0)) {
     landedFamilies.add('dars');
     summaries.push(
       AdministrativeSummarySchema.parse({
-        id: `admin-summary:dars:${latestPlanning.id}`,
+        id: `admin-summary:dars:${latestMyPlan.id}`,
         family: 'dars',
-        title: `${latestPlanning.planLabel} · Degree requirements`,
+        title: `${latestMyPlan.planLabel} · Degree requirements`,
         summary:
-          latestPlanning.degreeProgressSummary ??
-          `${latestPlanning.requirementGroupCount} requirement group(s) are currently tracked in the planning substrate.`,
-        importance: latestPlanning.requirementGroupCount > 0 ? 'high' : 'medium',
+          latestMyPlan.degreeProgressSummary ??
+          `${latestMyPlan.requirementGroupCount} requirement group(s) are currently tracked in the planning substrate.`,
+        importance: latestMyPlan.requirementGroupCount > 0 ? 'high' : 'medium',
         aiDefault: 'blocked',
         authoritySource: 'myplan planning substrate (DARS summary lane)',
         sourceSurface: 'myplan',
         nextAction: 'Review or export the DARS-aligned summary before any AI analysis.',
-        updatedAt: latestPlanning.capturedAt,
+        updatedAt: latestMyPlan.capturedAt,
       }),
     );
   }
@@ -607,29 +620,63 @@ function buildAdministrativeSummaries(
     );
   }
 
-  const blockerSummaries: Array<Pick<AdministrativeSummary, 'family' | 'title' | 'summary' | 'importance' | 'nextAction'>> = [
-    {
-      family: 'transcript',
-      title: 'Transcript summary lane',
-      summary: 'No truthful transcript runtime carrier is landed yet. Historical-record detail remains blocked until a lawful summary carrier is proven.',
-      importance: 'high',
-      nextAction: 'Do not claim transcript support; either land a summary-first carrier or record an exact external blocker after a bounded live push.',
-    },
-    {
-      family: 'finaid',
-      title: 'Financial-aid summary lane',
-      summary: 'No truthful financial-aid runtime carrier is landed yet. Aid detail remains blocked pending a lawful summary-first carrier.',
-      importance: 'high',
-      nextAction: 'Keep export-first and AI-blocked until a summary carrier is landed or an exact external blocker is proven.',
-    },
-    {
-      family: 'accounts',
-      title: 'Accounts summary lane',
-      summary: 'No truthful accounts runtime carrier is landed yet. Account-state detail remains blocked pending a lawful summary-first carrier.',
-      importance: 'medium',
-      nextAction: 'Keep review/export-first and AI-blocked until a summary carrier is landed or an exact blocker is proven.',
-    },
-  ];
+  const blockerSummaries: Array<Pick<AdministrativeSummary, 'family' | 'title' | 'summary' | 'importance' | 'nextAction' | 'sourceSurface'>> =
+    [
+      {
+        family: 'dars',
+        title: 'DARS summary lane',
+        summary:
+          'No truthful DARS summary lane is landed yet. Degree-audit detail remains blocked until the shared planning substrate captures a lawful summary carrier.',
+        importance: 'high',
+        nextAction:
+          'Keep DARS review/export-first until a planning-backed summary lane is landed or an exact external blocker is proven.',
+        sourceSurface: 'myplan',
+      },
+      {
+        family: 'transcript',
+        title: 'Transcript summary lane',
+        summary: 'No truthful transcript runtime carrier is landed yet. Historical-record detail remains blocked until a lawful summary carrier is proven.',
+        importance: 'high',
+        nextAction: 'Do not claim transcript support; either land a summary-first carrier or record an exact external blocker after a bounded live push.',
+        sourceSurface: 'myuw',
+      },
+      {
+        family: 'finaid',
+        title: 'Financial-aid summary lane',
+        summary: 'No truthful financial-aid runtime carrier is landed yet. Aid detail remains blocked pending a lawful summary-first carrier.',
+        importance: 'high',
+        nextAction: 'Keep export-first and AI-blocked until a summary carrier is landed or an exact external blocker is proven.',
+        sourceSurface: 'myuw',
+      },
+      {
+        family: 'accounts',
+        title: 'Accounts summary lane',
+        summary: 'No truthful accounts runtime carrier is landed yet. Account-state detail remains blocked pending a lawful summary-first carrier.',
+        importance: 'medium',
+        nextAction: 'Keep review/export-first and AI-blocked until a summary carrier is landed or an exact blocker is proven.',
+        sourceSurface: 'myuw',
+      },
+      {
+        family: 'tuition_detail',
+        title: 'Tuition-detail summary lane',
+        summary:
+          'No truthful tuition-detail runtime carrier is landed yet. Billing-statement detail remains blocked until a lawful summary-first carrier is proven.',
+        importance: 'high',
+        nextAction:
+          'Keep tuition detail review/export-first until a statement-backed summary carrier is landed or an exact external blocker is proven.',
+        sourceSurface: 'myuw',
+      },
+      {
+        family: 'profile',
+        title: 'Profile summary lane',
+        summary:
+          'No truthful profile runtime carrier is landed yet. Personal-profile detail remains blocked until a lawful summary-first carrier is proven.',
+        importance: 'medium',
+        nextAction:
+          'Keep profile review/export-first until a page-backed summary carrier is landed or an exact external blocker is proven.',
+        sourceSurface: 'myuw',
+      },
+    ];
 
   for (const blocker of blockerSummaries) {
     if (landedFamilies.has(blocker.family)) {
@@ -644,9 +691,9 @@ function buildAdministrativeSummaries(
         importance: blocker.importance,
         aiDefault: 'blocked',
         authoritySource: 'myuw candidate lane (carrier not landed)',
-        sourceSurface: 'myuw',
+        sourceSurface: blocker.sourceSurface,
         nextAction: blocker.nextAction,
-        updatedAt: new Date().toISOString(),
+        updatedAt: blockerUpdatedAt,
       }),
     );
   }

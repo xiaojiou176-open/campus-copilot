@@ -21,6 +21,10 @@ const resourcePaths: EdStemPathConfig = {
   threadsPath: '/api/courses/90031/threads?limit=30&sort=new',
 };
 
+const lessonPaths: EdStemPathConfig = {
+  threadsPath: '/api/courses/96846/threads?limit=30&sort=new',
+};
+
 function readFixture(relativePath: string) {
   return readFileSync(new URL(`./__fixtures__/live/${relativePath}`, import.meta.url), 'utf8');
 }
@@ -169,7 +173,7 @@ describe('EdStemApiClient', () => {
     expect(capabilities.resources.courses?.preferredMode).toBe('private_api');
     expect(capabilities.resources.messages?.modes).toEqual(['private_api', 'dom']);
     expect(capabilities.resources.messages?.preferredMode).toBe('private_api');
-    expect(capabilities.resources.resources?.modes).toEqual(['private_api']);
+    expect(capabilities.resources.resources?.modes).toEqual(['private_api', 'dom']);
     expect(capabilities.resources.resources?.preferredMode).toBe('private_api');
     expect(health?.status).toBe('healthy');
   });
@@ -624,6 +628,133 @@ describe('EdStemApiClient', () => {
         }),
       ]);
       expect(result.outcome).toBe('success');
+    }
+  });
+
+  it('falls back to the resources DOM carrier when the private resource request fails', async () => {
+    const client = new EdStemApiClient(
+      async (path) => {
+        if (path === '/api/user') {
+          return {
+            ok: true,
+            status: 200,
+            responseUrl: 'https://us.edstem.org/api/user',
+            bodyText: JSON.stringify({
+              courses: [
+                {
+                  course: {
+                    id: 90031,
+                    code: 'redacted-course-code',
+                    name: 'redacted-text',
+                  },
+                },
+              ],
+            }),
+            contentType: 'application/json',
+          };
+        }
+
+        if (path === '/api/courses/90031/threads?limit=30&sort=new') {
+          return {
+            ok: true,
+            status: 200,
+            responseUrl: 'https://us.edstem.org/api/courses/90031/threads?limit=30&sort=new',
+            bodyText: JSON.stringify({ threads: [], users: [] }),
+            contentType: 'application/json',
+          };
+        }
+
+        if (path === '/api/courses/90031/resources') {
+          return {
+            ok: false,
+            code: 'request_failed',
+            message: 'mocked resources outage',
+            status: 500,
+          };
+        }
+
+        return {
+          ok: false,
+          code: 'request_failed',
+          message: `No mock payload for ${path}`,
+          status: 500,
+        };
+      },
+      resourcePaths,
+    );
+
+    const adapter = createEdStemAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://edstem.org/us/courses/90031/resources',
+      site: 'edstem',
+      now: '2026-04-05T18:00:00-07:00',
+      pageHtml: readFixture('resources-page.html'),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outcome).toBe('partial_success');
+      expect(result.health.code).toBe('partial_success');
+      expect(result.health.reason).toBe('edstem_resources_dom_fallback');
+      expect(result.snapshot.resources).toHaveLength(2);
+      expect(result.snapshot.resources?.[0]).toMatchObject({
+        courseId: 'edstem:course:90031',
+        resourceKind: 'file',
+        summary: 'redacted-text',
+        detail: 'redacted-text · redacted-text · Download file',
+      });
+    }
+  });
+
+  it('collects EdStem lessons from the authenticated lessons DOM carrier', async () => {
+    const client = new EdStemApiClient(
+      okExecutor({
+        '/api/user': {
+          courses: [
+            {
+              course: {
+                id: 96846,
+                code: 'CSE 312 - 26sp',
+                name: 'Foundations of Computing II',
+              },
+            },
+          ],
+        },
+        '/api/courses/96846/threads?limit=30&sort=new': {
+          threads: [],
+          users: [],
+        },
+      }),
+      lessonPaths,
+    );
+
+    const adapter = createEdStemAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://edstem.org/us/courses/96846/lessons',
+      site: 'edstem',
+      now: '2026-04-13T08:00:00-07:00',
+      pageHtml: readFixture('lessons-page.html'),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.resources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'edstem:lesson:redacted-lesson-a',
+            courseId: 'edstem:course:96846',
+            resourceKind: 'link',
+            title: '[HW1 problem 7(a)] Python Tutorial & Coding Exercises',
+            summary: 'A. Using - Spring 2026',
+            detail: 'Lesson · attempted · Closed Due: Wed April 8th, 11:59pm',
+          }),
+          expect.objectContaining({
+            id: 'edstem:lesson:redacted-lesson-c',
+            detail: 'Lesson · not attempted · Open',
+          }),
+        ]),
+      );
+      expect(result.outcome).toBe('partial_success');
     }
   });
 

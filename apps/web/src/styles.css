@@ -5,13 +5,14 @@
   --cc-color-bg: #f5f4ee;
   --cc-color-surface: #fbfaf6;
   --cc-color-surface-muted: #f1eee5;
-  --cc-color-text: #27483d;
-  --cc-color-text-muted: #4e665e;
-  --cc-color-border: #dce8e1;
+  --cc-color-text: #31302e;
+  --cc-color-text-muted: #615d59;
+  --cc-color-border: #e2ddd6;
   --cc-color-warning: #b36b2c;
   --cc-color-danger: #a14343;
   --cc-color-success: #1f5d4b;
   --cc-font-family: Geist, "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --cc-font-display: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
   --cc-font-size-xs: 12px;
   --cc-font-size-sm: 14px;
   --cc-font-size-md: 16px;
@@ -33,9 +34,9 @@
   color-scheme: light;
   font-family: var(--cc-font-family);
   background:
-    radial-gradient(circle at top left, rgba(31, 93, 75, 0.05), transparent 34%),
-    radial-gradient(circle at top right, rgba(168, 98, 42, 0.035), transparent 24%),
-    linear-gradient(180deg, #f7f5ef 0%, #f3efe6 100%);
+    radial-gradient(circle at top left, rgba(31, 93, 75, 0.03), transparent 34%),
+    radial-gradient(circle at top right, rgba(168, 98, 42, 0.025), transparent 24%),
+    linear-gradient(180deg, #f8f6f1 0%, #f4f0e8 100%);
   color: var(--cc-color-text);
 }
 
@@ -137,12 +138,17 @@ textarea:focus-visible,
 }
 
 .web-shell__header,
+.web-shell__overview-band,
 .web-shell__overview-lanes,
 .web-shell__decision-lane,
 .web-shell__support-lane,
 .web-shell__explanation-lane {
   display: grid;
   gap: var(--cc-space-4);
+}
+
+.web-shell__overview-band {
+  gap: var(--cc-space-3);
 }
 
 .web-shell__overview-lanes {
@@ -152,6 +158,12 @@ textarea:focus-visible,
 
 .web-shell__toolbar-lane {
   display: grid;
+  gap: var(--cc-space-3);
+}
+
+.web-shell__toolbar-lane--supporting {
+  justify-self: end;
+  width: min(100%, 40rem);
 }
 
 .web-shell__support-lane {
@@ -197,6 +209,9 @@ textarea:focus-visible,
   margin: 0;
   font-size: clamp(2.2rem, 3.4vw, 2.9rem);
   line-height: 1.04;
+  font-family: var(--cc-font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .lede {
@@ -570,6 +585,28 @@ textarea:focus-visible,
   background: rgba(247, 245, 239, 0.92);
 }
 
+.split-grid--lane-band {
+  gap: var(--cc-space-3);
+}
+
+.panel--lane-summary {
+  padding: 1rem 1.05rem;
+  background: rgba(247, 245, 239, 0.9);
+  box-shadow: none;
+}
+
+.panel--lane-summary h2 {
+  font-size: 1.05rem;
+  font-family: var(--cc-font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.panel--lane-summary p {
+  font-size: 0.89rem;
+  line-height: 1.5;
+}
+
 .resource-link {
   color: var(--cc-color-primary);
   font-weight: 600;
@@ -592,6 +629,10 @@ textarea:focus-visible,
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.split-grid--primary .panel--decision {
+  min-height: 24rem;
+}
+
 .counts-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -602,6 +643,7 @@ textarea:focus-visible,
   gap: 0.25rem;
   background: rgba(247, 245, 239, 0.88);
   box-shadow: var(--cc-shadow-sm);
+  min-height: 7rem;
 }
 
 .stat-card strong {
@@ -662,14 +704,22 @@ textarea:focus-visible,
   display: grid;
   gap: var(--cc-space-4);
   background:
-    linear-gradient(180deg, rgba(251, 250, 246, 0.98), rgba(247, 243, 236, 0.94)),
-    radial-gradient(circle at top right, rgba(168, 98, 42, 0.05), transparent 38%);
-  box-shadow: var(--cc-shadow-sm);
+    linear-gradient(180deg, rgba(250, 248, 242, 0.95), rgba(245, 242, 236, 0.92)),
+    radial-gradient(circle at top right, rgba(168, 98, 42, 0.03), transparent 38%);
+  border-color: rgba(39, 72, 61, 0.1);
+  box-shadow: none;
 }
 
 .ai-panel-heading {
   display: grid;
   gap: var(--cc-space-2);
+}
+
+.ai-panel-summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2);
+  align-items: center;
 }
 
 .ai-explanation-strip {
@@ -681,8 +731,8 @@ textarea:focus-visible,
 .guidance-card {
   border: 1px solid rgba(39, 72, 61, 0.08);
   border-radius: var(--cc-radius-md);
-  background: rgba(247, 245, 239, 0.92);
-  padding: var(--cc-space-4);
+  background: rgba(247, 245, 239, 0.86);
+  padding: 0.82rem 0.9rem;
   display: grid;
   gap: var(--cc-space-2);
   box-shadow: none;
@@ -701,15 +751,60 @@ textarea:focus-visible,
   margin-bottom: 0;
 }
 
+.workbench-panels-shell {
+  position: relative;
+}
+
+.workbench-panels-shell--loading {
+  min-height: 34rem;
+}
+
+@media (max-width: 960px) {
+  .workbench-panels-shell--loading {
+    min-height: 24rem;
+  }
+}
+
 .loading-panel {
   display: grid;
   gap: 0.5rem;
   min-height: 180px;
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: min(100%, 34rem);
   align-content: center;
+  z-index: 2;
+  box-shadow: var(--cc-shadow-md);
+  background:
+    linear-gradient(180deg, rgba(251, 250, 246, 0.98), rgba(244, 241, 234, 0.96)),
+    rgba(251, 250, 246, 0.96);
 }
 
 .loading-panel h2 {
   margin: 0;
+}
+
+.loading-inline-state {
+  display: grid;
+  gap: 0.65rem;
+  min-height: 10rem;
+  align-content: start;
+}
+
+.loading-inline-state p {
+  margin: 0;
+  color: var(--cc-color-text-muted);
+}
+
+.loading-inline-row {
+  height: 0.92rem;
+  width: 72%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(220, 232, 225, 0.55), rgba(241, 238, 229, 0.95), rgba(220, 232, 225, 0.55));
+}
+
+.loading-inline-row--wide {
+  width: 92%;
 }
 
 .ai-controls {
@@ -730,8 +825,8 @@ textarea:focus-visible,
 .ai-answer-zone {
   border: 1px solid var(--cc-color-border);
   border-radius: var(--cc-radius-lg);
-  background: rgba(251, 250, 246, 0.96);
-  padding: var(--cc-space-5);
+  background: rgba(251, 250, 246, 0.94);
+  padding: 1rem 1.05rem;
 }
 
 .ai-question-block {
@@ -778,7 +873,27 @@ textarea:focus-visible,
   padding: var(--cc-space-4);
 }
 
+.advanced-settings--subdued {
+  background: rgba(246, 244, 238, 0.72);
+  border-color: rgba(39, 72, 61, 0.12);
+  box-shadow: none;
+}
+
+.advanced-settings--drawer {
+  background: rgba(246, 244, 238, 0.55);
+  border-style: dashed;
+  padding: var(--cc-space-3);
+}
+
+.advanced-settings--drawer summary {
+  font-size: 0.95rem;
+}
+
 .advanced-settings summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-space-3);
   cursor: pointer;
   font-weight: 600;
   color: var(--cc-color-text);

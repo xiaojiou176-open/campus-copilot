@@ -40,20 +40,23 @@ So future work should treat this document as:
 - not a daily implementation diary
 - not a second source of truth for current runtime evidence
 
-## Current Wave Boundaries
+## Current Scope Split
 
-Wave 1B locks the contract split:
+Keep the repo-writing split simple and public-safe:
 
 - current formal scope
 - next-phase engineering
 - later / platform ambition
 - explicit no-go
 
-Use these guardrails for later waves:
+Use these guardrails for later work:
 
-1. Wave 2 deepens product-serving site capabilities on the existing workbench contract, preferably by filling already-promoted canonical fields first.
-2. Wave 3 adds or evolves standalone WebUI only when it consumes imported or local workspace state on the same schema/read-model/export/AI truth.
-3. Wave 4 improves surface quality, i18n, front-door clarity, and dual-surface convergence without overclaiming launch completeness.
-4. Wave 5 extracts the internal Campus ↔ Switchyard seam, makes the runtime path Switchyard-first, and keeps browser evidence/control-plane work in the internal diagnostics substrate.
-5. Wave 6 can promote truthful repo-public read-only builder packaging such as SDK / CLI / MCP / skills, plus the site API preview libs and site-scoped MCP story, only after the shared substrate and Switchyard seam are stable.
-6. Wave 7 can prioritize launch/SEO/video only after the product and public contract are stable and owner-only settings are the main remaining work.
+1. deepen product-serving capabilities on the existing workbench contract before inventing new product shells
+2. keep any standalone web evolution on the same schema/read-model/export/AI truth instead of building a second sync engine
+3. treat surface polish, public naming, and launch-facing assets as later convergence work, not proof that unfinished substrate work is done
+4. keep internal runtime-seam or browser diagnostics work in internal maintainership lanes instead of public product docs
+5. treat repo-public builder packaging and launch/publication work as later or owner/platform-facing unless the repo explicitly promotes them into stable public contract
+
+Detailed owner-side release queues, submission packets, and mutable publication
+choreography should live in local maintainership packets such as
+`.agents/Plans/`, not in the committed docs front door.

@@ -1,6 +1,6 @@
 # Campus Copilot Design System
 
-更新时间：2026-04-09 23:05 PDT
+更新时间：2026-04-13 05:48 PDT
 
 > 这份设计系统不是“做得更像 AI 产品”的说明书。  
 > 它是把 Campus Copilot 统一成 **local-first academic decision workspace** 的施工总图。
@@ -23,6 +23,39 @@ Donor order 固定为：
 - **Notion primary**：整体布局、信息层级、边框与留白节奏
 - **Claude secondary**：只借 AI explanation lane 的温度和人味
 - **Raycast secondary**：只借 extension 外壳的紧凑 launcher 感
+
+## Direct Donor Borrow Rules
+
+这次不是“参考一下”，而是尽量**直接照着成熟样板抄**。
+
+### 1. 从 Notion 直接抄的东西
+
+- **信息层级**：hero 只负责定场，不抢主任务；真正的主工作区必须尽快露出来。
+- **边框哲学**：优先 `1px whisper border`，再考虑 shadow。结构先于装饰。
+- **卡片语法**：卡片不是为了“看起来高级”，而是为了把 decision / evidence / support 三层分开。
+- **CTA 克制**：只保留一两个真正有价值的强动作，其他动作降成 secondary / quiet。
+
+### 2. 从 Claude 直接抄的东西
+
+- **暖色中性底**：页面是纸感，不是玻璃感。
+- **解释层语气**：像可信 companion，不像 command center。
+- **AI 的位置**：解释层必须跟在事实之后，而不是先把用户引到模型面前。
+- **信任感**：manual-only / blocked / caution 要显眼，但不能戏剧化。
+
+### 3. 从 Raycast 直接抄的东西
+
+- **壳层紧凑度**：extension 这种小壳一定要 launcher-first / companion-first。
+- **操作收纳**：高级控制下沉，首屏只留高频、低认知负担动作。
+- **工具感**：信息密度可以高，但路径必须短，不能像管理后台。
+
+## Donor Mapping By Surface
+
+| Surface | Primary donor | Secondary donor | 这页最该抄什么 |
+| :-- | :-- | :-- | :-- |
+| `web workbench` | `Notion` | `Claude` | 首屏层级、工作台先于解释、whisper border、warm neutral surface |
+| `extension sidepanel` | `Raycast` | `Claude` | 紧凑壳层、launcher-first、AI 做解释层、默认折叠详细工作台 |
+| `extension options / trust center` | `Notion` | `Claude` | summary-first、控制项分层、把规则改写成人话 |
+| `popup` | `Raycast` | `Notion` | quick pulse launcher、少而准的动作、不要做成完整工作台 |
 
 禁止反过来：
 
@@ -115,6 +148,27 @@ Donor order 固定为：
 
 不要每个 panel 都自己发明第四种卡片语言。
 
+### 第一屏铁律
+
+不管是 web 还是 extension，都要守住下面这条：
+
+> **先让用户看懂“现在发生了什么、下一步看哪里”，再把工具、解释、设置往下摆。**
+
+换句话说：
+
+- **web**：orientation 之后应尽快进入 `Focus Queue / Weekly Load / Planning Pulse`
+- **sidepanel**：companion summary 之后才展开 detailed workspace
+- **settings**：先看 trust summary，再看高级规则
+
+如果第一屏开始像：
+
+- AI playground
+- prompt 面板
+- builder console
+- publication router
+
+那就说明设计已经漂了。
+
 ## Interaction Rules
 
 ### Buttons
@@ -185,9 +239,10 @@ Donor order 固定为：
 1. 先统一 extension/web 的 token，再改页面
 2. 把 AI 面板从“主角”降成“解释层”
 3. popup 从“导出抽屉”改成“quick pulse”
-4. 把 trust / diagnostics 做成第一屏真相层
+4. 把 trust / diagnostics 做成 supporting truth layer，而不是第一眼主角
 5. 拉开 extension/web 首屏的主次层级，避免 equal-weight card wall
 6. 补齐 focus / skip link / reduced-motion / empty-state 指路
+7. 一切 builder/publication 路由都放到 student loop 之后
 
 ## Page Overrides
 

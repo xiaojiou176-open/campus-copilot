@@ -14,7 +14,7 @@ import {
   getEntityCounts,
   getSiteEntityCounts,
 } from './query-entities.ts';
-import { getPlanningSubstratesBySource } from './planning-substrate.ts';
+import { getAllPlanningSubstrates, getPlanningSubstratesBySource } from './planning-substrate.ts';
 import {
   getLatestSyncRunBySite,
   getLatestSyncRuns,
@@ -126,11 +126,15 @@ export function useWeeklyLoad(now: string, db: CampusCopilotDB = campusCopilotDb
 }
 
 export function usePlanningSubstratesBySource(
-  source: 'myplan',
+  source: 'myplan' | 'time-schedule',
   db: CampusCopilotDB = campusCopilotDb,
   refreshKey?: number,
 ) {
   return useLiveQuery(() => getPlanningSubstratesBySource(source, db), [source, db, refreshKey]);
+}
+
+export function useAllPlanningSubstrates(db: CampusCopilotDB = campusCopilotDb, refreshKey?: number) {
+  return useLiveQuery(() => getAllPlanningSubstrates(db), [db, refreshKey]);
 }
 
 export function useWorkbenchView(

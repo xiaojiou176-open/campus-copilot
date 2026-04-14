@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { CAMPUS_MCP_SERVER_TOOL_NAMES, createCampusCopilotMcpServer } from './server.ts';
+import { CAMPUS_MCP_SERVER_TOOL_NAMES, createCampusCopilotMcpServer } from '../dist/server.mjs';
 
 test('mcp-server registers the expected read-only tool surface', async () => {
   const server = createCampusCopilotMcpServer();

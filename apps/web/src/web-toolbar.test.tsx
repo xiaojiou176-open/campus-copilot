@@ -60,13 +60,13 @@ describe('web toolbar and support rail', () => {
   it('renders a supporting trust summary and diagnostics receipts without overclaiming live state', () => {
     const html = renderToStaticMarkup(createElement(WebSupportRail, toolbarProps));
 
-    expect(html).toContain('Trust summary');
+    expect(html).toContain('What this workspace can prove');
     expect(html).toContain('Diagnostics and receipts');
     expect(html).toContain('Imported sites with data');
     expect(html).toContain('Tracked entities');
     expect(html).toContain('Unseen updates');
     expect(html).toContain('Latest stored sync receipt: Canvas');
-    expect(html).toContain('Local-first evidence comes first. This preview tees up the same trust center you review again in Auth &amp; Export Management before exporting or asking AI.');
+    expect(html).toContain('Start with the facts already on the desk.');
     expect(html).toContain('Registration-related and red-zone routes stay outside this product surface.');
   });
 });

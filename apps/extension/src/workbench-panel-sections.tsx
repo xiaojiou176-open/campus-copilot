@@ -111,6 +111,10 @@ type OperationsSectionProps = Pick<
 
 const ADMINISTRATIVE_SITES = new Set<Site>(['myuw', 'time-schedule']);
 
+function formatPlanningRuntimeValue(value: string | undefined) {
+  return value ? value.replace(/_/g, ' ') : undefined;
+}
+
 function isAdministrativeSite(site: Site) {
   return ADMINISTRATIVE_SITES.has(site);
 }
@@ -238,6 +242,19 @@ function getResourceActionLabel(
     default:
       return text.currentResources.openDownload;
   }
+}
+
+function getResourceSemanticLabel(resource: OperationsSectionProps['currentResources'][number]) {
+  if (resource.site === 'edstem') {
+    if (resource.id.startsWith('edstem:lesson:')) {
+      return 'lesson';
+    }
+    if (resource.summary) {
+      return 'grouped resource';
+    }
+  }
+
+  return resource.resourceKind;
 }
 
 function renderAlertGroup(
@@ -907,6 +924,67 @@ export function WorkbenchDecisionSections({
   const courseClusterCount = courseClusters.length;
   const workItemClusterCount = workItemClusters.length;
   const administrativeSummaryCount = administrativeSummaries.length;
+  const groupedDecisionCopy =
+    uiLanguage === 'zh-CN'
+      ? {
+          mergeHealthEyebrow: '合并健康',
+          mergeHealthTitle: '统一合并底座',
+          mergeHealthDescription:
+            '这块像总账本状态灯。它告诉你我们已经折成了多少课程簇、多少统一工作项，还有多少对象仍然只是可能匹配。',
+          courseClustersTitle: '课程簇',
+          courseClustersSummary: (count: number) => `${count} 个课程簇已进入当前共享视图。`,
+          mergeStats: (merged: number, possible: number) => `已合并 ${merged} · 可能匹配 ${possible}`,
+          workItemClustersTitle: '统一工作项',
+          workItemClustersSummary: (count: number) => `${count} 个统一工作项已进入当前共享视图。`,
+          workItemStats: (unresolved: number, conflicts: number) => `待处理 ${unresolved} · 冲突 ${conflicts}`,
+          administrativeSummariesTitle: '行政摘要',
+          administrativeSummariesSummary: (count: number) => `${count} 个行政摘要已进入当前工作台。`,
+          administrativeSummariesMeta: '这些对象默认更偏 review/export-first，而不是首页全文展示。',
+          coursePanoramaTitle: '课程总览',
+          coursePanoramaDescription: '这里像课程总览台，专门放已经折好的课程簇和课站证据，不把它们塞回首页首屏。',
+          coursePanoramaEmpty: '当前还没有课程簇进入共享视图。',
+          mergedWorkItemsTitle: '统一工作项',
+          mergedWorkItemsDescription: '这里放统一后的工作项，不再只看单站作业卡片。',
+          mergedWorkItemsEmpty: '当前还没有统一工作项进入共享视图。',
+          administrativeSnapshotsTitle: '行政摘要',
+          administrativeSnapshotsDescription:
+            '高敏感行政对象先以摘要卡进入工作台，默认走 review/export-first，不直接铺满首页。',
+          administrativeSnapshotsEmpty: '当前还没有已 landed 的行政摘要进入共享视图。',
+          authorityLabel: '权威来源',
+          sitesLabel: '站点',
+        }
+      : {
+          mergeHealthEyebrow: 'Merge Health',
+          mergeHealthTitle: 'Canonical merge substrate',
+          mergeHealthDescription:
+            'Think of this as the ledger health lamp. It shows how many course clusters and merged work items are already folded in, and how many objects still remain possible matches.',
+          courseClustersTitle: 'Course clusters',
+          courseClustersSummary: (count: number) => `${count} course clusters are already in the shared workspace view.`,
+          mergeStats: (merged: number, possible: number) => `merged ${merged} · possible ${possible}`,
+          workItemClustersTitle: 'Work-item clusters',
+          workItemClustersSummary: (count: number) =>
+            `${count} merged work items are already in the shared workspace view.`,
+          workItemStats: (unresolved: number, conflicts: number) => `unresolved ${unresolved} · conflicts ${conflicts}`,
+          administrativeSummariesTitle: 'Administrative summaries',
+          administrativeSummariesSummary: (count: number) =>
+            `${count} administrative summaries are already visible in the current workbench.`,
+          administrativeSummariesMeta:
+            'These objects stay review/export-first by default instead of expanding into first-screen full detail.',
+          coursePanoramaTitle: 'Course panorama',
+          coursePanoramaDescription:
+            'This is the course overview shelf: it keeps folded course clusters and course-site evidence visible without pushing them back into the hero lane.',
+          coursePanoramaEmpty: 'No course clusters have landed in the shared workspace view yet.',
+          mergedWorkItemsTitle: 'Merged work items',
+          mergedWorkItemsDescription:
+            'This section keeps the unified work-item view visible instead of dropping back to single-site assignment cards.',
+          mergedWorkItemsEmpty: 'No merged work items have landed in the shared workspace view yet.',
+          administrativeSnapshotsTitle: 'Administrative snapshots',
+          administrativeSnapshotsDescription:
+            'High-sensitivity administrative objects enter as summary cards first; the default posture stays review/export-first instead of filling the home surface.',
+          administrativeSnapshotsEmpty: 'No landed administrative summaries are visible in the shared workspace view yet.',
+          authorityLabel: 'Authority',
+          sitesLabel: 'Sites',
+        };
 
   return (
     <>
@@ -953,30 +1031,31 @@ export function WorkbenchDecisionSections({
       </article>
 
       <article className="surface__panel">
-        <p className="surface__eyebrow">Merge Health</p>
-        <h2>Canonical merge substrate</h2>
-        <p>
-          这块像“总账本状态灯”。它告诉你我们已经折成了多少课程簇、多少工作项簇，还有多少对象仍然只是可能匹配。
-        </p>
+        <p className="surface__eyebrow">{groupedDecisionCopy.mergeHealthEyebrow}</p>
+        <h2>{groupedDecisionCopy.mergeHealthTitle}</h2>
+        <p>{groupedDecisionCopy.mergeHealthDescription}</p>
         <div className="surface__grid surface__grid--split">
           <article className="surface__item">
-            <strong>Course clusters</strong>
-            <p>{courseClusterCount} 个课程簇已进入当前共享视图。</p>
+            <strong>{groupedDecisionCopy.courseClustersTitle}</strong>
+            <p>{groupedDecisionCopy.courseClustersSummary(courseClusterCount)}</p>
             <p className="surface__meta">
-              merged {mergeHealth?.mergedCount ?? 0} · possible {mergeHealth?.possibleMatchCount ?? 0}
+              {groupedDecisionCopy.mergeStats(mergeHealth?.mergedCount ?? 0, mergeHealth?.possibleMatchCount ?? 0)}
             </p>
           </article>
           <article className="surface__item">
-            <strong>Work-item clusters</strong>
-            <p>{workItemClusterCount} 个统一工作项已进入当前共享视图。</p>
+            <strong>{groupedDecisionCopy.workItemClustersTitle}</strong>
+            <p>{groupedDecisionCopy.workItemClustersSummary(workItemClusterCount)}</p>
             <p className="surface__meta">
-              unresolved {mergeHealth?.unresolvedCount ?? 0} · conflicts {mergeHealth?.authorityConflictCount ?? 0}
+              {groupedDecisionCopy.workItemStats(
+                mergeHealth?.unresolvedCount ?? 0,
+                mergeHealth?.authorityConflictCount ?? 0,
+              )}
             </p>
           </article>
           <article className="surface__item">
-            <strong>Administrative summaries</strong>
-            <p>{administrativeSummaryCount} 个行政摘要已进入当前工作台。</p>
-            <p className="surface__meta">这些对象默认更偏 review/export-first，而不是首页全文展示。</p>
+            <strong>{groupedDecisionCopy.administrativeSummariesTitle}</strong>
+            <p>{groupedDecisionCopy.administrativeSummariesSummary(administrativeSummaryCount)}</p>
+            <p className="surface__meta">{groupedDecisionCopy.administrativeSummariesMeta}</p>
           </article>
         </div>
       </article>
@@ -1200,12 +1279,21 @@ export function WorkbenchDecisionSections({
                 {text.planningPulse.requirementGroups(latestPlanningSubstrate.requirementGroupCount)} ·{' '}
                 {text.planningPulse.programExploration(latestPlanningSubstrate.programExplorationCount)}
               </p>
+              {latestPlanningSubstrate.currentStage ? (
+                <p className="surface__meta">
+                  {uiLanguage === 'zh-CN' ? '当前阶段' : 'Current stage'}: {formatPlanningRuntimeValue(latestPlanningSubstrate.currentStage)}
+                  {latestPlanningSubstrate.runtimePosture
+                    ? ` · ${uiLanguage === 'zh-CN' ? '运行姿态' : 'Runtime posture'}: ${formatPlanningRuntimeValue(latestPlanningSubstrate.runtimePosture)}`
+                    : ''}
+                </p>
+              ) : null}
               <p className="surface__meta">
                 {text.planningPulse.capturedAt(formatDateTime(uiLanguage, latestPlanningSubstrate.capturedAt))}
                 {latestPlanningSubstrate.lastUpdatedAt
                   ? ` · ${text.planningPulse.updatedAt(formatDateTime(uiLanguage, latestPlanningSubstrate.lastUpdatedAt))}`
                   : ''}
               </p>
+              {latestPlanningSubstrate.currentTruth ? <p>{latestPlanningSubstrate.currentTruth}</p> : null}
               {latestPlanningSubstrate.degreeProgressSummary ? (
                 <p>
                   {text.planningPulse.degreeProgressLabel}: {latestPlanningSubstrate.degreeProgressSummary}
@@ -1214,6 +1302,12 @@ export function WorkbenchDecisionSections({
               {latestPlanningSubstrate.transferPlanningSummary ? (
                 <p>
                   {text.planningPulse.transferPlanningLabel}: {latestPlanningSubstrate.transferPlanningSummary}
+                </p>
+              ) : null}
+              {latestPlanningSubstrate.exactBlockers.length ? (
+                <p className="surface__meta">
+                  {uiLanguage === 'zh-CN' ? '仍需继续处理' : 'Still blocked by'}:{' '}
+                  {latestPlanningSubstrate.exactBlockers.map((blocker) => blocker.id).join(' · ')}
                 </p>
               ) : null}
               {latestPlanningSubstrate.terms.length ? (
@@ -1317,13 +1411,45 @@ export function WorkbenchOperationsSections({
           manualAction: (label: string) => `手动打开 ${label}`,
         };
   const redZoneHardStops = getAcademicRedZoneHardStops(['register-uw', 'notify-uw']);
+  const groupedOperationsCopy =
+    uiLanguage === 'zh-CN'
+      ? {
+          coursePanoramaTitle: '课程总览',
+          coursePanoramaDescription: '这里像课程总览台，专门放已经折好的课程簇和课站证据，不把它们塞回首页首屏。',
+          coursePanoramaEmpty: '当前还没有课程簇进入共享视图。',
+          mergedWorkItemsTitle: '统一工作项',
+          mergedWorkItemsDescription: '这里放统一后的工作项，不再只看单站作业卡片。',
+          mergedWorkItemsEmpty: '当前还没有统一工作项进入共享视图。',
+          administrativeSnapshotsTitle: '行政摘要',
+          administrativeSnapshotsDescription:
+            '高敏感行政对象先以摘要卡进入工作台，默认走 review/export-first，不直接铺满首页。',
+          administrativeSnapshotsEmpty: '当前还没有已 landed 的行政摘要进入共享视图。',
+          authorityLabel: '权威来源',
+          sitesLabel: '站点',
+        }
+      : {
+          coursePanoramaTitle: 'Course panorama',
+          coursePanoramaDescription:
+            'This is the course overview shelf: it keeps folded course clusters and course-site evidence visible without pushing them back into the hero lane.',
+          coursePanoramaEmpty: 'No course clusters have landed in the shared workspace view yet.',
+          mergedWorkItemsTitle: 'Merged work items',
+          mergedWorkItemsDescription:
+            'This section keeps the unified work-item view visible instead of dropping back to single-site assignment cards.',
+          mergedWorkItemsEmpty: 'No merged work items have landed in the shared workspace view yet.',
+          administrativeSnapshotsTitle: 'Administrative snapshots',
+          administrativeSnapshotsDescription:
+            'High-sensitivity administrative objects enter as summary cards first; the default posture stays review/export-first instead of filling the home surface.',
+          administrativeSnapshotsEmpty: 'No landed administrative summaries are visible in the shared workspace view yet.',
+          authorityLabel: 'Authority',
+          sitesLabel: 'Sites',
+        };
 
   return (
     <>
       <div className="surface__grid surface__grid--split">
         <article className="surface__panel">
-          <h2>Course panorama</h2>
-          <p>这里像课程总览台，专门放已经折好的课程簇和课站证据，不把它们塞回首页首屏。</p>
+          <h2>{groupedOperationsCopy.coursePanoramaTitle}</h2>
+          <p>{groupedOperationsCopy.coursePanoramaDescription}</p>
           <div className="surface__stack">
             {courseClusters.length ? (
               courseClusters.slice(0, surface === 'sidepanel' ? 6 : 4).map((cluster) => (
@@ -1344,7 +1470,8 @@ export function WorkbenchOperationsSections({
                   </div>
                   <p>{cluster.summary}</p>
                   <p className="surface__meta">
-                    Authority: {cluster.authoritySurface} · Sites: {cluster.relatedSites.join(' / ')}
+                    {groupedOperationsCopy.authorityLabel}: {cluster.authoritySurface} · {groupedOperationsCopy.sitesLabel}:{' '}
+                    {cluster.relatedSites.join(' / ')}
                   </p>
                   {renderClusterReviewControls({
                     targetKind: 'course_cluster',
@@ -1354,14 +1481,14 @@ export function WorkbenchOperationsSections({
                 </article>
               ))
             ) : (
-              <p>当前还没有课程簇进入共享视图。</p>
+              <p>{groupedOperationsCopy.coursePanoramaEmpty}</p>
             )}
           </div>
         </article>
 
         <article className="surface__panel">
-          <h2>Merged work items</h2>
-          <p>这里放统一后的工作项，不再只看单站作业卡片。</p>
+          <h2>{groupedOperationsCopy.mergedWorkItemsTitle}</h2>
+          <p>{groupedOperationsCopy.mergedWorkItemsDescription}</p>
           <div className="surface__stack">
             {workItemClusters.length ? (
               workItemClusters.slice(0, surface === 'sidepanel' ? 6 : 4).map((cluster) => (
@@ -1383,7 +1510,7 @@ export function WorkbenchOperationsSections({
                   </div>
                   <p>{cluster.summary}</p>
                   <p className="surface__meta">
-                    Authority: {cluster.authoritySurface}
+                    {groupedOperationsCopy.authorityLabel}: {cluster.authoritySurface}
                     {cluster.dueAt ? ` · ${text.currentTasks.dueAt(formatDateTime(uiLanguage, cluster.dueAt))}` : ''}
                   </p>
                   {renderClusterReviewControls({
@@ -1394,15 +1521,15 @@ export function WorkbenchOperationsSections({
                 </article>
               ))
             ) : (
-              <p>当前还没有统一工作项进入共享视图。</p>
+              <p>{groupedOperationsCopy.mergedWorkItemsEmpty}</p>
             )}
           </div>
         </article>
       </div>
 
       <article className="surface__panel">
-        <h2>Administrative snapshots</h2>
-        <p>高敏感行政对象先以摘要卡进入工作台，默认走 review/export-first，不直接铺满首页。</p>
+        <h2>{groupedOperationsCopy.administrativeSnapshotsTitle}</h2>
+        <p>{groupedOperationsCopy.administrativeSnapshotsDescription}</p>
         <div className="surface__stack">
           {administrativeSummaries.length ? (
             administrativeSummaries.map((summary) => (
@@ -1422,7 +1549,7 @@ export function WorkbenchOperationsSections({
               </article>
             ))
           ) : (
-            <p>当前还没有已 landed 的行政摘要进入共享视图。</p>
+            <p>{groupedOperationsCopy.administrativeSnapshotsEmpty}</p>
           )}
         </div>
       </article>
@@ -1477,7 +1604,7 @@ export function WorkbenchOperationsSections({
                       <span className={`surface__badge surface__badge--${getLaneBadgeTone(resource.site)}`}>
                         {getLaneBadgeLabel(resource.site, text)}
                       </span>
-                      <span className="surface__badge surface__badge--neutral">{resource.resourceKind}</span>
+                      <span className="surface__badge surface__badge--neutral">{getResourceSemanticLabel(resource)}</span>
                     </div>
                   </div>
                   {resource.summary ? <p>{resource.summary}</p> : null}

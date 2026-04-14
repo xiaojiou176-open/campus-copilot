@@ -27,6 +27,10 @@ Its user-facing shape is a workbench with export and AI as parallel formal paths
 
 The current formal surface goal is a **learning decision layer**, not a broader chat shell.
 
+This section defines the current surface contract and intended product direction.
+It is not a claim that every extension/web surface has already reached final
+first-fold or final visual closure.
+
 That direction should materialize as:
 
 - `sidepanel` as an assistant-first companion with explicit entry into export/settings
@@ -70,6 +74,11 @@ The current extension surface should now be read as three distinct product modes
 
 This is not a license to turn the extension into a generic chat shell.
 It is a way to stop treating the default sidepanel like a compressed long-form workbench page.
+
+Read this file as:
+
+- what the product should clearly become in the current line
+- not as proof that every bar is already fully closed
 
 It must not be marketed as a site-syncing standalone shell until a later contract explicitly promotes that path.
 

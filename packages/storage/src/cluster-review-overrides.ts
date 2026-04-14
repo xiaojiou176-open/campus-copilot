@@ -7,6 +7,7 @@ import {
   type ClusterReviewOverride,
   type ClusterReviewTargetKind,
 } from './contracts.ts';
+import { recomputeClusterSubstrate } from './cluster-substrate.ts';
 
 function makeOverrideId(targetKind: ClusterReviewTargetKind, targetId: string) {
   return `cluster-review:${targetKind}:${targetId}`;
@@ -35,7 +36,6 @@ export async function setClusterReviewDecision(
   });
 
   await db.cluster_review_overrides.put(nextOverride);
-  const { recomputeClusterSubstrate } = await import('./cluster-substrate.ts');
   await recomputeClusterSubstrate(db);
   return nextOverride;
 }
@@ -49,7 +49,6 @@ export async function clearClusterReviewDecision(
 ) {
   const targetKind = ClusterReviewTargetKindSchema.parse(input.targetKind);
   await db.cluster_review_overrides.delete(makeOverrideId(targetKind, input.targetId));
-  const { recomputeClusterSubstrate } = await import('./cluster-substrate.ts');
   await recomputeClusterSubstrate(db);
 }
 

@@ -62,6 +62,40 @@ export const TIME_SCHEDULE_PROMOTION_HOLDS = [
   'note-derived modality/location need stronger proof before any broader shared field promotion',
 ] as const;
 
+export const TIME_SCHEDULE_STAGE_UNDERSTANDING = {
+  surface: 'time-schedule',
+  currentStage: 'partial_shared_landing',
+  runtimePosture: 'public_course_offerings_planning_lane',
+  readOnly: true,
+  noRegistrationAutomation: true,
+  currentTruth:
+    'Time Schedule is already a real public planning carrier, but it is still intentionally limited to public course offerings instead of full authenticated schedule/runtime parity.',
+} as const;
+
+export const TIME_SCHEDULE_EXACT_BLOCKERS = [
+  {
+    id: 'netid_richer_schedule_view',
+    class: 'owner-manual later',
+    summary: 'The richer NetID Time Schedule view still lacks a fresh repo-owned authenticated proof packet in this worker scope.',
+    whyItStopsPromotion:
+      'Worker C can keep the public carrier honest, but promoting the richer authenticated lane still needs a real current-user capture.',
+  },
+  {
+    id: 'dom_sln_detail_fallback',
+    class: 'repo-owned blocker',
+    summary: 'SLN-detail fallback now has a real parser/fixture-backed lane, but it still needs a stronger shared promotion path beyond “active detail tab” runtime.',
+    whyItStopsPromotion:
+      'The parser and extension runtime can now read an active SLN detail page, but the richer detail is not yet merged back into the public-offerings planning lane automatically.',
+  },
+  {
+    id: 'structured_location_modality_proof',
+    class: 'repo-owned blocker',
+    summary: 'Location and modality are still mostly note-derived instead of consistently structured fields.',
+    whyItStopsPromotion:
+      'Current extraction can carry them as partial proof, but first-class promotion still needs stronger evidence than freeform notes.',
+  },
+] as const;
+
 export interface ScheduleRootQuarterLink {
   quarter: string;
   netIdTimeScheduleUrl: string;
@@ -82,6 +116,27 @@ export interface TimeScheduleBoundaryProof {
     fullScheduleUrl: string;
     publicOfferingsUrl: string;
   }>;
+}
+
+export interface TimeScheduleRuntimePromotionBlocker {
+  id: (typeof TIME_SCHEDULE_EXACT_BLOCKERS)[number]['id'];
+  class: (typeof TIME_SCHEDULE_EXACT_BLOCKERS)[number]['class'];
+  summary: string;
+  whyItStopsPromotion: string;
+}
+
+export interface TimeScheduleRuntimePromotionPacket {
+  surface: 'time-schedule';
+  stage: typeof TIME_SCHEDULE_STAGE_UNDERSTANDING.currentStage;
+  runtimePosture: typeof TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture;
+  currentTruth: typeof TIME_SCHEDULE_STAGE_UNDERSTANDING.currentTruth;
+  readOnly: true;
+  noRegistrationAutomation: true;
+  boundaryProof: TimeScheduleBoundaryProof;
+  prototype: ReturnType<typeof extractPublicCourseOfferingsPrototype>;
+  fieldDecisions: typeof TIME_SCHEDULE_FIELD_DECISIONS;
+  promotionHolds: typeof TIME_SCHEDULE_PROMOTION_HOLDS;
+  exactBlockers: TimeScheduleRuntimePromotionBlocker[];
 }
 
 export interface PublicCourseOfferingMeeting {
@@ -110,6 +165,32 @@ export interface PublicCourseOfferingSection {
   modality?: 'hybrid' | 'online' | 'remote_async' | 'remote_sync';
   noteLines: string[];
   meetings: PublicCourseOfferingMeeting[];
+}
+
+export interface TimeScheduleSectionDetailMeeting {
+  days: string;
+  timeText: string;
+  location?: string;
+  instructor?: string;
+}
+
+export interface TimeScheduleSectionDetailPage {
+  quarterLabel: string;
+  sln: string;
+  courseKey: string;
+  sectionId: string;
+  sectionType?: string;
+  credits?: string;
+  title: string;
+  generalEducation?: string;
+  textbooksAvailable: boolean;
+  currentEnrollment?: number;
+  enrollmentLimit?: number;
+  roomCapacity?: number;
+  spaceAvailable?: number;
+  status: 'open' | 'closed' | 'unknown';
+  meetings: TimeScheduleSectionDetailMeeting[];
+  noteLines: string[];
 }
 
 export interface PublicCourseOfferingCourse {
@@ -574,6 +655,108 @@ function parseSection(sectionHtml: string, courseKey: string, warnings: string[]
   } satisfies PublicCourseOfferingSection;
 }
 
+function parseTimeScheduleIntegerCell(input: string | undefined) {
+  if (!input) {
+    return undefined;
+  }
+
+  const parsed = Number.parseInt(input.replace(/[^0-9-]/g, ''), 10);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function extractDetailCell(rowHtml: string, index: number) {
+  const cells = Array.from(rowHtml.matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)).map((match) =>
+    normalizeWhitespace(match[1] ?? ''),
+  );
+  return cells[index];
+}
+
+function extractFirstDataRow(tableHtml: string | undefined) {
+  if (!tableHtml) {
+    return '';
+  }
+
+  return Array.from(tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi))
+    .map((match) => match[0])
+    .find((rowHtml) => /<td\b/i.test(rowHtml)) ?? '';
+}
+
+function parseTimeScheduleDetailNotes(html: string) {
+  const notesBlock =
+    html.match(/<h3[^>]*>\s*Notes\s*<\/h3>[\s\S]*?<pre[^>]*>([\s\S]*?)<\/pre>/i)?.[1] ??
+    html.match(/<h3[^>]*>\s*Notes\s*<\/h3>[\s\S]*?<div[^>]*>([\s\S]*?)<\/div>/i)?.[1] ??
+    '';
+
+  return htmlToPlainTextWithLineBreaks(notesBlock)
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .filter((line) => line !== '--');
+}
+
+export function extractTimeScheduleSectionDetailPage(html: string): TimeScheduleSectionDetailPage {
+  const quarterLabel =
+    normalizeWhitespace(html.match(/<h1[^>]*>\s*Current Section Status\s*-\s*([^<]+)<\/h1>/i)?.[1] ?? '') ||
+    'Current quarter';
+  const statusTable =
+    html.match(/<table[^>]*id=["']sectionStatus["'][\s\S]*?<\/table>/i)?.[0] ??
+    html.match(/<th[^>]*>\s*SLN\s*<\/th>[\s\S]*?<\/table>/i)?.[0] ??
+    '';
+  const enrollmentTable =
+    html.match(/<table[^>]*id=["']enrollmentStatus["'][\s\S]*?<\/table>/i)?.[0] ??
+    html.match(/<th[^>]*>\s*Current Enrollment\s*<\/th>[\s\S]*?<\/table>/i)?.[0] ??
+    '';
+  const statusRow = extractFirstDataRow(statusTable);
+  const enrollmentRow = extractFirstDataRow(enrollmentTable);
+  const meetingRows = Array.from(
+    extractFirstDataRow(html.match(/<table[^>]*id=["']meetings["'][\s\S]*?<\/table>/i)?.[0]).matchAll(
+      /<tr[^>]*>([\s\S]*?)<\/tr>/gi,
+    ),
+  ).map((match) => match[0]);
+
+  const normalizedMeetingRows = meetingRows.length > 0 ? meetingRows : [extractFirstDataRow(html.match(/<table[^>]*id=["']meetings["'][\s\S]*?<\/table>/i)?.[0])].filter(Boolean);
+
+  const sln = extractDetailCell(statusRow, 0) ?? '';
+  const courseKey = extractDetailCell(statusRow, 1) ?? '';
+  const sectionId = extractDetailCell(statusRow, 2) ?? '';
+  const sectionType = extractDetailCell(statusRow, 3);
+  const credits = extractDetailCell(statusRow, 4);
+  const title = extractDetailCell(statusRow, 5) ?? `${courseKey} ${sectionId}`.trim();
+  const generalEducation = extractDetailCell(statusRow, 6);
+  const currentEnrollment = parseTimeScheduleIntegerCell(extractDetailCell(enrollmentRow, 0));
+  const enrollmentLimit = parseTimeScheduleIntegerCell(extractDetailCell(enrollmentRow, 1));
+  const roomCapacity = parseTimeScheduleIntegerCell(extractDetailCell(enrollmentRow, 2));
+  const spaceAvailable = parseTimeScheduleIntegerCell(extractDetailCell(enrollmentRow, 3));
+  const status = parseStatus(extractDetailCell(enrollmentRow, 4) ?? '');
+  const meetings = normalizedMeetingRows
+    .map((rowHtml) => ({
+      days: extractDetailCell(rowHtml, 0) ?? 'unknown',
+      timeText: extractDetailCell(rowHtml, 1) ?? 'unknown',
+      location: extractDetailCell(rowHtml, 2) || undefined,
+      instructor: extractDetailCell(rowHtml, 3) || undefined,
+    }))
+    .filter((meeting) => meeting.days !== 'unknown' || meeting.timeText !== 'unknown');
+
+  return {
+    quarterLabel,
+    sln,
+    courseKey,
+    sectionId,
+    sectionType,
+    credits,
+    title,
+    generalEducation,
+    textbooksAvailable: /Display Textbooks/i.test(html),
+    currentEnrollment,
+    enrollmentLimit,
+    roomCapacity,
+    spaceAvailable,
+    status,
+    meetings,
+    noteLines: parseTimeScheduleDetailNotes(html),
+  };
+}
+
 export function extractScheduleRootSnapshot(html: string): ScheduleRootSnapshot {
   const publicDisclosure = getFirstTextBlock(
     html,
@@ -722,5 +905,30 @@ export function extractPublicCourseOfferingsPrototype(input: {
     })),
     events,
     warnings: page.warnings,
+  };
+}
+
+export function buildTimeScheduleRuntimePromotionPacket(input: {
+  rootHtml: string;
+  offeringsHtml: string;
+  sourceUrl: string;
+  quarterLabel: string;
+}): TimeScheduleRuntimePromotionPacket {
+  return {
+    surface: 'time-schedule',
+    stage: TIME_SCHEDULE_STAGE_UNDERSTANDING.currentStage,
+    runtimePosture: TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture,
+    currentTruth: TIME_SCHEDULE_STAGE_UNDERSTANDING.currentTruth,
+    readOnly: true,
+    noRegistrationAutomation: true,
+    boundaryProof: parseTimeScheduleBoundaryHtml(input.rootHtml, input.sourceUrl),
+    prototype: extractPublicCourseOfferingsPrototype({
+      html: input.offeringsHtml,
+      sourceUrl: input.sourceUrl,
+      quarterLabel: input.quarterLabel,
+    }),
+    fieldDecisions: TIME_SCHEDULE_FIELD_DECISIONS,
+    promotionHolds: TIME_SCHEDULE_PROMOTION_HOLDS,
+    exactBlockers: TIME_SCHEDULE_EXACT_BLOCKERS.map((blocker) => ({ ...blocker })),
   };
 }

@@ -4,8 +4,12 @@ import { describe, expect, it } from 'vitest';
 
 import {
   TIME_SCHEDULE_CARRIER_ORDER,
+  TIME_SCHEDULE_EXACT_BLOCKERS,
   TIME_SCHEDULE_FIELD_DECISIONS,
   TIME_SCHEDULE_PROMOTION_HOLDS,
+  TIME_SCHEDULE_STAGE_UNDERSTANDING,
+  buildTimeScheduleRuntimePromotionPacket,
+  extractTimeScheduleSectionDetailPage,
   type PublicCourseOfferingCourse,
   extractPublicCourseOfferingsPage,
   extractPublicCourseOfferingsPrototype,
@@ -163,6 +167,34 @@ describe('adapters-time-schedule limited shared landing', () => {
     expect(packageJson.dependencies ?? {}).toEqual({});
   });
 
+  it('builds a runtime-promotion packet that keeps the public carrier honest about remaining blockers', () => {
+    const packet = buildTimeScheduleRuntimePromotionPacket({
+      rootHtml: readFixture('schedule-root.html'),
+      offeringsHtml: readFixture('public-course-offerings-cse.html'),
+      sourceUrl: 'https://www.washington.edu/students/timeschd/pub/SPR2026/cse.html',
+      quarterLabel: 'Spring Quarter 2026',
+    });
+
+    expect(packet.surface).toBe('time-schedule');
+    expect(packet.stage).toBe(TIME_SCHEDULE_STAGE_UNDERSTANDING.currentStage);
+    expect(packet.runtimePosture).toBe(TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture);
+    expect(packet.boundaryProof.fullScheduleRequiresNetId).toBe(true);
+    expect(packet.prototype.carrier).toBe('public-course-offerings-view');
+    expect(packet.fieldDecisions).toBe(TIME_SCHEDULE_FIELD_DECISIONS);
+    expect(packet.promotionHolds).toBe(TIME_SCHEDULE_PROMOTION_HOLDS);
+    expect(packet.exactBlockers).toEqual(
+      expect.arrayContaining(
+        TIME_SCHEDULE_EXACT_BLOCKERS.map((blocker) =>
+          expect.objectContaining({
+            id: blocker.id,
+            class: blocker.class,
+          }),
+        ),
+      ),
+    );
+    expect(packet.noRegistrationAutomation).toBe(true);
+  });
+
   it('preserves encoded angle-bracket text instead of decoding it into removable markup', () => {
     const html = readFixture('public-course-offerings-cse.html').replace(
       'RESEARCH SEMINAR',
@@ -173,5 +205,33 @@ describe('adapters-time-schedule limited shared landing', () => {
     const cse590 = page.courses.find((course: PublicCourseOfferingCourse) => course.courseKey === 'CSE 590');
 
     expect(cse590?.title).toBe('RESEARCH <LAB> SEMINAR');
+  });
+
+  it('extracts structured detail from a section-status fallback page', () => {
+    const detail = extractTimeScheduleSectionDetailPage(readFixture('section-detail-cse121a.html'));
+
+    expect(detail.quarterLabel).toBe('Spring Quarter 2026');
+    expect(detail.sln).toBe('12473');
+    expect(detail.courseKey).toBe('CSE 121');
+    expect(detail.sectionId).toBe('A');
+    expect(detail.sectionType).toBe('LC');
+    expect(detail.credits).toBe('4');
+    expect(detail.title).toBe('COMP PROGRAMMING I');
+    expect(detail.generalEducation).toBe('NSc,RSN');
+    expect(detail.textbooksAvailable).toBe(true);
+    expect(detail.currentEnrollment).toBe(161);
+    expect(detail.enrollmentLimit).toBe(250);
+    expect(detail.roomCapacity).toBe(345);
+    expect(detail.spaceAvailable).toBe(89);
+    expect(detail.status).toBe('open');
+    expect(detail.meetings[0]).toEqual({
+      days: 'WF',
+      timeText: '11:30-12:20',
+      location: 'GUG 220',
+      instructor: 'Wang,Matt',
+    });
+    expect(detail.noteLines).toContain(
+      'SEE THE CSE 12X SELF-PLACEMENT WEBPAGE FOR GUIDANCE ON CHOOSING THE APPROPRIATE CSE 12X COURSE',
+    );
   });
 });

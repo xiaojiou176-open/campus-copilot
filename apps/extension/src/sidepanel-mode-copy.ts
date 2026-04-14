@@ -105,15 +105,15 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
           },
           syllabus: {
             label: 'Syllabus',
-            description: '当前没有 lawful carrier，不能诚实宣称已支持。',
+            description: '当前已有 syllabus summary/resource lane，但还不是 raw syllabus 正文或完整课程资料线。',
           },
           groups: {
             label: 'Groups',
-            description: '当前没有 Canvas groups carrier，也没有共享产品面。',
+            description: '当前已有 partial group summary/link carrier，但还没成为 landed 的完整共享产品面。',
           },
           recordings: {
             label: '录播',
-            description: '当前没有 Canvas resource/recording carrier，不能直接导。',
+            description: '当前已有 partial media/embed carrier，但还不是 richer recording parity 或完整导出面。',
           },
         },
       },
@@ -240,15 +240,15 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
         },
         syllabus: {
           label: 'Syllabus',
-          description: 'No lawful carrier exists yet, so this cannot be claimed as supported.',
+          description: 'A syllabus summary/resource lane now exists, but this is still not raw syllabus-body access or a full course-material lane.',
         },
         groups: {
           label: 'Groups',
-          description: 'Canvas group data does not currently have a landed carrier or shared surface.',
+          description: 'Canvas now has a partial group summary/link carrier, but it is not yet a fully landed shared product surface.',
         },
         recordings: {
           label: 'Recordings',
-          description: 'Canvas does not currently expose a lawful resource/recording carrier in this repo.',
+          description: 'Canvas now has a partial media/embed carrier, but it is not yet richer recording parity or a complete export surface.',
         },
       },
     },

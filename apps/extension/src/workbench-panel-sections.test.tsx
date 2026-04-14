@@ -166,6 +166,8 @@ describe('workbench decision sections', () => {
             programExplorationCount: 1,
             degreeProgressSummary: 'Core degree requirements still need one systems elective.',
             transferPlanningSummary: 'One transfer credit is still pending review.',
+            exactBlockers: [],
+            hardDeferredMoves: [],
             terms: [
               {
                 termCode: '2026-spring',
@@ -277,6 +279,8 @@ describe('workbench operations sections', () => {
             programExplorationCount: 1,
             degreeProgressSummary: 'Core degree requirements still need one systems elective.',
             transferPlanningSummary: 'One transfer credit is still pending review.',
+            exactBlockers: [],
+            hardDeferredMoves: [],
             terms: [],
           },
         ]}
@@ -359,6 +363,7 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Q1 1 / 1 · Correct; Q2 0 / 1 · Incorrect');
     expect(markup).toContain('Study Materials');
     expect(markup).toContain('Week 8 review sheet');
+    expect(markup).toContain('grouped resource');
     expect(markup).toContain('Download file · PDF · 452 KB');
     expect(markup).toContain('Open download');
     expect(markup).toContain('https://us.edstem.org/api/resources/1/download/week-8-review-sheet.pdf?dl=1');
@@ -379,6 +384,46 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Schedule Outlook');
     expect(markup).toContain('Lecture meets in person this week.');
     expect(markup).toContain('MEB 246');
+  });
+
+  it('marks EdStem lesson resources with a lesson badge instead of a generic link badge', () => {
+    const markup = renderToStaticMarkup(
+      <WorkbenchOperationsSections
+        text={getUiText('en')}
+        uiLanguage="en"
+        surface="sidepanel"
+        planningSubstrates={[]}
+        currentResources={[
+          {
+            id: 'edstem:lesson:162340',
+            kind: 'resource',
+            site: 'edstem',
+            source: { site: 'edstem', resourceId: '162340', resourceType: 'lesson' },
+            courseId: 'edstem:course:96846',
+            resourceKind: 'link',
+            title: '[HW1 problem 7(a)] Python Tutorial & Coding Exercises',
+            summary: 'A. Using - Spring 2026',
+            detail: 'Lesson · attempted · Closed Due: Wed April 8th, 11:59pm',
+            url: 'https://edstem.org/us/courses/96846/lessons/162340',
+          },
+        ]}
+        currentAssignments={[]}
+        currentAnnouncements={[]}
+        currentMessages={[]}
+        currentEvents={[]}
+        orderedSiteStatus={[]}
+        syncFeedback={{}}
+        onSyncSite={async () => {}}
+        onExport={async () => {}}
+        latestSyncRun={undefined}
+        recentChangeEvents={[]}
+      />,
+    );
+
+    expect(markup).toContain('Study Materials');
+    expect(markup).toContain('lesson');
+    expect(markup).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
+    expect(markup).toContain('Open link');
   });
 
   it('shows local review decision controls for cluster matches instead of leaving possible matches read-only', () => {

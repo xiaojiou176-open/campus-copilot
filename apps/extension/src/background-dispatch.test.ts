@@ -1,3 +1,4 @@
+import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { browser } from 'wxt/browser';
@@ -24,6 +25,7 @@ vi.mock('wxt/browser', () => ({
 
 import { SITE_SYNC_HANDLERS } from '../entrypoints/background';
 import { getDefaultExtensionConfig } from './config';
+import { campusCopilotDb, getPlanningSubstratesBySource } from '@campus-copilot/storage';
 
 type ExecuteScriptMockResult = Array<{ result: unknown }>;
 
@@ -123,6 +125,15 @@ describe('background site dispatch', () => {
         }),
       );
     }
+
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    expect(storedPlanning[0]).toEqual(
+      expect.objectContaining({
+        source: 'time-schedule',
+        currentStage: 'partial_shared_landing',
+        runtimePosture: 'public_course_offerings_planning_lane',
+      }),
+    );
   });
 
   it('keeps encoded angle-bracket course text when syncing Time Schedule in the background', async () => {
@@ -157,6 +168,55 @@ describe('background site dispatch', () => {
           title: 'COMP <LAB> PROGRAMMING I',
         }),
       );
+    }
+  });
+
+  it('syncs Time Schedule from an active SLN detail page fallback', async () => {
+    const executeScriptMock = vi.spyOn(
+      browser.scripting as {
+        executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
+      },
+      'executeScript',
+    );
+    executeScriptMock.mockResolvedValueOnce([
+      {
+        result: readFileSync(
+          new URL('../../../packages/adapters-time-schedule/src/__fixtures__/section-detail-cse121a.html', import.meta.url),
+          'utf8',
+        ),
+      },
+    ]);
+
+    const result = await SITE_SYNC_HANDLERS['time-schedule']({
+      activeTab: {
+        tabId: 1,
+        url: 'https://sdb.admin.washington.edu/timeschd/uwnetid/sln.asp?QTRYR=SPR+2026&SLN=12473',
+      },
+      now: '2026-04-10T06:10:00Z',
+      config: getDefaultExtensionConfig(),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outcome).toBe('success');
+      expect(result.snapshot.courses?.[0]).toEqual(
+        expect.objectContaining({
+          site: 'time-schedule',
+          code: 'CSE 121',
+          title: 'COMP PROGRAMMING I',
+        }),
+      );
+      expect(result.snapshot.events?.[0]).toEqual(
+        expect.objectContaining({
+          site: 'time-schedule',
+          title: 'CSE 121 A',
+          summary: 'Spring Quarter 2026 section detail',
+          location: 'GUG 220',
+        }),
+      );
+      expect(result.snapshot.events?.[0]?.detail).toContain('WF 11:30-12:20');
+      expect(result.snapshot.events?.[0]?.detail).toContain('Wang,Matt');
+      expect(result.snapshot.events?.[0]?.detail).toContain('161/250 enrolled');
     }
   });
 
@@ -350,6 +410,161 @@ describe('background site dispatch', () => {
     fetchMock.mockRestore();
   });
 
+  it('syncs EdStem lessons from an authenticated lessons page into summary-first lesson resources', async () => {
+    const executeScriptMock = vi.spyOn(
+      browser.scripting as {
+        executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
+      },
+      'executeScript',
+    );
+    const htmlResult: ExecuteScriptMockResult = [
+      {
+        result: readFileSync(
+          new URL('../../../packages/adapters-edstem/src/__fixtures__/live/lessons-page.html', import.meta.url),
+          'utf8',
+        ),
+      },
+    ];
+    const tokenResult: ExecuteScriptMockResult = [
+      {
+        result: 'token-from-page',
+      },
+    ];
+    executeScriptMock
+      .mockResolvedValueOnce(htmlResult)
+      .mockResolvedValueOnce(tokenResult)
+      .mockResolvedValueOnce(tokenResult)
+      .mockResolvedValueOnce(tokenResult)
+      .mockResolvedValueOnce(tokenResult);
+
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            threads: [],
+            users: [],
+          }),
+          {
+            status: 200,
+            headers: {
+              'content-type': 'application/json',
+            },
+          },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([]), {
+          status: 200,
+          headers: {
+            'content-type': 'application/json',
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([]), {
+          status: 200,
+          headers: {
+            'content-type': 'application/json',
+          },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            courses: [
+              {
+                course: {
+                  id: 96846,
+                  code: 'CSE 312 - 26sp',
+                  name: 'Foundations of Computing II',
+                },
+              },
+            ],
+          }),
+          {
+            status: 200,
+            headers: {
+              'content-type': 'application/json',
+            },
+          },
+        ),
+      );
+
+    const result = await SITE_SYNC_HANDLERS.edstem({
+      activeTab: {
+        tabId: 1,
+        url: 'https://edstem.org/us/courses/96846/lessons',
+      },
+      now: '2026-04-13T08:00:00Z',
+      config: {
+        ...getDefaultExtensionConfig(),
+        sites: {
+          ...getDefaultExtensionConfig().sites,
+          edstem: {
+            threadsPath: '',
+            unreadPath: '',
+            recentActivityPath: '',
+          },
+        },
+      },
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://us.edstem.org/api/courses/96846/threads?limit=30&sort=new', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'x-token': 'token-from-page',
+      },
+    });
+    expect(fetchMock).toHaveBeenNthCalledWith(2, 'https://us.edstem.org/internal/unread', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'x-token': 'token-from-page',
+      },
+    });
+    expect(fetchMock).toHaveBeenNthCalledWith(3, 'https://us.edstem.org/internal/recent-activity', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'x-token': 'token-from-page',
+      },
+    });
+    expect(fetchMock).toHaveBeenNthCalledWith(4, 'https://us.edstem.org/api/user', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'x-token': 'token-from-page',
+      },
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outcome).toBe('partial_success');
+      expect(result.snapshot.resources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'edstem:lesson:redacted-lesson-a',
+            resourceKind: 'link',
+            title: '[HW1 problem 7(a)] Python Tutorial & Coding Exercises',
+            summary: 'A. Using - Spring 2026',
+            detail: 'Lesson · attempted · Closed Due: Wed April 8th, 11:59pm',
+          }),
+          expect.objectContaining({
+            id: 'edstem:lesson:redacted-lesson-c',
+            detail: 'Lesson · not attempted · Open',
+          }),
+        ]),
+      );
+    }
+
+    fetchMock.mockRestore();
+  });
+
   it('returns partial_success when EdStem messages sync but /api/user cannot provide course metadata', async () => {
     const executeScriptMock = vi.spyOn(
       browser.scripting as {
@@ -535,6 +750,64 @@ describe('background site dispatch', () => {
         title: 'Introduction to Algorithms',
       });
       expect(result.snapshot.grades?.[0]?.title).toBe('Problem Set 1');
+    }
+  });
+
+  it('keeps Gradescope graded-copy, history, and regrade action hints when runtime falls back to the current submission page', async () => {
+    const executeScriptMock = vi.spyOn(
+      browser.scripting as {
+        executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
+      },
+      'executeScript',
+    );
+    executeScriptMock
+      .mockResolvedValueOnce([
+        {
+          result: readFileSync(
+            new URL('../../../packages/adapters-gradescope/src/__fixtures__/live/submission-question-detail-rich.html', import.meta.url),
+            'utf8',
+          ).replace(
+            '</section>',
+            '<ul><li><a href="/courses/1144890/assignments/7224260/submissions/374320968.pdf">Download Graded Copy</a></li><li><button type="button">Submission History</button></li><li><button type="button" aria-label=" Request Regrade. Please select a question.">Request Regrade</button></li></ul></section>',
+          ),
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          result: {
+            ok: false,
+            code: 'request_failed',
+            message: 'internal assignments unavailable',
+            status: 500,
+          },
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          result: {
+            ok: false,
+            code: 'request_failed',
+            message: 'internal grades unavailable',
+            status: 500,
+          },
+        },
+      ]);
+
+    const result = await SITE_SYNC_HANDLERS.gradescope({
+      activeTab: {
+        tabId: 1,
+        url: 'https://www.gradescope.com/courses/1144890/assignments/7224260/submissions/374320968',
+      },
+      now: '2026-04-13T08:00:00Z',
+      config: getDefaultExtensionConfig(),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outcome).toBe('success');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain(
+        'Actions: Download graded copy | Submission history | Request regrade (Please select a question.)',
+      );
     }
   });
 
@@ -869,4 +1142,72 @@ describe('background site dispatch', () => {
       expect(result.health.reason).toBe('myuw_courses_collector_failed');
     }
   });
+
+  it('returns partial_success when a MyUW admin tuition page yields only admin high-sensitivity summaries', async () => {
+    const executeScriptMock = vi.spyOn(
+      browser.scripting as {
+        executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
+      },
+      'executeScript',
+    );
+    const tuitionHtml = `
+      <html><body>
+        <h1>Official Tuition Charge Statement - Spring 2026</h1>
+        <table id="tblBalance"><tr><td colspan="2"><tt><b>*** $ 0.00 ***</b></tt></td></tr></table>
+        <table id="tblClassification">
+          <tr><th>Tuition Classification:</th><td>UNDERGRAD RESIDENT</td></tr>
+          <tr><th>Credit Hours:</th><td>14</td></tr>
+        </table>
+        <h3>Detail of Account - Charges and payments beginning: Spring 2026 (3/25/26)</h3>
+        <table id="tblDetailOfAccount">
+          <tr><td><tt><b>TOTAL:</b></tt></td><td><tt>4468.00</tt></td><td><tt>4468.00</tt></td><td><tt>BALANCE: $ 0.00</tt></td></tr>
+        </table>
+        <table id="tblFinancialAid">
+          <tr><td><tt><b>TOTAL:</b></tt></td><td><tt>5260.00</tt></td><td><tt>4468.00</tt></td><td><tt>792.00</tt></td><td><tt>UNDISBURSED AID: $ 0.00</tt></td></tr>
+        </table>
+        <div id="panelTuitionBreakdown"><h3>Tuition Charge Breakdown</h3></div>
+      </body></html>
+    `;
+    const unsupportedResult: ExecuteScriptMockResult = [
+      {
+        result: {
+          ok: false,
+          code: 'unsupported_context',
+          message: 'unsupported',
+          status: 404,
+        },
+      },
+    ];
+    executeScriptMock
+      .mockResolvedValueOnce([
+        {
+          result: {
+            pageState: undefined,
+            pageHtml: tuitionHtml,
+          },
+        },
+      ])
+      .mockResolvedValueOnce(unsupportedResult)
+      .mockResolvedValueOnce(unsupportedResult)
+      .mockResolvedValueOnce(unsupportedResult)
+      .mockResolvedValueOnce(unsupportedResult)
+      .mockResolvedValueOnce(unsupportedResult);
+
+    const result = await SITE_SYNC_HANDLERS.myuw({
+      activeTab: {
+        tabId: 1,
+        url: 'https://sdb.admin.uw.edu/sisStudents/uwnetid/tuition.aspx',
+      },
+      now: '2026-04-13T08:00:00Z',
+      config: getDefaultExtensionConfig(),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.outcome).toBe('partial_success');
+      expect(result.snapshot).toEqual({});
+      expect(result.health.reason).toBe('admin_high_sensitivity_summary_captured');
+    }
+  });
+
 });

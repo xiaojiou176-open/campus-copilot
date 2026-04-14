@@ -42,6 +42,15 @@ This remains a hard cut against the wrong narrative:
 
 ## Current Formal Product Shape
 
+This section is a **product contract target**, not a claim that every surface
+already meets the final product-quality bar today.
+
+In plain language:
+
+- these are the shapes the repository is intentionally building toward now
+- they are real repo-side directions and partially landed surfaces
+- they should not be paraphrased as “every first fold is already perfect”
+
 - read-only workflow
 - manual sync
 - local-first storage and workbench views

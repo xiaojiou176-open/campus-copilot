@@ -171,6 +171,8 @@ describe('cluster substrate', () => {
           requirementGroupCount: 4,
           programExplorationCount: 1,
           degreeProgressSummary: 'Core requirements still need one systems elective.',
+          exactBlockers: [],
+          hardDeferredMoves: [],
           terms: [],
         },
       ],
@@ -212,6 +214,17 @@ describe('cluster substrate', () => {
           aiDefault: 'blocked',
           updatedAt: now,
         },
+        {
+          id: 'admin-carrier:profile',
+          family: 'profile',
+          title: 'MyUW profile summary',
+          summary: 'Profile summary carrier landed.',
+          sourceSurface: 'myuw',
+          authoritySource: 'myuw profile page',
+          importance: 'high',
+          aiDefault: 'blocked',
+          updatedAt: now,
+        },
       ],
       db,
     );
@@ -240,6 +253,7 @@ describe('cluster substrate', () => {
     expect(view.administrativeSummaries.find((summary) => summary.family === 'transcript')?.summary).toContain('carrier landed');
     expect(view.administrativeSummaries.find((summary) => summary.family === 'finaid')?.summary).toContain('carrier landed');
     expect(view.administrativeSummaries.find((summary) => summary.family === 'accounts')?.summary).toContain('carrier landed');
+    expect(view.administrativeSummaries.find((summary) => summary.family === 'profile')?.summary).toContain('carrier landed');
     expect(mergeHealth.mergedCount).toBeGreaterThan(0);
 
     const [focusQueue, alerts, weeklyLoad, changeEvents] = await Promise.all([
@@ -328,5 +342,30 @@ describe('cluster substrate', () => {
     expect(acceptedCluster?.reviewDecidedAt).toBeTruthy();
     expect(mergeHealth.possibleMatchCount).toBe(1);
     expect(mergeHealth.unresolvedCount).toBe(0);
+  });
+
+  it('emits exact blocker summaries for admin families that still have no landed carrier', async () => {
+    const db = createCampusCopilotDb('cluster-substrate-admin-blocker-test');
+
+    await replaceSiteSnapshot(
+      'myuw',
+      {},
+      {
+        status: 'success',
+        lastSyncedAt: now,
+      },
+      db,
+    );
+
+    const { administrativeSummaries } = await recomputeClusterSubstrate(db);
+    const blockerFamilies = new Set(
+      administrativeSummaries.filter((summary) => summary.id.endsWith(':blocker')).map((summary) => summary.family),
+    );
+
+    expect(blockerFamilies).toEqual(new Set(['dars', 'transcript', 'finaid', 'accounts', 'tuition_detail', 'profile']));
+    expect(administrativeSummaries.find((summary) => summary.family === 'dars')?.sourceSurface).toBe('myplan');
+    expect(administrativeSummaries.find((summary) => summary.family === 'tuition_detail')?.summary).toContain(
+      'No truthful tuition-detail runtime carrier is landed yet.',
+    );
   });
 });

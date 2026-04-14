@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 
 test('mcp-server bin exposes a help surface', () => {
-  const result = spawnSync(process.execPath, ['--experimental-strip-types', './src/bin.ts', '--help'], {
+  const result = spawnSync(process.execPath, ['./dist/bin.mjs', '--help'], {
     cwd: new URL('..', import.meta.url),
     encoding: 'utf8',
   });
@@ -14,7 +14,7 @@ test('mcp-server bin exposes a help surface', () => {
 });
 
 test('mcp-server bin exposes the package version', () => {
-  const result = spawnSync(process.execPath, ['--experimental-strip-types', './src/bin.ts', '--version'], {
+  const result = spawnSync(process.execPath, ['./dist/bin.mjs', '--version'], {
     cwd: new URL('..', import.meta.url),
     encoding: 'utf8',
   });

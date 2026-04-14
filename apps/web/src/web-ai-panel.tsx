@@ -69,84 +69,19 @@ export function WebAiPanel(props: {
         </div>
         <p className="meta">
           Review scope, packaging, and trust notes in Auth &amp; Export Management first. This panel stays in a
-          supporting role: it explains the current local workbench after the review desk is already visible.
+          supporting role: ask from the visible workspace first, then open the deeper policy and runtime notes only
+          when you actually need them.
         </p>
       </div>
 
-      <div>
-        <p className="meta-title">Boundary and evidence first</p>
-      </div>
-      <div className="ai-explanation-strip" aria-label="AI visibility and boundaries">
-        <article className="guidance-card">
-          <p className="meta-title">What AI can see</p>
-          <strong>Visible workspace evidence</strong>
-          <p>
-            The current workbench slice, focus queue, weekly load, planning pulse, and exported current
-            view that are already visible in this workspace.
-          </p>
-        </article>
-        <article className="guidance-card guidance-card--warning">
-          <p className="meta-title">What AI cannot do</p>
-          <strong>Manual-only guardrail</strong>
-          <p>{aiGuardrails.redZone.summary}</p>
-        </article>
-        <article className="guidance-card">
-          <p className="meta-title">Read-only posture</p>
-          <strong>Explanation follows the review desk</strong>
-          <p>
-            Runtime controls and provider settings remain tertiary. The workbench, its receipts, and its export
-            review stay first.
-          </p>
-        </article>
-      </div>
-
-      <div>
-        <p className="meta-title">Current packaging and overlay</p>
-      </div>
-      <div className="ai-explanation-strip" aria-label="Current export and policy envelope">
-        <article className={`guidance-card ${currentAiBlocked ? 'guidance-card--warning' : ''}`}>
-          <p className="meta-title">Layered policy</p>
-          <strong>
-            {currentPackaging
-              ? `Read/export ${currentPackaging.authorizationLevel} · AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
-              : 'No live policy envelope yet'}
-          </strong>
-          <p>
-            {currentPackaging
-              ? `Risk ${currentPackaging.riskLabel} · match ${currentPackaging.matchConfidence}. ${
-                  currentPackaging.aiAllowed
-                    ? 'The current slice can carry AI explanation.'
-                    : 'The current slice still needs Layer 2 approval before AI can read it.'
-                }`
-              : 'Load a workspace snapshot before asking AI or exporting from the web surface.'}
-          </p>
-        </article>
-        <article className="guidance-card">
-          <p className="meta-title">Current view export</p>
-          <strong>
-            {currentScope ? `${currentScope.scopeType} · ${currentScope.resourceFamily}` : 'Waiting for a loaded workspace'}
-          </strong>
-          <p>
-            {currentScope?.site ? `Site: ${currentScope.site}. ` : 'Site: multi-site. '}
-            {currentScope?.courseIdOrKey ? `Course: ${currentScope.courseIdOrKey}.` : 'Course scope: all visible courses.'}
-          </p>
-        </article>
-        <article className="guidance-card">
-          <p className="meta-title">Site policy overlay</p>
-          <strong>{currentPolicyOverlay ? currentPolicyOverlay.siteLabel : 'No site-specific overlay yet'}</strong>
-          <p>
-            {currentPolicyOverlay
-              ? `Allowed structured families: ${currentPolicyOverlay.allowedFamilies.join(', ')}. Export-first only: ${
-                  currentPolicyOverlay.exportOnlyFamilies.join(', ') || 'none'
-                }. Forbidden AI objects: ${currentPolicyOverlay.forbiddenAiObjects.join(', ') || 'none'}.`
-              : 'Load a site-scoped workspace slice to review the active overlay before asking AI.'}
-          </p>
-        </article>
-        <article className="guidance-card">
-          <p className="meta-title">Provenance</p>
-          <strong>{importedPackaging ? 'Imported truth is preserved' : 'Using current web workbench packaging'}</strong>
-          <p>{formatProvenance(importedPackaging?.provenance ?? currentPackaging?.provenance)}</p>
-        </article>
+      <div className="ai-panel-summary-strip" aria-label="Boundary and evidence first">
+        <span className="badge">Boundary and evidence first</span>
+        <span className={`badge ${currentAiBlocked ? 'badge-warning' : 'badge-success'}`}>
+          {currentPackaging
+            ? `AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
+            : 'No live policy envelope yet'}
+        </span>
+        <span className="badge">Read-only posture</span>
       </div>
       {props.importedEnvelope ? (
         <p className="meta">
@@ -254,6 +189,87 @@ export function WebAiPanel(props: {
           <p className="meta">Waiting for a cited answer. Ask after the workbench and export slice look right.</p>
         )}
       </div>
+
+      <details className="advanced-settings advanced-settings--subdued">
+        <summary>Boundary, policy, and provenance</summary>
+        <div className="ai-structured ai-structured--advanced">
+          <div>
+            <p className="meta-title">Boundary and evidence first</p>
+          </div>
+          <div className="ai-explanation-strip" aria-label="AI visibility and boundaries">
+            <article className="guidance-card">
+              <p className="meta-title">What AI can see</p>
+              <strong>Visible workspace evidence</strong>
+              <p>
+                The current workbench slice, focus queue, weekly load, planning pulse, and exported current
+                view that are already visible in this workspace.
+              </p>
+            </article>
+            <article className="guidance-card guidance-card--warning">
+              <p className="meta-title">What AI cannot do</p>
+              <strong>Manual-only guardrail</strong>
+              <p>{aiGuardrails.redZone.summary}</p>
+            </article>
+            <article className="guidance-card">
+              <p className="meta-title">Read-only posture</p>
+              <strong>Explanation follows the review desk</strong>
+              <p>
+                Runtime controls and provider settings remain tertiary. The workbench, its receipts, and its export
+                review stay first.
+              </p>
+            </article>
+          </div>
+
+          <div>
+            <p className="meta-title">Current packaging and overlay</p>
+          </div>
+          <div className="ai-explanation-strip" aria-label="Current export and policy envelope">
+            <article className={`guidance-card ${currentAiBlocked ? 'guidance-card--warning' : ''}`}>
+              <p className="meta-title">Layered policy</p>
+              <strong>
+                {currentPackaging
+                  ? `Read/export ${currentPackaging.authorizationLevel} · AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
+                  : 'No live policy envelope yet'}
+              </strong>
+              <p>
+                {currentPackaging
+                  ? `Risk ${currentPackaging.riskLabel} · match ${currentPackaging.matchConfidence}. ${
+                      currentPackaging.aiAllowed
+                        ? 'The current slice can carry AI explanation.'
+                        : 'The current slice still needs Layer 2 approval before AI can read it.'
+                    }`
+                  : 'Load a workspace snapshot before asking AI or exporting from the web surface.'}
+              </p>
+            </article>
+            <article className="guidance-card">
+              <p className="meta-title">Current view export</p>
+              <strong>
+                {currentScope ? `${currentScope.scopeType} · ${currentScope.resourceFamily}` : 'Waiting for a loaded workspace'}
+              </strong>
+              <p>
+                {currentScope?.site ? `Site: ${currentScope.site}. ` : 'Site: multi-site. '}
+                {currentScope?.courseIdOrKey ? `Course: ${currentScope.courseIdOrKey}.` : 'Course scope: all visible courses.'}
+              </p>
+            </article>
+            <article className="guidance-card">
+              <p className="meta-title">Site policy overlay</p>
+              <strong>{currentPolicyOverlay ? currentPolicyOverlay.siteLabel : 'No site-specific overlay yet'}</strong>
+              <p>
+                {currentPolicyOverlay
+                  ? `Allowed structured families: ${currentPolicyOverlay.allowedFamilies.join(', ')}. Export-first only: ${
+                      currentPolicyOverlay.exportOnlyFamilies.join(', ') || 'none'
+                    }. Forbidden AI objects: ${currentPolicyOverlay.forbiddenAiObjects.join(', ') || 'none'}.`
+                  : 'Load a site-scoped workspace slice to review the active overlay before asking AI.'}
+              </p>
+            </article>
+            <article className="guidance-card">
+              <p className="meta-title">Provenance</p>
+              <strong>{importedPackaging ? 'Imported truth is preserved' : 'Using current web workbench packaging'}</strong>
+              <p>{formatProvenance(importedPackaging?.provenance ?? currentPackaging?.provenance)}</p>
+            </article>
+          </div>
+        </div>
+      </details>
 
       <p className="meta-title">Advanced settings and opt-ins</p>
       <details className="advanced-settings advanced-settings--material" open={props.advancedMaterialEnabled}>

@@ -5,8 +5,9 @@ import type { Alert, Site } from '@campus-copilot/schema';
 import type { SiteEntityCounts, SyncRun, SyncState, WorkbenchFilter } from '@campus-copilot/storage';
 import { buildSiteBlockingHint } from './background-runtime';
 import type { ExtensionConfig } from './config';
-import { buildDiagnosticsSummary, type DiagnosticsSummary, type ProviderStatusLike } from './diagnostics';
+import { buildDiagnosticsSummary, type DiagnosticsSummary } from './diagnostics-summary';
 import type { ResolvedUiLanguage } from './i18n';
+import type { ProviderStatusLike } from './provider-status-format';
 
 export type SurfaceKind = 'sidepanel' | 'popup' | 'options';
 export type SidepanelMode = 'assistant' | 'export' | 'settings';

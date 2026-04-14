@@ -183,6 +183,10 @@ function decodeHtmlText(value: string | undefined) {
     .trim();
 }
 
+function stripHtml(value: string | undefined) {
+  return decodeHtmlText(value?.replace(/<[^>]+>/g, ' '));
+}
+
 function buildMessageId(remoteId: string | number) {
   return `edstem:message:${remoteId}`;
 }
@@ -258,6 +262,124 @@ function getEdStemResourceActionLabel(rawResource: EdStemRawResource) {
   }
 
   return 'Download file';
+}
+
+function slugifyEdStemResourcePart(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+}
+
+function parseEdStemResourcesFromDom(pageHtml: string, pageUrl: string) {
+  const courseId = parseEdStemCourseIdFromUrl(pageUrl);
+  if (!courseId) {
+    return [];
+  }
+
+  const groups = Array.from(
+    pageHtml.matchAll(
+      /<h2 class="res-group">(?<group>[\s\S]*?)<\/h2>\s*<div class="res-row">[\s\S]*?<div class="res-body (?<bodyClass>[^"]*)"[\s\S]*?<div class="res-name"[^>]*>(?<name>[\s\S]*?)<\/div>[\s\S]*?<div class="res-type"[^>]*>(?<type>[\s\S]*?)<\/div>/gi,
+    ),
+  );
+
+  return groups
+    .map((match, index): Resource | undefined => {
+      const title = decodeHtmlText(match.groups?.name);
+      const group = decodeHtmlText(match.groups?.group);
+      const typeLabel = decodeHtmlText(match.groups?.type);
+      const bodyClass = match.groups?.bodyClass ?? '';
+      if (!title) {
+        return undefined;
+      }
+
+      const resourceKind: Resource['resourceKind'] = /type-link/i.test(bodyClass)
+        ? 'link'
+        : /type-embed/i.test(bodyClass)
+          ? 'embed'
+          : 'file';
+      const detailParts = [typeLabel, group, resourceKind === 'file' ? 'Download file' : undefined].filter(Boolean);
+      const resourceId = `edstem:resource:dom:${courseId}:${slugifyEdStemResourcePart(group ?? 'group')}:${slugifyEdStemResourcePart(title)}:${index + 1}`;
+
+      return ResourceSchema.parse({
+        id: resourceId,
+        kind: 'resource',
+        site: 'edstem',
+        source: {
+          site: 'edstem',
+          resourceId,
+          resourceType: 'resource',
+          url: pageUrl,
+        },
+        url: pageUrl,
+        courseId: `edstem:course:${courseId}`,
+        resourceKind,
+        title,
+        summary: group,
+        detail: detailParts.join(' · '),
+      });
+    })
+    .filter((resource): resource is Resource => Boolean(resource));
+}
+
+function findLatestLessonModuleLabel(prefixHtml: string) {
+  const matches = Array.from(
+    prefixHtml.matchAll(/<h2 class="lesson-module-header-name"[^>]*>(?<module>[\s\S]*?)<\/h2>/gi),
+  );
+  const latest = matches.at(-1)?.groups?.module;
+  return latest ? decodeHtmlText(stripHtml(latest)) : undefined;
+}
+
+function parseEdStemLessonsFromDom(pageHtml: string, pageUrl: string) {
+  const courseId = parseEdStemCourseIdFromUrl(pageUrl);
+  if (!courseId) {
+    return [];
+  }
+
+  const lessonRows = Array.from(
+    pageHtml.matchAll(
+      /<div class="table-listing-row lesi-row"[^>]*>[\s\S]*?<a href="(?<href>\/us\/courses\/[^"\/]+\/lessons\/(?<lessonId>[^"\/]+))" class="table-listing-cell[^"]*tabliscel-flex"[^>]*>[\s\S]*?<div class="tablistext-text">(?<title>[\s\S]*?)<span id="lesson-description-[^"]+" class="sr-only">(?<status>[\s\S]*?)<\/span>[\s\S]*?<div class="lesi-row-subtext">(?<subtext>[\s\S]*?)<\/div>[\s\S]*?<\/a>[\s\S]*?<\/div>/gi,
+    ),
+  );
+
+  return lessonRows
+    .map((match): Resource | undefined => {
+      const rowHtml = match[0];
+      const lessonId = match.groups?.lessonId;
+      const href = match.groups?.href;
+      const title = decodeHtmlText(stripHtml(match.groups?.title ?? ''));
+      if (!lessonId || !href || !title) {
+        return undefined;
+      }
+
+      const moduleLabel = findLatestLessonModuleLabel(pageHtml.slice(0, match.index ?? 0));
+      const statusText = (decodeHtmlText(stripHtml(match.groups?.status ?? '')) ?? '').replace(/^lesson,\s*/i, '').trim();
+      const subtext = decodeHtmlText(
+        stripHtml(rowHtml.match(/<div class="lesi-row-subtext">(?<subtext>[\s\S]*?)<\/div>\s*<\/div>\s*<\/div>\s*<\/a>/i)?.groups?.subtext ?? ''),
+      );
+      const detailParts = ['Lesson', statusText || undefined, subtext || undefined].filter(Boolean);
+      const url = toAbsoluteEdStemUrl(href);
+
+      return ResourceSchema.parse({
+        id: `edstem:lesson:${lessonId}`,
+        kind: 'resource',
+        site: 'edstem',
+        source: {
+          site: 'edstem',
+          resourceId: lessonId,
+          resourceType: 'lesson',
+          url,
+        },
+        url,
+        courseId: `edstem:course:${courseId}`,
+        resourceKind: 'link',
+        title,
+        summary: moduleLabel,
+        detail: detailParts.join(' · '),
+      });
+    })
+    .filter((resource): resource is Resource => Boolean(resource));
 }
 
 function isInstructorRole(rawRole: string | undefined) {
@@ -754,7 +876,7 @@ class EdStemResourcesPrivateCollector implements ResourceCollector<Resource> {
   constructor(private readonly client: EdStemApiClient) {}
 
   async supports(ctx: AdapterContext) {
-    return ctx.site === 'edstem' && Boolean(parseEdStemCourseIdFromUrl(ctx.url));
+    return ctx.site === 'edstem' && Boolean(parseEdStemCourseIdFromUrl(ctx.url)) && !/\/lessons(?:\/|$)/.test(ctx.url);
   }
 
   async collect(ctx: AdapterContext) {
@@ -766,6 +888,60 @@ class EdStemResourcesPrivateCollector implements ResourceCollector<Resource> {
     return this.client.getResources(courseId).then((resources) =>
       resources.map(normalizeResource).filter((resource): resource is Resource => Boolean(resource)),
     );
+  }
+}
+
+class EdStemResourcesDomCollector implements ResourceCollector<Resource> {
+  readonly name = 'EdStemResourcesDomCollector';
+  readonly resource = 'resources';
+  readonly mode = 'dom' as const;
+  readonly priority = 20;
+
+  async supports(ctx: AdapterContext) {
+    return ctx.site === 'edstem' && Boolean(parseEdStemCourseIdFromUrl(ctx.url)) && Boolean(ctx.pageHtml?.includes('res-group'));
+  }
+
+  async collect(ctx: AdapterContext) {
+    if (!ctx.pageHtml?.trim()) {
+      throw new EdStemApiError('unsupported_context', 'EdStem resources DOM fallback needs page HTML.');
+    }
+
+    const resources = parseEdStemResourcesFromDom(ctx.pageHtml, ctx.url);
+    if (resources.length === 0) {
+      throw new EdStemApiError('unsupported_context', 'EdStem resources DOM fallback found no resource rows.');
+    }
+
+    return resources;
+  }
+}
+
+class EdStemLessonsDomCollector implements ResourceCollector<Resource> {
+  readonly name = 'EdStemLessonsDomCollector';
+  readonly resource = 'resources';
+  readonly mode = 'dom' as const;
+  readonly priority = 15;
+
+  async supports(ctx: AdapterContext) {
+    return (
+      ctx.site === 'edstem' &&
+      /\/lessons(?:\/|$)/.test(ctx.url) &&
+      Boolean(parseEdStemCourseIdFromUrl(ctx.url)) &&
+      Boolean(ctx.pageHtml?.includes('lesson-module-header-name')) &&
+      Boolean(ctx.pageHtml?.includes('table-listing-row lesi-row'))
+    );
+  }
+
+  async collect(ctx: AdapterContext) {
+    if (!ctx.pageHtml?.trim()) {
+      throw new EdStemApiError('unsupported_context', 'EdStem lessons DOM fallback needs page HTML.');
+    }
+
+    const resources = parseEdStemLessonsFromDom(ctx.pageHtml, ctx.url);
+    if (resources.length === 0) {
+      throw new EdStemApiError('unsupported_context', 'EdStem lessons DOM fallback found no lesson rows.');
+    }
+
+    return resources;
   }
 }
 
@@ -1049,9 +1225,9 @@ export class EdStemAdapter implements SiteAdapter {
           preferredMode: this.client ? 'private_api' : 'dom',
         },
         resources: {
-          supported: ctx.site === 'edstem' && Boolean(this.client),
-          modes: this.client ? ['private_api'] : [],
-          preferredMode: this.client ? 'private_api' : undefined,
+          supported: ctx.site === 'edstem',
+          modes: this.client ? ['private_api', 'dom'] : ['dom'],
+          preferredMode: this.client ? 'private_api' : 'dom',
         },
       },
     };
@@ -1079,6 +1255,8 @@ export class EdStemAdapter implements SiteAdapter {
     }
     collectors.push(new EdStemMessagesDomCollector());
     courseCollectors.push(new EdStemCoursesDomCollector());
+    resourceCollectors.push(new EdStemLessonsDomCollector());
+    resourceCollectors.push(new EdStemResourcesDomCollector());
 
     try {
       const messagesPipeline = await runCollectorPipeline(ctx, collectors);
@@ -1101,12 +1279,16 @@ export class EdStemAdapter implements SiteAdapter {
       const hasCourseGap = !coursesPipeline.ok;
       const hasResourceGap = !resourcesPipeline.ok && resourcesPipeline.errorReason !== 'no_supported_collectors';
       const hasFallbackSuccess =
-        messagesPipeline.winningMode === 'dom' || (coursesPipeline.ok ? coursesPipeline.winningMode === 'dom' : false);
+        messagesPipeline.winningMode === 'dom' ||
+        (coursesPipeline.ok ? coursesPipeline.winningMode === 'dom' : false) ||
+        (resourcesPipeline.ok ? resourcesPipeline.winningMode === 'dom' : false);
       const hasPartialSuccess = hasCourseGap || hasResourceGap || hasFallbackSuccess;
       const fallbackReason = hasCourseGap
         ? 'edstem_course_metadata_partial'
         : hasResourceGap
           ? 'edstem_resources_partial'
+        : resourcesPipeline.ok && resourcesPipeline.winningMode === 'dom'
+          ? 'edstem_resources_dom_fallback'
         : hasFallbackSuccess
           ? 'edstem_dashboard_dom_fallback'
           : 'edstem_sync_success';

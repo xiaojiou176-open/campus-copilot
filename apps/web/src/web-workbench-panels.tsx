@@ -20,6 +20,10 @@ import { LoadingStatValue, ReadyStateBlock, formatDateTime, formatWeeklyLoadSumm
 
 const ADMINISTRATIVE_SITES = new Set<Site>(['myuw', 'time-schedule']);
 
+function formatPlanningRuntimeValue(value: string | undefined) {
+  return value ? value.replace(/_/g, ' ') : undefined;
+}
+
 function isAdministrativeSite(site: Site) {
   return ADMINISTRATIVE_SITES.has(site);
 }
@@ -30,6 +34,19 @@ function getLaneLabel(site: Site) {
 
 function getLaneBadgeClass(site: Site) {
   return isAdministrativeSite(site) ? 'badge badge-warning' : 'badge badge-success';
+}
+
+function getResourceSemanticLabel(resource: { site: Site; id: string; resourceKind: 'file' | 'link' | 'embed' | 'other'; summary?: string }) {
+  if (resource.site === 'edstem') {
+    if (resource.id.startsWith('edstem:lesson:')) {
+      return 'lesson';
+    }
+    if (resource.summary) {
+      return 'grouped resource';
+    }
+  }
+
+  return resource.resourceKind;
 }
 
 export function WebWorkbenchPanels(props: {
@@ -116,6 +133,20 @@ export function WebWorkbenchPanels(props: {
   const administrativeSummaries = props.administrativeSummaries ?? [];
   const mergedCourseCount = courseClusters.length;
   const mergedWorkItemCount = workItemClusters.length;
+  const deepReviewSections = [
+    'Merge Health',
+    'Course panorama',
+    'Merged work items',
+    'Administrative snapshots',
+    'Current Tasks',
+    'Discussion Highlights',
+    'Study Materials',
+    'Notice Signals',
+    'Schedule Outlook',
+    'Change Journal',
+    'Imported site counts',
+  ] as const;
+  const deepReviewSectionCount = deepReviewSections.length;
   const currentScope = props.currentViewExport?.scope;
   const currentPackaging = props.currentViewExport?.packaging;
   const importedScope = props.importedEnvelope?.scope;
@@ -151,7 +182,7 @@ export function WebWorkbenchPanels(props: {
   }
 
   return (
-    <>
+    <div className={`workbench-panels-shell${props.workbenchReady ? '' : ' workbench-panels-shell--loading'}`}>
       {!props.workbenchReady ? (
         <section className="panel loading-panel" role="status" aria-live="polite" aria-atomic="true">
           <h2>Loading shared workbench</h2>
@@ -237,11 +268,85 @@ export function WebWorkbenchPanels(props: {
         </article>
       </section>
 
-      <section className="split-grid split-grid--secondary">
-        <article className="panel">
+      <section className="panel panel--planning">
+        <p className="eyebrow">Academic lane</p>
+        <h2>Planning Pulse</h2>
+        <p>
+          A read-only summary of the shared MyPlan substrate, kept in the same decision lane as focus and load without
+          pretending this workspace can register for you.
+        </p>
+        <div className="stack">
+          <ReadyStateBlock
+            ready={props.workbenchReady}
+            hasItems={Boolean(latestPlanningSubstrate)}
+            emptyState={<p>No shared MyPlan planning summary is visible yet.</p>}
+          >
+            {latestPlanningSubstrate ? (
+              <article className="item">
+                <div className="item-header">
+                  <strong>{latestPlanningSubstrate.planLabel}</strong>
+                  <div className="badge-row">
+                    <span className="badge badge-success">Academic</span>
+                    <span className="badge">MyPlan</span>
+                    <span className="badge">Read-only</span>
+                  </div>
+                </div>
+                <p>
+                  {latestPlanningSubstrate.termCount} term(s) · {latestPlanningSubstrate.plannedCourseCount} planned
+                  course(s) · {latestPlanningSubstrate.backupCourseCount} backup course(s) ·{' '}
+                  {latestPlanningSubstrate.scheduleOptionCount} schedule option(s)
+                </p>
+                <p className="meta">
+                  {latestPlanningSubstrate.requirementGroupCount} requirement group(s) ·{' '}
+                  {latestPlanningSubstrate.programExplorationCount} exploration path(s)
+                </p>
+                {latestPlanningSubstrate.currentStage ? (
+                  <p className="meta">
+                    Current stage: {formatPlanningRuntimeValue(latestPlanningSubstrate.currentStage)}
+                    {latestPlanningSubstrate.runtimePosture
+                      ? ` · Runtime posture: ${formatPlanningRuntimeValue(latestPlanningSubstrate.runtimePosture)}`
+                      : ''}
+                  </p>
+                ) : null}
+                <p className="meta">
+                  Captured {formatDateTime(latestPlanningSubstrate.capturedAt)}
+                  {latestPlanningSubstrate.lastUpdatedAt
+                    ? ` · Updated ${formatDateTime(latestPlanningSubstrate.lastUpdatedAt)}`
+                    : ''}
+                </p>
+                {latestPlanningSubstrate.currentTruth ? <p>{latestPlanningSubstrate.currentTruth}</p> : null}
+                {latestPlanningSubstrate.degreeProgressSummary ? (
+                  <p>Degree progress: {latestPlanningSubstrate.degreeProgressSummary}</p>
+                ) : null}
+                {latestPlanningSubstrate.transferPlanningSummary ? (
+                  <p>Transfer planning: {latestPlanningSubstrate.transferPlanningSummary}</p>
+                ) : null}
+                {latestPlanningSubstrate.exactBlockers.length ? (
+                  <p className="meta">
+                    Still blocked by: {latestPlanningSubstrate.exactBlockers.map((blocker) => blocker.id).join(' · ')}
+                  </p>
+                ) : null}
+                {latestPlanningSubstrate.terms.length ? (
+                  <div className="badge-row">
+                    {latestPlanningSubstrate.terms.slice(0, 4).map((term) => (
+                      <span className="badge" key={term.termCode}>
+                        {term.termLabel}: {term.plannedCourseCount} planned · {term.backupCourseCount} backup ·{' '}
+                        {term.scheduleOptionCount} option(s)
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </article>
+            ) : null}
+          </ReadyStateBlock>
+        </div>
+      </section>
+
+      <section className="split-grid split-grid--secondary split-grid--lane-band">
+        <article className="panel panel--lane-summary">
           <p className="eyebrow">Grouped student view</p>
           <h2>Academic lane</h2>
-          <p>Course work keeps the same priority sorter, but now reads as an explicit academic lane instead of a generic mixed list.</p>
+          <p>Course work stays on the same priority sorter instead of becoming a second dashboard.</p>
           <div className="badge-row">
             <span className="badge">Unified priority</span>
             <span className="badge badge-success">Academic</span>
@@ -251,10 +356,10 @@ export function WebWorkbenchPanels(props: {
           </p>
         </article>
 
-        <article className="panel">
+        <article className="panel panel--lane-summary">
           <p className="eyebrow">Grouped student view</p>
           <h2>Administrative lane</h2>
-          <p>MyUW signals and schedule context now read as one administrative line without splitting into a second product.</p>
+          <p>MyUW and schedule signals stay visible without pretending this is a separate administrative product.</p>
           <div className="badge-row">
             <span className="badge">Unified priority</span>
             <span className="badge badge-warning">Administrative</span>
@@ -266,82 +371,95 @@ export function WebWorkbenchPanels(props: {
         </article>
       </section>
 
-      <section className="panel panel--supporting">
-        <p className="eyebrow">Trust center</p>
-        <h2>Auth &amp; Export Management</h2>
-        <p>
-          Review the current scope, policy envelope, provenance, and site overlay before exporting or asking AI.
-          This lane stays read-only and works like a review desk, not a preset wall.
-        </p>
-        <div className="ai-explanation-strip" aria-label="Auth and export management">
-          <article className="guidance-card">
-            <p className="meta-title">Review scope</p>
-            <strong>{formatScopeLine(currentScope)}</strong>
+      <details className="advanced-settings advanced-settings--subdued">
+        <summary>
+          Trust summary and export review
+          <span className="badge badge-neutral">Open when you need the packet desk</span>
+        </summary>
+        <div className="stack">
+          <section className="panel panel--supporting">
+            <p className="eyebrow">Trust center</p>
+            <h2>Auth &amp; Export Management</h2>
             <p>
-              {props.importedEnvelope
-                ? `Imported snapshot: ${props.importedEnvelope.title ?? 'Untitled artifact'} · ${formatScopeLine(importedScope)} · generated ${formatDateTime(
-                    props.importedEnvelope.generatedAt,
-                  )}.`
-                : 'No imported envelope is overriding the current local read-model view, so this review lane is reading the live web workbench slice.'}
+              Review the current scope, policy envelope, provenance, and site overlay before exporting or asking AI.
+              This lane stays read-only and works like a review desk, not a preset wall.
             </p>
-          </article>
-          <article className={`guidance-card ${currentPackaging?.aiAllowed ? '' : 'guidance-card--warning'}`}>
-            <p className="meta-title">Current policy envelope</p>
-            <strong>
-              {currentPackaging
-                ? `Read/export ${currentPackaging.authorizationLevel} · AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
-                : 'No live export envelope yet'}
-            </strong>
-            <p>
-              {currentPackaging
-                ? `Risk ${currentPackaging.riskLabel} · match ${currentPackaging.matchConfidence} · provenance ${currentPackaging.provenance.length}. ${
-                    currentPackaging.aiAllowed
-                      ? 'Layer 2 is currently visible for this slice.'
-                      : 'Layer 2 is still blocked, so AI must stay behind the trust desk.'
-                  }`
-                : 'Load a shared workbench slice before treating this web surface as export-ready.'}
-            </p>
-          </article>
-          <article className="guidance-card">
-            <p className="meta-title">Provenance and imported receipt</p>
-            <strong>{importedPackaging ? 'Imported envelope retained' : 'Using current workbench packaging'}</strong>
-            <p>
-              {formatProvenance()}
-            </p>
-          </article>
-          <article className="guidance-card">
-            <p className="meta-title">Site policy overlay and review honesty</p>
-            <strong>
-              {currentOverlay ? currentOverlay.siteLabel : 'Multi-site or unloaded view'}
-            </strong>
-            <p>
-              {currentOverlay
-                ? `Allowed: ${currentOverlay.allowedFamilies.join(', ')}. Export-first: ${
-                    currentOverlay.exportOnlyFamilies.join(', ') || 'none'
-                  }. Forbidden AI objects: ${currentOverlay.forbiddenAiObjects.join(', ') || 'none'}. `
-                : 'Choose a site-scoped slice to review the active site overlay and carrier honesty notes. '}
-              {summaryFamilies.length > 0
-                ? `Summary-first admin lanes: ${summaryFamilies.join(', ')}. `
-                : 'No administrative summary families are visible in this slice. '}
-              {summaryFamilies.length > 0
-                ? ''
-                : ''}
-              {exportFirstFamilies.length > 0
-                ? `Export-first families in this view: ${exportFirstFamilies.join(', ')}. `
-                : 'No site-scoped export-first families are visible in this slice yet. '}
-              {props.planningSubstrates.length > 0 ? `Planning substrate(s): ${props.planningSubstrates.length} read-only lane(s).` : 'No planning substrate is visible in this slice.'}
-            </p>
-          </article>
+            <div className="ai-explanation-strip" aria-label="Auth and export management">
+              <article className="guidance-card">
+                <p className="meta-title">Review scope</p>
+                <strong>{formatScopeLine(currentScope)}</strong>
+                <p>
+                  {props.importedEnvelope
+                    ? `Imported snapshot: ${props.importedEnvelope.title ?? 'Untitled artifact'} · ${formatScopeLine(importedScope)} · generated ${formatDateTime(
+                        props.importedEnvelope.generatedAt,
+                      )}.`
+                    : 'No imported envelope is overriding the current local read-model view, so this review lane is reading the live web workbench slice.'}
+                </p>
+              </article>
+              <article className={`guidance-card ${currentPackaging?.aiAllowed ? '' : 'guidance-card--warning'}`}>
+                <p className="meta-title">Current policy envelope</p>
+                <strong>
+                  {currentPackaging
+                    ? `Read/export ${currentPackaging.authorizationLevel} · AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
+                    : 'No live export envelope yet'}
+                </strong>
+                <p>
+                  {currentPackaging
+                    ? `Risk ${currentPackaging.riskLabel} · match ${currentPackaging.matchConfidence} · provenance ${currentPackaging.provenance.length}. ${
+                        currentPackaging.aiAllowed
+                          ? 'Layer 2 is currently visible for this slice.'
+                          : 'Layer 2 is still blocked, so AI must stay behind the trust desk.'
+                      }`
+                    : 'Load a shared workbench slice before treating this web surface as export-ready.'}
+                </p>
+              </article>
+              <article className="guidance-card">
+                <p className="meta-title">Provenance and imported receipt</p>
+                <strong>{importedPackaging ? 'Imported envelope retained' : 'Using current workbench packaging'}</strong>
+                <p>{formatProvenance()}</p>
+              </article>
+              <article className="guidance-card">
+                <p className="meta-title">Site policy overlay and review honesty</p>
+                <strong>{currentOverlay ? currentOverlay.siteLabel : 'Multi-site or unloaded view'}</strong>
+                <p>
+                  {currentOverlay
+                    ? `Allowed: ${currentOverlay.allowedFamilies.join(', ')}. Export-first: ${
+                        currentOverlay.exportOnlyFamilies.join(', ') || 'none'
+                      }. Forbidden AI objects: ${currentOverlay.forbiddenAiObjects.join(', ') || 'none'}. `
+                    : 'Choose a site-scoped slice to review the active site overlay and carrier honesty notes. '}
+                  {summaryFamilies.length > 0
+                    ? `Summary-first admin lanes: ${summaryFamilies.join(', ')}. `
+                    : 'No administrative summary families are visible in this slice. '}
+                  {exportFirstFamilies.length > 0
+                    ? `Export-first families in this view: ${exportFirstFamilies.join(', ')}. `
+                    : 'No site-scoped export-first families are visible in this slice yet. '}
+                  {props.planningSubstrates.length > 0
+                    ? `Planning substrate(s): ${props.planningSubstrates.length} read-only lane(s).`
+                    : 'No planning substrate is visible in this slice.'}
+                </p>
+              </article>
+            </div>
+            {importedPackaging ? (
+              <p className="meta">
+                Imported envelope keeps its own posture: read/export {importedPackaging.authorizationLevel} · AI{' '}
+                {importedPackaging.aiAllowed ? 'allowed' : 'blocked'} · risk {importedPackaging.riskLabel} · match{' '}
+                {importedPackaging.matchConfidence}.
+              </p>
+            ) : null}
+          </section>
         </div>
-        {importedPackaging ? (
-          <p className="meta">
-            Imported envelope keeps its own posture: read/export {importedPackaging.authorizationLevel} · AI{' '}
-            {importedPackaging.aiAllowed ? 'allowed' : 'blocked'} · risk {importedPackaging.riskLabel} · match{' '}
-            {importedPackaging.matchConfidence}.
-          </p>
-        ) : null}
-      </section>
+      </details>
 
+      <details className="advanced-settings advanced-settings--subdued advanced-settings--drawer">
+        <summary>
+          Deep review drawer
+          <span className="badge badge-neutral">{deepReviewSectionCount} blocks</span>
+        </summary>
+        <div className="stack">
+      <p className="meta">
+        Open this quieter review drawer only when you need assignment, discussion, material, admin, and imported-count
+        detail beyond the first overview and decision lane.
+      </p>
       <section className="split-grid split-grid--primary">
         <article className="panel">
           <h2>Merge Health</h2>
@@ -367,9 +485,7 @@ export function WebWorkbenchPanels(props: {
             </article>
           </div>
         </article>
-
       </section>
-
       <section className="split-grid split-grid--primary">
         <article className="panel">
           <h2>Course panorama</h2>
@@ -457,67 +573,6 @@ export function WebWorkbenchPanels(props: {
           </ReadyStateBlock>
         </div>
       </section>
-
-      <section className="panel panel--planning">
-        <p className="eyebrow">Academic lane</p>
-        <h2>Planning Pulse</h2>
-        <p>
-          A read-only summary of the shared MyPlan substrate, kept in the same decision lane as focus and load without
-          pretending this workspace can register for you.
-        </p>
-        <div className="stack">
-          <ReadyStateBlock
-            ready={props.workbenchReady}
-            hasItems={Boolean(latestPlanningSubstrate)}
-            emptyState={<p>No shared MyPlan planning summary is visible yet.</p>}
-          >
-            {latestPlanningSubstrate ? (
-              <article className="item">
-                <div className="item-header">
-                  <strong>{latestPlanningSubstrate.planLabel}</strong>
-                  <div className="badge-row">
-                    <span className="badge badge-success">Academic</span>
-                    <span className="badge">MyPlan</span>
-                    <span className="badge">Read-only</span>
-                  </div>
-                </div>
-                <p>
-                  {latestPlanningSubstrate.termCount} term(s) · {latestPlanningSubstrate.plannedCourseCount} planned
-                  course(s) · {latestPlanningSubstrate.backupCourseCount} backup course(s) ·{' '}
-                  {latestPlanningSubstrate.scheduleOptionCount} schedule option(s)
-                </p>
-                <p className="meta">
-                  {latestPlanningSubstrate.requirementGroupCount} requirement group(s) ·{' '}
-                  {latestPlanningSubstrate.programExplorationCount} exploration path(s)
-                </p>
-                <p className="meta">
-                  Captured {formatDateTime(latestPlanningSubstrate.capturedAt)}
-                  {latestPlanningSubstrate.lastUpdatedAt
-                    ? ` · Updated ${formatDateTime(latestPlanningSubstrate.lastUpdatedAt)}`
-                    : ''}
-                </p>
-                {latestPlanningSubstrate.degreeProgressSummary ? (
-                  <p>Degree progress: {latestPlanningSubstrate.degreeProgressSummary}</p>
-                ) : null}
-                {latestPlanningSubstrate.transferPlanningSummary ? (
-                  <p>Transfer planning: {latestPlanningSubstrate.transferPlanningSummary}</p>
-                ) : null}
-                {latestPlanningSubstrate.terms.length ? (
-                  <div className="badge-row">
-                    {latestPlanningSubstrate.terms.slice(0, 4).map((term) => (
-                      <span className="badge" key={term.termCode}>
-                        {term.termLabel}: {term.plannedCourseCount} planned · {term.backupCourseCount} backup ·{' '}
-                        {term.scheduleOptionCount} option(s)
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </article>
-            ) : null}
-          </ReadyStateBlock>
-        </div>
-      </section>
-
       <section className="split-grid split-grid--evidence">
         <article className="panel">
           <h2>Current Tasks</h2>
@@ -591,10 +646,10 @@ export function WebWorkbenchPanels(props: {
             {props.currentResources.slice(0, 6).map((resource) => (
               <article className="item" key={resource.id}>
                 <div className="item-header">
-                  <strong>{resource.title}</strong>
+                    <strong>{resource.title}</strong>
                   <div className="badge-row">
                     <span className={getLaneBadgeClass(resource.site)}>{getLaneLabel(resource.site)}</span>
-                    <span className="badge">{resource.resourceKind}</span>
+                    <span className="badge">{getResourceSemanticLabel(resource)}</span>
                   </div>
                 </div>
                 {resource.summary ? <p>{resource.summary}</p> : null}
@@ -735,6 +790,8 @@ export function WebWorkbenchPanels(props: {
           <p>Loading site counts from the shared read-model...</p>
         )}
       </section>
-    </>
+        </div>
+      </details>
+    </div>
   );
 }

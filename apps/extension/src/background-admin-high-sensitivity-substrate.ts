@@ -25,6 +25,9 @@ function detectAdminCarrierFamily(url: string) {
   if (normalized.includes('/accounts')) {
     return 'accounts' as const;
   }
+  if (normalized.includes('/profile')) {
+    return 'profile' as const;
+  }
   if (normalized.includes('tuition.aspx')) {
     return 'tuition_detail' as const;
   }
@@ -124,6 +127,71 @@ function buildAccountsCarrier(pageHtml: string, url: string, now: string): Admin
   ];
 }
 
+function buildProfileCarrier(pageHtml: string, url: string, now: string): AdminCarrierRecord {
+  const preferredNamePresent = /Preferred Name/i.test(pageHtml);
+  const pronounsPresent = /Pronouns/i.test(pageHtml);
+  const localAddressPresent = /Local Address/i.test(pageHtml);
+  const emailSectionPresent = /Email Address/i.test(pageHtml) || /Email Addresses/i.test(pageHtml);
+  const emergencyContactCount = (pageHtml.match(/Emergency Contact \d+/gi) ?? []).length;
+
+  return {
+    id: 'admin-carrier:profile',
+    family: 'profile',
+    title: 'MyUW profile summary',
+    summary: `Profile page confirms preferred-name ${preferredNamePresent ? 'support' : 'absence'}, pronouns ${pronounsPresent ? 'visibility' : 'not visible'}, local-contact block ${localAddressPresent ? 'present' : 'not visible'}, email section ${emailSectionPresent ? 'present' : 'not visible'}, and ${emergencyContactCount || 0} emergency contact record(s).`,
+    sourceSurface: 'myuw',
+    sourceUrl: url,
+    authoritySource: 'myuw profile page summary cards',
+    importance: 'medium',
+    aiDefault: 'blocked',
+    nextAction: 'Review or export the profile summary before any AI analysis.',
+    updatedAt: now,
+  };
+}
+
+function buildTuitionDetailCarrier(pageHtml: string, url: string, now: string): AdminCarrierRecord {
+  const quarter =
+    extractFirstMatch(pageHtml, /Official Tuition Charge Statement\s*-\s*([^<\n]+)/i) ||
+    extractFirstMatch(pageHtml, /Detail of Account - Charges and payments beginning:\s*([^<\n]+)/i);
+  const dueAmount =
+    extractFirstMatch(pageHtml, /\*\*\*\s*\$\s*([0-9.,]+)\s*\*\*\*/i) ||
+    extractFirstMatch(pageHtml, /BALANCE:\s*\$\s*([0-9.,]+)/i);
+  const tuitionClassification = extractFirstMatch(pageHtml, /Tuition Classification:\s*<\/th>\s*<td[^>]*>([\s\S]*?)<\/td>/i);
+  const creditHours = extractFirstMatch(pageHtml, /Credit Hours:\s*<\/th>\s*<td[^>]*>([\s\S]*?)<\/td>/i);
+  const paymentsTotal = extractFirstMatch(
+    pageHtml,
+    /<b>TOTAL:<\/b>[\s\S]*?<td[^>]*><tt>([0-9.,]+)<\/tt><\/td>\s*<td[^>]*><tt>([0-9.,]+)<\/tt><\/td>\s*<td[^>]*><tt>BALANCE:/i,
+  );
+  const chargesTotal = extractFirstMatch(
+    pageHtml,
+    /<b>TOTAL:<\/b>[\s\S]*?<td[^>]*><tt>[0-9.,]+<\/tt><\/td>\s*<td[^>]*><tt>([0-9.,]+)<\/tt><\/td>\s*<td[^>]*><tt>BALANCE:/i,
+  );
+  const aidToAccount = extractFirstMatch(
+    pageHtml,
+    /Disbursed to Account[\s\S]*?<tt>([0-9.,]+)<\/tt>\s*<\/td>\s*<td[^>]*><tt>UNDISBURSED AID:/i,
+  );
+  const undisbursedAid = extractFirstMatch(pageHtml, /UNDISBURSED AID:\s*\$\s*([0-9.,]+)/i);
+  const hasBreakdown = /Tuition Charge Breakdown/i.test(pageHtml);
+
+  return {
+    id: 'admin-carrier:tuition-detail',
+    family: 'tuition_detail',
+    title: 'Tuition statement summary',
+    summary: `${quarter || 'Current quarter'} tuition statement shows balance due $${dueAmount || 'unknown'}, tuition classification ${
+      tuitionClassification || 'unknown'
+    }, ${creditHours || 'unknown'} credit hours, charges $${chargesTotal || 'unknown'}, payments $${paymentsTotal || 'unknown'}, aid to account $${
+      aidToAccount || 'unknown'
+    }, undisbursed aid $${undisbursedAid || 'unknown'}, and ${hasBreakdown ? 'a visible mandatory-fee breakdown' : 'no parsed fee-breakdown table'}.`,
+    sourceSurface: 'myuw',
+    sourceUrl: url,
+    authoritySource: 'sdb.admin tuition statement page',
+    importance: 'high',
+    aiDefault: 'blocked',
+    nextAction: 'Review or export the tuition statement summary before any AI analysis.',
+    updatedAt: now,
+  };
+}
+
 export function extractAdminCarriersFromPageHtml(input: {
   url: string;
   pageHtml?: string;
@@ -147,19 +215,8 @@ export function extractAdminCarriersFromPageHtml(input: {
   if (family === 'accounts') {
     return buildAccountsCarrier(input.pageHtml, input.url, input.now);
   }
-  return [
-    {
-      id: 'admin-carrier:tuition-detail',
-      family: 'tuition_detail',
-      title: 'Tuition statement summary',
-      summary: 'Tuition statement page is open and ready for export-first review.',
-      sourceSurface: 'myuw',
-      sourceUrl: input.url,
-      authoritySource: 'sdb.admin tuition statement page',
-      importance: 'high',
-      aiDefault: 'blocked',
-      nextAction: 'Review or export the tuition statement summary before any AI analysis.',
-      updatedAt: input.now,
-    },
-  ];
+  if (family === 'profile') {
+    return [buildProfileCarrier(input.pageHtml, input.url, input.now)];
+  }
+  return [buildTuitionDetailCarrier(input.pageHtml, input.url, input.now)];
 }

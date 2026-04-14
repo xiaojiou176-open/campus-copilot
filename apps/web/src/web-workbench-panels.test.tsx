@@ -87,6 +87,8 @@ describe('web workbench planning pulse', () => {
             programExplorationCount: 1,
             degreeProgressSummary: 'Core degree requirements still need one systems elective.',
             transferPlanningSummary: 'One transfer credit is still pending review.',
+            exactBlockers: [],
+            hardDeferredMoves: [],
             terms: [
               {
                 termCode: '2026-spring',
@@ -159,5 +161,76 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Spring 2026: 3 planned · 1 backup · 2 option(s)');
     expect(html.indexOf('Focus Queue')).toBeLessThan(html.indexOf('Auth &amp; Export Management'));
     expect(html.indexOf('Weekly Load')).toBeLessThan(html.indexOf('Auth &amp; Export Management'));
+  });
+
+  it('shows EdStem lesson and grouped-resource badges in study materials', () => {
+    const html = renderToStaticMarkup(
+      createElement(WebWorkbenchPanels, {
+        workbenchReady: true,
+        todaySnapshot: {
+          totalAssignments: 0,
+          dueSoonAssignments: 0,
+          recentUpdates: 0,
+          newGrades: 0,
+          riskAlerts: 0,
+          syncedSites: 1,
+        },
+        recentUpdates: { unseenCount: 0, items: [] },
+        currentViewExport: undefined,
+        importedEnvelope: undefined,
+        focusQueue: [],
+        planningSubstrates: [],
+        weeklyLoad: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+        currentAssignments: [],
+        currentMessages: [],
+        currentResources: [
+          {
+            id: 'edstem:lesson:162340',
+            site: 'edstem',
+            title: '[HW1 problem 7(a)] Python Tutorial & Coding Exercises',
+            resourceKind: 'link',
+            summary: 'A. Using - Spring 2026',
+            detail: 'Lesson · attempted · Closed Due: Wed April 8th, 11:59pm',
+          },
+          {
+            id: 'edstem:resource:dom:96846:a-using-spring-2026:starter-code:1',
+            site: 'edstem',
+            title: 'Starter code',
+            resourceKind: 'file',
+            summary: 'A. Using - Spring 2026',
+            detail: 'ZIP · A. Using - Spring 2026 · Download file',
+            downloadUrl: 'https://edstem.org/us/courses/96846/resources/1',
+          },
+        ],
+        currentAnnouncements: [],
+        currentEvents: [],
+        recentChangeEvents: [],
+        countsBySite: [],
+        topSyncRun: undefined,
+        siteLabels: {
+          canvas: 'Canvas',
+          gradescope: 'Gradescope',
+          edstem: 'EdStem',
+          myuw: 'MyUW',
+          'time-schedule': 'Time Schedule',
+          'course-sites': 'Course Websites',
+        },
+      }),
+    );
+
+    expect(html).toContain('Study Materials');
+    expect(html).toContain('lesson');
+    expect(html).toContain('grouped resource');
+    expect(html).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
+    expect(html).toContain('ZIP · A. Using - Spring 2026 · Download file');
   });
 });

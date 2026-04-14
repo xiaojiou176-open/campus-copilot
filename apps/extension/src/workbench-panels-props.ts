@@ -17,7 +17,7 @@ import type {
   WorkbenchFilter,
 } from '@campus-copilot/storage';
 import type { ResolvedUiLanguage } from './i18n';
-import type { DiagnosticsSummary } from './diagnostics';
+import type { DiagnosticsSummary } from './diagnostics-summary';
 import type { OrderedSiteStatusEntry, SurfaceKind } from './surface-shell-model';
 import type { UiText } from './surface-shell-view-helpers';
 

@@ -119,10 +119,7 @@ export function buildSurfaceAiRequest(input: {
   authorization?: AuthorizationState;
   todaySnapshot: TodaySnapshot;
   state: SurfaceCompositionState;
-}): {
-  currentViewExport: ExportArtifact;
-  proxyRequest: ReturnType<typeof buildAiProxyRequest>;
-} {
+}) {
   const currentViewExport = buildSurfaceExportArtifact({
     preset: 'current_view',
     format: 'markdown',

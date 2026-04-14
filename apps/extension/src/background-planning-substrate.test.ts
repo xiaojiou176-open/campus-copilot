@@ -193,6 +193,8 @@ describe('background planning substrate capture', () => {
         programExplorationCount: 0,
         degreeProgressSummary: 'Requirement progress is not exposed on this MyPlan planning page yet. Open Degree Audit (DARS) to capture requirement detail.',
         transferPlanningSummary: undefined,
+        exactBlockers: [],
+        hardDeferredMoves: [],
         terms: [
           {
             termCode: 'sp26',

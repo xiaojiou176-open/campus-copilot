@@ -449,8 +449,8 @@ async function ensureServer(url, start, validate) {
 
 function startApiServer(port) {
   return startProcess(
-    process.execPath,
-    ['--env-file-if-exists=../../.env', '--experimental-strip-types', 'src/server.ts'],
+    'pnpm',
+    ['exec', 'tsx', 'src/server.ts'],
     {
       cwd: `${rootDir}/apps/api`,
       env: {

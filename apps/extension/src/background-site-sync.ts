@@ -24,6 +24,11 @@ import {
   type CourseSitesSyncResult,
 } from '@campus-copilot/adapters-course-sites';
 import {
+  extractTimeScheduleSectionDetailPage,
+  TIME_SCHEDULE_EXACT_BLOCKERS,
+  TIME_SCHEDULE_STAGE_UNDERSTANDING,
+} from '../../../packages/adapters-time-schedule/src/index.ts';
+import {
   type CanvasSyncStatusView,
   type GetSiteSyncStatusResponse,
   type SiteSyncStatusView,
@@ -36,6 +41,7 @@ import {
   getSyncStateBySite,
   putSyncState,
   recordSiteSyncError,
+  replacePlanningSubstratesBySource,
   replaceSiteSnapshot,
   type SiteSnapshotPayload,
   upsertAdminCarriers,
@@ -311,6 +317,66 @@ function toTimeScheduleCourseId(courseKey: string) {
   return `time-schedule:course:${courseKey}`;
 }
 
+function isTimeScheduleSectionDetailUrl(url: string) {
+  return /sdb\.admin\.washington\.edu\/timeschd\/uwnetid\/sln\.asp/i.test(url);
+}
+
+function buildTimeScheduleDetailSnapshot(pageHtml: string, url: string): SiteSnapshotPayload {
+  const detail = extractTimeScheduleSectionDetailPage(pageHtml);
+  const primaryMeeting = detail.meetings[0];
+  const meetingPattern =
+    primaryMeeting && primaryMeeting.days && primaryMeeting.timeText
+      ? `${primaryMeeting.days} ${primaryMeeting.timeText}`.trim()
+      : 'meeting pattern unavailable';
+  const detailParts = [
+    meetingPattern,
+    primaryMeeting?.location,
+    primaryMeeting?.instructor,
+    detail.status !== 'unknown' ? detail.status : undefined,
+    detail.currentEnrollment != null && detail.enrollmentLimit != null
+      ? `${detail.currentEnrollment}/${detail.enrollmentLimit} enrolled`
+      : undefined,
+  ].filter(Boolean);
+
+  return {
+    courses: [
+      {
+        id: toTimeScheduleCourseId(detail.courseKey),
+        kind: 'course',
+        site: 'time-schedule',
+        source: {
+          site: 'time-schedule',
+          resourceId: detail.courseKey,
+          resourceType: 'section_detail_course',
+          url,
+        },
+        url,
+        title: detail.title,
+        code: detail.courseKey,
+      },
+    ],
+    events: [
+      {
+        id: `time-schedule:event:${detail.courseKey}:${detail.sectionId}:${detail.sln}`,
+        kind: 'event',
+        site: 'time-schedule',
+        source: {
+          site: 'time-schedule',
+          resourceId: `${detail.courseKey}:${detail.sectionId}:${detail.sln}`,
+          resourceType: 'section_detail',
+          url,
+        },
+        courseId: toTimeScheduleCourseId(detail.courseKey),
+        eventKind: 'class',
+        title: `${detail.courseKey} ${detail.sectionId}`,
+        summary: `${detail.quarterLabel} section detail`,
+        location: primaryMeeting?.location,
+        detail: detailParts.join(' · ') || undefined,
+      },
+    ],
+  };
+}
+
 function buildTimeScheduleSnapshot(pageHtml: string, url: string): SiteSnapshotPayload {
   const quarter =
     normalizeWhitespace(pageHtml.match(/<h1>\s*(?<quarter>[^<]+?)\s+Course Offerings\s*<\/h1>/i)?.groups?.quarter ?? '') ||
@@ -374,6 +440,56 @@ function buildTimeScheduleSnapshot(pageHtml: string, url: string): SiteSnapshotP
             : `${section.meetingDays} ${section.timeText} · public course offerings`,
       })),
     ),
+  };
+}
+
+function slugifyTimeScheduleQuarter(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+function inferTimeScheduleQuarterLabel(snapshot: SiteSnapshotPayload) {
+  const summary = snapshot.events?.[0]?.summary;
+  const match = summary?.match(/Current Time Schedule · (?<quarter>[^·]+)/);
+  return match?.groups?.quarter?.trim() || 'Current quarter';
+}
+
+function buildTimeSchedulePlanningSubstrate(input: {
+  snapshot: SiteSnapshotPayload;
+  capturedAt: string;
+  sourceUrl: string;
+}) {
+  const quarterLabel = inferTimeScheduleQuarterLabel(input.snapshot);
+  const termCode = slugifyTimeScheduleQuarter(quarterLabel) || 'current-quarter';
+
+  return {
+    id: `time-schedule:planning-substrate:${termCode}`,
+    source: 'time-schedule' as const,
+    fit: 'derived_planning_substrate' as const,
+    readOnly: true as const,
+    capturedAt: input.capturedAt,
+    planId: `time-schedule:${termCode}`,
+    planLabel: `Time Schedule · ${quarterLabel}`,
+    termCount: 1,
+    plannedCourseCount: input.snapshot.courses?.length ?? 0,
+    backupCourseCount: 0,
+    scheduleOptionCount: input.snapshot.events?.length ?? 0,
+    requirementGroupCount: 0,
+    programExplorationCount: 0,
+    currentStage: TIME_SCHEDULE_STAGE_UNDERSTANDING.currentStage,
+    runtimePosture: TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture,
+    currentTruth: TIME_SCHEDULE_STAGE_UNDERSTANDING.currentTruth,
+    exactBlockers: TIME_SCHEDULE_EXACT_BLOCKERS.map((blocker) => ({ ...blocker })),
+    hardDeferredMoves: ['registration helper', 'watcher automation', 'enrollment-state truth'],
+    terms: [
+      {
+        termCode,
+        termLabel: quarterLabel,
+        plannedCourseCount: input.snapshot.courses?.length ?? 0,
+        backupCourseCount: 0,
+        scheduleOptionCount: input.snapshot.events?.length ?? 0,
+        summary: `Public course offerings captured from ${input.sourceUrl}.`,
+      },
+    ],
   };
 }
 
@@ -487,7 +603,11 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
         status: 'unknown',
       },
     });
-    if (adminCarriers.length > 0 && !result.ok && result.outcome === 'unsupported_context') {
+    if (
+      adminCarriers.length > 0 &&
+      !result.ok &&
+      (result.outcome === 'unsupported_context' || result.outcome === 'collector_failed' || result.outcome === 'request_failed')
+    ) {
       return {
         ok: true as const,
         site: 'myuw' as const,
@@ -532,7 +652,7 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
       ],
     };
 
-    if (!activeTab.url.includes('/students/timeschd/') || !html) {
+    if ((!activeTab.url.includes('/students/timeschd/') && !isTimeScheduleSectionDetailUrl(activeTab.url)) || !html) {
       return {
         ok: false,
         site: 'time-schedule',
@@ -559,7 +679,20 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
     }
 
     try {
-      const snapshot = buildTimeScheduleSnapshot(html, activeTab.url);
+      const snapshot = isTimeScheduleSectionDetailUrl(activeTab.url)
+        ? buildTimeScheduleDetailSnapshot(html, activeTab.url)
+        : buildTimeScheduleSnapshot(html, activeTab.url);
+      await replacePlanningSubstratesBySource(
+        'time-schedule',
+        [
+          buildTimeSchedulePlanningSubstrate({
+            snapshot,
+            capturedAt: now,
+            sourceUrl: activeTab.url,
+          }),
+        ],
+        campusCopilotDb,
+      );
       return {
         ok: true,
         site: 'time-schedule',

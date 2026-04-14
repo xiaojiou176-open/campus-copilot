@@ -3,19 +3,20 @@
   font-family: Geist, "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #27483d;
+  color: #31302e;
   background:
-    radial-gradient(circle at top left, rgba(31, 93, 75, 0.05), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(168, 98, 42, 0.035), transparent 22%),
-    linear-gradient(180deg, #f7f5ef 0%, #f3efe6 100%);
-  --surface-border: #dce8e1;
+    radial-gradient(circle at top left, rgba(31, 93, 75, 0.035), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(168, 98, 42, 0.025), transparent 26%),
+    linear-gradient(180deg, #f8f6f1 0%, #f4f0e8 100%);
+  --surface-border: #e2ddd6;
+  --surface-display: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
   --surface-panel: rgba(251, 250, 246, 0.96);
   --surface-panel-strong: #fbfaf6;
-  --surface-panel-muted: rgba(241, 238, 229, 0.92);
-  --surface-copy: #4e665e;
-  --surface-title: #27483d;
-  --surface-muted: #4e665e;
-  --surface-muted-soft: #60766d;
+  --surface-panel-muted: rgba(245, 242, 235, 0.92);
+  --surface-copy: #615d59;
+  --surface-title: #31302e;
+  --surface-muted: #615d59;
+  --surface-muted-soft: #7a746d;
   --surface-accent: #1f5d4b;
   --surface-accent-strong: #27483d;
   --surface-accent-soft: rgba(31, 93, 75, 0.1);
@@ -92,6 +93,18 @@ textarea {
   justify-content: space-between;
 }
 
+.surface__mode-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.surface__mode-context .surface__meta {
+  margin: 0;
+}
+
 .surface__mode-switch {
   display: inline-flex;
   flex-wrap: wrap;
@@ -104,6 +117,7 @@ textarea {
 
 .surface__title--compact {
   font-size: 1.72rem;
+  letter-spacing: -0.02em;
 }
 
 .surface__copy--compact {
@@ -135,11 +149,41 @@ textarea {
 }
 
 .surface__workspace-detail-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
   cursor: pointer;
   list-style: none;
   padding: 14px 18px;
-  font-weight: 700;
   color: var(--surface-title);
+}
+
+.surface__workspace-detail-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.surface__workspace-detail-copy strong {
+  font-size: 0.96rem;
+}
+
+.surface__workspace-detail-copy span {
+  color: var(--surface-muted);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.surface__workspace-detail-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.surface__workspace-detail-toggle {
+  font-weight: 700;
 }
 
 .surface__workspace-detail-summary::-webkit-details-marker {
@@ -191,6 +235,9 @@ textarea {
   margin: 0;
   font-size: 1.86rem;
   line-height: 1.1;
+  font-family: var(--surface-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--surface-title);
 }
 
@@ -344,6 +391,14 @@ textarea {
   border-color: rgba(31, 93, 75, 0.16);
 }
 
+.surface__hero-statuses {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .surface--sidepanel .surface__card {
   padding: 16px;
 }
@@ -378,7 +433,7 @@ textarea {
 }
 
 .surface--sidepanel .surface__ask-ai-flow--compact {
-  grid-template-columns: minmax(0, 1.18fr) minmax(190px, 0.62fr);
+  grid-template-columns: minmax(0, 1.34fr) minmax(168px, 0.46fr);
 }
 
 .surface--sidepanel .surface__question-card,
@@ -406,7 +461,9 @@ textarea {
 
 .surface__panel h2 {
   font-size: 1.12rem;
-  font-weight: 650;
+  font-family: var(--surface-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .surface__panel h3 {
@@ -511,6 +568,16 @@ textarea {
   background: linear-gradient(180deg, rgba(251, 250, 246, 0.99), rgba(241, 238, 229, 0.82));
 }
 
+.surface__stats-strip--actions {
+  border-style: dashed;
+  border-color: rgba(39, 72, 61, 0.14);
+  box-shadow: none;
+}
+
+.surface__stats-strip--actions .surface__actions {
+  margin-top: 2px;
+}
+
 .surface__stats-strip-head {
   display: flex;
   justify-content: space-between;
@@ -602,10 +669,10 @@ textarea {
 
 .surface__status-intro--supporting {
   margin-top: 0;
-  padding: 10px 12px;
+  padding: 9px 11px;
   border: 1px solid rgba(31, 93, 75, 0.1);
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(247, 245, 239, 0.9), rgba(251, 250, 246, 0.92));
+  background: linear-gradient(180deg, rgba(246, 244, 238, 0.82), rgba(250, 248, 242, 0.9));
   box-shadow: none;
 }
 
@@ -648,7 +715,7 @@ textarea {
 
 .surface__status-card--warning {
   border-color: rgba(179, 107, 44, 0.18);
-  background: rgba(252, 246, 238, 0.96);
+  background: rgba(251, 246, 238, 0.92);
 }
 
 .surface__callout {
@@ -899,7 +966,7 @@ textarea {
 }
 
 .surface__answer {
-  margin-top: 14px;
+  margin-top: 0;
   padding: 14px;
   border-radius: 16px;
   background: rgba(247, 243, 236, 0.96);
@@ -955,8 +1022,8 @@ textarea {
   gap: 14px;
   padding: 16px 18px;
   border-color: rgba(31, 93, 75, 0.14);
-  background: linear-gradient(180deg, rgba(251, 250, 246, 0.99), rgba(247, 243, 236, 0.96));
-  box-shadow: 0 10px 24px rgba(39, 72, 61, 0.07);
+  background: linear-gradient(180deg, rgba(251, 250, 246, 0.995), rgba(246, 242, 236, 0.94));
+  box-shadow: 0 12px 26px rgba(39, 72, 61, 0.055);
 }
 
 .surface__group--supporting {
@@ -991,15 +1058,16 @@ textarea {
 }
 
 .surface__panel--ask-ai {
-  background: linear-gradient(180deg, rgba(251, 250, 246, 0.99), rgba(247, 243, 236, 0.96));
-  box-shadow: var(--surface-shadow-sm);
+  background: linear-gradient(180deg, rgba(250, 248, 242, 0.96), rgba(246, 243, 237, 0.92));
+  border-color: rgba(39, 72, 61, 0.1);
+  box-shadow: none;
 }
 
 .surface__advanced-settings--supporting {
   margin-top: 0;
   border-style: dashed;
   border-color: rgba(39, 72, 61, 0.12);
-  background: rgba(244, 241, 234, 0.88);
+  background: rgba(244, 241, 234, 0.8);
 }
 
 .surface__advanced-settings--supporting .surface__advanced-settings-summary {
@@ -1014,15 +1082,24 @@ textarea {
 
 .surface__ask-ai-sidebar--supporting .surface__status-card,
 .surface__ask-ai-sidebar--supporting .surface__evidence-card {
-  background: rgba(247, 245, 239, 0.9);
+  background: rgba(247, 245, 239, 0.84);
 }
 
 .surface__ask-ai-sidebar--supporting .surface__status-card {
-  padding: 12px 13px;
+  padding: 11px 12px;
 }
 
 .surface__ask-ai-sidebar--supporting .surface__badge {
   font-size: 0.72rem;
+}
+
+.surface__ask-ai-sidebar--supporting .surface__meta-label {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+}
+
+.surface__ask-ai-sidebar--supporting .surface__item-lead {
+  font-size: 0.94rem;
 }
 
 .surface__suggestion-strip {

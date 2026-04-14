@@ -1,79 +1,51 @@
 # Wave 4-7 Release Notes Draft
 
+This is a **repo-side draft release summary**.
+
+It is not proof that a public release page, package publication, or store
+listing already happened.
+
 ## Title
 
-`Campus Copilot: truthful dual-surface workbench, Switchyard seam, and read-only builder preview`
+`Campus Copilot: truthful dual-surface workbench, tighter public docs, and read-only builder preview`
 
 ## One-paragraph summary
 
-Campus Copilot is now a more coherent local-first academic decision workspace across both the extension and the standalone read-only web surface. This release lands a clearer Campus ↔ Switchyard seam, strengthens internal browser evidence tooling, and turns the repo's read-only builder direction into real preview surfaces across SDK, CLI, MCP, and site-level API preview packages.
+Campus Copilot is now a more coherent local-first academic decision workspace
+across both the extension and the standalone read-only web surface. The repo
+front door is tighter, the read-only builder preview is more clearly described,
+and the back-half roadmap now keeps repo-local truth separate from owner-only
+publication or platform actions.
 
 ## Highlights
 
 ### Product surface
 
-- unified front door and docs story for extension + standalone web
-- clearer Wave 4-7 SSOT in the repository docs
-- continued `AI after structure` positioning
-- EdStem course resources now land on the canonical `Resource` contract across storage, export, extension, and standalone web
+- extension + standalone web are described as one product, not two unrelated shells
+- `AI after structure` remains the rule
+- docs front door is more student-first and less execution-diary shaped
 
 ### Runtime and semantics
 
-- stronger Campus-owned answer semantics above the runtime seam
-- more explicit `Switchyard-first` transport/runtime direction
-- internal browser evidence/control-plane substrate improved without turning it into a student-facing feature
-- post-closeout hardening now includes deterministic lockfile-security guards and runtime-cleanup race guards in the repo-owned gate
-- remaining deeper `Gradescope` depth, plus any future beyond-current `EdStem` resource work, now has a proof-first capture path instead of guess-first adapter work
+- Campus-owned explanation semantics remain above the provider/runtime seam
+- Switchyard is still described as an optional local bridge or later tighter cutover path, not as a hosted product claim
+- internal browser diagnostics stay clearly internal
 
 ### Read-only builder preview
 
-- `@campus-copilot/sdk`
-- `@campus-copilot/workspace-sdk`
-- `@campus-copilot/site-sdk`
-- `@campus-copilot/cli`
-- `@campus-copilot/mcp`
-- `@campus-copilot/mcp-readonly`
-- `@campus-copilot/mcp-server`
-- `@campus-copilot/provider-runtime`
-- `@campus-copilot/gradescope-api`
-- `@campus-copilot/edstem-api`
-- `@campus-copilot/myuw-api`
+- read-only SDK / CLI / MCP preview surfaces remain real repo-side
+- repo-local package and example readiness remains real
+- publication and listing still stay separate from repo-side proof
 
-The repo-local preview packaging story is also stricter now:
-
-- public package manifests carry explicit package file inventories
-- `pnpm proof:public` proves dry-run pack behavior instead of relying on loose preview manifests
-
-### Verification
-
-Release-candidate proof should include:
-
-- `pnpm typecheck`
-- `pnpm test`
-- `pnpm verify`
-- latest GitHub-hosted `Verify` lane green, which now runs `pnpm verify:hosted`
-- latest GitHub-hosted `Nightly` lane green when you want hosted coverage/public-distribution/web-interaction proof
-- `pnpm smoke:provider`
-- `pnpm smoke:sidepanel`
-- `pnpm test:coverage`
-- `bash scripts/support-bundle-smoke.sh`
-- `pnpm --filter @campus-copilot/web test:interaction`
-
-Recent deterministic hardening now also covers:
-
-- lockfile-level dependency guards for patched transitive dependencies such as `defu`
-- direct runtime-cleanup race regression coverage for repo-owned support-bundle artifacts
-
-## What this release still does not claim
+## What This Draft Still Does Not Claim
 
 - hosted MCP
 - write-capable automation
 - live browser/session control as a public product feature
 - hosted autonomy or operator-bot behavior
+- automatic package/store publication
 
-## Remaining honest tail
+## Remaining Honest Tail
 
-- live/browser control-plane still depends on real session availability and current Chrome attach conditions
-- `Gradescope` graded submission annotation detail now joins the current `Assignment` contract through the state-backed submission viewer carrier, alongside the already-landed question/rubric/evaluation-comment detail; `EdStem reply-body` now lands through direct thread-detail DOM normalization with committed redacted fixtures, and `EdStem` course resources now land through the authenticated course-resources API on the current `Resource` contract
-- package publishing is still a release-policy decision, not an implied default
-- demo/video publishing still requires owner execution
+- deeper site-depth and final product-surface convergence still exist repo-side
+- publication, visibility, release-page, and media execution remain later or owner-only

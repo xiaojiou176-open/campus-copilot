@@ -474,6 +474,88 @@ describe('GradescopeApiClient', () => {
     }
   });
 
+  it('promotes /submissions/new composer pages into assignment detail instead of treating them as link-only rows', async () => {
+    const client = new GradescopeApiClient(
+      okExecutor({
+        '/internal/assignments': undefined,
+        '/internal/grades': undefined,
+        '/courses/1285555/assignments/7880245/submissions/new': readFixture('submission-composer.html'),
+      } as unknown as Record<string, unknown>),
+      paths,
+    );
+
+    const adapter = createGradescopeAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://www.gradescope.com/courses/1285555',
+      site: 'gradescope',
+      now: '2026-03-24T18:00:00-07:00',
+      pageHtml: `
+        <table>
+          <tr>
+            <td>
+              <a href="/courses/1285555/assignments/7880245/submissions/new">PSet 1, problem 1</a>
+            </td>
+            <td class="submissionStatus">No submission</td>
+          </tr>
+        </table>
+      `,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.assignments?.[0]).toMatchObject({
+        id: 'gradescope:assignment:7880245',
+        courseId: 'gradescope:course:1285555',
+        status: 'todo',
+        maxScore: 12,
+      });
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('No submission');
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('Q1 redacted-text');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain('Q2 redacted-text');
+    }
+  });
+
+  it('fetches plain assignment links and promotes composer detail even when the row has no submission id yet', async () => {
+    const client = new GradescopeApiClient(
+      okExecutor({
+        '/internal/assignments': undefined,
+        '/internal/grades': undefined,
+        '/courses/1285555/assignments/7880245': readFixture('submission-composer.html'),
+      } as unknown as Record<string, unknown>),
+      paths,
+    );
+
+    const adapter = createGradescopeAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://www.gradescope.com/courses/1285555',
+      site: 'gradescope',
+      now: '2026-03-24T18:00:00-07:00',
+      pageHtml: `
+        <table>
+          <tr>
+            <td>
+              <a href="/courses/1285555/assignments/7880245">PSet 1, problem 1</a>
+            </td>
+            <td class="submissionStatus">No submission</td>
+          </tr>
+        </table>
+      `,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.assignments?.[0]).toMatchObject({
+        id: 'gradescope:assignment:7880245',
+        courseId: 'gradescope:course:1285555',
+        status: 'todo',
+        maxScore: 12,
+      });
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('No submission');
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('Q1 redacted-text 4 pts');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain('Q2 redacted-text · 8 pts');
+    }
+  });
+
   it('replays the committed redacted live fixture set for regression coverage', async () => {
     const client = new GradescopeApiClient(
       okExecutor({
@@ -646,6 +728,8 @@ describe('GradescopeApiClient', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('Autograder result 18 / 18 (Autograder passed)');
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('[1 comment]');
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Q2.1 Difference between addresses · 3 / 3');
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Correct type casting');
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Correct explanation');
@@ -717,6 +801,8 @@ describe('GradescopeApiClient', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('Autograder result 18 / 18 (Autograder passed)');
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('[1 comment]');
       expect(result.snapshot.assignments?.[0]?.summary).toContain('Graded 24 / 24');
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Comment: Solid explanation here. Like how you equated the ptrdiff_t to the size in bytes.');
     }
@@ -880,6 +966,32 @@ describe('GradescopeApiClient', () => {
       expect(result.snapshot.grades?.[0]?.url).toBe(
         'https://www.gradescope.com/courses/1144890/assignments/7224262/submissions/376035162',
       );
+    }
+  });
+
+  it('surfaces graded-copy, history, and regrade availability from a graded submission page', async () => {
+    const client = new GradescopeApiClient(
+      okExecutor({
+        '/internal/assignments': undefined,
+        '/internal/grades': undefined,
+      } as unknown as Record<string, unknown>),
+      paths,
+    );
+
+    const adapter = createGradescopeAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://www.gradescope.com/courses/1144890/assignments/7224260/submissions/374320968',
+      site: 'gradescope',
+      now: '2026-04-13T08:00:00-07:00',
+      pageHtml: readFixture('submission-question-detail-rich.html').replace(
+        '</section>',
+        '<ul><li><a href="/courses/1144890/assignments/7224260/submissions/374320968.pdf">Download Graded Copy</a></li><li><button type="button">Submission History</button></li><li><button type="button" aria-label=" Request Regrade. Please select a question.">Request Regrade</button></li></ul></section>',
+      ),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.assignments?.[0]?.detail).toContain('Actions: Download graded copy | Submission history | Request regrade (Please select a question.)');
     }
   });
 

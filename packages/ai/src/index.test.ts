@@ -143,13 +143,15 @@ describe('ai runtime contracts', () => {
     expect(AiRuntimeModeSchema.options).toEqual(['auto', 'switchyard_first', 'direct']);
   });
 
-  it('exposes the minimal structured tool registry', () => {
+  it('exposes the structured tool registry that matches the current AI request contract', () => {
     const toolNames = getToolDefinitions().map((tool) => tool.name);
     expect(toolNames).toEqual([
       'get_today_snapshot',
       'get_recent_updates',
       'get_priority_alerts',
       'export_current_view',
+      'get_planning_substrates',
+      'get_opted_in_course_material_excerpt',
     ]);
   });
 
@@ -175,6 +177,17 @@ describe('ai runtime contracts', () => {
         "Treat Time Schedule as a public planning carrier, not as proof of the student's enrolled reality or any registration entitlement.",
       operatorNote:
         'Time Schedule answers should stay planning-oriented, cite public section context, and defer enrolled-state claims to MyUW.',
+    });
+    expect(getAiSitePolicyOverlay('edstem')).toEqual({
+      site: 'edstem',
+      siteLabel: 'EdStem',
+      allowedFamilies: ['threads', 'announcements', 'course links', 'resource metadata', 'lesson summaries'],
+      exportOnlyFamilies: ['thread attachments', 'raw lesson bodies', 'raw resource files'],
+      forbiddenAiObjects: ['private draft replies', 'raw attachment bodies', 'hidden thread content', 'raw lesson bodies', 'raw resource files'],
+      carrierHonesty:
+        'Treat EdStem as a read-only classroom discussion and course-resource carrier; shared lesson/resource summaries are allowed, but this repo still does not claim official LMS parity or raw material ingestion.',
+      operatorNote:
+        'EdStem answers should focus on structured discussion context, resource metadata, and lesson-summary signals while keeping task-detail and grouped-material gaps explicit.',
     });
     expect(getAiSitePolicyOverlay('myuw')?.forbiddenAiObjects).toContain('degree audit detail');
     expect(getAiSitePolicyOverlay('myuw')?.exportOnlyFamilies).toContain('transcript summaries');

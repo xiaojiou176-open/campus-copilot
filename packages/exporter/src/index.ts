@@ -399,6 +399,8 @@ function normalizeAdministrativeSummaryRuleFamily(family: string) {
       return 'transcript_summary';
     case 'finaid':
       return 'financial_aid_summary';
+    case 'profile':
+      return 'profile_summary';
     case 'accounts':
     case 'tuition':
     case 'tuition_detail':
@@ -512,6 +514,14 @@ function inferRiskLabel(scope: ExportScopeMetadata, authorizationLevel: Authoriz
   return 'low';
 }
 
+function hasAdministrativeCarrierPlaceholders(
+  summaries: Array<{
+    id: string;
+  }>,
+) {
+  return summaries.some((summary) => summary.id.endsWith(':blocker'));
+}
+
 function inferMatchConfidence(input: {
   scope: ExportScopeMetadata;
   normalized: NormalizedExportInput;
@@ -580,7 +590,9 @@ function buildDefaultProvenance(input: {
     entries.push({
       sourceType: 'derived_read_model',
       label: 'Administrative summary-first substrate',
-      detail: 'High-sensitivity academic and administrative records stay review-first and export-first until a stronger lane is promoted.',
+      detail: hasAdministrativeCarrierPlaceholders(input.normalized.administrativeSummaries)
+        ? 'High-sensitivity academic and administrative records stay review-first and export-first. Some summary rows are blocker placeholders, so their presence does not mean a truthful runtime carrier is landed.'
+        : 'High-sensitivity academic and administrative records stay review-first and export-first until a stronger lane is promoted.',
       readOnly: true,
     });
   }
@@ -676,14 +688,12 @@ function resolvePackagingMetadata(input: {
   scope: ExportScopeMetadata;
 }): ExportPackagingMetadata {
   const requested = input.normalized.packaging;
-  const layer1Status =
-    requested?.authorizationLevel ??
-    resolveAuthorizationStatus({
-      normalized: input.normalized,
-      authorization: input.normalized.authorization,
-      layer: 'layer1_read_export',
-      scope: input.scope,
-    });
+  const layer1Status = resolveAuthorizationStatus({
+    normalized: input.normalized,
+    authorization: input.normalized.authorization,
+    layer: 'layer1_read_export',
+    scope: input.scope,
+  });
   const layer2Status = resolveAuthorizationStatus({
     normalized: input.normalized,
     authorization: input.normalized.authorization,
@@ -693,7 +703,7 @@ function resolvePackagingMetadata(input: {
 
   return {
     authorizationLevel: layer1Status,
-    aiAllowed: requested?.aiAllowed ?? layer2Status === 'allowed',
+    aiAllowed: layer1Status === 'allowed' && layer2Status === 'allowed',
     riskLabel: requested?.riskLabel ?? inferRiskLabel(input.scope, layer1Status, layer2Status),
     matchConfidence: requested?.matchConfidence ?? inferMatchConfidence(input),
     provenance: requested?.provenance ?? buildDefaultProvenance(input),
@@ -1339,10 +1349,15 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       endAt: '',
       score: '',
       maxScore: '',
-      importance: summary.importance,
-      dateKey: '',
-      reasons: summary.family,
-      blockedBy: summary.aiDefault === 'blocked' ? 'ai_blocked' : '',
+        importance: summary.importance,
+        dateKey: '',
+        reasons: summary.family,
+      blockedBy: [
+        summary.aiDefault === 'blocked' ? 'ai_blocked' : '',
+        summary.id.endsWith(':blocker') ? 'carrier_not_landed' : '',
+      ]
+        .filter(Boolean)
+        .join(' | '),
       outcome: '',
       changeCount: '',
       summary: summary.summary,

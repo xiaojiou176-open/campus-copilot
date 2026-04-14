@@ -135,11 +135,13 @@ const AI_SITE_POLICY_OVERLAYS: Record<AiPolicySite, AiSitePolicyOverlay> = {
   edstem: {
     site: 'edstem',
     siteLabel: 'EdStem',
-    allowedFamilies: ['threads', 'announcements', 'course links'],
-    exportOnlyFamilies: ['thread attachments'],
-    forbiddenAiObjects: ['private draft replies', 'raw attachment bodies', 'hidden thread content'],
-    carrierHonesty: 'Treat EdStem as a read-only classroom discussion carrier and avoid implying official LMS parity.',
-    operatorNote: 'EdStem answers should focus on structured discussion context and keep thread uncertainty visible.',
+    allowedFamilies: ['threads', 'announcements', 'course links', 'resource metadata', 'lesson summaries'],
+    exportOnlyFamilies: ['thread attachments', 'raw lesson bodies', 'raw resource files'],
+    forbiddenAiObjects: ['private draft replies', 'raw attachment bodies', 'hidden thread content', 'raw lesson bodies', 'raw resource files'],
+    carrierHonesty:
+      'Treat EdStem as a read-only classroom discussion and course-resource carrier; shared lesson/resource summaries are allowed, but this repo still does not claim official LMS parity or raw material ingestion.',
+    operatorNote:
+      'EdStem answers should focus on structured discussion context, resource metadata, and lesson-summary signals while keeping task-detail and grouped-material gaps explicit.',
   },
   myuw: {
     site: 'myuw',
@@ -149,11 +151,12 @@ const AI_SITE_POLICY_OVERLAYS: Record<AiPolicySite, AiSitePolicyOverlay> = {
       'degree-audit summaries',
       'transcript summaries',
       'financial aid summaries',
+      'profile summaries',
       'tuition and account summaries',
     ],
-    forbiddenAiObjects: ['degree audit detail', 'transcript detail', 'financial aid detail', 'tuition or account detail'],
+    forbiddenAiObjects: ['degree audit detail', 'transcript detail', 'financial aid detail', 'profile detail', 'emergency contact detail', 'tuition or account detail'],
     carrierHonesty:
-      'Treat MyUW as a read-only student status carrier; current notices can inform the desk, but DARS/transcript/finaid/tuition detail still need explicit future lanes and stronger human confirmation.',
+      'Treat MyUW as a read-only student status carrier; current notices can inform the desk, but DARS/transcript/finaid/profile/tuition detail still need explicit future lanes and stronger human confirmation.',
     operatorNote:
       'MyUW answers should separate current notices from high-sensitivity records and prefer export-first handoff when an administrative detail lane is not yet landed.',
   },
@@ -605,6 +608,14 @@ const TOOL_DEFINITIONS: ToolDefinition[] = [
   {
     name: 'export_current_view',
     description: 'Return an export artifact for the current structured workbench view.',
+  },
+  {
+    name: 'get_planning_substrates',
+    description: 'Return planning-only substrates and their current coverage posture from the shared workbench.',
+  },
+  {
+    name: 'get_opted_in_course_material_excerpt',
+    description: 'Return the one explicitly opted-in course-material excerpt, if the user enabled that narrow lane.',
   },
 ];
 

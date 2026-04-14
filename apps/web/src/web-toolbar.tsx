@@ -55,11 +55,11 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
   return (
     <section className="support-grid" aria-label="Workspace trust and diagnostics">
       <article className="support-card support-card--trust">
-        <p className="eyebrow">Trust center preview</p>
-        <h2>Trust summary</h2>
+        <p className="eyebrow">Review before AI</p>
+        <h2>What this workspace can prove</h2>
         <p className="support-copy">
-          Local-first evidence comes first. This preview tees up the same trust center you review again in
-          Auth &amp; Export Management before exporting or asking AI.
+          Start with the facts already on the desk. This summary shows what the current slice can really prove before
+          you export it or ask AI to explain it.
         </p>
         <div className="support-list support-list--compact" role="list" aria-label="Trust summary rules">
           <div className="support-rule" role="listitem">
@@ -112,14 +112,14 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
   return (
     <section className="hero hero--orientation">
       <div className="hero-copy">
-        <p className="eyebrow">Orientation header</p>
+        <p className="eyebrow">Start here</p>
         <h1>Student decision workspace</h1>
         <p className="lede">
           One local workspace where academic work and administrative signals stay grouped on the same decision desk.
         </p>
         <p className="hero-support">
-          Start with the decision lane first, then use the trust row, AI rail, and tool drawer to review the exact
-          slice you want to explain or export. Cited AI follows the workspace after the facts are already visible.
+          Start with the next-up work and weekly load first. Trust review, export, and cited AI stay close by, but they
+          follow the visible facts instead of replacing them.
         </p>
       </div>
       <div className="hero-card hero-card--orientation">
@@ -172,8 +172,8 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
               Filter / Export
             </p>
             <p className="toolbar-group-copy">
-              Filter and export only after the decision lane and trust desk have shown the current boundary,
-              envelope, and receipts for the slice you want to review.
+              Filter and export after the decision lane has shown the slice you want. Trust review stays nearby, but it
+              no longer has to take over the first screen.
             </p>
           </div>
           <div className="toolbar-row toolbar-row-fields">

@@ -13,10 +13,12 @@
 2. 第一屏只保留轻 companion 结构：
    - current context
    - local connection / trust cue
-   - `Light companion mode` CTA card
-3. `Ask AI` 保持 explanation layer，但在默认模式里提前到主区
-4. 完整 workbench 要移到 `Show detailed workspace` 折叠层之后
-5. AI 面板内 provider/model controls 下沉到 `Advanced runtime settings`
+   - next-action CTA
+3. 顶栏的连接与授权不要再做并列大 badge，改成一行 quiet context
+4. `Ask AI` 保持 explanation layer，但必须排在详细工作台之前
+5. `Ask AI` 的 supporting trust snapshot / policy drawer 也必须退到答案区之后
+6. 完整 workbench 要移到 `Show detailed workspace` 折叠层之后
+7. AI 面板内 provider/model controls 下沉到 `Advanced runtime settings`
 
 ## Copy Rules
 

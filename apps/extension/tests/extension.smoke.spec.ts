@@ -1,8 +1,11 @@
+import { mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
 const CONFIG_KEY = 'campusCopilotConfig';
 const SITE_STATE_KEY = '__campus_copilot_mock_site_states__';
 const DOWNLOAD_KEY = '__campus_copilot_last_download__';
+const SMOKE_CAPTURE_DIR = process.env.EXTENSION_SMOKE_CAPTURE_DIR;
 
 function resolveSmokeBaseUrl(baseURL?: string) {
   return baseURL ?? process.env.EXTENSION_SMOKE_BASE_URL ?? 'http://127.0.0.1:4174';
@@ -40,6 +43,20 @@ async function gotoSmokePage(
   }
 
   throw new Error(`smoke_page_unavailable:${url}:status_${lastStatus}`);
+}
+
+async function maybeCaptureSmokeScreenshot(page: Page, filename: string) {
+  if (!SMOKE_CAPTURE_DIR) {
+    return;
+  }
+
+  mkdirSync(SMOKE_CAPTURE_DIR, { recursive: true });
+  await page.screenshot({
+    path: join(SMOKE_CAPTURE_DIR, `${filename}.png`),
+    fullPage: true,
+    animations: 'disabled',
+    caret: 'hide',
+  });
 }
 
 async function installExtensionMocks(page: import('@playwright/test').Page) {
@@ -404,7 +421,12 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function expandDetailedWorkspace(page: Page, label: string) {
-  const trigger = page.getByText(label, { exact: true });
+  const details = page.locator('.surface__workspace-detail');
+  if ((await details.getAttribute('open')) !== null) {
+    return;
+  }
+
+  const trigger = details.locator('summary').filter({ hasText: label });
   if (await trigger.isVisible()) {
     await trigger.click();
   }
@@ -412,16 +434,16 @@ async function expandDetailedWorkspace(page: Page, label: string) {
 
 async function assertOptionsTrustCenter(page: Page) {
   await expect(page.getByRole('heading', { name: 'Connection and boundary summary' })).toBeVisible();
-  const authorizationPanel = page.locator('article.surface__panel').filter({
-    has: page.getByRole('heading', { name: 'Authorization center' }),
-  });
+  const authorizationHeading = page.getByRole('heading', { name: 'Trust center' }).last();
+  const authorizationPanel = authorizationHeading.locator('xpath=ancestor::article[1]');
   const configurationActionsHeading = page.getByRole('heading', { name: 'Configuration actions' });
-  await expect(authorizationPanel.getByText('Keep Layer 1 read/export separate from Layer 2 AI analysis')).toBeVisible();
+  await expect(authorizationPanel.getByText('Keep read/export separate from AI analysis')).toBeVisible();
+  await authorizationPanel.locator('summary').filter({ hasText: 'Open detailed site and rule controls' }).click();
   await authorizationPanel.locator('summary').filter({ hasText: 'Detailed authorization controls' }).click();
-  await expect(authorizationPanel.getByLabel('All sites · Layer 1 read/export')).toBeVisible();
-  await expect(authorizationPanel.getByLabel('All sites · Layer 2 AI read/analysis')).toBeVisible();
-  await expect(authorizationPanel.getByLabel('Canvas · Layer 1 read/export')).toBeVisible();
-  await expect(authorizationPanel.getByLabel('Canvas · Layer 2 AI read/analysis')).toBeVisible();
+  await expect(authorizationPanel.locator('label').filter({ hasText: 'All sites · Read & export' })).toBeVisible();
+  await expect(authorizationPanel.locator('label').filter({ hasText: 'All sites · AI analysis' })).toBeVisible();
+  await expect(authorizationPanel.getByText('Site AI policy overlays')).toBeVisible();
+  await expect(authorizationPanel.locator('summary').filter({ hasText: 'Course-level AI confirmations' })).toBeVisible();
   await expect(configurationActionsHeading).toBeVisible();
   const authorizationBox = await authorizationPanel.boundingBox();
   const configurationActionsBox = await configurationActionsHeading.boundingBox();
@@ -436,24 +458,64 @@ async function seedTechnicalConfig(
     bffBaseUrl?: string;
     edStemThreadsPath?: string;
     globalLayer2Status?: string;
+    canvasLayer2Status?: string;
+    allowAllLayer2ReadAnalysis?: boolean;
+    allowWorkspaceEnvelope?: boolean;
   },
 ) {
   await page.evaluate(
-    ({ configKey, bffBaseUrl, edStemThreadsPath, globalLayer2Status }) => {
+    ({
+      configKey,
+      bffBaseUrl,
+      edStemThreadsPath,
+      globalLayer2Status,
+      canvasLayer2Status,
+      allowAllLayer2ReadAnalysis,
+      allowWorkspaceEnvelope,
+    }) => {
       const storageKey = '__extension_storage__';
       const raw = window.localStorage.getItem(storageKey);
       const state = raw ? JSON.parse(raw) : {};
       const currentConfig = state[configKey] ?? {};
       const currentAuthorization = currentConfig.authorization ?? { policyVersion: 'wave1-skeleton', rules: [] };
-      const nextRules = (currentAuthorization.rules ?? []).filter(
+      let nextRules = (currentAuthorization.rules ?? []).filter(
         (rule: { id?: string; layer?: string; resourceFamily?: string; site?: string; courseIdOrKey?: string }) =>
           !(
             !rule.site &&
             !rule.courseIdOrKey &&
             rule.layer === 'layer2_ai_read_analysis' &&
             rule.resourceFamily === 'workspace_snapshot'
+          ) &&
+          !(
+            !rule.site &&
+            !rule.courseIdOrKey &&
+            rule.layer === 'layer1_read_export' &&
+            rule.resourceFamily === 'workspace_snapshot'
+          ) &&
+          !(
+            rule.site === 'canvas' &&
+            !rule.courseIdOrKey &&
+            rule.layer === 'layer1_read_export' &&
+            rule.resourceFamily === 'workspace_snapshot'
+          ) &&
+          !(
+            rule.site === 'canvas' &&
+            !rule.courseIdOrKey &&
+            rule.layer === 'layer2_ai_read_analysis' &&
+            rule.resourceFamily === 'workspace_snapshot'
           ),
       );
+
+      if (allowAllLayer2ReadAnalysis) {
+        nextRules = nextRules.map((rule: { layer?: string; status?: string }) =>
+          rule.layer === 'layer2_ai_read_analysis'
+            ? {
+                ...rule,
+                status: 'allowed',
+              }
+            : rule,
+        );
+      }
 
       if (globalLayer2Status) {
         nextRules.push({
@@ -463,6 +525,52 @@ async function seedTechnicalConfig(
           resourceFamily: 'workspace_snapshot',
           label: 'All sites AI read/analysis status',
         });
+      }
+
+      if (canvasLayer2Status) {
+        nextRules.push({
+          id: 'canvas-layer2_ai_read_analysis-workspace',
+          layer: 'layer2_ai_read_analysis',
+          status: canvasLayer2Status,
+          site: 'canvas',
+          resourceFamily: 'workspace_snapshot',
+          label: 'Canvas AI read/analysis status',
+        });
+      }
+
+      if (allowWorkspaceEnvelope) {
+        nextRules.push(
+          {
+            id: 'global-layer1_read_export-workspace',
+            layer: 'layer1_read_export',
+            status: 'allowed',
+            resourceFamily: 'workspace_snapshot',
+            label: 'All sites read/export status',
+          },
+          {
+            id: 'global-layer2_ai_read_analysis-workspace',
+            layer: 'layer2_ai_read_analysis',
+            status: 'allowed',
+            resourceFamily: 'workspace_snapshot',
+            label: 'All sites AI read/analysis status',
+          },
+          {
+            id: 'canvas-layer1_read_export-workspace',
+            layer: 'layer1_read_export',
+            status: 'allowed',
+            site: 'canvas',
+            resourceFamily: 'workspace_snapshot',
+            label: 'Canvas read/export status',
+          },
+          {
+            id: 'canvas-layer2_ai_read_analysis-workspace',
+            layer: 'layer2_ai_read_analysis',
+            status: 'allowed',
+            site: 'canvas',
+            resourceFamily: 'workspace_snapshot',
+            label: 'Canvas AI read/analysis status',
+          },
+        );
       }
 
       state[configKey] = {
@@ -491,6 +599,9 @@ async function seedTechnicalConfig(
       bffBaseUrl: input.bffBaseUrl,
       edStemThreadsPath: input.edStemThreadsPath,
       globalLayer2Status: input.globalLayer2Status,
+      canvasLayer2Status: input.canvasLayer2Status,
+      allowAllLayer2ReadAnalysis: input.allowAllLayer2ReadAnalysis,
+      allowWorkspaceEnvelope: input.allowWorkspaceEnvelope,
     },
   );
 }
@@ -520,9 +631,11 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByText('Stale sites')).toBeVisible();
   await expect(page.getByText('Not synced sites')).toBeVisible();
   await page.getByRole('button', { name: 'Export diagnostics JSON' }).click();
+  await page.waitForFunction((downloadKey) => Boolean(localStorage.getItem(downloadKey)), DOWNLOAD_KEY);
   const diagnosticsPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
   expect(diagnosticsPayload).toContain('campus-copilot-diagnostics.json');
   await expect(page.getByRole('heading', { name: 'Site Status' })).toBeVisible();
+  await maybeCaptureSmokeScreenshot(page, 'extension-sidepanel-overview');
   await expect(page.getByRole('button', { name: 'Sync Canvas' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sync Gradescope' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sync EdStem' })).toBeVisible();
@@ -533,13 +646,14 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
 test('saves settings/auth center changes, syncs edstem, and records export downloads', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
   await assertOptionsTrustCenter(page);
-  await page.getByLabel('All sites · Layer 2 AI read/analysis').selectOption('allowed');
+  await maybeCaptureSmokeScreenshot(page, 'extension-options-trust-center');
+  await page.getByLabel('All sites · AI analysis').selectOption('allowed');
   await page.getByRole('button', { name: 'Save configuration' }).click();
   await expect(page.getByText('Configuration saved.')).toBeVisible();
 
   await gotoSmokePage(page, baseURL, '/options.html');
   await assertOptionsTrustCenter(page);
-  await expect(page.getByLabel('All sites · Layer 2 AI read/analysis')).toHaveValue('allowed');
+  await expect(page.getByLabel('All sites · AI analysis')).toHaveValue('allowed');
 
   await seedTechnicalConfig(page, {
     bffBaseUrl: 'http://127.0.0.1:8787',
@@ -631,21 +745,23 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
     has: page.getByText('Review & export'),
   });
   await expect(exportReviewPanel.getByText('Trust review comes before the export action.')).toBeVisible();
-  await expect(exportReviewPanel.getByText('AI visibility', { exact: true })).toBeVisible();
-  await expect(exportReviewPanel.getByText(/AI analysis (allowed|blocked)/)).toBeVisible();
-  await expect(
-    exportReviewPanel.locator('p.surface__meta-label').filter({ hasText: /^Risk label$/ }),
-  ).toBeVisible();
-  await expect(exportReviewPanel.getByText(/(High|Medium|Low) risk/)).toBeVisible();
-  await expect(
-    exportReviewPanel.locator('p.surface__meta-label').filter({ hasText: /^Match confidence$/ }),
-  ).toBeVisible();
-  await expect(exportReviewPanel.getByText(/(High|Medium|Low) match confidence/)).toBeVisible();
-  await expect(
-    exportReviewPanel.locator('p.surface__meta-label').filter({ hasText: /^Provenance$/ }),
-  ).toBeVisible();
-  await expect(exportReviewPanel.getByText('Unified local read model')).toBeVisible();
-  await expect(exportReviewPanel.getByText('EdStem session-backed discussion carrier')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Export selection' })).toBeEnabled();
+  const aiVisibilityCard = exportReviewPanel.locator('article.surface__evidence-card').nth(2);
+  await expect(aiVisibilityCard.locator('p.surface__meta-label')).toContainText('AI visibility');
+  await expect(aiVisibilityCard.locator('p.surface__item-lead')).toContainText(/AI analysis (allowed|blocked)/);
+  const provenanceCard = exportReviewPanel.locator('article.surface__evidence-card').nth(3);
+  await expect(provenanceCard.locator('p.surface__meta-label')).toContainText('Provenance');
+  await expect(provenanceCard.locator('p.surface__item-lead')).toContainText('Unified local read model');
+  const packetEvidenceSummary = page.locator('summary').filter({ hasText: 'Open detailed packet evidence' }).first();
+  await expect(packetEvidenceSummary).toBeVisible();
+  await packetEvidenceSummary.click();
+  const packetEvidenceCards = exportReviewPanel.locator('details article.surface__evidence-card');
+  const riskCard = packetEvidenceCards.nth(1);
+  await expect(riskCard.locator('p.surface__meta-label')).toContainText('Risk label');
+  await expect(riskCard.locator('p.surface__item-lead')).toContainText(/(High|Medium|Low) risk/);
+  const matchConfidenceCard = packetEvidenceCards.nth(2);
+  await expect(matchConfidenceCard.locator('p.surface__meta-label')).toContainText('Match confidence');
+  await expect(matchConfidenceCard.locator('p.surface__item-lead')).toContainText(/(High|Medium|Low) match confidence/);
   await page.getByRole('button', { name: 'Export selection' }).click();
   const downloadPayload = JSON.parse(
     (await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY)) ?? '{}',
@@ -656,11 +772,12 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   expect(exportedText).not.toContain('Homework 5');
 });
 
-test('asks ai after provider config exists', async ({ page, baseURL }) => {
+test('keeps ai gated until the current scope is explicitly allowed', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
   await seedTechnicalConfig(page, {
     bffBaseUrl: 'http://127.0.0.1:8787',
     globalLayer2Status: 'allowed',
+    canvasLayer2Status: 'allowed',
   });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
@@ -683,6 +800,34 @@ test('asks ai after provider config exists', async ({ page, baseURL }) => {
   await expect(
     askAiPanel.locator('article.surface__status-card--success article.surface__evidence-card').nth(2).getByText('MARKDOWN', { exact: true }),
   ).toBeVisible();
+  const questionField = page.getByLabel('Question');
+  await expect(page.locator('.surface__workspace-detail summary').filter({ hasText: 'Review the current workspace slice first' })).toBeVisible();
+  await expandDetailedWorkspace(page, 'Show detailed workspace');
+  const canvasFilterChip = page.locator('.surface__toolbar').getByRole('button', { name: 'Canvas', exact: true });
+  await canvasFilterChip.click();
+  await expect(canvasFilterChip).toHaveClass(/surface__chip--active/);
+  await questionField.fill('What should I pay attention to right now?');
+  await page.getByRole('button', { name: 'Ask AI' }).click();
+
+  await expect(page.getByText('AI access for this scope still needs to be enabled in Settings/Auth.')).toBeVisible();
+  await expect(askAiPanel.getByRole('heading', { name: 'Current site policy overlay' })).toBeVisible();
+  await expect(askAiPanel.getByText('Canvas', { exact: true })).toBeVisible();
+});
+
+test('asks ai after the current workspace envelope is explicitly allowed', async ({ page, baseURL }) => {
+  await gotoSmokePage(page, baseURL, '/options.html');
+  await seedTechnicalConfig(page, {
+    bffBaseUrl: 'http://127.0.0.1:8787',
+    allowAllLayer2ReadAnalysis: true,
+    allowWorkspaceEnvelope: true,
+    globalLayer2Status: 'allowed',
+    canvasLayer2Status: 'allowed',
+  });
+
+  await gotoSmokePage(page, baseURL, '/sidepanel.html');
+  await expandDetailedWorkspace(page, 'Review the current workspace slice first');
+  const canvasFilterChip = page.locator('.surface__toolbar').getByRole('button', { name: 'Canvas', exact: true });
+  await canvasFilterChip.click();
   await page.getByLabel('Question').fill('What should I pay attention to right now?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
@@ -690,6 +835,7 @@ test('asks ai after provider config exists', async ({ page, baseURL }) => {
   await expect(page.getByRole('heading', { name: 'Key points' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Citations' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Homework 5' })).toBeVisible();
+  await maybeCaptureSmokeScreenshot(page, 'extension-sidepanel-ai-answer');
 });
 
 test('popup stays launcher-first and keeps extra export presets behind disclosure', async ({ page, baseURL }) => {
@@ -701,6 +847,7 @@ test('popup stays launcher-first and keeps extra export presets behind disclosur
   await expect(page.getByRole('button', { name: 'Current view' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Recent updates' })).toHaveCount(0);
   await expect(page.getByText('More export shortcuts')).toHaveCount(0);
+  await maybeCaptureSmokeScreenshot(page, 'extension-popup-launcher');
 });
 
 test('shows provider not ready when selected provider is unavailable in bff status', async ({ page, baseURL }) => {
@@ -728,8 +875,8 @@ test('shows provider not ready when selected provider is unavailable in bff stat
 test('switches to Chinese UI and shows partial-success plus site-filter behavior', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
   await page.getByLabel('Interface language').selectOption('zh-CN');
-  await page.locator('summary').filter({ hasText: '高级运行时设置' }).click();
-  await page.getByLabel('BFF 地址').fill('');
+  await page.locator('summary').filter({ hasText: '高级连接覆盖设置' }).click();
+  await page.getByLabel('本地 AI 服务地址').fill('');
   await page.getByRole('button', { name: '保存配置' }).click();
   await expect(page.getByText('配置已保存。')).toBeVisible();
   await gotoSmokePage(page, baseURL, '/sidepanel.html');

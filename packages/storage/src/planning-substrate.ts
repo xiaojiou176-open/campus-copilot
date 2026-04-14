@@ -33,6 +33,10 @@ export async function getPlanningSubstratesBySource(
   return db.planning_substrates.where('source').equals(source).toArray();
 }
 
+export async function getAllPlanningSubstrates(db: CampusCopilotDB = campusCopilotDb) {
+  return db.planning_substrates.toArray();
+}
+
 export async function getLatestPlanningSubstrateBySource(
   source: PlanningSubstrateSource,
   db: CampusCopilotDB = campusCopilotDb,

@@ -259,7 +259,7 @@ export const WorkbenchViewSchema = z
   .strict();
 export type WorkbenchView = z.infer<typeof WorkbenchViewSchema>;
 
-export const PlanningSubstrateSourceSchema = z.enum(['myplan']);
+export const PlanningSubstrateSourceSchema = z.enum(['myplan', 'time-schedule']);
 export type PlanningSubstrateSource = z.infer<typeof PlanningSubstrateSourceSchema>;
 
 export const PlanningSubstrateFitSchema = z.enum(['derived_planning_substrate']);
@@ -276,6 +276,16 @@ export const PlanningSubstrateTermSummarySchema = z
   })
   .strict();
 export type PlanningSubstrateTermSummary = z.infer<typeof PlanningSubstrateTermSummarySchema>;
+
+export const PlanningSubstrateBlockerSchema = z
+  .object({
+    id: z.string().min(1),
+    class: z.enum(['repo-owned blocker', 'GitHub-owned blocker', 'external-only blocker', 'owner-manual later']),
+    summary: z.string().min(1),
+    whyItStopsPromotion: z.string().min(1),
+  })
+  .strict();
+export type PlanningSubstrateBlocker = z.infer<typeof PlanningSubstrateBlockerSchema>;
 
 export const PlanningSubstrateOwnerSchema = z
   .object({
@@ -295,6 +305,11 @@ export const PlanningSubstrateOwnerSchema = z
     programExplorationCount: z.number().int().nonnegative(),
     degreeProgressSummary: z.string().min(1).optional(),
     transferPlanningSummary: z.string().min(1).optional(),
+    currentStage: z.string().min(1).optional(),
+    runtimePosture: z.string().min(1).optional(),
+    currentTruth: z.string().min(1).optional(),
+    exactBlockers: z.array(PlanningSubstrateBlockerSchema).default([]),
+    hardDeferredMoves: z.array(z.string().min(1)).default([]),
     terms: z.array(PlanningSubstrateTermSummarySchema),
   })
   .strict();
@@ -454,13 +469,14 @@ export const AdministrativeSummaryFamilySchema = z.enum([
   'transcript',
   'finaid',
   'accounts',
+  'profile',
 ]);
 export type AdministrativeSummaryFamily = z.infer<typeof AdministrativeSummaryFamilySchema>;
 
 export const AdministrativeAiDefaultSchema = z.enum(['blocked', 'confirm_required', 'allowed']);
 export type AdministrativeAiDefault = z.infer<typeof AdministrativeAiDefaultSchema>;
 
-export const AdminCarrierFamilySchema = z.enum(['transcript', 'finaid', 'accounts', 'tuition_detail']);
+export const AdminCarrierFamilySchema = z.enum(['transcript', 'finaid', 'accounts', 'tuition_detail', 'profile']);
 export type AdminCarrierFamily = z.infer<typeof AdminCarrierFamilySchema>;
 
 export const AdminCarrierRecordSchema = z

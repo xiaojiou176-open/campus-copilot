@@ -114,6 +114,65 @@ const CanvasRawFileSchema = z
   })
   .passthrough();
 
+const CanvasRawModuleItemContentDetailsSchema = z
+  .object({
+    url: z.string().nullable().optional(),
+    page_url: z.string().nullable().optional(),
+    media_entry_title: z.string().nullable().optional(),
+    file_name: z.string().nullable().optional(),
+    content_type: z.string().nullable().optional(),
+  })
+  .passthrough();
+
+const CanvasRawModuleItemSchema = z
+  .object({
+    id: z.union([z.number(), z.string()]),
+    type: z.string().nullable().optional(),
+    title: z.string().nullable().optional(),
+    html_url: z.string().nullable().optional(),
+    external_url: z.string().nullable().optional(),
+    page_url: z.string().nullable().optional(),
+    published: z.boolean().optional(),
+    content_id: z.union([z.number(), z.string()]).nullable().optional(),
+    content_details: CanvasRawModuleItemContentDetailsSchema.nullable().optional(),
+  })
+  .passthrough();
+
+const CanvasRawModuleSchema = z
+  .object({
+    id: z.union([z.number(), z.string()]),
+    name: z.string().nullable().optional(),
+    published: z.boolean().optional(),
+    items: z.array(CanvasRawModuleItemSchema).optional(),
+  })
+  .passthrough();
+
+const CanvasRawGroupSchema = z
+  .object({
+    id: z.union([z.number(), z.string()]),
+    name: z.string().nullable().optional(),
+    description: z.string().nullable().optional(),
+    members_count: z.union([z.number(), z.string()]).nullable().optional(),
+    join_level: z.string().nullable().optional(),
+    html_url: z.string().nullable().optional(),
+    group_category_id: z.union([z.number(), z.string()]).nullable().optional(),
+  })
+  .passthrough();
+
+const CanvasRawMediaObjectSchema = z
+  .object({
+    id: z.union([z.number(), z.string()]).nullable().optional(),
+    media_id: z.string().nullable().optional(),
+    title: z.string().nullable().optional(),
+    user_entered_title: z.string().nullable().optional(),
+    media_type: z.string().nullable().optional(),
+    html_url: z.string().nullable().optional(),
+    url: z.string().nullable().optional(),
+    created_at: z.string().nullable().optional(),
+    updated_at: z.string().nullable().optional(),
+  })
+  .passthrough();
+
 const CanvasRawAssignmentSubmissionSchema = z
   .object({
     workflow_state: z.string().optional(),
@@ -195,6 +254,7 @@ const CanvasRawConversationMessageSchema = z
   .passthrough();
 
 const CanvasRawConversationDetailSchema = CanvasRawConversationSchema.extend({
+  message_count: z.number().optional(),
   messages: z.array(CanvasRawConversationMessageSchema).optional(),
 }).passthrough();
 
@@ -219,6 +279,10 @@ const CanvasRawEventSchema = z
 
 type CanvasRawCourse = z.infer<typeof CanvasRawCourseSchema>;
 type CanvasRawFile = z.infer<typeof CanvasRawFileSchema>;
+type CanvasRawModule = z.infer<typeof CanvasRawModuleSchema>;
+type CanvasRawModuleItem = z.infer<typeof CanvasRawModuleItemSchema>;
+type CanvasRawGroup = z.infer<typeof CanvasRawGroupSchema>;
+type CanvasRawMediaObject = z.infer<typeof CanvasRawMediaObjectSchema>;
 type CanvasRawAssignment = z.infer<typeof CanvasRawAssignmentSchema>;
 type CanvasRawSubmission = z.infer<typeof CanvasRawSubmissionSchema>;
 type CanvasRawAnnouncement = z.infer<typeof CanvasRawAnnouncementSchema>;
@@ -313,6 +377,34 @@ export class CanvasApiClient {
   async getFiles(courseId: string): Promise<CanvasRawFile[]> {
     return z.array(CanvasRawFileSchema).parse(
       await this.fetchPaginatedArray(`/api/v1/courses/${courseId}/files?per_page=100`),
+    );
+  }
+
+  async getModules(courseId: string): Promise<CanvasRawModule[]> {
+    const params = new URLSearchParams();
+    params.append('include[]', 'items');
+    params.append('include[]', 'content_details');
+    params.set('per_page', '100');
+
+    return z.array(CanvasRawModuleSchema).parse(
+      await this.fetchPaginatedArray(`/api/v1/courses/${courseId}/modules?${params.toString()}`),
+    );
+  }
+
+  async getGroups(courseId: string): Promise<CanvasRawGroup[]> {
+    return z.array(CanvasRawGroupSchema).parse(
+      await this.fetchPaginatedArray(`/api/v1/courses/${courseId}/groups?per_page=100`),
+    );
+  }
+
+  async getMediaObjects(courseId: string): Promise<CanvasRawMediaObject[]> {
+    const params = new URLSearchParams();
+    params.append('exclude[]', 'sources');
+    params.append('exclude[]', 'tracks');
+    params.set('per_page', '100');
+
+    return z.array(CanvasRawMediaObjectSchema).parse(
+      await this.fetchPaginatedArray(`/api/v1/courses/${courseId}/media_objects?${params.toString()}`),
     );
   }
 
@@ -520,6 +612,177 @@ function buildCanvasResourceDetail(input: { label: string; extension?: string; s
   }
 
   return parts.join(' · ');
+}
+
+function looksLikeCanvasRecording(parts: Array<string | undefined>) {
+  return parts.some((value) => Boolean(value && /(recording|panopto|lecture capture|video|media)/i.test(value)));
+}
+
+function buildCanvasModuleItemDetail(rawModule: CanvasRawModule, rawItem: CanvasRawModuleItem) {
+  const type = rawItem.type?.trim();
+  const looksLikeRecording = looksLikeCanvasRecording([
+    rawItem.title ?? undefined,
+    rawItem.external_url ?? undefined,
+    rawItem.html_url ?? undefined,
+    rawItem.content_details?.media_entry_title ?? undefined,
+  ]);
+  const typeLabel = looksLikeRecording
+    ? 'Recording'
+    : type === 'Page'
+      ? 'Page'
+      : type === 'ExternalUrl'
+        ? 'External link'
+        : type === 'ExternalTool'
+          ? 'External tool'
+          : type || 'Item';
+
+  return [typeLabel, rawModule.name?.trim() || 'Canvas module'].join(' · ');
+}
+
+function normalizeCanvasModuleItemResource(
+  rawModule: CanvasRawModule,
+  rawItem: CanvasRawModuleItem,
+  courseId: string,
+): Resource | undefined {
+  if (rawModule.published === false || rawItem.published === false) {
+    return undefined;
+  }
+
+  const type = rawItem.type?.trim();
+  const url = toOptionalAbsoluteUrl(
+    rawItem.external_url ?? rawItem.html_url ?? rawItem.content_details?.url ?? undefined,
+  );
+  const title =
+    rawItem.title?.trim() ||
+    rawItem.content_details?.media_entry_title?.trim() ||
+    (rawModule.name?.trim() ? `${rawModule.name.trim()} item` : undefined) ||
+    `Canvas module item ${rawItem.id}`;
+  const looksLikeRecording = looksLikeCanvasRecording([
+    title,
+    url,
+    rawItem.content_details?.media_entry_title ?? undefined,
+  ]);
+
+  return ResourceSchema.parse({
+    id: `canvas:resource:module-item:${courseId}:${rawModule.id}:${rawItem.id}`,
+    kind: 'resource',
+    site: 'canvas',
+    source: {
+      site: 'canvas',
+      resourceId: `${courseId}:${rawModule.id}:${rawItem.id}`,
+      resourceType:
+        looksLikeRecording
+          ? 'recording'
+          : type === 'File'
+            ? 'file_reference'
+            : type === 'Assignment'
+              ? 'assignment_reference'
+          : type === 'Discussion'
+            ? 'discussion_reference'
+            : type === 'Quiz'
+              ? 'quiz_reference'
+              : type === 'SubHeader'
+                ? 'module_header'
+                : 'module_item',
+      url,
+    },
+    url,
+    courseId: `canvas:course:${courseId}`,
+    resourceKind: looksLikeRecording ? 'embed' : url ? 'link' : 'other',
+    title,
+    summary: rawModule.name?.trim() || undefined,
+    detail: buildCanvasModuleItemDetail(rawModule, rawItem),
+    fileExtension: extractFileExtension(rawItem.content_details?.file_name ?? undefined),
+  });
+}
+
+function buildCanvasGroupDetail(rawGroup: CanvasRawGroup) {
+  const parts = ['Canvas group'];
+  const members = toOptionalNonNegativeInt(rawGroup.members_count);
+  if (members != null) {
+    parts.push(`${members} members`);
+  }
+  if (rawGroup.join_level?.trim()) {
+    parts.push(rawGroup.join_level.trim());
+  }
+
+  return parts.join(' · ');
+}
+
+function normalizeCanvasGroupResource(rawGroup: CanvasRawGroup, courseId: string): Resource {
+  const title = rawGroup.name?.trim() || `Canvas group ${rawGroup.id}`;
+  const url = toOptionalAbsoluteUrl(rawGroup.html_url ?? undefined);
+
+  return ResourceSchema.parse({
+    id: `canvas:resource:group:${rawGroup.id}`,
+    kind: 'resource',
+    site: 'canvas',
+    source: {
+      site: 'canvas',
+      resourceId: String(rawGroup.id),
+      resourceType: 'group',
+      url,
+    },
+    url,
+    courseId: `canvas:course:${courseId}`,
+    resourceKind: url ? 'link' : 'other',
+    title,
+    summary: stripCanvasHtml(rawGroup.description ?? undefined),
+    detail: buildCanvasGroupDetail(rawGroup),
+  });
+}
+
+function buildCanvasMediaDetail(rawMedia: CanvasRawMediaObject) {
+  const parts = ['Canvas media'];
+  if (rawMedia.media_type?.trim()) {
+    parts.push(rawMedia.media_type.trim());
+  }
+  return parts.join(' · ');
+}
+
+function normalizeCanvasMediaResource(rawMedia: CanvasRawMediaObject, courseId: string): Resource | undefined {
+  const mediaId = rawMedia.id ?? rawMedia.media_id;
+  if (mediaId == null) {
+    return undefined;
+  }
+
+  const title =
+    rawMedia.user_entered_title?.trim() ||
+    rawMedia.title?.trim() ||
+    `Canvas recording ${mediaId}`;
+  const url = toOptionalAbsoluteUrl(rawMedia.html_url ?? rawMedia.url ?? undefined);
+
+  return ResourceSchema.parse({
+    id: `canvas:resource:media:${mediaId}`,
+    kind: 'resource',
+    site: 'canvas',
+    source: {
+      site: 'canvas',
+      resourceId: String(mediaId),
+      resourceType: 'media_object',
+      url,
+    },
+    url,
+    courseId: `canvas:course:${courseId}`,
+    resourceKind: 'embed',
+    title,
+    detail: buildCanvasMediaDetail(rawMedia),
+    releasedAt: rawMedia.updated_at ?? rawMedia.created_at ?? undefined,
+  });
+}
+
+function dedupeCanvasResources(resources: Resource[]) {
+  const deduped = new Map<string, Resource>();
+  for (const resource of resources) {
+    if (!deduped.has(resource.id)) {
+      deduped.set(resource.id, resource);
+    }
+  }
+  return Array.from(deduped.values());
+}
+
+function isOptionalCanvasFamilyGap(error: unknown) {
+  return error instanceof CanvasApiError && error.code === 'unsupported_context';
 }
 
 function buildSyllabusSummary(rawCourse: CanvasRawCourse) {
@@ -757,6 +1020,22 @@ function buildCanvasMessageAttachmentHint(
   return `Includes ${attachmentCount} attachments`;
 }
 
+function buildCanvasThreadHint(rawConversationDetail: CanvasRawConversationDetail | undefined): string | undefined {
+  const explicitCount = rawConversationDetail?.message_count;
+  const derivedCount = rawConversationDetail?.messages?.length;
+  const count = explicitCount ?? derivedCount;
+
+  if (!count || count <= 1) {
+    return undefined;
+  }
+
+  if (count === 2) {
+    return '2-message thread';
+  }
+
+  return `${count}-message thread`;
+}
+
 function buildCanvasMessageSummary(
   rawConversation: CanvasRawConversation,
   rawConversationDetail?: CanvasRawConversationDetail,
@@ -764,13 +1043,15 @@ function buildCanvasMessageSummary(
   const latestMessage = extractLatestCanvasConversationMessage(rawConversationDetail);
   const detailBody = stripCanvasHtml(latestMessage?.body ?? undefined);
   const attachmentHint = buildCanvasMessageAttachmentHint(latestMessage?.attachments);
+  const threadHint = buildCanvasThreadHint(rawConversationDetail);
   const fallbackSummary = rawConversation.last_message?.trim() || undefined;
+  const detailSummary = [detailBody, attachmentHint, threadHint].filter(Boolean).join(' · ');
 
-  if (detailBody && attachmentHint) {
-    return `${detailBody} · ${attachmentHint}`;
+  if (detailSummary) {
+    return detailSummary;
   }
 
-  return detailBody ?? attachmentHint ?? fallbackSummary;
+  return fallbackSummary;
 }
 
 function normalizeMessage(
@@ -929,7 +1210,47 @@ class CanvasResourcesApiCollector implements ResourceCollector<Resource> {
         collected.push(...rawFiles.map((rawFile) => normalizeFileResource(rawFile, courseId)));
       } catch (error) {
         const reason = error instanceof Error ? error.message : 'resource_collector_failed';
-        failures.push(`course_${courseId}:${reason}`);
+        failures.push(`course_${courseId}:files:${reason}`);
+      }
+
+      try {
+        const rawModules = await this.client.getModules(courseId);
+        for (const rawModule of rawModules) {
+          collected.push(
+            ...((rawModule.items ?? [])
+              .map((rawItem) => normalizeCanvasModuleItemResource(rawModule, rawItem, courseId))
+              .filter((resource): resource is Resource => Boolean(resource))),
+          );
+        }
+      } catch (error) {
+        if (!isOptionalCanvasFamilyGap(error)) {
+          const reason = error instanceof Error ? error.message : 'module_collector_failed';
+          failures.push(`course_${courseId}:modules:${reason}`);
+        }
+      }
+
+      try {
+        const rawGroups = await this.client.getGroups(courseId);
+        collected.push(...rawGroups.map((rawGroup) => normalizeCanvasGroupResource(rawGroup, courseId)));
+      } catch (error) {
+        if (!isOptionalCanvasFamilyGap(error)) {
+          const reason = error instanceof Error ? error.message : 'group_collector_failed';
+          failures.push(`course_${courseId}:groups:${reason}`);
+        }
+      }
+
+      try {
+        const rawMediaObjects = await this.client.getMediaObjects(courseId);
+        collected.push(
+          ...rawMediaObjects
+            .map((rawMedia) => normalizeCanvasMediaResource(rawMedia, courseId))
+            .filter((resource): resource is Resource => Boolean(resource)),
+        );
+      } catch (error) {
+        if (!isOptionalCanvasFamilyGap(error)) {
+          const reason = error instanceof Error ? error.message : 'media_collector_failed';
+          failures.push(`course_${courseId}:media:${reason}`);
+        }
       }
     }
 
@@ -938,10 +1259,10 @@ class CanvasResourcesApiCollector implements ResourceCollector<Resource> {
     }
 
     if (failures.length > 0) {
-      throw new PartialCanvasResourcesError(collected, failures.join(' | '));
+      throw new PartialCanvasResourcesError(dedupeCanvasResources(collected), failures.join(' | '));
     }
 
-    return z.array(ResourceSchema).parse(collected);
+    return z.array(ResourceSchema).parse(dedupeCanvasResources(collected));
   }
 }
 

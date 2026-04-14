@@ -68,30 +68,24 @@ Neither should replace the student-first story on the front door.
 
 ## Pick The Right Entry Surface
 
-If you already know why the product exists and just need the fastest truthful
-entry point, use this table instead of guessing:
+If you only need the fastest truthful route, start here:
 
-| If you are | Start here | Current state | Quick proof |
-| :-- | :-- | :-- | :-- |
-| a GitHub visitor or reviewer | [`DISTRIBUTION.md`](DISTRIBUTION.md) and [`docs/storefront-assets.md`](docs/storefront-assets.md) | public front door is live | GitHub Pages returns `HTTP 200` |
-| a student trying the product locally | [Quickstart](#quickstart) and [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) | build-ready local-first product | `pnpm verify` |
-| a Codex / Claude MCP consumer | [`packages/mcp-server/README.md`](packages/mcp-server/README.md) and [`examples/integrations/README.md`](examples/integrations/README.md) | `public-ready (repo-local)` | `pnpm proof:public` |
-| a team that wants one containerized local HTTP surface | [`DISTRIBUTION.md`](DISTRIBUTION.md), [`docs/container-publication-prep.md`](docs/container-publication-prep.md), and [`packages/mcp-server/README.md`](packages/mcp-server/README.md) | `container-ready (repo-local)` | `docker build -t campus-copilot-api:local .` and `pnpm smoke:docker:api` |
-| a skill consumer who wants machine-readable bundle truth | [`skills/catalog.json`](skills/catalog.json), [`skills/README.md`](skills/README.md), and [`skills/clawhub-submission.packet.json`](skills/clawhub-submission.packet.json) | `public-ready (repo-local)` with generic upstream packet ready | `pnpm check:skill-catalog` |
-| a package or registry reviewer | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) and [`docs/16-distribution-preflight-packets.md`](docs/16-distribution-preflight-packets.md) | repo-side packets are ready, official listing is still later | `pnpm proof:public` |
-
-## Fastest Launch Paths
-
-If you already know what kind of user you are, use this shorter router instead of reading every package description first:
-
-| I am trying to... | Start here | Current truthful state |
+| If you are | Start here | Why this is the right first stop |
 | :-- | :-- | :-- |
-| understand the product in one screen | this README + [`docs/assets/hero-workbench-overview.svg`](docs/assets/hero-workbench-overview.svg) | public front door, GitHub-first |
-| run the student-facing local workbench | [Quickstart](#quickstart) | ready now |
-| connect one generic stdio MCP server | [`packages/mcp-server/README.md`](packages/mcp-server/README.md) | public-ready (repo-local) |
-| run a local Docker path with health checks | [`DISTRIBUTION.md`](DISTRIBUTION.md) | container-ready (repo-local) for the thin local BFF |
-| load the unpacked browser extension | [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) | build-ready, owner-side store submission later |
-| inspect the public read-only skill pack | [`skills/README.md`](skills/README.md), [`skills/catalog.json`](skills/catalog.json), and [`skills/clawhub-submission.packet.json`](skills/clawhub-submission.packet.json) | public-ready (repo-local), generic upstream packet ready, not officially listed |
+| a student trying the product locally | [Quickstart](#quickstart) | It gets you into the real workbench first instead of sending you through maintainer paperwork. |
+| a reviewer checking whether the product is real | [`docs/storefront-assets.md`](docs/storefront-assets.md) and [`docs/verification-matrix.md`](docs/verification-matrix.md) | Start with workbench proof, then check what the repo can and cannot prove. |
+| a builder who needs the read-only MCP or local HTTP surface | [`packages/mcp-server/README.md`](packages/mcp-server/README.md), [`INTEGRATIONS.md`](INTEGRATIONS.md), and [`DISTRIBUTION.md`](DISTRIBUTION.md) | Builder surfaces are real, but they come after the student-facing story. |
+| an owner preparing store or registry publication | [`DISTRIBUTION.md`](DISTRIBUTION.md) and [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) | Publication is a later owner-side lane, not the default front door. |
+
+## After The Student Loop
+
+Once the student-facing story is clear, these are the next truthful lanes:
+
+- **Repo-local proof**: [`docs/storefront-assets.md`](docs/storefront-assets.md), [`docs/verification-matrix.md`](docs/verification-matrix.md)
+- **Builder surfaces**: [`packages/mcp-server/README.md`](packages/mcp-server/README.md), [`INTEGRATIONS.md`](INTEGRATIONS.md), [`examples/README.md`](examples/README.md)
+- **run a local Docker path with health checks**: [`DISTRIBUTION.md`](DISTRIBUTION.md) and [`docs/container-publication-prep.md`](docs/container-publication-prep.md)
+- **Distribution packets**: [`DISTRIBUTION.md`](DISTRIBUTION.md), [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md)
+- **Store last mile**: [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md)
 
 ## Current Product Shape
 

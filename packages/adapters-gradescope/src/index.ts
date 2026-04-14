@@ -214,6 +214,7 @@ type GradescopeDerivedCourseHint = {
 type GradescopeSubmissionQuestion = {
   label: string;
   title?: string;
+  modality?: 'autograder' | 'manual';
   score?: number;
   maxScore?: number;
   rubricLabels?: string[];
@@ -224,12 +225,14 @@ type GradescopeSubmissionQuestion = {
 type GradescopeSubmissionDetail = {
   courseId: string;
   assignmentId: string;
-  submissionId: string;
   url: string;
   title: string;
+  submissionId?: string;
+  status: AssignmentStatus;
   score?: number;
   maxScore?: number;
   questions: GradescopeSubmissionQuestion[];
+  actionHints?: string[];
 };
 
 const MAX_SUBMISSION_DETAIL_FETCHES = 10;
@@ -263,20 +266,23 @@ function normalizeLooseDateTime(value: string | undefined) {
   return z.string().datetime().safeParse(normalized).success ? normalized : undefined;
 }
 
-function parseGradescopeSubmissionLinks(pageHtml: string | undefined) {
+function parseGradescopeAssignmentDetailLinks(pageHtml: string | undefined) {
   if (!pageHtml) {
     return [];
   }
 
   return Array.from(
     pageHtml.matchAll(
-      /\/courses\/(?<courseId>\d+)\/assignments\/(?<assignmentId>\d+)\/submissions\/(?<submissionId>\d+)/g,
+      /\/courses\/(?<courseId>\d+)\/assignments\/(?<assignmentId>\d+)(?:\/submissions\/(?<submissionId>\d+|new))?/g,
     ),
   ).map((match) => ({
     courseId: match.groups?.courseId ?? '',
     assignmentId: match.groups?.assignmentId ?? '',
-    submissionId: match.groups?.submissionId ?? '',
-    path: `/courses/${match.groups?.courseId}/assignments/${match.groups?.assignmentId}/submissions/${match.groups?.submissionId}`,
+    submissionId: match.groups?.submissionId ?? undefined,
+    path:
+      match.groups?.submissionId
+        ? `/courses/${match.groups?.courseId}/assignments/${match.groups?.assignmentId}/submissions/${match.groups?.submissionId}`
+        : `/courses/${match.groups?.courseId}/assignments/${match.groups?.assignmentId}`,
   }));
 }
 
@@ -287,20 +293,20 @@ async function enrichAssignmentsWithSubmissionDetails(input: {
   currentUrl: string;
 }) {
   const detailByAssignmentId = new Map<string, GradescopeSubmissionDetail>();
-  const currentDetail = parseGradescopeSubmissionDetail(input.currentPageHtml, input.currentUrl);
+  const currentDetail = parseGradescopeAssignmentPageDetail(input.currentPageHtml, input.currentUrl);
   if (currentDetail) {
     detailByAssignmentId.set(currentDetail.assignmentId, currentDetail);
   }
 
   const isCourseScopedContext =
-    /\/courses\/\d+(?:\/assignments\/\d+\/submissions\/\d+)?$/.test(input.currentUrl) ||
+    /\/courses\/\d+(?:\/assignments\/\d+(?:\/submissions\/(?:\d+|new))?)?$/.test(input.currentUrl) ||
     /\/courses\/\d+/.test(input.currentUrl);
   if (input.client && isCourseScopedContext) {
     const assignmentIdsToEnrich = new Set(
       input.assignments.map((assignment) => assignment.id.replace(/^gradescope:assignment:/, '')),
     );
     const seenSubmissionAssignmentIds = new Set<string>();
-    const submissionLinks = parseGradescopeSubmissionLinks(input.currentPageHtml)
+    const submissionLinks = parseGradescopeAssignmentDetailLinks(input.currentPageHtml)
       .filter((link) => {
         if (!link.assignmentId) {
           return false;
@@ -321,7 +327,7 @@ async function enrichAssignmentsWithSubmissionDetails(input: {
     for (const link of submissionLinks) {
       try {
         const submissionHtml = await input.client.fetchHtml(link.path);
-        const detail = parseGradescopeSubmissionDetail(submissionHtml, `https://www.gradescope.com${link.path}`);
+        const detail = parseGradescopeAssignmentPageDetail(submissionHtml, `https://www.gradescope.com${link.path}`);
         if (detail) {
           detailByAssignmentId.set(detail.assignmentId, detail);
         }
@@ -590,8 +596,12 @@ function truncateGradescopeDetailText(value: string, maxLength = 48) {
   return value.length > maxLength ? `${value.slice(0, maxLength - 1).trimEnd()}…` : value;
 }
 
+function isAutograderQuestion(question: Pick<GradescopeSubmissionQuestion, 'label' | 'title'>) {
+  return /autograder/i.test(`${question.title ?? ''} ${question.label}`);
+}
+
 function normalizeQuestionLabel(question: GradescopeSubmissionQuestion) {
-  return question.label;
+  return isAutograderQuestion(question) ? 'Autograder result' : question.label;
 }
 
 function buildGradescopeRubricLabelSummary(labels: string[] | undefined) {
@@ -614,12 +624,37 @@ function buildGradescopeRubricLabelSummary(labels: string[] | undefined) {
   return preview.join(', ');
 }
 
+function formatGradescopeQuestionScore(question: Pick<GradescopeSubmissionQuestion, 'score' | 'maxScore'>) {
+  if (question.score !== undefined && question.maxScore !== undefined) {
+    return `${question.score} / ${question.maxScore}`;
+  }
+
+  if (question.score !== undefined) {
+    return `${question.score}`;
+  }
+
+  if (question.maxScore !== undefined) {
+    return `${question.maxScore} pts`;
+  }
+
+  return undefined;
+}
+
 function buildGradescopeAnnotationSummaryCount(count: number | undefined) {
   if (!count || count <= 0) {
     return undefined;
   }
 
   return `[${count} annotation${count === 1 ? '' : 's'}]`;
+}
+
+function buildGradescopeEvaluationSummaryCount(comments: string[] | undefined) {
+  const count = (comments ?? []).length;
+  if (count <= 0) {
+    return undefined;
+  }
+
+  return `[${count} comment${count === 1 ? '' : 's'}]`;
 }
 
 function formatGradescopeAnnotationPages(pageNumbers: number[]) {
@@ -656,13 +691,11 @@ function buildGradescopeQuestionBreakdownSummary(detail: GradescopeSubmissionDet
   const questionParts = detail.questions
     .map((question) => {
       const label = normalizeQuestionLabel(question);
-      const scoreText =
-        question.score !== undefined || question.maxScore !== undefined
-          ? `${question.score ?? '-'} / ${question.maxScore ?? '-'}`
-          : undefined;
+      const scoreText = formatGradescopeQuestionScore(question);
       const rubricText = buildGradescopeRubricLabelSummary(question.rubricLabels);
       const annotationText = buildGradescopeAnnotationSummaryCount(question.annotationCount);
-      return [label, scoreText, rubricText ? `(${rubricText})` : undefined, annotationText].filter(Boolean).join(' ');
+      const evaluationText = buildGradescopeEvaluationSummaryCount(question.evaluationComments);
+      return [label, scoreText, rubricText ? `(${rubricText})` : undefined, evaluationText, annotationText].filter(Boolean).join(' ');
     })
     .filter(Boolean);
 
@@ -683,10 +716,7 @@ function buildGradescopeQuestionBreakdownDetail(detail: GradescopeSubmissionDeta
   const questionParts = detail.questions
     .map((question) => {
       const label = normalizeQuestionLabel(question);
-      const scoreText =
-        question.score !== undefined || question.maxScore !== undefined
-          ? `${question.score ?? '-'} / ${question.maxScore ?? '-'}`
-          : undefined;
+      const scoreText = formatGradescopeQuestionScore(question);
       const rubricLabels = Array.from(
         new Set(
           (question.rubricLabels ?? [])
@@ -707,17 +737,99 @@ function buildGradescopeQuestionBreakdownDetail(detail: GradescopeSubmissionDeta
     })
     .filter(Boolean);
 
-  return questionParts.length > 0 ? questionParts.join('; ') : undefined;
+  const baseDetail = questionParts.length > 0 ? questionParts.join('; ') : undefined;
+  const actionText = detail.actionHints && detail.actionHints.length > 0 ? `Actions: ${detail.actionHints.join(' | ')}` : undefined;
+  return [baseDetail, actionText].filter(Boolean).join('; ') || undefined;
 }
 
-function parseGradescopeSubmissionDetail(pageHtml: string | undefined, pageUrl: string) {
+function parseGradescopeSubmissionActions(pageHtml: string | undefined) {
+  if (!pageHtml) {
+    return [];
+  }
+
+  const actionHints: string[] = [];
+  const gradedCopyHref = pageHtml.match(/href="(?<href>\/courses\/\d+\/assignments\/\d+\/submissions\/\d+\.pdf)"/i)?.groups?.href;
+  if (gradedCopyHref) {
+    actionHints.push('Download graded copy');
+  }
+
+  if (/>\s*Submission History\s*</i.test(pageHtml)) {
+    actionHints.push('Submission history');
+  }
+
+  const regradeLabel = pageHtml.match(/aria-label="(?<label>\s*Request Regrade[^"]*)"/i)?.groups?.label?.trim();
+  if (regradeLabel) {
+    const normalized = regradeLabel.replace(/^Request Regrade\.?\s*/i, '').trim();
+    actionHints.push(normalized ? `Request regrade (${normalized})` : 'Request regrade');
+  } else if (/>\s*Request Regrade\s*</i.test(pageHtml)) {
+    const disabled = /Request Regrade[\s\S]*?aria-disabled="true"/i.test(pageHtml);
+    actionHints.push(disabled ? 'Request regrade (disabled)' : 'Request regrade');
+  }
+
+  return Array.from(new Set(actionHints));
+}
+
+function parseGradescopeTotalPoints(totalPointsText: string | undefined) {
+  const pair = parseScorePair(totalPointsText);
+  if (pair.score !== undefined || pair.maxScore !== undefined) {
+    return pair;
+  }
+
+  const maxOnly = totalPointsText?.match(/(?<max>\d+(?:\.\d+)?)\s*pts/i)?.groups?.max;
+  return {
+    score: undefined,
+    maxScore: maxOnly ? Number(maxOnly) : undefined,
+  };
+}
+
+function parseGradescopeQuestionSections(pageHtml: string) {
+  return Array.from(
+    pageHtml.matchAll(/<li class="submissionOutline--section">[\s\S]*?<\/li>/gi),
+  ).flatMap((sectionMatch): GradescopeSubmissionQuestion[] => {
+    const sectionHtml = sectionMatch[0];
+    const index = sectionHtml.match(/<h2 class="submissionOutline--sectionHeading">Question (?<index>[\d.]+)<\/h2>/i)?.groups?.index;
+    if (!index) {
+      return [];
+    }
+
+    const title = stripHtml(
+      sectionHtml.match(/<h3[^>]*class="submissionOutlineQuestion--titleContainer"[^>]*>(?<title>[\s\S]*?)<\/h3>/i)?.groups
+        ?.title ??
+        sectionHtml.match(/<a[^>]*class="submissionOutlineQuestion--title[^"]*"[^>]*>(?<title>[\s\S]*?)<\/a>/i)?.groups
+          ?.title ??
+        sectionHtml.match(/<h3[^>]*class="submissionOutlineQuestion--title[^"]*"[^>]*>(?<title>[\s\S]*?)<\/h3>/i)?.groups
+          ?.title,
+    );
+    const scoreMatch = sectionHtml.match(
+      /<span class="submissionOutlineQuestion--score">(?<score>[^<]+)<\/span>\s*\/\s*(?<max>\d+(?:\.\d+)?)\s*pts/i,
+    );
+    const maxOnly =
+      sectionHtml.match(/<span[^>]*class="questionHeading--points"[^>]*>(?<points>\d+(?:\.\d+)?)\s*Points<\/span>/i)?.groups
+        ?.points ??
+      sectionHtml.match(/<span[^>]*aria-hidden="true">(?<points>\d+(?:\.\d+)?)\s*pts<\/span>/i)?.groups?.points;
+
+      return [
+        {
+          label: title ? `Q${index} ${title}` : `Q${index}`,
+          title,
+          modality: /autograder/i.test(title ?? '') ? 'autograder' : 'manual',
+          score: toOptionalNumber(scoreMatch?.groups?.score),
+          maxScore: toOptionalNumber(scoreMatch?.groups?.max ?? maxOnly),
+        } satisfies GradescopeSubmissionQuestion,
+    ];
+  });
+}
+
+function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageUrl: string) {
   const match = pageUrl.match(
-    /\/courses\/(?<courseId>\d+)\/assignments\/(?<assignmentId>\d+)\/submissions\/(?<submissionId>\d+)/,
+    /\/courses\/(?<courseId>\d+)\/assignments\/(?<assignmentId>\d+)(?:\/submissions\/(?<submissionId>\d+|new))?/,
   );
-  if (!pageHtml || !match?.groups?.courseId || !match.groups.assignmentId || !match.groups.submissionId) {
+  if (!pageHtml || !match?.groups?.courseId || !match.groups.assignmentId) {
     return undefined;
   }
 
+  const submissionId = match.groups.submissionId;
+  const isComposerPage = !submissionId || submissionId === 'new';
   const viewerProps = extractGradescopeSubmissionViewerProps(pageHtml);
   const title = decodeHtmlText(
     pageHtml.match(/submissionOutlineHeader--assignmentTitle">(?<title>[\s\S]*?)<\/h1>/)?.groups?.title,
@@ -802,6 +914,7 @@ function parseGradescopeSubmissionDetail(pageHtml: string | undefined, pageUrl: 
           {
             label,
             title: questionTitle,
+            modality: isAutograderQuestion({ label, title: questionTitle }) ? 'autograder' : 'manual',
             score: toOptionalNumber(questionSubmission?.score),
             maxScore: toOptionalNumber(question.weight),
             rubricLabels: rubricLabelsByQuestionId.get(String(question.id)),
@@ -827,40 +940,20 @@ function parseGradescopeSubmissionDetail(pageHtml: string | undefined, pageUrl: 
       return {
         courseId: match.groups.courseId,
         assignmentId: match.groups.assignmentId,
-        submissionId: match.groups.submissionId,
+        submissionId: isComposerPage ? undefined : submissionId,
         url: `https://www.gradescope.com${match[0]}`,
         title: decodeHtmlText(viewerProps.assignment.title) ?? title ?? `Gradescope assignment ${match.groups.assignmentId}`,
+        status: isComposerPage ? 'todo' : 'graded',
         score: total.score,
         maxScore: total.maxScore,
         questions,
+        actionHints: parseGradescopeSubmissionActions(pageHtml),
       } satisfies GradescopeSubmissionDetail;
     }
   }
 
-  const questions = Array.from(
-    pageHtml.matchAll(
-      /<li class="submissionOutline--section">[\s\S]*?<h2 class="submissionOutline--sectionHeading">Question (?<index>[\d.]+)<\/h2>[\s\S]*?(?:<h3[^>]*class="submissionOutlineQuestion--title"[^>]*>(?<titleH3>[\s\S]*?)<\/h3>|<a[^>]*class="submissionOutlineQuestion--title[^"]*"[^>]*>(?<titleA>[\s\S]*?)<\/a>)[\s\S]*?<span class="submissionOutlineQuestion--score">(?<score>[^<]+)<\/span>\s*\/\s*(?<max>\d+(?:\.\d+)?)\s*pts/gi,
-    ),
-  )
-    .flatMap((questionMatch): GradescopeSubmissionQuestion[] => {
-      const index = questionMatch.groups?.index;
-      if (!index) {
-        return [];
-      }
-
-      return [
-        {
-          label: stripHtml(questionMatch.groups?.titleA ?? questionMatch.groups?.titleH3)
-            ? `Q${index} ${stripHtml(questionMatch.groups?.titleA ?? questionMatch.groups?.titleH3)}`
-            : `Q${index}`,
-          title: stripHtml(questionMatch.groups?.titleA ?? questionMatch.groups?.titleH3),
-          score: toOptionalNumber(questionMatch.groups?.score),
-          maxScore: toOptionalNumber(questionMatch.groups?.max),
-        } satisfies GradescopeSubmissionQuestion,
-      ];
-    });
-
-  const total = parseScorePair(totalPointsText);
+  const questions = parseGradescopeQuestionSections(pageHtml);
+  const total = parseGradescopeTotalPoints(totalPointsText);
   if (!title && questions.length === 0 && total.score === undefined && total.maxScore === undefined) {
     return undefined;
   }
@@ -868,12 +961,14 @@ function parseGradescopeSubmissionDetail(pageHtml: string | undefined, pageUrl: 
   return {
     courseId: match.groups.courseId,
     assignmentId: match.groups.assignmentId,
-    submissionId: match.groups.submissionId,
+    submissionId: isComposerPage ? undefined : submissionId,
     url: `https://www.gradescope.com${match[0]}`,
     title: title ?? `Gradescope assignment ${match.groups.assignmentId}`,
+    status: isComposerPage ? 'todo' : 'graded',
     score: total.score,
     maxScore: total.maxScore,
     questions,
+    actionHints: parseGradescopeSubmissionActions(pageHtml),
   } satisfies GradescopeSubmissionDetail;
 }
 
@@ -882,7 +977,9 @@ function enrichAssignmentWithSubmissionDetail(assignment: Assignment, detail: Gr
   const fullDetail = buildGradescopeQuestionBreakdownDetail(detail);
   const baseSummary =
     assignment.summary ??
-    `Graded ${assignment.score ?? detail.score ?? '-'} / ${assignment.maxScore ?? detail.maxScore ?? '-'}`;
+    (detail.status === 'graded'
+      ? `Graded ${assignment.score ?? detail.score ?? '-'} / ${assignment.maxScore ?? detail.maxScore ?? '-'}`
+      : 'No submission');
 
   return AssignmentSchema.parse({
     ...assignment,
@@ -894,16 +991,21 @@ function enrichAssignmentWithSubmissionDetail(assignment: Assignment, detail: Gr
     title: assignment.title || detail.title,
     summary: detailSummary ? `${baseSummary} · ${detailSummary}` : baseSummary,
     detail: assignment.detail ?? fullDetail,
-    score: assignment.score ?? detail.score,
+    score: detail.status === 'graded' ? assignment.score ?? detail.score : assignment.score,
     maxScore: assignment.maxScore ?? detail.maxScore,
-    status: 'graded',
+    status: detail.status === 'graded' ? 'graded' : assignment.status,
   });
 }
 
 function buildAssignmentFromSubmissionDetail(detail: GradescopeSubmissionDetail) {
   const detailSummary = buildGradescopeQuestionBreakdownSummary(detail);
   const fullDetail = buildGradescopeQuestionBreakdownDetail(detail);
-  const baseSummary = `Graded ${detail.score ?? '-'} / ${detail.maxScore ?? '-'}`;
+  const baseSummary =
+    detail.status === 'graded'
+      ? `Graded ${detail.score ?? '-'} / ${detail.maxScore ?? '-'}`
+      : detail.maxScore !== undefined
+        ? `No submission · ${detail.maxScore} pts total`
+        : 'No submission';
 
   return AssignmentSchema.parse({
     id: `gradescope:assignment:${detail.assignmentId}`,
@@ -920,13 +1022,13 @@ function buildAssignmentFromSubmissionDetail(detail: GradescopeSubmissionDetail)
     title: detail.title,
     summary: detailSummary ? `${baseSummary} · ${detailSummary}` : baseSummary,
     detail: fullDetail,
-    status: 'graded',
-    score: detail.score,
+    status: detail.status,
+    score: detail.status === 'graded' ? detail.score : undefined,
     maxScore: detail.maxScore,
   });
 }
 
-function buildGradeFromSubmissionDetail(detail: GradescopeSubmissionDetail) {
+function buildGradeFromSubmissionDetail(detail: GradescopeSubmissionDetail & { submissionId: string }) {
   return GradeSchema.parse({
     id: `gradescope:grade:${detail.submissionId}`,
     kind: 'grade',
@@ -1164,7 +1266,7 @@ class GradescopeAssignmentsCollector implements ResourceCollector<Assignment> {
       ).values(),
     );
     const assignments = rawAssignments.map((rawAssignment) => normalizeAssignment(rawAssignment, ctx.now));
-    const currentDetail = parseGradescopeSubmissionDetail(ctx.pageHtml, ctx.url);
+    const currentDetail = parseGradescopeAssignmentPageDetail(ctx.pageHtml, ctx.url);
     if (!currentDetail) {
       return assignments;
     }
@@ -1271,9 +1373,9 @@ class GradescopeAssignmentsDomCollector implements ResourceCollector<Assignment>
   }
 
   async collect(ctx: AdapterContext) {
-    const directSubmissionDetail = parseGradescopeSubmissionDetail(ctx.pageHtml, ctx.url);
-    if (directSubmissionDetail) {
-      return [buildAssignmentFromSubmissionDetail(directSubmissionDetail)];
+    const directAssignmentDetail = parseGradescopeAssignmentPageDetail(ctx.pageHtml, ctx.url);
+    if (directAssignmentDetail) {
+      return [buildAssignmentFromSubmissionDetail(directAssignmentDetail)];
     }
 
     const collectFromHtml = (html: string, fallbackCourseId?: string) =>
@@ -1490,6 +1592,11 @@ function buildGradescopeFailure(
     }),
     attemptsByResource,
   };
+}
+
+function parseGradescopeSubmissionDetail(pageHtml: string | undefined, pageUrl: string) {
+  const detail = parseGradescopeAssignmentPageDetail(pageHtml, pageUrl);
+  return detail?.submissionId ? (detail as GradescopeSubmissionDetail & { submissionId: string }) : undefined;
 }
 
 function mapGradescopeFailureToSyncOutcome(

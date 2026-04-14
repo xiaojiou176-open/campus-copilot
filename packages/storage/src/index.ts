@@ -22,6 +22,7 @@ export {
   MergeHealthSummarySchema,
   MergeLedgerDecisionSchema,
   MergeLedgerEntrySchema,
+  PlanningSubstrateBlockerSchema,
   PlanningSubstrateFitSchema,
   PlanningSubstrateOwnerSchema,
   PlanningSubstrateSourceSchema,
@@ -63,6 +64,7 @@ export {
   type MergeHealthSummary,
   type MergeLedgerDecision,
   type MergeLedgerEntry,
+  type PlanningSubstrateBlocker,
   type PlanningSubstrateFit,
   type PlanningSubstrateOwner,
   type PlanningSubstrateSource,
@@ -126,6 +128,7 @@ export {
   upsertLocalEntityOverlay,
 } from './local-overlay.ts';
 export {
+  getAllPlanningSubstrates,
   getLatestPlanningSubstrateBySource,
   getPlanningSubstratesBySource,
   putPlanningSubstrates,
@@ -160,6 +163,7 @@ export {
   useAllEvents,
   useAllGrades,
   useAllMessages,
+  useAllPlanningSubstrates,
   useAllResources,
   useAllSiteEntityCounts,
   useEntityCounts,

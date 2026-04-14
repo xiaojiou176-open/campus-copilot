@@ -209,9 +209,14 @@ function buildPlanningSubstrateToolPayload(planningSubstrates: WorkbenchView['pl
   const orderedPlanningSubstrates = [...planningSubstrates].sort((left, right) =>
     right.capturedAt.localeCompare(left.capturedAt),
   );
-  const latestPlanning = orderedPlanningSubstrates[0];
+  const primaryPlanning = orderedPlanningSubstrates.find((entry) => entry.source === 'myplan') ?? orderedPlanningSubstrates[0];
+  const additionalSources = orderedPlanningSubstrates
+    .filter((entry) => entry.id !== primaryPlanning?.id)
+    .map((entry) => entry.source);
+  const exactBlockers = primaryPlanning?.exactBlockers ?? [];
+  const hardDeferredMoves = primaryPlanning?.hardDeferredMoves ?? [];
 
-  if (!latestPlanning) {
+  if (!primaryPlanning) {
     return {
       lane: 'summary_first_read_only_planning_lane' as const,
       posture: 'planning_only_not_registration_or_enrollment_proof' as const,
@@ -228,12 +233,12 @@ function buildPlanningSubstrateToolPayload(planningSubstrates: WorkbenchView['pl
   }
 
   const hasPlanCapture =
-    latestPlanning.termCount > 0 ||
-    latestPlanning.plannedCourseCount > 0 ||
-    latestPlanning.backupCourseCount > 0 ||
-    latestPlanning.scheduleOptionCount > 0;
+    primaryPlanning.termCount > 0 ||
+    primaryPlanning.plannedCourseCount > 0 ||
+    primaryPlanning.backupCourseCount > 0 ||
+    primaryPlanning.scheduleOptionCount > 0;
   const hasAuditCapture =
-    latestPlanning.requirementGroupCount > 0 || Boolean(latestPlanning.degreeProgressSummary);
+    primaryPlanning.requirementGroupCount > 0 || Boolean(primaryPlanning.degreeProgressSummary);
 
   let coverageStatus: PlanningPulseCoverageStatus = 'metadata_only';
   let exactMissingSlice = 'Current capture needs a stronger planning/audit continuation before it can claim a complete Planning Pulse lane.';
@@ -254,26 +259,39 @@ function buildPlanningSubstrateToolPayload(planningSubstrates: WorkbenchView['pl
 
   return {
     lane: 'summary_first_read_only_planning_lane' as const,
-    posture: 'planning_only_not_registration_or_enrollment_proof' as const,
+    posture: primaryPlanning.runtimePosture ?? ('planning_only_not_registration_or_enrollment_proof' as const),
     coverageStatus,
-    summary: `${latestPlanning.planLabel} currently tracks ${latestPlanning.termCount} term(s), ${latestPlanning.plannedCourseCount} planned course(s), ${latestPlanning.backupCourseCount} backup option(s), ${latestPlanning.scheduleOptionCount} schedule option(s), and ${latestPlanning.requirementGroupCount} requirement group(s) in the shared Planning Pulse lane.`,
-    exactMissingSlice,
+    summary: primaryPlanning.currentTruth
+      ? `${primaryPlanning.currentTruth} ${primaryPlanning.planLabel} currently tracks ${primaryPlanning.termCount} term(s), ${primaryPlanning.plannedCourseCount} planned course(s), ${primaryPlanning.backupCourseCount} backup option(s), ${primaryPlanning.scheduleOptionCount} schedule option(s), and ${primaryPlanning.requirementGroupCount} requirement group(s) in the shared Planning Pulse lane.`
+      : `${primaryPlanning.planLabel} currently tracks ${primaryPlanning.termCount} term(s), ${primaryPlanning.plannedCourseCount} planned course(s), ${primaryPlanning.backupCourseCount} backup option(s), ${primaryPlanning.scheduleOptionCount} schedule option(s), and ${primaryPlanning.requirementGroupCount} requirement group(s) in the shared Planning Pulse lane.`,
+    exactMissingSlice: exactBlockers.length > 0 ? exactBlockers.map((blocker) => `${blocker.id}: ${blocker.summary}`).join(' | ') : exactMissingSlice,
     latestCapture: {
-      id: latestPlanning.id,
-      capturedAt: latestPlanning.capturedAt,
-      planLabel: latestPlanning.planLabel,
-      planId: latestPlanning.planId,
-      termCount: latestPlanning.termCount,
-      plannedCourseCount: latestPlanning.plannedCourseCount,
-      backupCourseCount: latestPlanning.backupCourseCount,
-      scheduleOptionCount: latestPlanning.scheduleOptionCount,
-      requirementGroupCount: latestPlanning.requirementGroupCount,
-      degreeProgressSummary: latestPlanning.degreeProgressSummary,
-      transferPlanningSummary: latestPlanning.transferPlanningSummary,
+      id: primaryPlanning.id,
+      capturedAt: primaryPlanning.capturedAt,
+      planLabel: primaryPlanning.planLabel,
+      planId: primaryPlanning.planId,
+      source: primaryPlanning.source,
+      currentStage: primaryPlanning.currentStage,
+      runtimePosture: primaryPlanning.runtimePosture,
+      currentTruth: primaryPlanning.currentTruth,
+      termCount: primaryPlanning.termCount,
+      plannedCourseCount: primaryPlanning.plannedCourseCount,
+      backupCourseCount: primaryPlanning.backupCourseCount,
+      scheduleOptionCount: primaryPlanning.scheduleOptionCount,
+      requirementGroupCount: primaryPlanning.requirementGroupCount,
+      degreeProgressSummary: primaryPlanning.degreeProgressSummary,
+      transferPlanningSummary: primaryPlanning.transferPlanningSummary,
+      exactBlockers,
+      hardDeferredMoves,
     },
     operatorNotes: [
+      ...(primaryPlanning.currentStage ? [`Current stage: ${primaryPlanning.currentStage}.`] : []),
       'Planning Pulse stays a shared planning summary lane, not proof of enrollment entitlement or registration execution state.',
       'Requirement and degree-progress signals remain summary-first until a stronger standalone detail lane is promoted.',
+      ...(additionalSources.length > 0 ? [`Additional planning carriers: ${additionalSources.join(', ')}.`] : []),
+      ...(hardDeferredMoves.length > 0
+        ? [`Hard deferred moves: ${hardDeferredMoves.join(', ')}.`]
+        : []),
     ],
     records: orderedPlanningSubstrates,
   };
@@ -281,8 +299,10 @@ function buildPlanningSubstrateToolPayload(planningSubstrates: WorkbenchView['pl
 
 function buildAiExportToolPayload(args: BuildWorkbenchAiProxyRequestArgs, presentation: BuildWorkbenchAiProxyRequestArgs['presentation']) {
   const decisionContext = buildAiDecisionContext(args, presentation);
+  const exportContentAllowed =
+    args.currentViewExport.packaging.authorizationLevel === 'allowed' && args.currentViewExport.packaging.aiAllowed;
 
-  if (args.currentViewExport.packaging.aiAllowed) {
+  if (exportContentAllowed) {
     return {
       filename: args.currentViewExport.filename,
       format: args.currentViewExport.format,

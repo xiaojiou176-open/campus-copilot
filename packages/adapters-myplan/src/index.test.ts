@@ -1,10 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
+  MYPLAN_EXACT_BLOCKERS,
   MYPLAN_COMPARISON_DEFERRED_FIELDS,
   MYPLAN_CONTINUATION_PROVED_FIELDS,
   MYPLAN_DEFERRED_FIELDS,
+  MYPLAN_HARD_DEFERRED_MOVES,
   MYPLAN_PROVED_FIELDS,
+  MYPLAN_STAGE_UNDERSTANDING,
+  buildMyPlanRuntimePromotionPacket,
   buildMyPlanCarrierComparisonPacket,
   buildMyPlanPrototype,
   getMyPlanDeferredFieldSet,
@@ -179,6 +183,32 @@ describe('MyPlanPrototype', () => {
     expect(comparison.weeklyLoadCandidateSignals).toContain('term.scheduleOptions');
     expect(comparison.promotionEntryCriteria[0]).toContain('live current-user session');
     expect(comparison.sharedPromotionBlockers).toContain('live current-user carrier lock still pending');
+    expect(comparison.sharedPromotionBlockers).toContain(
+      'the shared Planning Pulse lane still needs both plan and audit captures before it can claim complete coverage',
+    );
+  });
+
+  it('builds a runtime-promotion packet with only the blockers that still survive redacted fixture proof', () => {
+    const packet = buildMyPlanRuntimePromotionPacket({
+      capturedAt: '2026-04-09T13:30:00-07:00',
+      bootstrap: readJsonFixture('authenticated-bootstrap.json'),
+      sessionSnapshot: readJsonFixture('authenticated-planning-snapshot.json'),
+    });
+
+    expect(packet.surface).toBe('myplan');
+    expect(packet.stage).toBe(MYPLAN_STAGE_UNDERSTANDING.currentStage);
+    expect(packet.runtimePosture).toBe(MYPLAN_STAGE_UNDERSTANDING.runtimePosture);
+    expect(packet.currentTruth).toContain('both MyPlan plan context and DARS-style audit-summary context');
+    expect(packet.prototype.planLabel).toBe('Computer Science transfer plan');
+    expect(packet.comparison?.surface).toBe('myplan');
+    expect(packet.exactBlockers).toEqual([
+      expect.objectContaining({
+        id: 'live_current_user_carrier_lock',
+        class: 'owner-manual later',
+      }),
+    ]);
+    expect(packet.hardDeferredMoves).toEqual([...MYPLAN_HARD_DEFERRED_MOVES]);
+    expect(packet.noRegistrationAutomation).toBe(true);
   });
 
   it('extracts the bootstrap script even when script attributes are reordered', () => {

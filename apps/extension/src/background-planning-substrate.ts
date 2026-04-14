@@ -1,5 +1,11 @@
 import type { SiteSyncOutcome } from '@campus-copilot/core';
 import {
+  deriveMyPlanPromotionState,
+  MYPLAN_EXACT_BLOCKERS,
+  MYPLAN_HARD_DEFERRED_MOVES,
+  MYPLAN_STAGE_UNDERSTANDING,
+} from '../../../packages/adapters-myplan/src/index.ts';
+import {
   campusCopilotDb,
   getLatestPlanningSubstrateBySource,
   replacePlanningSubstratesBySource,
@@ -278,6 +284,17 @@ function buildPlanningBase(previous: PlanningSubstrateOwner | undefined, capture
     programExplorationCount: previous?.programExplorationCount ?? 0,
     degreeProgressSummary: previous?.degreeProgressSummary,
     transferPlanningSummary: previous?.transferPlanningSummary,
+    currentStage: previous?.currentStage ?? MYPLAN_STAGE_UNDERSTANDING.currentStage,
+    runtimePosture: previous?.runtimePosture ?? MYPLAN_STAGE_UNDERSTANDING.runtimePosture,
+    currentTruth: previous?.currentTruth ?? MYPLAN_STAGE_UNDERSTANDING.currentTruth,
+    exactBlockers:
+      previous?.exactBlockers && previous.exactBlockers.length > 0
+        ? previous.exactBlockers
+        : MYPLAN_EXACT_BLOCKERS.map((blocker) => ({ ...blocker })),
+    hardDeferredMoves:
+      previous?.hardDeferredMoves && previous.hardDeferredMoves.length > 0
+        ? previous.hardDeferredMoves
+        : [...MYPLAN_HARD_DEFERRED_MOVES],
     terms: previous?.terms ?? [],
   };
 }
@@ -377,6 +394,24 @@ function buildPlanCaptureFromHtml(
   };
 }
 
+function applyPlanningPromotionState(record: PlanningSubstrateOwner) {
+  const promotionState = deriveMyPlanPromotionState({
+    termCount: record.termCount,
+    plannedCourseCount: record.plannedCourseCount,
+    backupCourseCount: record.backupCourseCount,
+    scheduleOptionCount: record.scheduleOptionCount,
+    requirementGroupCount: record.requirementGroupCount,
+    degreeProgressSummary: record.degreeProgressSummary,
+    liveCurrentUser: true,
+  });
+
+  return {
+    ...record,
+    currentTruth: promotionState.currentTruth,
+    exactBlockers: promotionState.exactBlockers,
+  };
+}
+
 function buildAuditCaptureFromHtml(
   pageHtml: string,
   capturedAt: string,
@@ -416,10 +451,12 @@ export function buildMyPlanPlanningSubstrateFromHtml(input: {
   }
 
   if (kind === 'plan') {
-    return buildPlanCaptureFromHtml(input.pageHtml, input.url, input.capturedAt, input.previous);
+    return applyPlanningPromotionState(
+      buildPlanCaptureFromHtml(input.pageHtml, input.url, input.capturedAt, input.previous),
+    );
   }
 
-  return buildAuditCaptureFromHtml(input.pageHtml, input.capturedAt, input.previous);
+  return applyPlanningPromotionState(buildAuditCaptureFromHtml(input.pageHtml, input.capturedAt, input.previous));
 }
 
 export async function capturePlanningSubstrateFromActiveTab(now: string, targetOverride?: SyncTargetOverride) {

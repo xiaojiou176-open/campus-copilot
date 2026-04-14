@@ -426,7 +426,78 @@ describe('exporter package', () => {
     expect(artifact.packaging.aiAllowed).toBe(false);
     expect(artifact.packaging.riskLabel).toBe('high');
     expect(artifact.packaging.provenance.some((entry) => entry.label === 'Administrative summary-first substrate')).toBe(true);
+    expect(
+      artifact.packaging.provenance.some((entry) =>
+        entry.detail?.includes('their presence does not mean a truthful runtime carrier is landed'),
+      ),
+    ).toBe(false);
     expect(artifact.content).toContain('"administrativeSummaries": 1');
     expect(artifact.content).toContain('"authorization_level": "confirm_required"');
+  });
+
+  it('ignores caller-supplied packaging overrides that would overstate authorization truth', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'csv',
+      input: {
+        generatedAt,
+        scope: {
+          site: 'myuw',
+        },
+        packaging: {
+          authorizationLevel: 'allowed',
+          aiAllowed: true,
+        },
+        authorization: {
+          policyVersion: 'wave2-deepwater-productization',
+          rules: [
+            {
+              id: 'workspace-layer1',
+              layer: 'layer1_read_export',
+              status: 'allowed',
+              resourceFamily: 'workspace_snapshot',
+            },
+            {
+              id: 'workspace-layer2',
+              layer: 'layer2_ai_read_analysis',
+              status: 'allowed',
+              resourceFamily: 'workspace_snapshot',
+            },
+            {
+              id: 'transcript-layer1',
+              layer: 'layer1_read_export',
+              status: 'confirm_required',
+              resourceFamily: 'transcript_summary',
+            },
+            {
+              id: 'transcript-layer2',
+              layer: 'layer2_ai_read_analysis',
+              status: 'blocked',
+              resourceFamily: 'transcript_summary',
+            },
+          ],
+        },
+        administrativeSummaries: [
+          {
+            id: 'admin-summary:transcript:blocker',
+            family: 'transcript',
+            title: 'Transcript summary lane',
+            summary: 'No truthful transcript runtime carrier is landed yet. Historical-record detail remains blocked until a lawful summary carrier is proven.',
+            importance: 'high',
+            aiDefault: 'blocked',
+            authoritySource: 'myuw candidate lane',
+          },
+        ],
+      },
+    });
+
+    expect(artifact.packaging.authorizationLevel).toBe('confirm_required');
+    expect(artifact.packaging.aiAllowed).toBe(false);
+    expect(
+      artifact.packaging.provenance.some((entry) =>
+        entry.detail?.includes('their presence does not mean a truthful runtime carrier is landed'),
+      ),
+    ).toBe(true);
+    expect(artifact.content).toContain('carrier_not_landed');
   });
 });

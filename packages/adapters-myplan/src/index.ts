@@ -80,6 +80,41 @@ export const MYPLAN_FORBIDDEN_KEYS = [
   'targetUrl',
 ] as const;
 
+export const MYPLAN_STAGE_UNDERSTANDING = {
+  surface: 'myplan',
+  currentStage: 'partial_shared_landing',
+  runtimePosture: 'comparison_oriented_planning_substrate',
+  readOnly: true,
+  noRegistrationAutomation: true,
+  currentTruth:
+    'MyPlan already lands in the shared Planning Pulse lane, but it still stays summary-first and read-only instead of claiming full standalone MyPlan parity.',
+} as const;
+
+export const MYPLAN_EXACT_BLOCKERS = [
+  {
+    id: 'plan_audit_dual_capture',
+    class: 'repo-owned blocker',
+    summary: 'Planning Pulse still needs both plan context and audit-summary context before it can claim complete shared coverage.',
+    whyItStopsPromotion:
+      'A single MyPlan or DARS capture still leaves the other half missing from the shared Planning Pulse lane, even though the shared substrate itself is already landed.',
+  },
+  {
+    id: 'live_current_user_carrier_lock',
+    class: 'owner-manual later',
+    summary: 'A fresh repo-owned live MyPlan session still has to corroborate the shared planning lane on the canonical browser lane.',
+    whyItStopsPromotion:
+      'Redacted fixtures prove shape and boundaries, but first-class runtime promotion still needs a real current-user Planning Pulse corroboration.',
+  },
+] as const;
+
+export const MYPLAN_HARD_DEFERRED_MOVES = [
+  'registration handoff',
+  'adviser sharing',
+  'collaboration actions',
+  'write-back controls',
+  'raw degree-audit blocks',
+] as const;
+
 export type MyPlanCourseStatus = 'planned' | 'backup';
 export type MyPlanCarrierKind = 'authenticated_html_bootstrap' | 'authenticated_session_snapshot_candidate';
 export type MyPlanPrototypeProofStatus =
@@ -186,6 +221,101 @@ export interface MyPlanCarrierComparisonPacket {
   weeklyLoadCandidateSignals: string[];
   promotionEntryCriteria: string[];
   sharedPromotionBlockers: string[];
+}
+
+export interface MyPlanRuntimePromotionBlocker {
+  id: (typeof MYPLAN_EXACT_BLOCKERS)[number]['id'];
+  class: (typeof MYPLAN_EXACT_BLOCKERS)[number]['class'];
+  summary: string;
+  whyItStopsPromotion: string;
+}
+
+export interface MyPlanRuntimePromotionPacket {
+  surface: 'myplan';
+  stage: typeof MYPLAN_STAGE_UNDERSTANDING.currentStage;
+  runtimePosture: typeof MYPLAN_STAGE_UNDERSTANDING.runtimePosture;
+  currentTruth: string;
+  readOnly: true;
+  noRegistrationAutomation: true;
+  prototype: MyPlanPrototypeSnapshot;
+  comparison: MyPlanCarrierComparisonPacket | null;
+  exactBlockers: MyPlanRuntimePromotionBlocker[];
+  hardDeferredMoves: Array<(typeof MYPLAN_HARD_DEFERRED_MOVES)[number]>;
+}
+
+const MYPLAN_MISSING_AUDIT_SUMMARY =
+  'Requirement progress is not exposed on this MyPlan planning page yet. Open Degree Audit (DARS) to capture requirement detail.';
+
+function hasMyPlanPlanCoverage(input: {
+  termCount: number;
+  plannedCourseCount: number;
+  backupCourseCount: number;
+  scheduleOptionCount: number;
+}) {
+  return input.termCount > 0 || input.plannedCourseCount > 0 || input.backupCourseCount > 0 || input.scheduleOptionCount > 0;
+}
+
+function hasMyPlanAuditCoverage(input: {
+  requirementGroupCount: number;
+  degreeProgressSummary?: string;
+}) {
+  return (
+    input.requirementGroupCount > 0 ||
+    (input.degreeProgressSummary != null &&
+      input.degreeProgressSummary.trim().length > 0 &&
+      input.degreeProgressSummary !== MYPLAN_MISSING_AUDIT_SUMMARY)
+  );
+}
+
+export function deriveMyPlanPromotionState(input: {
+  termCount: number;
+  plannedCourseCount: number;
+  backupCourseCount: number;
+  scheduleOptionCount: number;
+  requirementGroupCount: number;
+  degreeProgressSummary?: string;
+  liveCurrentUser: boolean;
+}) {
+  const hasPlanCoverage = hasMyPlanPlanCoverage(input);
+  const hasAuditCoverage = hasMyPlanAuditCoverage(input);
+  const exactBlockers = [];
+
+  if (!input.liveCurrentUser) {
+    exactBlockers.push({ ...MYPLAN_EXACT_BLOCKERS[1] });
+  }
+
+  if (!hasPlanCoverage || !hasAuditCoverage) {
+    exactBlockers.unshift({ ...MYPLAN_EXACT_BLOCKERS[0] });
+  }
+
+  if (hasPlanCoverage && hasAuditCoverage) {
+    return {
+      currentTruth:
+        'Planning Pulse already includes both MyPlan plan context and DARS-style audit-summary context, while still staying summary-first and read-only.',
+      exactBlockers,
+    };
+  }
+
+  if (hasPlanCoverage) {
+    return {
+      currentTruth:
+        'Planning Pulse already includes MyPlan plan context, but the DARS-style audit-summary half is still missing from the current shared capture.',
+      exactBlockers,
+    };
+  }
+
+  if (hasAuditCoverage) {
+    return {
+      currentTruth:
+        'Planning Pulse already includes DARS-style audit-summary context, but the MyPlan plan half is still missing from the current shared capture.',
+      exactBlockers,
+    };
+  }
+
+  return {
+    currentTruth: MYPLAN_STAGE_UNDERSTANDING.currentTruth,
+    exactBlockers,
+  };
 }
 
 export interface MyPlanPrototypeSnapshot {
@@ -1186,9 +1316,50 @@ export function buildMyPlanCarrierComparisonPacket(input: {
     ],
     sharedPromotionBlockers: [
       'live current-user carrier lock still pending',
-      'Planner-owned shared derived planning substrate contract still pending',
-      'shared schema/storage/core authorization still pending',
+      'the shared Planning Pulse lane still needs both plan and audit captures before it can claim complete coverage',
     ],
+  };
+}
+
+export function buildMyPlanRuntimePromotionPacket(input: BuildMyPlanPrototypeInput): MyPlanRuntimePromotionPacket {
+  const bootstrapSource = input.bootstrap ?? (input.pageHtml ? extractBootstrapFromHtml(input.pageHtml) : undefined);
+  const prototype = buildMyPlanPrototype(
+    bootstrapSource
+      ? {
+          capturedAt: input.capturedAt,
+          bootstrap: bootstrapSource,
+        }
+      : input,
+  );
+  const comparison =
+    bootstrapSource && input.sessionSnapshot
+      ? buildMyPlanCarrierComparisonPacket({
+          comparedAt: input.capturedAt,
+          bootstrap: bootstrapSource,
+          sessionSnapshot: input.sessionSnapshot,
+        })
+      : null;
+  const promotionState = deriveMyPlanPromotionState({
+    termCount: prototype.metadata.termCount,
+    plannedCourseCount: prototype.metadata.plannedCourseCount,
+    backupCourseCount: prototype.metadata.backupCourseCount,
+    scheduleOptionCount: prototype.metadata.scheduleOptionCount,
+    requirementGroupCount: prototype.metadata.requirementGroupCount,
+    degreeProgressSummary: prototype.degreeProgress.summary,
+    liveCurrentUser: false,
+  });
+
+  return {
+    surface: 'myplan',
+    stage: MYPLAN_STAGE_UNDERSTANDING.currentStage,
+    runtimePosture: MYPLAN_STAGE_UNDERSTANDING.runtimePosture,
+    currentTruth: promotionState.currentTruth,
+    readOnly: true,
+    noRegistrationAutomation: true,
+    prototype,
+    comparison,
+    exactBlockers: promotionState.exactBlockers,
+    hardDeferredMoves: [...MYPLAN_HARD_DEFERRED_MOVES],
   };
 }
 

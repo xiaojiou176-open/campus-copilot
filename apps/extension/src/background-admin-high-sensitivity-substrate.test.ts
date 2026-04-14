@@ -30,6 +30,46 @@ const accountsHtml = `
   </body></html>
 `;
 
+const profileHtml = `
+  <html><head><title>Profile - MyUW</title></head><body>
+    <h2>Name &amp; Pronouns</h2>
+    <h3>Preferred Name</h3><div>Terry Yu</div>
+    <h3>Pronouns</h3><div>He/him/his</div>
+    <h3>Local Address</h3><div>Redacted address</div>
+    <h2>Email Addresses</h2><div>redacted@example.invalid</div>
+    <h3>Emergency Contact 1</h3><div>Person One</div>
+    <h3>Emergency Contact 2</h3><div>Person Two</div>
+  </body></html>
+`;
+
+const tuitionHtml = `
+  <html><head><title>Tuition Charge Statement</title></head><body>
+    <h1>Official Tuition Charge Statement - Spring 2026</h1>
+    <table id="tblBalance">
+      <tr><th>Due Date</th><th>Amount</th></tr>
+      <tr><td colspan="2"><tt><b>*** $ 0.00 ***</b></tt></td></tr>
+    </table>
+    <table id="tblClassification">
+      <tr><th>Tuition Classification:</th><td>UNDERGRAD RESIDENT</td></tr>
+      <tr><th>Credit Hours:</th><td>14</td></tr>
+    </table>
+    <h3>Detail of Account - Charges and payments beginning: Spring 2026 (3/25/26)</h3>
+    <table id="tblDetailOfAccount">
+      <tr><th>Date</th><th>Transaction</th><th>Payments</th><th>Charges</th></tr>
+      <tr><td><tt>3/30/26</tt></td><td><tt>Tuition</tt></td><td></td><td><tt>4395.00</tt></td></tr>
+      <tr><td><tt>3/30/26</tt></td><td><tt>Aid Disbursed to Account</tt></td><td><tt>4468.00</tt></td><td></td></tr>
+      <tr><td colspan="2"><tt><b>TOTAL:</b></tt></td><td><tt>4468.00</tt></td><td><tt>4468.00</tt></td><td><tt>BALANCE: $ 0.00</tt></td></tr>
+    </table>
+    <table id="tblFinancialAid">
+      <tr><th>Program</th><th>Amount Offered</th><th>Disbursed to Account</th></tr>
+      <tr><td><tt>PEDRIZETTI FAMILY SCHOLARSHIP</tt></td><td><tt>1000.00</tt></td><td><tt>1000.00</tt></td></tr>
+      <tr><td><tt>WASHINGTON COLLEGE GRANT</tt></td><td><tt>4260.00</tt></td><td><tt>3468.00</tt></td><td><tt>792.00</tt></td></tr>
+      <tr><td><tt><b>TOTAL:</b></tt></td><td><tt>5260.00</tt></td><td><tt>4468.00</tt></td><td><tt>792.00</tt></td><td><tt>UNDISBURSED AID: $ 0.00</tt></td></tr>
+    </table>
+    <div id="panelTuitionBreakdown"><h3>Tuition Charge Breakdown</h3></div>
+  </body></html>
+`;
+
 describe('background admin high-sensitivity substrate', () => {
   it('extracts a transcript summary carrier from transcript html', () => {
     const records = extractAdminCarriersFromPageHtml({
@@ -67,5 +107,38 @@ describe('background admin high-sensitivity substrate', () => {
     expect(records.map((record) => record.family).sort()).toEqual(['accounts', 'tuition_detail']);
     expect(records.find((record) => record.family === 'accounts')?.summary).toContain('eligible');
     expect(records.find((record) => record.family === 'tuition_detail')?.summary).toContain('$0');
+  });
+
+  it('extracts a profile summary carrier from profile html without echoing raw profile values', () => {
+    const records = extractAdminCarriersFromPageHtml({
+      url: 'https://example.invalid/profile/',
+      pageHtml: profileHtml,
+      now: '2026-04-11T12:00:00-07:00',
+    });
+
+    expect(records).toHaveLength(1);
+    expect(records[0]?.family).toBe('profile');
+    expect(records[0]?.summary).toContain('preferred-name support');
+    expect(records[0]?.summary).toContain('2 emergency contact record');
+    expect(records[0]?.summary).not.toContain('Terry Yu');
+    expect(records[0]?.summary).not.toContain('redacted@example.invalid');
+  });
+
+  it('extracts a statement-backed tuition summary carrier from tuition html', () => {
+    const records = extractAdminCarriersFromPageHtml({
+      url: 'https://example.invalid/redacted/tuition.aspx',
+      pageHtml: tuitionHtml,
+      now: '2026-04-11T12:00:00-07:00',
+    });
+
+    expect(records).toHaveLength(1);
+    expect(records[0]?.family).toBe('tuition_detail');
+    expect(records[0]?.summary).toContain('Spring 2026');
+    expect(records[0]?.summary).toContain('UNDERGRAD RESIDENT');
+    expect(records[0]?.summary).toContain('14 credit hours');
+    expect(records[0]?.summary).toContain('charges $4468.00');
+    expect(records[0]?.summary).toContain('payments $4468.00');
+    expect(records[0]?.summary).toContain('undisbursed aid $0.00');
+    expect(records[0]?.summary).toContain('visible mandatory-fee breakdown');
   });
 });
