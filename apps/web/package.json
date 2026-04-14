@@ -18,14 +18,14 @@
     "@campus-copilot/exporter": "workspace:*",
     "@campus-copilot/schema": "workspace:*",
     "@campus-copilot/storage": "workspace:*",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "zod": "^4.1.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^6.0.2",
-    "vite": "^8.0.7"
+    "vite": "^8.0.8"
   }
 }
