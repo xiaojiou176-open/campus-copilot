@@ -1,6 +1,6 @@
 # Product Brief
 
-Campus Copilot is a local-first study workspace for students who need one structured place to understand work across:
+Campus Copilot is an academic decision workspace for students who need one structured place to understand work across:
 
 - Canvas
 - Gradescope
@@ -53,7 +53,7 @@ In plain language:
 
 - read-only workflow
 - manual sync
-- local-first storage and workbench views
+- local storage and workbench views
 - extension default assistant-first companion mode with explicit export/settings entry
 - site-scoped export mode instead of a preset-only sidebar story
 - local user-state overlay for personal judgment
@@ -71,7 +71,7 @@ The Wave 1 contract split needs four buckets, not one blurred promise:
 - **current formal scope**: the existing four-site decision workspace, cited AI over structured results, the thin BFF for `OpenAI` / `Gemini`, and the optional local `Switchyard` bridge on the same consumer seam
 - **next-phase engineering**: product-serving depth that strengthens the same workspace, such as richer `Gradescope` page / image rendering beyond the current graded-submission question/rubric/evaluation-comment/annotation detail path, selective `registration / tuition / textbook` promotion on the same contract, and read-only academic planning/search expansion for `MyPlan`, `DARS`, `Time Schedule`, `DawgPath`, and class-search-only `ctcLink`
 - **current repo-side expansion progress**: `Time Schedule` has now crossed from isolated prototype into the shared runtime path on the public course-offerings carrier, and `MyPlan` now has a shared planning substrate plus read-only planning-summary surfaces in the extension and the web workbench; both still need narrow, truthful wording and must not be described as registration automation or as full upstream-site parity
-- **current preview scope**: repo-public, read-only builder surfaces such as `MCP / SDK / CLI / Skills / site API preview packages` and plugin-grade repo bundles that remain local-first, bundle-grade, and non-hosted
+- **current preview scope**: repo-public, read-only integration surfaces such as `MCP / SDK / CLI / Skills / site API preview packages` and plugin-grade repo bundles that remain repo-local, bundle-grade, and non-hosted
 - **later ambition**: official listing, hosted distribution, broader launch-facing `SEO / video`, and any packaging or release-channel step that outruns the current repo-local proof surface
 
 Selective new academic domains such as textbook/material or tuition-like signals only graduate into the contract through the same next-phase engineering lane; they are not implied current scope.

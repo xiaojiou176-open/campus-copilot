@@ -126,7 +126,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
         <p>Workspace truth</p>
         <strong>{props.ready ? 'Shared storage/read-model loaded' : 'Bootstrapping local workspace'}</strong>
         <span>Last refresh {formatRelativeTime(props.now)}</span>
-        <span className="hero-card-note">Local-first, read-only, and review-first on the same schema/export contract.</span>
+        <span className="hero-card-note">Read-only, review-first, and grounded in the same schema/export contract.</span>
       </div>
     </section>
   );

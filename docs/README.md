@@ -31,7 +31,7 @@ If you are new, pick one route and ignore the rest for now:
 - **I want to understand the four-site substrate**: start with [`02-system-architecture.md`](02-system-architecture.md), then [`03-domain-schema.md`](03-domain-schema.md), then [`04-adapter-spec.md`](04-adapter-spec.md)
 - **I want repo-local proof that the current story is real**: start with [`verification-matrix.md`](verification-matrix.md), then [`site-capability-matrix.md`](site-capability-matrix.md), then [`live-validation-runbook.md`](live-validation-runbook.md)
 - **I want the exact current-vs-next boundary**: start with [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md), then [`18-v2-product-contract-freeze.md`](18-v2-product-contract-freeze.md), then [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)
-- **I want the builder/API surface after the product shape is clear**: start with [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`../examples/README.md`](../examples/README.md)
+- **I want the integration/API surface after the product shape is clear**: start with [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`../examples/README.md`](../examples/README.md)
 - **I want distribution or store routes**: start with [`../DISTRIBUTION.md`](../DISTRIBUTION.md), then [`14-public-distribution-scoreboard.md`](14-public-distribution-scoreboard.md), then [`chrome-web-store-submission-packet.md`](chrome-web-store-submission-packet.md)
 
 ## Default Newcomer Route
@@ -73,7 +73,7 @@ Use this route only when you already understand the product and need the integra
 4. [`../examples/toolbox-chooser.md`](../examples/toolbox-chooser.md)
 5. [`../skills/README.md`](../skills/README.md)
 
-Builder truth stays intentionally narrow:
+Integration truth stays intentionally narrow:
 
 - read-only preview surfaces are real
 - repo-local examples and package docs are real
@@ -93,7 +93,7 @@ Builder truth stays intentionally narrow:
 | [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md) | boundary brief | permissions, privacy, upload limits |
 | [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md) | execution-order brief | how to extend the repo without breaking its ordering |
 | [`09-implementation-decisions.md`](09-implementation-decisions.md) | locked choices | current formal implementation choices |
-| [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md) | builder-fit brief | current API surface, ecosystem fit, and future MCP/API substrate direction |
+| [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md) | integration-fit brief | current API surface, ecosystem fit, and future MCP/API substrate direction |
 | [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md) | contract-freeze brief | current formal scope vs next-phase vs later |
 | [`12-wave4-7-omnibus-ledger.md`](12-wave4-7-omnibus-ledger.md) | maintainer-only omnibus ledger | back-half internal program truth; not the default public route |
 | [`13-site-depth-exhaustive-ledger.md`](13-site-depth-exhaustive-ledger.md) | site-depth ledger | exhaustive per-site resource map, classifications, and next-action framing |
@@ -127,7 +127,7 @@ If you are a maintainer or contributor, read in this order:
 | Short truthful distribution router | [`../DISTRIBUTION.md`](../DISTRIBUTION.md) |
 | Short truthful integrations router | [`../INTEGRATIONS.md`](../INTEGRATIONS.md) |
 | Short privacy posture page | [`../PRIVACY.md`](../PRIVACY.md) |
-| AI/runtime boundary and builder-facing path | [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md) |
+| AI/runtime boundary and integration-facing path | [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md) |
 | Academic expansion and safety contract | [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md) |
 | Machine-readable current HTTP contract | [`api/openapi.yaml`](api/openapi.yaml) |
 | Builder example router | [`../examples/README.md`](../examples/README.md) |

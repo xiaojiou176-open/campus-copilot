@@ -97,6 +97,25 @@ export const AssignmentSchema = z
     submittedAt: IsoDateTimeSchema.optional(),
     score: z.number().finite().optional(),
     maxScore: z.number().finite().optional(),
+    reviewSummary: z
+      .object({
+        questions: z.array(
+          z
+            .object({
+              label: z.string().min(1),
+              modality: z.enum(['autograder', 'manual']).optional(),
+              score: z.number().finite().optional(),
+              maxScore: z.number().finite().optional(),
+              rubricLabels: z.array(z.string().min(1)).default([]),
+              evaluationCommentCount: z.number().int().nonnegative().optional(),
+              annotationCount: z.number().int().nonnegative().optional(),
+              annotationPages: z.array(z.number().int().positive()).default([]),
+            })
+            .strict(),
+        ),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 export type Assignment = z.infer<typeof AssignmentSchema>;

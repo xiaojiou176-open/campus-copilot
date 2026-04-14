@@ -56,10 +56,10 @@ Rules:
 
 | Target | Why it is valuable | Allowed posture | Current hard boundary |
 | :-- | :-- | :-- | :-- |
-| `MyPlan` | planning, degree path, transfer planning context | local-first, read-only, user-session-bound interpretation only | do not treat historical Kuali lineage as proof of a current public API or current public source repo |
-| `DARS` | degree-audit visibility | local-first, read-only, current-user-only interpretation | do not treat internal reports or protected audit content as a public data surface |
+| `MyPlan` | planning, degree path, transfer planning context | repo-local, read-only, user-session-bound interpretation only | do not treat historical Kuali lineage as proof of a current public API or current public source repo |
+| `DARS` | degree-audit visibility | repo-local, read-only, current-user-only interpretation | do not treat internal reports or protected audit content as a public data surface |
 | `Time Schedule` | catalog/schedule lookup and course timing context | prefer official/public schedule surfaces first, then read-only page interpretation | do not turn schedule lookup into registration automation |
-| `DawgPath` | major/program path visibility | local-first, read-only interpretation only | do not market it as an official advising product or export other students' records |
+| `DawgPath` | major/program path visibility | repo-local, read-only interpretation only | do not market it as an official advising product or export other students' records |
 | `ctcLink class search` | Washington community-college course discovery | class-search-only, institution-by-institution validation, read-only | do not overclaim stable anonymous JSON APIs; do not expand this lane into registration, identity, finance, or records automation without a separate contract |
 
 ## Red-Zone Academic Surfaces
@@ -81,7 +81,7 @@ If a future feature touches those surfaces, the default answer is **no** unless 
 The intended lower-risk posture is:
 
 - the user is operating on their own account
-- the product stays local-first
+- the product stays repo-local
 - the product provides read-only interpretation and organization
 - sync is manual, not silent background scanning
 - the product does not submit forms, press site buttons, or send campus-site mutations
@@ -141,7 +141,7 @@ The current product now has one **narrow, default-disabled advanced lane**:
 
 1. the user explicitly opts in on a per-course basis
 2. the user manually pastes the excerpt they want analyzed
-3. the flow stays local-first and clearly separated from the default path
+3. the flow stays repo-local and clearly separated from the default path
 4. the UI states that rights and policy compliance remain the user's responsibility
 5. the repo does not fetch, upload, or infer additional raw course files for that lane
 
@@ -191,7 +191,7 @@ In plain language:
 The contract must live in four layers at once:
 
 1. **docs and public wording**
-   - say `local-first`
+   - say `repo-local`
    - say `read-only`
    - say `not official`
    - say `user must follow school and platform policies`
@@ -217,7 +217,7 @@ This section answers a narrower question:
 | Layer | What is already real | What is still missing |
 | :-- | :-- | :-- |
 | docs and public wording | root docs, distribution routers, privacy/security pages, and collaborator contracts already repeat the same red-zone and AI/material boundary | some leaf package/example surfaces still inherit only `read-only / not hosted` wording instead of the full contract |
-| extension/runtime permission boundary | the extension manifest stays cookie-free, does not request `Register.UW` / `Notify.UW` hosts, and now includes a scoped read-only `myplan.uw.edu/*` host lane so `MyPlan / DARS` capture can run through the same manual, local-first extension path; the current extension surface also exposes reusable red-zone wrapper helpers for single-surface and multi-surface disabled/manual-only handling | this is still not the same thing as repo-wide UI adoption across every future surface |
+| extension/runtime permission boundary | the extension manifest stays cookie-free, does not request `Register.UW` / `Notify.UW` hosts, and now includes a scoped read-only `myplan.uw.edu/*` host lane so `MyPlan / DARS` capture can run through the same manual, repo-local extension path; the current extension surface also exposes reusable red-zone wrapper helpers for single-surface and multi-surface disabled/manual-only handling | this is still not the same thing as repo-wide UI adoption across every future surface |
 | static governance gate | `check:campus-readonly-boundary`, `check:docs:ssot`, `check:consumer-surfaces`, `check:public-surface`, and `check:host-safety` already guard major drift paths, and the campus-readonly lane now partially consumes `policies/integration-boundaries.yaml` for red-zone uniqueness, AI forbidden-input snippets, the shared default-disabled advanced-material deny wording, and current caller-wrapper adoption snippets | `policies/integration-boundaries.yaml` is still not the single generated registry behind every gate or every public table |
 | AI default runtime seam | current AI callers already route through structured workbench/export inputs, explicitly reject raw DOM / raw HTML / cookies / raw site payloads **and** raw course-material classes in the shared prompt contract, carry an explicit `advancedMaterialAnalysis` contract through the shared seam, fail fast on obvious raw-material questions by default, and now support a narrow default-off per-course excerpt-only lane across the current extension/web AI panels | direct raw-file ingestion still has no lawful canonical carrier, and there is still no universal proof that every future caller must inherit the same narrow opt-in scaffold |
 | product-layer hard-stop behavior | the contract already says red-zone pages should stop at static explanation or manual paths, the extension plus standalone web AI surfaces now render explicit manual-only red-zone notices and a disabled red-zone CTA scaffold through the shared caller guard wrapper, and the extension operations surface now carries a manual-only campus-boundary panel for `Register.UW` / `Notify.UW` through a reusable local red-zone helper | a repo-wide runtime/UI hard-stop for every future red-zone route, button, or polling loop is still a next-wave implementation/gate task |

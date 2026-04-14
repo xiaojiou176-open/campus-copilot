@@ -19,7 +19,7 @@ For manual browser/session truth, use [`live-validation-runbook.md`](live-valida
 
 ### Formal Baseline Vision
 
-Campus Copilot is a **local-first academic decision workspace**.
+Campus Copilot is an **academic decision workspace with local storage and read-only operation**.
 
 The current formal path is:
 
@@ -59,7 +59,7 @@ They are kept separate here so they do not silently masquerade as already-promis
 
 | Capability | Wave 1B bucket | Current state | Contract note |
 | :-- | :-- | :-- | :-- |
-| Local-first academic decision workspace identity | current formal scope | formal | This is the public product identity. |
+| Academic decision workspace identity | current formal scope | formal | This is the public product identity. |
 | `Canvas / Gradescope / EdStem / MyUW` support | current formal scope | formal | These are the only formal supported study surfaces today. |
 | Shared schema + Dexie/read-model truth | current formal scope | formal | Storage/read-model remains the canonical product truth. |
 | Focus Queue / Weekly Load / Change Journal / derived alerts | current formal scope | formal | The decision layer is already part of today's contract. |
@@ -107,7 +107,7 @@ They are kept separate here so they do not silently masquerade as already-promis
 | Standalone WebUI | current formal scope | landed as read-only import surface | same schema/storage/export/AI contract, no second sync engine | Wave 3 follow-through |
 | Surface convergence / i18n / front-door polish | next-phase engineering | partial | valuable, but not the same as current scope expansion | Wave 4 |
 | Internal private clients | later / internal substrate ambition | not started as contract | keep internal until mainline depth is stable | Wave 5 |
-| Repo-public read-only SDK / CLI / MCP / skill examples | current repo-public preview | materially landed | local-first toolbox preview, still not hosted or write-capable | Wave 6 |
+| Repo-public read-only SDK / CLI / MCP / skill examples | current repo-public preview | materially landed | repo-local toolbox preview, still not hosted or write-capable | Wave 6 |
 | Public plugin packaging | later / platform ambition | not started as contract | future public packaging, not current deliverable | Wave 6 |
 | Launch surface / SEO / video | later / launch ambition | not started as contract | public packaging follows product truth | Wave 7 |
 

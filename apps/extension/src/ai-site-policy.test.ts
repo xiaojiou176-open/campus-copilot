@@ -2,6 +2,20 @@ import { describe, expect, it } from 'vitest';
 import { getAiSitePolicyOverlay } from './ai-site-policy';
 
 describe('ai site policy overlay', () => {
+  it('keeps Canvas landed resource metadata in the structured allowlist without widening raw-material access', () => {
+    expect(getAiSitePolicyOverlay('canvas')).toEqual({
+      site: 'canvas',
+      siteLabel: 'Canvas',
+      allowedFamilies: ['assignments', 'announcements', 'grades', 'calendar', 'resource metadata'],
+      exportOnlyFamilies: ['course_material_excerpt'],
+      forbiddenAiObjects: ['unfinished assignment detail pages', 'raw course files', 'raw submission payloads'],
+      carrierHonesty:
+        'Treat Canvas data as a read-only campus carrier and never present session-backed paths as official public APIs.',
+      operatorNote:
+        'Canvas answers should stay grounded in structured entities, cited exports, and explicit trust gaps while treating landed module/group/media carriers as resource metadata instead of raw course material access.',
+    });
+  });
+
   it('keeps EdStem resources and lesson summaries in the structured allowlist', () => {
     expect(getAiSitePolicyOverlay('edstem')).toEqual({
       site: 'edstem',

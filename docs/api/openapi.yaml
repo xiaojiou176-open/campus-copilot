@@ -4,8 +4,8 @@ info:
   version: 0.1.0
   summary: Thin local HTTP edge for formal provider calls and provider readiness.
   description: >
-    This contract describes the current local-first HTTP surface that ships in the
-    repository today. It is intended for local builder integration, testing, and
+    This contract describes the current repo-local HTTP surface that ships in the
+    repository today. It is intended for local integration, testing, and
     future read-only substrate work. It does not imply a hosted public API,
     public auth flow, public MCP surface, or public SDK product.
 servers:

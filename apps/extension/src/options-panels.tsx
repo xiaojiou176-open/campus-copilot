@@ -559,7 +559,7 @@ export function OptionsPanels(props: {
             <div className="surface__stack">
               <h3>{highSensitivitySnapshotLabel}</h3>
               <p className="surface__meta">
-                These entries stay summary-first and export-first. AI remains more restrictive than read/export.
+                These entries now sit on landed summary lanes and remain export-first. AI remains more restrictive than read/export.
               </p>
               <div className="surface__grid">
                 {ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS.map((family) => (

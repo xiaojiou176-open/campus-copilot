@@ -8,9 +8,9 @@ Use it to avoid writing platform-side unknowns into `README.md` as if the reposi
 
 | Item | Where to check | Repo can prove it? | Last checked | Notes |
 | :-- | :-- | :--: | :-- | :-- |
-| Repository description | GitHub repository settings / page header | No | 2026-04-07 | Current value: `Local-first academic decision workspace with cited study context from Canvas, Gradescope, EdStem, and MyUW.` This now matches the repo's local-first and student-first front door more directly. |
+| Repository description | GitHub repository settings / page header | No | 2026-04-07 | The value recorded on that date used the older local-storage-first wording. If the live GitHub front door is refreshed, update this row instead of treating the old wording as canonical. |
 | Homepage / website URL | GitHub repository settings | No | 2026-04-07 | Configured to `https://xiaojiou176-open.github.io/campus-copilot/`. Fresh check now returns `HTTP 200`, so the GitHub Pages front door is live. |
-| Topics | GitHub repository settings | No | 2026-04-07 | Current topics: `ai`, `browser-extension`, `canvas`, `decision-support`, `edstem`, `education`, `gradescope`, `local-first`, `myuw`, `read-only`, `student-productivity`, `typescript`. |
+| Topics | GitHub repository settings | No | 2026-04-07 | The recorded topic set on that date still reflected the older front-door taxonomy. Refresh this row when the live GitHub control plane changes. |
 | Social preview image | GitHub repository settings | No | 2026-04-07 | Custom social preview is enabled (`usesCustomOpenGraphImage=true`). Repo-tracked source remains `docs/assets/social-preview.png`; keep it aligned with the current front-door positioning. |
 | Discussions enabled | GitHub repository settings | No | 2026-04-07 | Enabled (`has_discussions=true`). |
 | Branch protection | GitHub branch protection settings | No | 2026-04-07 | Required checks are `Verify`, `CodeQL`, `Security Hygiene`, and `Dependency Review`; `strict=true`; `required_approving_review_count=1`; `require_last_push_approval=true`; `required_signatures=true`; admins enforced; linear history required; conversation resolution required; force-push and deletion disabled. |

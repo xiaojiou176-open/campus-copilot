@@ -215,6 +215,7 @@ export interface ExportInput {
   administrativeSummaries?: Array<{
     id: string;
     family: string;
+    laneStatus?: 'landed_summary_lane' | 'carrier_not_landed';
     title: string;
     summary: string;
     importance: string;
@@ -517,9 +518,10 @@ function inferRiskLabel(scope: ExportScopeMetadata, authorizationLevel: Authoriz
 function hasAdministrativeCarrierPlaceholders(
   summaries: Array<{
     id: string;
+    laneStatus?: string;
   }>,
 ) {
-  return summaries.some((summary) => summary.id.endsWith(':blocker'));
+  return summaries.some((summary) => summary.laneStatus === 'carrier_not_landed' || summary.id.endsWith(':blocker'));
 }
 
 function inferMatchConfidence(input: {
@@ -589,10 +591,10 @@ function buildDefaultProvenance(input: {
   if (input.scope.resourceFamily === 'administrative_snapshot' || input.normalized.administrativeSummaries.length > 0) {
     entries.push({
       sourceType: 'derived_read_model',
-      label: 'Administrative summary-first substrate',
+      label: 'Administrative landed summary lane',
       detail: hasAdministrativeCarrierPlaceholders(input.normalized.administrativeSummaries)
-        ? 'High-sensitivity academic and administrative records stay review-first and export-first. Some summary rows are blocker placeholders, so their presence does not mean a truthful runtime carrier is landed.'
-        : 'High-sensitivity academic and administrative records stay review-first and export-first until a stronger lane is promoted.',
+        ? 'High-sensitivity academic and administrative records stay review-first and export-first. Some rows are still blocker placeholders, so their presence does not mean every family has a landed summary lane.'
+        : 'High-sensitivity academic and administrative records now flow through landed summary lanes and stay export-first until a stronger detail/runtime lane is promoted.',
       readOnly: true,
     });
   }
@@ -602,7 +604,7 @@ function buildDefaultProvenance(input: {
       entries.push({
         sourceType: 'official_api',
         label: 'Canvas official API carrier',
-        detail: 'Assignments, resources, messages, grades, and events stay grounded in official Canvas read-only responses.',
+        detail: 'Assignments, resources, messages, grades, and events stay grounded in official Canvas read-only responses, including landed module/group/media carriers on the shared Resource lane.',
         readOnly: true,
       });
       break;
@@ -626,7 +628,7 @@ function buildDefaultProvenance(input: {
       entries.push({
         sourceType: 'session_interface',
         label: 'MyUW student-status carrier',
-        detail: 'Notice and schedule signals can promote into the decision desk while transcript, finaid, and account detail remain summary-first.',
+        detail: 'Notice and schedule signals can promote into the decision desk while transcript, finaid, and account detail stay on landed summary lanes with detail/runtime promotion still pending.',
         readOnly: true,
       });
       break;
@@ -634,7 +636,7 @@ function buildDefaultProvenance(input: {
       entries.push({
         sourceType: 'page_state',
         label: 'MyPlan planning substrate capture',
-        detail: 'Current MyPlan depth remains comparison-oriented and still awaits stronger live promotion.',
+        detail: 'Current MyPlan depth is a landed summary lane: comparison-oriented, read-only, and still awaiting stronger live/runtime promotion.',
         readOnly: true,
       });
       break;
@@ -650,7 +652,7 @@ function buildDefaultProvenance(input: {
       entries.push({
         sourceType: 'page_state',
         label: 'Course website DOM carrier',
-        detail: 'Course websites contribute metadata and schedule context, not default AI-readable raw materials.',
+        detail: 'Course websites currently contribute a scope-limited runtime lane for metadata and schedule context, not default AI-readable raw materials.',
         readOnly: true,
       });
       break;
@@ -1354,7 +1356,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
         reasons: summary.family,
       blockedBy: [
         summary.aiDefault === 'blocked' ? 'ai_blocked' : '',
-        summary.id.endsWith(':blocker') ? 'carrier_not_landed' : '',
+        summary.laneStatus === 'carrier_not_landed' || summary.id.endsWith(':blocker') ? 'carrier_not_landed' : '',
       ]
         .filter(Boolean)
         .join(' | '),
@@ -1507,8 +1509,24 @@ function renderMarkdown(dataset: ExportDataset) {
         const detail = assignment.dueAt ? ` - due ${assignment.dueAt}` : '';
         const summary = assignment.summary ? ` - ${assignment.summary}` : '';
         const fullDetail = assignment.detail ? ` - detail ${assignment.detail}` : '';
+        const reviewSummary = assignment.reviewSummary
+          ? ` - review ${assignment.reviewSummary.questions
+              .map((question) => {
+                const score =
+                  question.score !== undefined || question.maxScore !== undefined
+                    ? ` ${question.score ?? '-'} / ${question.maxScore ?? '-'}`
+                    : '';
+                const rubric = question.rubricLabels.length > 0 ? ` (${question.rubricLabels.join(', ')})` : '';
+                const comments =
+                  question.evaluationCommentCount !== undefined ? ` [${question.evaluationCommentCount} comment${question.evaluationCommentCount === 1 ? '' : 's'}]` : '';
+                const annotations =
+                  question.annotationCount !== undefined ? ` [${question.annotationCount} annotation${question.annotationCount === 1 ? '' : 's'}]` : '';
+                return `${question.label}${score}${rubric}${comments}${annotations}`;
+              })
+              .join('; ')}`
+          : '';
         const score = assignment.score !== undefined || assignment.maxScore !== undefined ? ` - score ${assignment.score ?? '-'} / ${assignment.maxScore ?? '-'}` : '';
-        return `- ${assignment.title} (${assignment.site}, ${assignment.status})${detail}${score}${summary}${fullDetail}`;
+        return `- ${assignment.title} (${assignment.site}, ${assignment.status})${detail}${score}${summary}${fullDetail}${reviewSummary}`;
       }),
     ),
   );

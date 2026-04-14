@@ -221,6 +221,7 @@ type GradescopeSubmissionQuestion = {
   evaluationComments?: string[];
   annotationCount?: number;
   annotationPreview?: string;
+  annotationPages?: number[];
 };
 type GradescopeSubmissionDetail = {
   courseId: string;
@@ -234,6 +235,25 @@ type GradescopeSubmissionDetail = {
   questions: GradescopeSubmissionQuestion[];
   actionHints?: string[];
 };
+
+function buildGradescopeReviewSummary(detail: GradescopeSubmissionDetail): Assignment['reviewSummary'] | undefined {
+  if (detail.questions.length === 0) {
+    return undefined;
+  }
+
+  return {
+    questions: detail.questions.map((question) => ({
+      label: normalizeQuestionLabel(question),
+      modality: question.modality,
+      score: question.score,
+      maxScore: question.maxScore,
+      rubricLabels: question.rubricLabels ?? [],
+      evaluationCommentCount: question.evaluationComments?.length ? question.evaluationComments.length : undefined,
+      annotationCount: question.annotationCount,
+      annotationPages: question.annotationPages ?? [],
+    })),
+  };
+}
 
 const MAX_SUBMISSION_DETAIL_FETCHES = 10;
 
@@ -922,6 +942,7 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
               .map((evaluation) => decodeHtmlText(evaluation.comments ?? undefined))
               .filter((comment): comment is string => Boolean(comment)),
             annotationCount: annotationCount > 0 ? annotationCount : undefined,
+            annotationPages: annotationPageNumbers,
             annotationPreview: buildGradescopeAnnotationPreview({
               contents: annotationContents,
               count: annotationCount,
@@ -994,6 +1015,7 @@ function enrichAssignmentWithSubmissionDetail(assignment: Assignment, detail: Gr
     score: detail.status === 'graded' ? assignment.score ?? detail.score : assignment.score,
     maxScore: assignment.maxScore ?? detail.maxScore,
     status: detail.status === 'graded' ? 'graded' : assignment.status,
+    reviewSummary: buildGradescopeReviewSummary(detail),
   });
 }
 
@@ -1025,6 +1047,7 @@ function buildAssignmentFromSubmissionDetail(detail: GradescopeSubmissionDetail)
     status: detail.status,
     score: detail.status === 'graded' ? detail.score : undefined,
     maxScore: detail.maxScore,
+    reviewSummary: buildGradescopeReviewSummary(detail),
   });
 }
 

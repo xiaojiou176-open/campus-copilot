@@ -28,7 +28,7 @@ the committed docs lane.
 | read-only packages such as SDK / CLI / MCP helpers | `public-ready (repo-local)` and mostly `registry candidate` | publication under owner credentials is later |
 | canonical MCP registry lane | `registry submitted` with a current public listing already observed in prior repo evidence, backed by `packages/mcp-server/registry-submission.packet.json` | future listing lifecycle is platform/owner-side, not a repo-local blocker |
 | public skill catalog | repo-side proof exists and live listing evidence has been observed previously | future catalog lifecycle is owner/platform-side |
-| Containerized API sidecar | `container-ready (repo-local)` with a repo-owned container path and `docs/container-publication.packet.json` | registry visibility and page reread are later |
+| Containerized API integration surface | `container-ready (repo-local)` with a repo-owned container path and `docs/container-publication.packet.json` | registry visibility and page reread are later |
 | browser extension | `build-ready product surface` | store dashboard submission is later |
 | generic bundles/integration examples | `plugin-grade repo bundle` | official marketplace/listing is not implied |
 

@@ -36,7 +36,35 @@ function getLaneBadgeClass(site: Site) {
   return isAdministrativeSite(site) ? 'badge badge-warning' : 'badge badge-success';
 }
 
-function getResourceSemanticLabel(resource: { site: Site; id: string; resourceKind: 'file' | 'link' | 'embed' | 'other'; summary?: string }) {
+function getResourceSemanticLabel(resource: {
+  site: Site;
+  id: string;
+  resourceKind: 'file' | 'link' | 'embed' | 'other';
+  summary?: string;
+  source?: { resourceType?: string };
+}) {
+  if (resource.site === 'canvas') {
+    switch (resource.source?.resourceType) {
+      case 'group':
+        return 'group';
+      case 'media_object':
+      case 'recording':
+        return 'recording';
+      case 'assignment_reference':
+        return 'module assignment';
+      case 'discussion_reference':
+        return 'module discussion';
+      case 'quiz_reference':
+        return 'module quiz';
+      case 'file_reference':
+        return 'module file';
+      case 'module_header':
+        return 'module header';
+      case 'module_item':
+        return 'module item';
+    }
+  }
+
   if (resource.site === 'edstem') {
     if (resource.id.startsWith('edstem:lesson:')) {
       return 'lesson';
@@ -47,6 +75,48 @@ function getResourceSemanticLabel(resource: { site: Site; id: string; resourceKi
   }
 
   return resource.resourceKind;
+}
+
+function getAssignmentReviewSummary(assignment: {
+  reviewSummary?: {
+    questions: Array<{
+      label: string;
+      score?: number;
+      maxScore?: number;
+      rubricLabels: string[];
+      evaluationCommentCount?: number;
+      annotationCount?: number;
+    }>;
+  };
+}) {
+  const questions = assignment.reviewSummary?.questions ?? [];
+  if (questions.length === 0) {
+    return undefined;
+  }
+
+  const visible = questions.slice(0, 3).map((question) => {
+    const score =
+      question.score !== undefined || question.maxScore !== undefined
+        ? ` ${question.score ?? '-'} / ${question.maxScore ?? '-'}`
+        : '';
+    const rubric = question.rubricLabels.length > 0 ? ` (${question.rubricLabels.join(', ')})` : '';
+    const comments =
+      question.evaluationCommentCount !== undefined
+        ? ` [${question.evaluationCommentCount} comment${question.evaluationCommentCount === 1 ? '' : 's'}]`
+        : '';
+    const annotations =
+      question.annotationCount !== undefined
+        ? ` [${question.annotationCount} annotation${question.annotationCount === 1 ? '' : 's'}]`
+        : '';
+    return `${question.label}${score}${rubric}${comments}${annotations}`;
+  });
+  const remaining = questions.length - visible.length;
+
+  return `Review summary: ${visible.join('; ')}${remaining > 0 ? `; +${remaining} more` : ''}`;
+}
+
+function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
+  return summary.laneStatus === 'carrier_not_landed' ? 'carrier not landed' : 'landed summary lane';
 }
 
 export function WebWorkbenchPanels(props: {
@@ -70,6 +140,16 @@ export function WebWorkbenchPanels(props: {
     summary?: string;
     detail?: string;
     dueAt?: string;
+    reviewSummary?: {
+      questions: Array<{
+        label: string;
+        score?: number;
+        maxScore?: number;
+        rubricLabels: string[];
+        evaluationCommentCount?: number;
+        annotationCount?: number;
+      }>;
+    };
   }>;
   currentMessages: Array<{
     id: string;
@@ -84,6 +164,7 @@ export function WebWorkbenchPanels(props: {
   currentResources: Array<{
     id: string;
     site: Site;
+    source?: { resourceType?: string };
     title: string;
     resourceKind: 'file' | 'link' | 'embed' | 'other';
     summary?: string;
@@ -428,7 +509,7 @@ export function WebWorkbenchPanels(props: {
                       }. Forbidden AI objects: ${currentOverlay.forbiddenAiObjects.join(', ') || 'none'}. `
                     : 'Choose a site-scoped slice to review the active site overlay and carrier honesty notes. '}
                   {summaryFamilies.length > 0
-                    ? `Summary-first admin lanes: ${summaryFamilies.join(', ')}. `
+                    ? `Landed summary lanes: ${summaryFamilies.join(', ')}. `
                     : 'No administrative summary families are visible in this slice. '}
                   {exportFirstFamilies.length > 0
                     ? `Export-first families in this view: ${exportFirstFamilies.join(', ')}. `
@@ -547,7 +628,7 @@ export function WebWorkbenchPanels(props: {
 
       <section className="panel">
         <h2>Administrative snapshots</h2>
-        <p>High-sensitivity administrative surfaces stay summary-first here and still prefer export/review before AI.</p>
+        <p>High-sensitivity administrative surfaces appear here as landed summary lanes and still prefer export/review before AI.</p>
         <div className="stack">
           <ReadyStateBlock
             ready={props.workbenchReady}
@@ -560,6 +641,7 @@ export function WebWorkbenchPanels(props: {
                   <strong>{summary.title}</strong>
                   <div className="badge-row">
                     <span className="badge badge-warning">{summary.family}</span>
+                    <span className="badge">{getAdministrativeLaneLabel(summary)}</span>
                     <span className="badge">{summary.importance}</span>
                   </div>
                 </div>
@@ -594,6 +676,7 @@ export function WebWorkbenchPanels(props: {
                   </div>
                   {assignment.summary ? <p>{assignment.summary}</p> : null}
                   {assignment.detail ? <p className="meta">{assignment.detail}</p> : null}
+                  {getAssignmentReviewSummary(assignment) ? <p className="meta">{getAssignmentReviewSummary(assignment)}</p> : null}
                   <p className="meta">
                     {props.siteLabels[assignment.site]}
                     {assignment.dueAt ? ` · due ${formatDateTime(assignment.dueAt)}` : ''}

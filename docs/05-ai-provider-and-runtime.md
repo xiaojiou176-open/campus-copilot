@@ -43,7 +43,7 @@ It is **not** currently:
 
 ## Current API And Substrate Shape
 
-Today the repository already has a real builder-facing spine:
+Today the repository already has a real integration spine:
 
 - `apps/api` is the public-facing thin HTTP layer for formal provider calls
 - `apps/api` can bridge to a local `Switchyard` runtime without turning Campus Copilot into a generic orchestration shell
@@ -80,11 +80,11 @@ The future shape is:
 
 - Campus keeps the thin consumer adapter and product semantics
 - `Switchyard` owns provider transport, auth/remediation, and runtime substrate
-- builder-facing public packaging follows only after that seam is stable
+- public integration packaging follows only after that seam is stable
 
 ## Next-Phase Builder Extraction vs Later Packaging
 
-The next builder-facing move is still internal-first at the transport/runtime layer:
+The next integration-facing move is still internal-first at the transport/runtime layer:
 
 - stronger repo-owned read-side helpers
 - internal private clients extracted from adapter logic
@@ -121,7 +121,7 @@ Why:
 
 - the repository produces structured, exportable, citation-aware context
 - the AI layer is already formalized behind a thin BFF
-- the runtime is auditable and local-first
+- the runtime is auditable and repo-local
 
 The repo is less appropriate to market today as:
 

@@ -117,20 +117,20 @@ const AI_SITE_POLICY_OVERLAYS: Record<AiPolicySite, AiSitePolicyOverlay> = {
   canvas: {
     site: 'canvas',
     siteLabel: 'Canvas',
-    allowedFamilies: ['assignments', 'announcements', 'grades', 'calendar'],
+    allowedFamilies: ['assignments', 'announcements', 'grades', 'calendar', 'resource metadata'],
     exportOnlyFamilies: ['course_material_excerpt'],
     forbiddenAiObjects: ['unfinished assignment detail pages', 'raw course files', 'raw submission payloads'],
     carrierHonesty: 'Treat Canvas data as a read-only campus carrier and never present session-backed paths as official public APIs.',
-    operatorNote: 'Canvas answers should stay grounded in structured entities, cited exports, and explicit trust gaps.',
+    operatorNote: 'Canvas answers should stay grounded in structured entities, cited exports, and explicit trust gaps while treating landed module/group/media carriers as resource metadata instead of raw course material access.',
   },
   gradescope: {
     site: 'gradescope',
     siteLabel: 'Gradescope',
-    allowedFamilies: ['assignments', 'grades', 'rubric summary'],
+    allowedFamilies: ['assignments', 'grades', 'review summaries'],
     exportOnlyFamilies: ['submission review artifacts'],
     forbiddenAiObjects: ['raw submission bodies', 'unreleased rubric detail', 'in-progress submission detail'],
     carrierHonesty: 'Treat Gradescope as a read-only session-backed grading carrier and keep reviewer uncertainty explicit.',
-    operatorNote: 'Gradescope answers should summarize structured scores and rubric outcomes instead of inventing reviewer intent.',
+    operatorNote: 'Gradescope answers should summarize structured scores and question-level review summaries instead of inventing reviewer intent.',
   },
   edstem: {
     site: 'edstem',
@@ -169,7 +169,7 @@ const AI_SITE_POLICY_OVERLAYS: Record<AiPolicySite, AiSitePolicyOverlay> = {
     carrierHonesty:
       'Treat MyPlan as a read-only planning substrate and comparison-oriented carrier, not as proof of enrollment entitlement or registration execution state.',
     operatorNote:
-      'MyPlan answers should stay planning-oriented, keep requirement uncertainty visible, and prefer export-first review when the current lane is still summary-first.',
+      'MyPlan answers should stay planning-oriented, keep requirement uncertainty visible, and prefer export-first review while the current lane remains a landed summary lane rather than a detail/runtime lane.',
   },
   'time-schedule': {
     site: 'time-schedule',
@@ -196,7 +196,7 @@ const AI_SITE_POLICY_OVERLAYS: Record<AiPolicySite, AiSitePolicyOverlay> = {
     carrierHonesty:
       'Treat course websites as read-only metadata and schedule carriers first; public visibility does not make their raw materials AI-readable by default.',
     operatorNote:
-      'Course-site answers should stay summary-first, preserve possible-match uncertainty, and prefer export-first review for syllabus, policy, and exam material.',
+      'Course-site answers should stay within the current scope-limited runtime lane, preserve possible-match uncertainty, and prefer export-first review for syllabus, policy, and exam material.',
   },
 };
 

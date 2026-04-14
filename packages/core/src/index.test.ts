@@ -92,7 +92,7 @@ describe('core contracts', () => {
           planLabel: 'Student Plan',
           currentStage: 'partial_shared_landing',
           runtimePosture: 'comparison_oriented_planning_substrate',
-          currentTruth: 'MyPlan is a real planning lane but still summary-first.',
+          currentTruth: 'MyPlan is a real planning lane and already a landed summary lane.',
           termCount: 2,
           plannedCourseCount: 6,
           backupCourseCount: 1,
@@ -309,7 +309,7 @@ describe('core contracts', () => {
 
     expect(request.body.messages[0]?.content).toContain('Current site policy overlay: MyPlan.');
     expect(request.body.messages[1]?.content).toContain('"coverageStatus":"plan_and_audit"');
-    expect(request.body.messages[1]?.content).toContain('still stays summary-first and read-only');
+    expect(request.body.messages[1]?.content).toContain('is now a landed summary lane, but it still stays read-only and detail/runtime-lane pending');
     expect(request.body.messages[1]?.content).toContain('Transfer equivalency review remains manual.');
   });
 
@@ -400,6 +400,7 @@ describe('core contracts', () => {
           {
             id: 'admin:transcript:1',
             family: 'transcript',
+            laneStatus: 'landed_summary_lane',
             title: 'Transcript summary',
             summary: 'GPA detail and transcript standing stay export-first until a stronger lane is promoted.',
             importance: 'high',
@@ -435,7 +436,7 @@ describe('core contracts', () => {
           provenance: [
             {
               sourceType: 'derived_read_model',
-              label: 'Administrative summary-first substrate',
+              label: 'Administrative landed summary lane',
               readOnly: true,
             },
           ],
@@ -477,6 +478,7 @@ describe('core contracts', () => {
           {
             id: 'admin:transcript:1',
             family: 'transcript',
+            laneStatus: 'carrier_not_landed',
             title: 'Transcript summary',
             summary: 'Transcript detail is still review-first until a stronger lawful lane lands.',
             importance: 'high',
@@ -512,7 +514,7 @@ describe('core contracts', () => {
           provenance: [
             {
               sourceType: 'derived_read_model',
-              label: 'Administrative summary-first substrate',
+              label: 'Administrative landed summary lane',
               readOnly: true,
             },
           ],

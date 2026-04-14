@@ -426,6 +426,120 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Open link');
   });
 
+  it('marks Canvas module, group, and recording carriers with semantic badges', () => {
+    const markup = renderToStaticMarkup(
+      <WorkbenchOperationsSections
+        text={getUiText('en')}
+        uiLanguage="en"
+        surface="sidepanel"
+        planningSubstrates={[]}
+        currentResources={[
+          {
+            id: 'canvas:resource:module-item:42:7001:8107',
+            kind: 'resource',
+            site: 'canvas',
+            source: {
+              site: 'canvas',
+              resourceId: '42:7001:8107',
+              resourceType: 'assignment_reference',
+            },
+            courseId: 'canvas:course:42',
+            resourceKind: 'link',
+            title: 'Checkpoint 1',
+            summary: 'Week 1',
+            detail: 'Assignment · Week 1',
+            url: 'https://canvas.example.edu/courses/42/assignments/88',
+          },
+          {
+            id: 'canvas:resource:group:901',
+            kind: 'resource',
+            site: 'canvas',
+            source: { site: 'canvas', resourceId: '901', resourceType: 'group' },
+            courseId: 'canvas:course:42',
+            resourceKind: 'link',
+            title: 'Project Team 7',
+            detail: 'Canvas group · 4 members · invitation_only',
+            url: 'https://canvas.example.edu/groups/901',
+          },
+          {
+            id: 'canvas:resource:media:media-42',
+            kind: 'resource',
+            site: 'canvas',
+            source: { site: 'canvas', resourceId: 'media-42', resourceType: 'media_object' },
+            courseId: 'canvas:course:42',
+            resourceKind: 'embed',
+            title: 'Lecture capture 3',
+            detail: 'Canvas media · video',
+            url: 'https://canvas.example.edu/media_objects/media-42',
+          },
+        ]}
+        currentAssignments={[]}
+        currentAnnouncements={[]}
+        currentMessages={[]}
+        currentEvents={[]}
+        orderedSiteStatus={[]}
+        syncFeedback={{}}
+        onSyncSite={async () => {}}
+        onExport={async () => {}}
+        latestSyncRun={undefined}
+        recentChangeEvents={[]}
+      />,
+    );
+
+    expect(markup).toContain('module assignment');
+    expect(markup).toContain('group');
+    expect(markup).toContain('recording');
+  });
+
+  it('shows Gradescope review summaries on current task cards without promoting raw artifacts', () => {
+    const markup = renderToStaticMarkup(
+      <WorkbenchOperationsSections
+        text={getUiText('en')}
+        uiLanguage="en"
+        surface="sidepanel"
+        planningSubstrates={[]}
+        currentResources={[]}
+        currentAssignments={[
+          {
+            id: 'gradescope:assignment:7244652',
+            kind: 'assignment',
+            site: 'gradescope',
+            source: { site: 'gradescope', resourceId: '7244652', resourceType: 'assignment' },
+            title: 'Concept Check 30',
+            status: 'graded',
+            summary: 'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations]',
+            detail: 'Actions: Download graded copy | Submission history | Request regrade (Please select a question.)',
+            reviewSummary: {
+              questions: [
+                {
+                  label: 'Q2.1 redacted-question-title',
+                  modality: 'manual',
+                  score: 3,
+                  maxScore: 9,
+                  rubricLabels: ['Needs work'],
+                  annotationCount: 3,
+                  annotationPages: [3],
+                },
+              ],
+            },
+          },
+        ]}
+        currentAnnouncements={[]}
+        currentMessages={[]}
+        currentEvents={[]}
+        orderedSiteStatus={[]}
+        syncFeedback={{}}
+        onSyncSite={async () => {}}
+        onExport={async () => {}}
+        latestSyncRun={undefined}
+        recentChangeEvents={[]}
+      />,
+    );
+
+    expect(markup).toContain('Review summary: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations]');
+    expect(markup).toContain('Actions: Download graded copy | Submission history | Request regrade');
+  });
+
   it('shows local review decision controls for cluster matches instead of leaving possible matches read-only', () => {
     const markup = renderToStaticMarkup(
       <WorkbenchOperationsSections

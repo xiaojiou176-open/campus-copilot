@@ -159,13 +159,13 @@ describe('ai runtime contracts', () => {
     expect(getAiSitePolicyOverlay('canvas')).toEqual({
       site: 'canvas',
       siteLabel: 'Canvas',
-      allowedFamilies: ['assignments', 'announcements', 'grades', 'calendar'],
+      allowedFamilies: ['assignments', 'announcements', 'grades', 'calendar', 'resource metadata'],
       exportOnlyFamilies: ['course_material_excerpt'],
       forbiddenAiObjects: ['unfinished assignment detail pages', 'raw course files', 'raw submission payloads'],
       carrierHonesty:
         'Treat Canvas data as a read-only campus carrier and never present session-backed paths as official public APIs.',
       operatorNote:
-        'Canvas answers should stay grounded in structured entities, cited exports, and explicit trust gaps.',
+        'Canvas answers should stay grounded in structured entities, cited exports, and explicit trust gaps while treating landed module/group/media carriers as resource metadata instead of raw course material access.',
     });
     expect(getAiSitePolicyOverlay('time-schedule')).toEqual({
       site: 'time-schedule',
@@ -213,7 +213,7 @@ describe('ai runtime contracts', () => {
     expect(messages.systemPrompt).toContain('assignment PDFs');
     expect(messages.systemPrompt).toContain('Advanced material analysis stays default-disabled');
     expect(messages.systemPrompt).toContain('Current site policy overlay: Canvas.');
-    expect(messages.systemPrompt).toContain('Allowed structured families: assignments, announcements, grades, calendar.');
+    expect(messages.systemPrompt).toContain('Allowed structured families: assignments, announcements, grades, calendar, resource metadata.');
     expect(messages.systemPrompt).toContain('Export-only but not default AI families: course_material_excerpt.');
     expect(messages.systemPrompt).toContain('"summary"');
     expect(messages.systemPrompt).toContain('"nextActions"');

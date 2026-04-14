@@ -476,6 +476,9 @@ export type AdministrativeSummaryFamily = z.infer<typeof AdministrativeSummaryFa
 export const AdministrativeAiDefaultSchema = z.enum(['blocked', 'confirm_required', 'allowed']);
 export type AdministrativeAiDefault = z.infer<typeof AdministrativeAiDefaultSchema>;
 
+export const AdministrativeLaneStatusSchema = z.enum(['landed_summary_lane', 'carrier_not_landed']);
+export type AdministrativeLaneStatus = z.infer<typeof AdministrativeLaneStatusSchema>;
+
 export const AdminCarrierFamilySchema = z.enum(['transcript', 'finaid', 'accounts', 'tuition_detail', 'profile']);
 export type AdminCarrierFamily = z.infer<typeof AdminCarrierFamilySchema>;
 
@@ -500,6 +503,7 @@ export const AdministrativeSummarySchema = z
   .object({
     id: z.string().min(1),
     family: AdministrativeSummaryFamilySchema,
+    laneStatus: AdministrativeLaneStatusSchema,
     title: z.string().min(1),
     summary: z.string().min(1),
     importance: ImportanceLevelSchema,

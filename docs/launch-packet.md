@@ -6,7 +6,7 @@ supporting public-proof layer.
 It is not the default front-door story.
 
 Use it after the README or docs hub has already established the main product
-identity as a local-first academic decision workspace.
+identity as an academic decision workspace.
 
 Use it when you want one place that answers:
 

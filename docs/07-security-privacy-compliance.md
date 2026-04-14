@@ -1,10 +1,10 @@
 # Security, Privacy, And Compliance Brief
 
-Campus Copilot should remain a local-first study workspace, not a high-permission black-box collector.
+Campus Copilot should remain a reviewable study workspace, not a high-permission black-box collector.
 
 ## Core Security Rules
 
-- local-first by default
+- reviewable local workflow by default
 - minimal necessary upload
 - manual sync, not silent background scanning
 - read-only formal product path

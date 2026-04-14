@@ -178,6 +178,7 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
     administrativeSummaries: (presentation?.administrativeSummaries ?? args.administrativeSummaries ?? []).map((summary) => ({
       id: summary.id,
       family: summary.family,
+      laneStatus: summary.laneStatus,
       title: summary.title,
       summary: summary.summary,
       importance: summary.importance,
@@ -246,7 +247,7 @@ function buildPlanningSubstrateToolPayload(planningSubstrates: WorkbenchView['pl
   if (hasPlanCapture && hasAuditCapture) {
     coverageStatus = 'plan_and_audit';
     exactMissingSlice =
-      'Current Planning Pulse capture includes both plan context and audit-summary context, but it still stays summary-first and read-only.';
+      'Current Planning Pulse capture includes both plan context and audit-summary context and is now a landed summary lane, but it still stays read-only and detail/runtime-lane pending.';
   } else if (hasPlanCapture) {
     coverageStatus = 'plan_only';
     exactMissingSlice =
@@ -287,7 +288,7 @@ function buildPlanningSubstrateToolPayload(planningSubstrates: WorkbenchView['pl
     operatorNotes: [
       ...(primaryPlanning.currentStage ? [`Current stage: ${primaryPlanning.currentStage}.`] : []),
       'Planning Pulse stays a shared planning summary lane, not proof of enrollment entitlement or registration execution state.',
-      'Requirement and degree-progress signals remain summary-first until a stronger standalone detail lane is promoted.',
+      'Requirement and degree-progress signals now live on a landed summary lane until a stronger standalone detail/runtime lane is promoted.',
       ...(additionalSources.length > 0 ? [`Additional planning carriers: ${additionalSources.join(', ')}.`] : []),
       ...(hardDeferredMoves.length > 0
         ? [`Hard deferred moves: ${hardDeferredMoves.join(', ')}.`]

@@ -700,6 +700,50 @@ describe('GradescopeApiClient', () => {
       expect(result.snapshot.assignments?.[0]?.detail).toBe(
         'Q1 · 1 / 1 · Correct; Q2 · 1 / 1 · Correct; Q3 · 1 / 1 · Correct; Q4 · 1 / 1 · Correct; Q5 · 1 / 1 · Correct',
       );
+      expect(result.snapshot.assignments?.[0]?.reviewSummary).toEqual({
+        questions: [
+          {
+            label: 'Q1',
+            modality: 'manual',
+            score: 1,
+            maxScore: 1,
+            rubricLabels: ['Correct'],
+            annotationPages: [],
+          },
+          {
+            label: 'Q2',
+            modality: 'manual',
+            score: 1,
+            maxScore: 1,
+            rubricLabels: ['Correct'],
+            annotationPages: [],
+          },
+          {
+            label: 'Q3',
+            modality: 'manual',
+            score: 1,
+            maxScore: 1,
+            rubricLabels: ['Correct'],
+            annotationPages: [],
+          },
+          {
+            label: 'Q4',
+            modality: 'manual',
+            score: 1,
+            maxScore: 1,
+            rubricLabels: ['Correct'],
+            annotationPages: [],
+          },
+          {
+            label: 'Q5',
+            modality: 'manual',
+            score: 1,
+            maxScore: 1,
+            rubricLabels: ['Correct'],
+            annotationPages: [],
+          },
+        ],
+      });
       expect(result.snapshot.grades?.[0]).toMatchObject({
         id: 'gradescope:grade:351643803',
         assignmentId: 'gradescope:assignment:6836461',
@@ -763,6 +807,37 @@ describe('GradescopeApiClient', () => {
       expect(result.snapshot.assignments?.[0]?.detail).toBe(
         'Q2.1 redacted-question-title · 3 / 9 · Annotations: redacted-annotation-1 | redacted-annotation-2 | +1 more (page 3); Q3.2 redacted-question-title · 1.5 / 3 · Annotations: redacted-annotation-link (page 5); Q3.3 redacted-question-title · 3 / 3 · Annotations: redacted-annotation-5 (page 5)',
       );
+      expect(result.snapshot.assignments?.[0]?.reviewSummary).toEqual({
+        questions: [
+          {
+            label: 'Q2.1 redacted-question-title',
+            modality: 'manual',
+            score: 3,
+            maxScore: 9,
+            rubricLabels: [],
+            annotationCount: 3,
+            annotationPages: [3],
+          },
+          {
+            label: 'Q3.2 redacted-question-title',
+            modality: 'manual',
+            score: 1.5,
+            maxScore: 3,
+            rubricLabels: [],
+            annotationCount: 1,
+            annotationPages: [5],
+          },
+          {
+            label: 'Q3.3 redacted-question-title',
+            modality: 'manual',
+            score: 3,
+            maxScore: 3,
+            rubricLabels: [],
+            annotationCount: 1,
+            annotationPages: [5],
+          },
+        ],
+      });
       expect(result.snapshot.grades?.[0]).toMatchObject({
         id: 'gradescope:grade:375869113',
         assignmentId: 'gradescope:assignment:7244652',

@@ -1,7 +1,7 @@
 {
   "name": "Campus Copilot Read-Only Web Workbench",
   "short_name": "Campus Copilot",
-  "description": "Local-first academic decision workspace for structured campus snapshots and cited AI review.",
+  "description": "Academic decision workspace for structured campus snapshots and cited AI review.",
   "display": "standalone",
   "background_color": "#edf5ef",
   "theme_color": "#1f5d4b",

@@ -90,7 +90,7 @@ describe('web ai panel guardrails', () => {
     expect(html).toContain('Current packaging and overlay');
     expect(html).toContain('Layered policy');
     expect(html).toContain('Site policy overlay');
-    expect(html).toContain('Allowed structured families: assignments, announcements, grades, calendar.');
+    expect(html).toContain('Allowed structured families: assignments, announcements, grades, calendar, resource metadata.');
     expect(html).toContain('Ask AI stays blocked on the web surface until the current export envelope carries Layer 2 approval.');
     expect(html).toContain('Imported snapshot envelope');
     expect(html).toContain('What AI can see');

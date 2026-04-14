@@ -562,6 +562,7 @@ function buildAdministrativeSummaries(
       AdministrativeSummarySchema.parse({
         id: `admin-summary:dars:${latestMyPlan.id}`,
         family: 'dars',
+        laneStatus: 'landed_summary_lane',
         title: `${latestMyPlan.planLabel} · Degree requirements`,
         summary:
           latestMyPlan.degreeProgressSummary ??
@@ -587,6 +588,7 @@ function buildAdministrativeSummaries(
       AdministrativeSummarySchema.parse({
         id: `admin-summary:tuition:${signal.id}`,
         family: 'tuition',
+        laneStatus: 'landed_summary_lane',
         title: signal.title,
         summary: signal.summary ?? 'MyUW surfaced a tuition or billing reminder.',
         importance: signal.kind === 'event' ? 'high' : 'medium',
@@ -608,6 +610,7 @@ function buildAdministrativeSummaries(
       AdministrativeSummarySchema.parse({
         id: carrier.id.replace('admin-carrier', 'admin-summary'),
         family: carrier.family,
+        laneStatus: 'landed_summary_lane',
         title: carrier.title,
         summary: carrier.summary,
         importance: carrier.importance,
@@ -686,6 +689,7 @@ function buildAdministrativeSummaries(
       AdministrativeSummarySchema.parse({
         id: `admin-summary:${blocker.family}:blocker`,
         family: blocker.family,
+        laneStatus: 'carrier_not_landed',
         title: blocker.title,
         summary: blocker.summary,
         importance: blocker.importance,

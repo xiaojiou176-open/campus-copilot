@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --env-file-if-exists=../../.env --watch --experimental-strip-types src/server.ts",
-    "start": "node --env-file-if-exists=../../.env --experimental-strip-types src/server.ts",
+    "dev": "pnpm exec tsx watch src/server.ts",
+    "start": "pnpm exec tsx src/server.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
   "dependencies": {
     "@campus-copilot/ai": "workspace:*",
     "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }

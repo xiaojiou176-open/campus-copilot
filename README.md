@@ -1,6 +1,6 @@
 # Campus Copilot
 
-> A local-first academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
+> An academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
 
 [Docs](docs/README.md) · [Quickstart](#quickstart) · [Integrations](INTEGRATIONS.md) · [Distribution](DISTRIBUTION.md) · [Privacy](PRIVACY.md) · [Product Brief](docs/01-product-prd.md) · [Academic Safety](docs/17-academic-expansion-and-safety-contract.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [AI Collaboration](CLAUDE.md) · [Security](SECURITY.md) · [License](LICENSE)
 
@@ -35,9 +35,9 @@ It is an **academic decision workspace** for students who want one place to answ
 The product stays intentionally narrow:
 
 - **Structured data first**: adapters normalize site-specific data into one shared schema.
-- **Local-first by default**: storage, workbench views, filtering, and export live locally.
+- **User-controlled workspace by default**: storage, workbench views, filtering, and export stay on the student side instead of pretending this is a hosted school platform.
 - **AI after structure**: AI can summarize or explain the workbench result, but it does not read raw DOM, raw HTML, cookies, or raw course files/instructor-authored materials by default. The only advanced material-analysis path currently allowed is still default-off, per-course, excerpt-only, and user-confirmed.
-- **Academic safety contract**: read-only academic expansion beyond the current four-site sync core, including the current `Time Schedule` and `MyPlan` lanes, must stay local-first and outside red-zone registration automation.
+- **Academic safety contract**: read-only academic expansion beyond the current four-site sync core, including the current `Time Schedule` and `MyPlan` lanes, stays outside red-zone registration automation and other high-risk school actions.
 - **Export is a first-class feature**: Markdown, CSV, JSON, and ICS are part of the core product, not an afterthought.
 
 You can think of it like a school desk instead of a chat window:
@@ -269,7 +269,7 @@ pnpm test:coverage
 
 ### Formal product paths
 
-- Local-first read-only workflow
+- Read-only academic workflow
 - Shared schema + Dexie read models
 - Local user-state overlay and derived decision views
 - Manual sync from supported sites
@@ -329,19 +329,19 @@ If your intent is specifically **Codex / Claude Code / OpenClaw / MCP onboarding
 4. [Builder examples](examples/README.md)
 5. [Public skills](skills/README.md)
 6. [Public distribution ledger](docs/14-public-distribution-scoreboard.md)
-7. [Builder API and ecosystem fit](docs/10-builder-api-and-ecosystem-fit.md)
+7. [Integration API and ecosystem fit](docs/10-builder-api-and-ecosystem-fit.md)
 
 ## Builder Quick Paths
 
 If you are here for MCP, SDK, CLI, or coding-agent integration, start here
 **after** the student-facing loop and repo-local proof path already make sense.
 
-Use this order when you want the shortest honest builder route:
+Use this order when you want the shortest honest integration route:
 
 1. [examples/README.md](examples/README.md)
 2. [examples/toolbox-chooser.md](examples/toolbox-chooser.md)
 3. [examples/integrations/README.md](examples/integrations/README.md)
-4. [examples/mcp/README.md](examples/mcp/README.md) if you already know you want the site-sidecar route
+4. [examples/mcp/README.md](examples/mcp/README.md) if you already know you want the site-specific integration route
 5. [skills/README.md](skills/README.md), [skills/catalog.json](skills/catalog.json), and [skills/clawhub-submission.packet.json](skills/clawhub-submission.packet.json)
 6. [docs/16-distribution-preflight-packets.md](docs/16-distribution-preflight-packets.md) if you care about repo-side submission packets and preflight checks
 7. the package READMEs under `packages/*/README.md` for the exact surface you want to consume
@@ -350,7 +350,7 @@ Use this order when you want the shortest honest builder route:
 
 The guardrail stays simple:
 
-> Campus Copilot can be a strong read-only context surface for builders.
+> Campus Copilot can be a strong read-only context surface for integrations.
 > It is still **not** a hosted autonomy layer, a public MCP platform, or a write-capable browser-control product.
 
 ## Consumer Onboarding Matrix
@@ -360,17 +360,17 @@ this routing table instead of guessing:
 
 | Consumer | Start here | Best when you want | Keep this boundary |
 | :-- | :-- | :-- | :-- |
-| Codex | [`examples/integrations/codex-mcp.example.json`](examples/integrations/codex-mcp.example.json) | one generic stdio MCP server over the local BFF plus imported snapshots when repo-root launch or `cwd` support is available | read-only, local-first, not browser control |
-| Codex without `cwd` support | [`examples/integrations/codex-mcp-shell.example.json`](examples/integrations/codex-mcp-shell.example.json) | the same generic MCP server, but with an explicit repo-root shell wrapper | still local-first and read-only |
+| Codex | [`examples/integrations/codex-mcp.example.json`](examples/integrations/codex-mcp.example.json) | one generic stdio MCP server over the local BFF plus imported snapshots when repo-root launch or `cwd` support is available | read-only, user-controlled, not browser control |
+| Codex without `cwd` support | [`examples/integrations/codex-mcp-shell.example.json`](examples/integrations/codex-mcp-shell.example.json) | the same generic MCP server, but with an explicit repo-root shell wrapper | still user-controlled and read-only |
 | Claude Code / Claude Desktop | [`examples/integrations/claude-code-mcp.example.json`](examples/integrations/claude-code-mcp.example.json) and [`examples/mcp/claude-desktop.example.json`](examples/mcp/claude-desktop.example.json) | the same read-only MCP path, either generic or site-scoped | snapshot-first or thin-BFF-first, never write-capable |
-| Claude Code without `cwd` support | [`examples/integrations/claude-code-mcp-shell.example.json`](examples/integrations/claude-code-mcp-shell.example.json) | the same generic MCP path, but with an explicit repo-root shell wrapper | still local-first and read-only |
+| Claude Code without `cwd` support | [`examples/integrations/claude-code-mcp-shell.example.json`](examples/integrations/claude-code-mcp-shell.example.json) | the same generic MCP path, but with an explicit repo-root shell wrapper | still user-controlled and read-only |
 | OpenClaw-style local runtimes | [`examples/openclaw-readonly.md`](examples/openclaw-readonly.md) | a local operator/runtime that can launch stdio MCP tools but should keep Campus Copilot as a context provider | use command snippets directly unless your runtime explicitly supports the same `mcpServers` shape |
-| CLI-first builder checks | [`examples/cli-usage.md`](examples/cli-usage.md) | quick status, provider readiness, per-site inspection, or export from a terminal | local BFF or snapshot only |
-| SDK-first builder code | [`examples/sdk-usage.ts`](examples/sdk-usage.ts) | embedding the read-side contract in your own scripts or tools | shared schema/snapshot/BFF substrate only |
+| Terminal checks | [`examples/cli-usage.md`](examples/cli-usage.md) | quick status, provider readiness, per-site inspection, or export from a terminal | local BFF or snapshot only |
+| SDK integration code | [`examples/sdk-usage.ts`](examples/sdk-usage.ts) | embedding the read-side contract in your own scripts or tools | shared schema/snapshot/BFF substrate only |
 
 For deterministic first-run examples, prefer [`examples/workspace-snapshot.sample.json`](examples/workspace-snapshot.sample.json) before you involve any live browser state.
 
-If you are already sure you want a builder-facing surface but do not know whether to choose MCP, a site sidecar, CLI, `workspace-sdk`, or `site-sdk`, start with [`examples/toolbox-chooser.md`](examples/toolbox-chooser.md).
+If you are already sure you want an integration surface but do not know whether to choose MCP, a site-scoped integration, CLI, `workspace-sdk`, or `site-sdk`, start with [`examples/toolbox-chooser.md`](examples/toolbox-chooser.md).
 
 ## Current Scope vs Next Phase
 
@@ -380,15 +380,15 @@ mixing them into one big promise:
 - **Current formal scope**: the four-site workbench, shared schema/read-model truth, Wave 2 read-only depth already normalized into assignment/message/event/resource detail, extension + standalone web workbench surfaces, export, cited AI, and the shared BFF seam for `OpenAI` / `Gemini` / optional local `Switchyard`
 - **Read-only academic expansion lane**: `MyPlan`, `DARS`, `Time Schedule`, `DawgPath`, and class-search-only `ctcLink`, still outside `Register.UW` / `Notify.UW` automation
 - **Current repo-side expansion progress**: `Time Schedule` now has a shared runtime landing on the public course-offerings carrier, and `MyPlan` now has a shared planning substrate plus read-only planning summary surfaces in both the extension and the web workbench; both lines must still be described as limited read-only expansion support, not as registration automation or full upstream-site parity
-- **Current builder preview**: repo-public read-only SDK / CLI / MCP surfaces plus a repo-local provider-runtime seam package over imported snapshots and the thin BFF
+- **Current integration preview**: repo-public read-only SDK / CLI / MCP surfaces plus a repo-local provider-runtime seam package over imported snapshots and the thin BFF
 - **Current internal direction**: browser control-plane diagnostics stay internal, and Wave 5 continues the `Switchyard-first` cutover without giving away Campus-owned answer semantics or student-facing stop-rule logic
 - **Later ambition**: broader publication, release-channel distribution, and launch-facing `SEO / video` work
 
 Use [docs/11-wave1-contract-freeze-gap-matrix.md](docs/11-wave1-contract-freeze-gap-matrix.md), [docs/12-wave4-7-omnibus-ledger.md](docs/12-wave4-7-omnibus-ledger.md), and [docs/13-site-depth-exhaustive-ledger.md](docs/13-site-depth-exhaustive-ledger.md) as the canonical matrices for that split.
 
-## Builder-Facing Surface
+## Integration Surface
 
-Today the builder-facing surface is intentionally narrow, but it is no longer
+Today the integration surface is intentionally narrow, but it is no longer
 just "future direction":
 
 - **Current API layer**: a thin local BFF in `apps/api` for formal `OpenAI` / `Gemini` API-key calls plus the shared local `Switchyard` bridge
@@ -407,9 +407,9 @@ just "future direction":
 
 The honest statement is:
 
-> Campus Copilot already has a real AI/runtime spine and a real read-only builder toolbox preview, but it is **not** a hosted autonomy platform, a live-browser control product, or a write-capable MCP server.
+> Campus Copilot already has a real AI/runtime spine and a real read-only integration toolbox preview, but it is **not** a hosted autonomy platform, a live-browser control product, or a write-capable MCP server.
 
-If you want the full builder-facing explanation, read [docs/10-builder-api-and-ecosystem-fit.md](docs/10-builder-api-and-ecosystem-fit.md).
+If you want the full integration-facing explanation, read [docs/10-builder-api-and-ecosystem-fit.md](docs/10-builder-api-and-ecosystem-fit.md).
 If you want the bundle-grade vs listing-grade truth behind those surfaces, read [docs/14-public-distribution-scoreboard.md](docs/14-public-distribution-scoreboard.md).
 
 ## Trust Signals
@@ -442,7 +442,7 @@ Those belong in manual checklists or runbooks, not in the repository’s primary
 The strongest parts of the repository today are:
 
 - architecture boundaries
-- local-first data flow
+- user-controlled data flow
 - failure modeling
 - deterministic repository verification
 
@@ -480,4 +480,4 @@ If this project is useful to you, the best reason to star it is not “it alread
 
 The reason to star it now is:
 
-> it already has the hard part — a real local-first data model and multi-site integration skeleton — and the next stage is about turning that strong engineering core into a stronger learning decision workspace.
+> it already has the hard part — a real student-side data model and multi-site integration skeleton — and the next stage is about turning that strong engineering core into a stronger learning decision workspace.

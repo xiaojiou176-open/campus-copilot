@@ -15,7 +15,7 @@ Campus Copilot 的首屏必须先让学生感到：
 
 ### 1.1 产品定位
 
-- 正式定位：`local-first academic decision workspace + AI browser companion`
+- 正式定位：`academic decision workspace with local storage + AI browser companion`
 - 体验顺序：`结构化事实 -> 决策摘要 -> 导出 -> cited AI explanation`
 - 绝不漂移成：generic chatbot、站外写操作代理、深埋工程设置的开发者工具
 
@@ -149,8 +149,8 @@ type ExtensionPrimaryMode = 'assistant' | 'export' | 'configuration';
   - `English`: `Your campus companion for this page`
   - `中文`: `这页的校园伴随助手`
 - 上下文副文案：
-  - `English`: `Read-only, local-first, and grounded in the facts already imported or visible for this site.`
-  - `中文`: `只读、本地优先，只基于这个站点已经导入或当前可见的结构化事实继续。`
+  - `English`: `Read-only, grounded in local workspace facts, and based only on what this site already imported or visibly shows.`
+  - `中文`: `只读、基于本地工作区事实，只沿用这个站点已经导入或当前可见的结构化信息继续。`
 - trust strip：
   - `English`: `Manual-only red zones stay outside this product.`
   - `中文`: `涉及注册/通知等红区动作时，本产品只说明，不替你操作。`
@@ -581,7 +581,7 @@ Site permissions
 - `trustworthy`
 - `academic`
 - `structured`
-- `local-first`
+- `grounded in local workspace facts`
 
 不走的方向：
 
@@ -801,4 +801,3 @@ Rounded square badge
 - autodiscovery 是否只试 `8787`，还是未来允许有限候选端口扩展
 - `CSV / ICS` 在各资源族上的精细可用矩阵
 - sidepanel 最终目标宽度与最小高度阈值
-

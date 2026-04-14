@@ -55,7 +55,7 @@ Host permissions are limited to the currently supported study surfaces plus loca
 The repository currently treats these as formal paths:
 
 - normalized multi-site extension runtime
-- local-first workbench views
+- repo-local workbench views
 - course-website family as a read-only repo-side expansion lane on the existing `Course / Assignment / Event / Resource` contracts
 - cluster/admin deepwater summaries on the storage/read-model layer
 - standalone read-only web workbench over imported workspace snapshots

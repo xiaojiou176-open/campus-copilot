@@ -1,6 +1,7 @@
 import type { PriorityReason, Site } from '@campus-copilot/schema';
 import {
   setClusterReviewDecision,
+  type AdministrativeSummary,
   type ClusterReviewDecision,
   type ClusterReviewTargetKind,
 } from '@campus-copilot/storage';
@@ -245,6 +246,28 @@ function getResourceActionLabel(
 }
 
 function getResourceSemanticLabel(resource: OperationsSectionProps['currentResources'][number]) {
+  if (resource.site === 'canvas') {
+    switch (resource.source.resourceType) {
+      case 'group':
+        return 'group';
+      case 'media_object':
+      case 'recording':
+        return 'recording';
+      case 'assignment_reference':
+        return 'module assignment';
+      case 'discussion_reference':
+        return 'module discussion';
+      case 'quiz_reference':
+        return 'module quiz';
+      case 'file_reference':
+        return 'module file';
+      case 'module_header':
+        return 'module header';
+      case 'module_item':
+        return 'module item';
+    }
+  }
+
   if (resource.site === 'edstem') {
     if (resource.id.startsWith('edstem:lesson:')) {
       return 'lesson';
@@ -255,6 +278,37 @@ function getResourceSemanticLabel(resource: OperationsSectionProps['currentResou
   }
 
   return resource.resourceKind;
+}
+
+function getAssignmentReviewSummary(assignment: OperationsSectionProps['currentAssignments'][number]) {
+  const questions = assignment.reviewSummary?.questions ?? [];
+  if (questions.length === 0) {
+    return undefined;
+  }
+
+  const visible = questions.slice(0, 3).map((question) => {
+    const score =
+      question.score !== undefined || question.maxScore !== undefined
+        ? ` ${question.score ?? '-'} / ${question.maxScore ?? '-'}`
+        : '';
+    const rubric = question.rubricLabels.length > 0 ? ` (${question.rubricLabels.join(', ')})` : '';
+    const comments =
+      question.evaluationCommentCount !== undefined
+        ? ` [${question.evaluationCommentCount} comment${question.evaluationCommentCount === 1 ? '' : 's'}]`
+        : '';
+    const annotations =
+      question.annotationCount !== undefined
+        ? ` [${question.annotationCount} annotation${question.annotationCount === 1 ? '' : 's'}]`
+        : '';
+    return `${question.label}${score}${rubric}${comments}${annotations}`;
+  });
+  const remaining = questions.length - visible.length;
+
+  return `Review summary: ${visible.join('; ')}${remaining > 0 ? `; +${remaining} more` : ''}`;
+}
+
+function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
+  return summary.laneStatus === 'carrier_not_landed' ? 'carrier not landed' : 'landed summary lane';
 }
 
 function renderAlertGroup(
@@ -1538,6 +1592,7 @@ export function WorkbenchOperationsSections({
                   <strong>{summary.title}</strong>
                   <div className="surface__pill-row">
                     <span className="surface__badge surface__badge--warning">{summary.family}</span>
+                    <span className="surface__badge surface__badge--neutral">{getAdministrativeLaneLabel(summary)}</span>
                     <span className={`surface__badge surface__badge--${summary.importance}`}>{summary.importance}</span>
                   </div>
                 </div>
@@ -1578,6 +1633,9 @@ export function WorkbenchOperationsSections({
                   </p>
                   {assignment.summary ? <p>{assignment.summary}</p> : null}
                   {assignment.detail ? <p className="surface__meta">{assignment.detail}</p> : null}
+                  {getAssignmentReviewSummary(assignment) ? (
+                    <p className="surface__meta">{getAssignmentReviewSummary(assignment)}</p>
+                  ) : null}
                   {assignment.score !== undefined || assignment.maxScore !== undefined ? (
                     <p className="surface__meta">
                       {assignment.score ?? '-'} / {assignment.maxScore ?? '-'}

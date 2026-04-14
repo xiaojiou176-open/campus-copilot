@@ -33,7 +33,7 @@ Use the Chrome lane as four narrow gates:
 ## What is already truthful to claim
 
 - the repository already builds a real browser extension
-- the extension is local-first and read-only
+- the extension is repo-local and read-only
 - the current workbench surfaces are sidepanel, popup, and options
 - the extension front door is already GitHub-public and Pages-backed
 

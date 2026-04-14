@@ -57,27 +57,27 @@ export const ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS = [
   {
     resourceFamily: 'degree_audit_summary',
     label: 'Degree-audit / DARS summaries',
-    note: 'DARS stays summary-first and review-first. A planning-backed summary carrier may land here later, but without that capture this family should remain an explicit blocker, not an implicit support claim.',
+    note: 'DARS now has a landed summary lane and stays review-first. It is real shared truth, but detail/runtime promotion still remains pending.',
   },
   {
     resourceFamily: 'transcript_summary',
     label: 'Transcript summaries',
-    note: 'Transcript stays summary-first and review-first. When a lawful page-backed summary carrier exists it can land here, but historical-record detail still stays outside a standalone runtime lane.',
+    note: 'Transcript now has a landed summary lane and stays review-first. Historical-record detail still stays outside a standalone runtime lane.',
   },
   {
     resourceFamily: 'financial_aid_summary',
     label: 'Financial-aid summaries',
-    note: 'Financial-aid stays summary-first and review-first. A lawful summary carrier may land here later, but high-sensitivity detail still stays export-first and outside the AI-readable path.',
+    note: 'Financial aid now has a landed summary lane and stays review-first. High-sensitivity detail still stays export-first and outside the AI-readable path.',
   },
   {
     resourceFamily: 'profile_summary',
     label: 'Profile summaries',
-    note: 'Profile stays summary-first and review-first. Personal-profile detail remains export-first and outside the default AI-readable path.',
+    note: 'Profile now has a landed summary lane and stays review-first. Personal-profile detail remains export-first and outside the default AI-readable path.',
   },
   {
     resourceFamily: 'tuition_account_summary',
     label: 'Tuition / account summaries',
-    note: 'Tuition/account summaries stay review-first. Reminder-level signals or page-backed summaries may land here, but billing detail is still not a standalone runtime lane.',
+    note: 'Tuition/account now has a landed summary lane and stays review-first. Billing detail is still not a standalone runtime lane.',
   },
 ] as const;
 
@@ -223,7 +223,7 @@ function buildDefaultAuthorizationRules(): AuthorizationState['rules'] {
       resourceFamily: 'degree_audit_summary',
       label: 'Degree-audit summaries require explicit export confirmation',
       reason:
-        'The current DARS posture is summary-first on the shared planning/admin substrate. Without a planning-backed capture it should remain an explicit blocker, not a support claim.',
+        'The current DARS posture is a landed summary lane on the shared planning/admin substrate. It is a real review/export lane, but not yet a detail/runtime lane.',
     },
     {
       id: 'degree-audit-layer2-summary',
@@ -231,7 +231,7 @@ function buildDefaultAuthorizationRules(): AuthorizationState['rules'] {
       status: 'blocked',
       resourceFamily: 'degree_audit_summary',
       label: 'Degree-audit AI analysis stays blocked until a stronger DARS lane is promoted',
-      reason: 'The current DARS posture is summary-first and export-first, not an AI-readable detail lane.',
+      reason: 'The current DARS posture is a landed summary lane and export-first, not an AI-readable detail/runtime lane.',
     },
     {
       id: 'transcript-layer1-summary',
@@ -240,7 +240,7 @@ function buildDefaultAuthorizationRules(): AuthorizationState['rules'] {
       resourceFamily: 'transcript_summary',
       label: 'Transcript summaries require explicit export confirmation',
       reason:
-        'Transcript stays summary-first and export-first. A page-backed summary carrier can land here later, but absence of that carrier must stay an explicit blocker.',
+        'Transcript already has a landed summary lane and stays export-first. Historical-record detail still remains outside a detail/runtime lane.',
     },
     {
       id: 'transcript-layer2-summary',
@@ -257,7 +257,7 @@ function buildDefaultAuthorizationRules(): AuthorizationState['rules'] {
       resourceFamily: 'financial_aid_summary',
       label: 'Financial-aid summaries require explicit export confirmation',
       reason:
-        'Financial aid stays summary-first and export-first. A lawful summary carrier can land here later, but absence of that carrier must stay an explicit blocker.',
+        'Financial aid already has a landed summary lane and stays export-first. High-sensitivity detail still remains outside a detail/runtime lane.',
     },
     {
       id: 'financial-aid-layer2-summary',
@@ -274,7 +274,7 @@ function buildDefaultAuthorizationRules(): AuthorizationState['rules'] {
       resourceFamily: 'profile_summary',
       label: 'Profile summaries require explicit export confirmation',
       reason:
-        'Profile stays summary-first and export-first. A page-backed summary carrier can land here later, but personal-profile detail still stays outside the default AI-readable runtime path.',
+        'Profile already has a landed summary lane and stays export-first. Personal-profile detail still stays outside the default AI-readable runtime path.',
     },
     {
       id: 'profile-layer2-summary',
@@ -291,7 +291,7 @@ function buildDefaultAuthorizationRules(): AuthorizationState['rules'] {
       resourceFamily: 'tuition_account_summary',
       label: 'Tuition and account summaries require explicit export confirmation',
       reason:
-        'Tuition/account summaries stay review-first. Reminder-level or page-backed summaries may land here later, but absence of a carrier must stay explicit and billing detail is still not a standalone runtime lane.',
+        'Tuition/account now has a landed summary lane and stays review-first. Billing detail is still not a standalone runtime lane.',
     },
     {
       id: 'tuition-account-layer2-summary',

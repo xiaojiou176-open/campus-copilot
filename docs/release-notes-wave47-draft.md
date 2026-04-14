@@ -7,13 +7,13 @@ listing already happened.
 
 ## Title
 
-`Campus Copilot: truthful dual-surface workbench, tighter public docs, and read-only builder preview`
+`Campus Copilot: truthful dual-surface workbench, tighter public docs, and a read-only integration preview`
 
 ## One-paragraph summary
 
-Campus Copilot is now a more coherent local-first academic decision workspace
+Campus Copilot is now a more coherent academic decision workspace
 across both the extension and the standalone read-only web surface. The repo
-front door is tighter, the read-only builder preview is more clearly described,
+front door is tighter, the read-only integration preview is more clearly described,
 and the back-half roadmap now keeps repo-local truth separate from owner-only
 publication or platform actions.
 
@@ -31,7 +31,7 @@ publication or platform actions.
 - Switchyard is still described as an optional local bridge or later tighter cutover path, not as a hosted product claim
 - internal browser diagnostics stay clearly internal
 
-### Read-only builder preview
+### Read-only integration preview
 
 - read-only SDK / CLI / MCP preview surfaces remain real repo-side
 - repo-local package and example readiness remains real

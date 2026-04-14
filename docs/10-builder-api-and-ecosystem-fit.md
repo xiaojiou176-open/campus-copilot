@@ -1,6 +1,6 @@
-# Builder API And Ecosystem Fit
+# Integration API And Ecosystem Fit
 
-This brief is a builder-facing second-layer explainer, not the repository's
+This brief is an integration-facing second-layer explainer, not the repository's
 front-door identity.
 
 Read it after the student-facing mainline is already clear in `README.md` and
@@ -12,25 +12,25 @@ This brief explains one narrow question:
 
 ## How To Read This File
 
-Use this file when you need the builder/tooling truth split:
+Use this file when you need the integration/tooling truth split:
 
-- what builder surfaces are already real
+- what integration surfaces are already real
 - which ones are read-only or preview-grade
 - which claims still require owner action, upstream listing, or later packaging
 
 Do not use this file as the first product introduction. Campus Copilot is still
-first a student-facing local-first academic decision workspace.
+first a student-facing academic decision workspace.
 
-All builder-facing surfaces in this file still inherit the academic safety contract in [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md):
+All integration-facing surfaces in this file still inherit the academic safety contract in [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md):
 
 - no registration automation
 - no `Register.UW` / `Notify.UW` product path
 - no default AI ingestion of raw course files or instructor-authored materials
 - no rebranding of internal/session-backed academic paths as official public APIs
 
-## Current Builder-Facing Surface
+## Current Integration Surface
 
-Campus Copilot already has a real but secondary **read-side builder spine**:
+Campus Copilot already has a real but secondary **read-side integration spine**:
 
 - a thin local HTTP edge in `apps/api`
 - a shared runtime compat seam in `packages/provider-runtime`
@@ -39,7 +39,7 @@ Campus Copilot already has a real but secondary **read-side builder spine**:
 - export-ready structured output in `packages/exporter`
 - a standalone imported-workspace web surface in `apps/web` that reuses the same storage/export/AI contract
 
-That makes the repository useful to builders who arrive after the product story
+That makes the repository useful to integrators who arrive after the product story
 is already grounded and want:
 
 - structured academic context instead of raw browser noise
@@ -81,7 +81,7 @@ If you want a machine-readable version of the same current local contract, read 
 
 ## Minimal Request Examples
 
-These examples are intentionally small and local-first.
+These examples are intentionally small and repo-local.
 They show the current real contract surface without pretending this is already a hosted public API.
 
 ### Health
@@ -200,7 +200,7 @@ export async function askCampusCopilot(question: string) {
 }
 ```
 
-These examples are builder-facing convenience examples, not a promise that the repository already ships:
+These examples are integration-facing convenience examples, not a promise that the repository already ships:
 
 - hosted multi-tenant API access
 - public auth flows
@@ -217,7 +217,7 @@ The repository already has real substrate pieces, and it now ships repo-public p
 - `packages/provider-runtime`: Switchyard compat seam that keeps Campus-owned answer semantics separate from runtime transport
 - `packages/gradescope-api`, `packages/edstem-api`, `packages/myuw-api`: read-only site API preview libraries over the current adapter clients
 
-The next academic builder lane still includes read-only planning/search surfaces such as `MyPlan`, `DARS`, `Time Schedule`, `DawgPath`, and class-search-only `ctcLink`, but they no longer all sit at the same maturity level:
+The next academic integration lane still includes read-only planning/search surfaces such as `MyPlan`, `DARS`, `Time Schedule`, `DawgPath`, and class-search-only `ctcLink`, but they no longer all sit at the same maturity level:
 
 - `MyPlan` now has a shared planning-substrate lane plus extension/web `Planning Pulse` adoption
 - `Time Schedule` now has a limited shared runtime/site lane on the public course-offerings carrier
@@ -226,12 +226,12 @@ The next academic builder lane still includes read-only planning/search surfaces
 
 Those lanes are still not the same thing as full shipped site parity, and should continue to be described with truthful partial/isolated wording rather than as current first-class site support.
 
-This is the honest builder statement:
+This is the honest integration statement:
 
 > Campus Copilot already has a reusable schema/storage/export spine, and it now
 > exposes repo-public read-only SDK / CLI / MCP surfaces plus a public-ready
-> repo-local provider-runtime seam package, but that builder layer is still not
-> the repository's first identity and it is not a hosted SDK or autonomy
+> repo-local provider-runtime seam package, but that integration layer is still
+> not the repository's first identity and it is not a hosted SDK or autonomy
 > product.
 
 ## Current Read-Only Toolbox Preview
@@ -333,7 +333,7 @@ Those categories overstate the current product and reopen risk boundaries the re
 If a team still wants to consume Campus Copilot from an OpenClaw-style local operator/runtime, the safe path is:
 
 - keep Campus Copilot on the snapshot/BFF/read-only side
-- use the generic stdio MCP server or one site-scoped snapshot sidecar
+- use the generic stdio MCP server or one site-scoped snapshot surface
 - do not market that setup as live browser control or a write-capable plugin
 
 ## Current Scope vs Later
@@ -363,11 +363,11 @@ If you are integrating Campus Copilot from a coding agent or local runtime, open
 | Consumer shape | Open this first | What it proves today | What it still does not prove |
 | :-- | :-- | :-- | :-- |
 | Generic Codex-style MCP client | [`../examples/integrations/codex-mcp.example.json`](../examples/integrations/codex-mcp.example.json) | the combined read-only stdio server is real and repo-consumable | hosted/public MCP distribution |
-| Claude Code / Claude Desktop | [`../examples/integrations/claude-code-mcp.example.json`](../examples/integrations/claude-code-mcp.example.json), [`../examples/mcp/claude-desktop.example.json`](../examples/mcp/claude-desktop.example.json) | combined server and site-scoped sidecar wiring are both real | live browser control or write capability |
+| Claude Code / Claude Desktop | [`../examples/integrations/claude-code-mcp.example.json`](../examples/integrations/claude-code-mcp.example.json), [`../examples/mcp/claude-desktop.example.json`](../examples/mcp/claude-desktop.example.json) | combined server and site-scoped snapshot wiring are both real | live browser control or write capability |
 | OpenClaw-style local operator/runtime | [`../examples/openclaw-readonly.md`](../examples/openclaw-readonly.md) | Campus Copilot can stay on the snapshot/BFF/read-only side of a local runtime | official plugin positioning, hosted autonomy, or write-capable operator loops |
-| Skill-first builder workflow | [`../skills/README.md`](../skills/README.md) | repo-local public skills already exist for snapshot analysis and MCP consumption | hosted/public skill distribution |
+| Skill-first integration workflow | [`../skills/README.md`](../skills/README.md) | repo-local public skills already exist for snapshot analysis and MCP consumption | hosted/public skill distribution |
 
-## Builder Entry Path
+## Integration Entry Path
 
 If you want to integrate with the current repository shape, start here:
 

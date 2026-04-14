@@ -107,8 +107,9 @@ describe('web workbench planning pulse', () => {
           {
             id: 'admin:transcript:1',
             family: 'transcript',
+            laneStatus: 'landed_summary_lane',
             title: 'Transcript summary',
-            summary: 'Latest transcript lane is still summary-first and export-first.',
+            summary: 'Latest transcript lane is already a landed summary lane and stays export-first.',
             importance: 'high',
             aiDefault: 'confirm_required',
             authoritySource: 'myuw summary lane',
@@ -153,7 +154,7 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Imported snapshot: Imported planning packet');
     expect(html).toContain('Read/export partial · AI blocked');
     expect(html).toContain('Allowed: planning substrates, degree requirement summaries, schedule option context.');
-    expect(html).toContain('Summary-first admin lanes: transcript.');
+    expect(html).toContain('Landed summary lanes: transcript.');
     expect(html).toContain('Planning Pulse');
     expect(html).toContain('Allen School planning draft');
     expect(html).toContain('3 term(s) · 9 planned course(s) · 2 backup course(s) · 4 schedule option(s)');
@@ -232,5 +233,152 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('grouped resource');
     expect(html).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
     expect(html).toContain('ZIP · A. Using - Spring 2026 · Download file');
+  });
+
+  it('shows Canvas semantic badges for landed module, group, and recording carriers', () => {
+    const html = renderToStaticMarkup(
+      createElement(WebWorkbenchPanels, {
+        workbenchReady: true,
+        todaySnapshot: {
+          totalAssignments: 0,
+          dueSoonAssignments: 0,
+          recentUpdates: 0,
+          newGrades: 0,
+          riskAlerts: 0,
+          syncedSites: 1,
+        },
+        recentUpdates: { unseenCount: 0, items: [] },
+        currentViewExport: undefined,
+        importedEnvelope: undefined,
+        focusQueue: [],
+        planningSubstrates: [],
+        weeklyLoad: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+        currentAssignments: [],
+        currentMessages: [],
+        currentResources: [
+          {
+            id: 'canvas:resource:module-item:42:7001:8107',
+            site: 'canvas',
+            source: { resourceType: 'assignment_reference' },
+            title: 'Checkpoint 1',
+            resourceKind: 'link',
+            summary: 'Week 1',
+            detail: 'Assignment · Week 1',
+          },
+          {
+            id: 'canvas:resource:group:901',
+            site: 'canvas',
+            source: { resourceType: 'group' },
+            title: 'Project Team 7',
+            resourceKind: 'link',
+            detail: 'Canvas group · 4 members · invitation_only',
+          },
+          {
+            id: 'canvas:resource:media:media-42',
+            site: 'canvas',
+            source: { resourceType: 'media_object' },
+            title: 'Lecture capture 3',
+            resourceKind: 'embed',
+            detail: 'Canvas media · video',
+          },
+        ],
+        currentAnnouncements: [],
+        currentEvents: [],
+        recentChangeEvents: [],
+        countsBySite: [],
+        topSyncRun: undefined,
+        siteLabels: {
+          canvas: 'Canvas',
+          gradescope: 'Gradescope',
+          edstem: 'EdStem',
+          myuw: 'MyUW',
+          'time-schedule': 'Time Schedule',
+          'course-sites': 'Course Websites',
+        },
+      }),
+    );
+
+    expect(html).toContain('module assignment');
+    expect(html).toContain('group');
+    expect(html).toContain('recording');
+  });
+
+  it('shows Gradescope review summaries on current task cards', () => {
+    const html = renderToStaticMarkup(
+      createElement(WebWorkbenchPanels, {
+        workbenchReady: true,
+        todaySnapshot: {
+          totalAssignments: 1,
+          dueSoonAssignments: 0,
+          recentUpdates: 0,
+          newGrades: 1,
+          riskAlerts: 0,
+          syncedSites: 1,
+        },
+        recentUpdates: { unseenCount: 0, items: [] },
+        currentViewExport: undefined,
+        importedEnvelope: undefined,
+        focusQueue: [],
+        planningSubstrates: [],
+        weeklyLoad: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+        currentAssignments: [
+          {
+            id: 'gradescope:assignment:7244652',
+            site: 'gradescope',
+            title: 'Concept Check 30',
+            status: 'graded',
+            summary: 'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations]',
+            detail: 'Actions: Download graded copy | Submission history | Request regrade (Please select a question.)',
+            reviewSummary: {
+              questions: [
+                {
+                  label: 'Q2.1 redacted-question-title',
+                  score: 3,
+                  maxScore: 9,
+                  rubricLabels: ['Needs work'],
+                  annotationCount: 3,
+                },
+              ],
+            },
+          },
+        ],
+        currentMessages: [],
+        currentResources: [],
+        currentAnnouncements: [],
+        currentEvents: [],
+        recentChangeEvents: [],
+        countsBySite: [],
+        topSyncRun: undefined,
+        siteLabels: {
+          canvas: 'Canvas',
+          gradescope: 'Gradescope',
+          edstem: 'EdStem',
+          myuw: 'MyUW',
+          'time-schedule': 'Time Schedule',
+          'course-sites': 'Course Websites',
+        },
+      }),
+    );
+
+    expect(html).toContain('Review summary: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations]');
+    expect(html).toContain('Actions: Download graded copy | Submission history | Request regrade');
   });
 });

@@ -39,7 +39,7 @@
 - 正式架构主链仍是：
   - `schema -> adapters -> storage/read-model -> decision surfaces -> extension/web -> export -> cited AI -> thin BFF`
 - 正式产品身份仍是：
-  - `local-first academic decision workspace`
+  - `academic decision workspace with local storage and read-only operation`
 - 正式强边界仍是：
   - read-only
   - no registration automation
@@ -57,7 +57,7 @@ Campus Copilot 的下一阶段，不再只是“扩站工程”。
 
 它必须朝下面这个方向继续建设：
 
-> **一个本地优先、只读、可信、显式授权、可导出、可 AI 分析的学生决策桌面。**
+> **一个本地存储、只读、可信、显式授权、可导出、可 AI 分析的学生决策桌面。**
 
 说得更直白一点：
 
@@ -172,7 +172,7 @@ AI 要读取、分析、继续 agentic 深挖，必须单独授权。
 所以冻结的新解释是：
 
 - official-first 仍然成立
-- 但在 read-only、local-first、truthful、显式授权前提下：
+- 但在 read-only、repo-local、truthful、显式授权前提下：
   - session-backed
   - private/internal API
   - DOM/state fallback
@@ -328,4 +328,3 @@ AI 要读取、分析、继续 agentic 深挖，必须单独授权。
 - Current implementation choices: [`09-implementation-decisions.md`](09-implementation-decisions.md)
 - Current per-site truth: [`site-capability-matrix.md`](site-capability-matrix.md)
 - Exhaustive per-site ledger: [`13-site-depth-exhaustive-ledger.md`](13-site-depth-exhaustive-ledger.md)
-

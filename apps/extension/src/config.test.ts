@@ -54,10 +54,10 @@ describe('extension config', () => {
     ).toBe(true);
     expect(
       ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS.find((family) => family.resourceFamily === 'degree_audit_summary')?.note,
-    ).toContain('explicit blocker');
+    ).toContain('landed summary lane');
     expect(
       config.authorization.rules.find((rule) => rule.id === 'tuition-account-layer1-summary')?.reason,
-    ).toContain('absence of a carrier must stay explicit');
+    ).toContain('landed summary lane');
   });
 
   it('merges partial updates without dropping nested models or site config', async () => {

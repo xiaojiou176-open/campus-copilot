@@ -15,7 +15,7 @@ door.
 
 ## Product Identity Still Does Not Drift
 
-Campus Copilot remains a **local-first academic decision workspace**.
+Campus Copilot remains an **academic decision workspace with local storage and read-only operation**.
 
 It still does **not** become:
 
@@ -79,7 +79,7 @@ What the committed docs should say about this lane:
 
 - preview is real
 - read-only is real
-- local-first is real
+- repo-local storage is real
 - hosted/public-registry completion is **not** implied
 
 ## Remaining Repo-Local Work
