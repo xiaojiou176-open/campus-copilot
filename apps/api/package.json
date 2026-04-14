@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm exec tsx watch src/server.ts",
-    "start": "pnpm exec tsx src/server.ts",
+    "dev": "node --env-file-if-exists=../../.env --watch --experimental-strip-types src/server.ts",
+    "start": "node --env-file-if-exists=../../.env --experimental-strip-types src/server.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run"
   },
