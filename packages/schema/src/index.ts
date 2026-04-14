@@ -57,6 +57,24 @@ export type Course = z.infer<typeof CourseSchema>;
 export const ResourceKindSchema = z.enum(['file', 'link', 'embed', 'other']);
 export type ResourceKind = z.infer<typeof ResourceKindSchema>;
 
+export const ResourceGroupSchema = z
+  .object({
+    key: z.string().min(1),
+    label: z.string().min(1),
+    memberCount: z.number().int().positive().optional(),
+  })
+  .strict();
+export type ResourceGroup = z.infer<typeof ResourceGroupSchema>;
+
+export const ResourceModuleSchema = z
+  .object({
+    key: z.string().min(1),
+    label: z.string().min(1),
+    itemType: z.string().min(1),
+  })
+  .strict();
+export type ResourceModule = z.infer<typeof ResourceModuleSchema>;
+
 export const ResourceSchema = z
   .object({
     ...BaseEntityShape,
@@ -66,6 +84,8 @@ export const ResourceSchema = z
     title: z.string().min(1),
     summary: z.string().min(1).optional(),
     detail: z.string().min(1).optional(),
+    resourceGroup: ResourceGroupSchema.optional(),
+    resourceModule: ResourceModuleSchema.optional(),
     fileExtension: z.string().min(1).optional(),
     sizeBytes: z.number().int().nonnegative().optional(),
     downloadUrl: z.url().optional(),
@@ -97,6 +117,7 @@ export const AssignmentSchema = z
     submittedAt: IsoDateTimeSchema.optional(),
     score: z.number().finite().optional(),
     maxScore: z.number().finite().optional(),
+    actionHints: z.array(z.string().min(1)).default([]).optional(),
     reviewSummary: z
       .object({
         questions: z.array(

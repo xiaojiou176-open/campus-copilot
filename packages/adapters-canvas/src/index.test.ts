@@ -325,12 +325,22 @@ describe('CanvasApiClient', () => {
             resourceKind: 'link',
             title: 'Week 1 overview',
             summary: 'Week 1',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'item',
+            },
           }),
           expect.objectContaining({
             id: 'canvas:resource:module-item:42:7001:8102',
             courseId: 'canvas:course:42',
             resourceKind: 'embed',
             title: 'Panopto recording',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'recording',
+            },
           }),
           expect.objectContaining({
             id: 'canvas:resource:module-item:42:7001:8106',
@@ -339,6 +349,11 @@ describe('CanvasApiClient', () => {
             title: 'Week 1 worksheet',
             detail: 'File · Week 1',
             fileExtension: '.pdf',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'file',
+            },
           }),
           expect.objectContaining({
             id: 'canvas:resource:module-item:42:7001:8107',
@@ -346,6 +361,11 @@ describe('CanvasApiClient', () => {
             resourceKind: 'link',
             title: 'Checkpoint 1',
             detail: 'Assignment · Week 1',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'assignment',
+            },
           }),
           expect.objectContaining({
             id: 'canvas:resource:module-item:42:7001:8103',
@@ -353,6 +373,11 @@ describe('CanvasApiClient', () => {
             resourceKind: 'link',
             title: 'Lab 1 discussion',
             detail: 'Discussion · Week 1',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'discussion',
+            },
           }),
           expect.objectContaining({
             id: 'canvas:resource:module-item:42:7001:8104',
@@ -360,6 +385,11 @@ describe('CanvasApiClient', () => {
             resourceKind: 'link',
             title: 'Week 1 readiness quiz',
             detail: 'Quiz · Week 1',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'quiz',
+            },
           }),
           expect.objectContaining({
             id: 'canvas:resource:module-item:42:7001:8105',
@@ -367,6 +397,11 @@ describe('CanvasApiClient', () => {
             resourceKind: 'other',
             title: 'Prepare before section',
             detail: 'SubHeader · Week 1',
+            resourceModule: {
+              key: 'canvas:module:42:7001',
+              label: 'Week 1',
+              itemType: 'subheader',
+            },
           }),
           expect.objectContaining({
             id: 'canvas:resource:group:901',

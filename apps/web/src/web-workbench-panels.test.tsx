@@ -108,8 +108,9 @@ describe('web workbench planning pulse', () => {
             id: 'admin:transcript:1',
             family: 'transcript',
             laneStatus: 'landed_summary_lane',
+            detailRuntimeStatus: 'pending',
             title: 'Transcript summary',
-            summary: 'Latest transcript lane is already a landed summary lane and stays export-first.',
+            summary: 'Latest transcript lane currently appears as a review-first summary and stays export-first.',
             importance: 'high',
             aiDefault: 'confirm_required',
             authoritySource: 'myuw summary lane',
@@ -154,7 +155,7 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Imported snapshot: Imported planning packet');
     expect(html).toContain('Read/export partial · AI blocked');
     expect(html).toContain('Allowed: planning substrates, degree requirement summaries, schedule option context.');
-    expect(html).toContain('Landed summary lanes: transcript.');
+    expect(html).toContain('Review-ready summaries: transcript.');
     expect(html).toContain('Planning Pulse');
     expect(html).toContain('Allen School planning draft');
     expect(html).toContain('3 term(s) · 9 planned course(s) · 2 backup course(s) · 4 schedule option(s)');
@@ -207,6 +208,11 @@ describe('web workbench planning pulse', () => {
             site: 'edstem',
             title: 'Starter code',
             resourceKind: 'file',
+            resourceGroup: {
+              key: 'edstem:resource-group:96846:a-using-spring-2026',
+              label: 'A. Using - Spring 2026',
+              memberCount: 2,
+            },
             summary: 'A. Using - Spring 2026',
             detail: 'ZIP · A. Using - Spring 2026 · Download file',
             downloadUrl: 'https://edstem.org/us/courses/96846/resources/1',
@@ -230,7 +236,7 @@ describe('web workbench planning pulse', () => {
 
     expect(html).toContain('Study Materials');
     expect(html).toContain('lesson');
-    expect(html).toContain('grouped resource');
+    expect(html).toContain('resource set');
     expect(html).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
     expect(html).toContain('ZIP · A. Using - Spring 2026 · Download file');
   });
@@ -347,6 +353,7 @@ describe('web workbench planning pulse', () => {
             status: 'graded',
             summary: 'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations]',
             detail: 'Actions: Download graded copy | Submission history | Request regrade (Please select a question.)',
+            actionHints: ['Download graded copy', 'Submission history', 'Request regrade (Please select a question.)'],
             reviewSummary: {
               questions: [
                 {
@@ -378,7 +385,7 @@ describe('web workbench planning pulse', () => {
       }),
     );
 
-    expect(html).toContain('Review summary: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations]');
-    expect(html).toContain('Actions: Download graded copy | Submission history | Request regrade');
+    expect(html).toContain('Question breakdown: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations]');
+    expect(html).toContain('Available actions: Download graded copy · Submission history · Request regrade (Please select a question.)');
   });
 });

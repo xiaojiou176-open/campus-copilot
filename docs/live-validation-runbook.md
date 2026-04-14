@@ -410,7 +410,9 @@ Minimum proof examples:
 
 - EdStem:
   - `reply-body` is now proven through the direct thread-detail DOM carrier and committed redacted fixtures under `packages/adapters-edstem/src/__fixtures__/live/`
-  - course resources are now proven through the authenticated `api/courses/:course_id/resources` carrier with redacted API fixtures; only use Lane E1 again if a new grouped-material or richer download carrier is being proposed beyond the current `Resource` contract
+  - course resources are now proven through the authenticated `api/courses/:course_id/resources` carrier with redacted API fixtures
+  - lesson-detail pages now also show a session-backed `api/lessons/:lesson_id?view=1` carrier; once this local proof is promoted, the remaining question is contract promotion, not proof chase
+  - only use Lane E1 again if a new grouped-material or richer download carrier is being proposed beyond the current `Resource` contract
 - Gradescope:
   - question/rubric/evaluation-comment/annotation detail is now shipped through the graded submission carrier at `/courses/:course_id/assignments/:assignment_id/submissions/:submission_id`
   - only use Lane E1 again if a richer page/image carrier is being proposed beyond the current assignment summary/detail contract

@@ -45,6 +45,7 @@ const baseInput = {
       title: 'Homework 5',
       summary: 'Submitted draft is already in Canvas.',
       detail: 'Q1 1 / 1 · Correct; Q2 0 / 1 · Incorrect',
+      actionHints: ['Download graded copy', 'Submission history'],
       dueAt: '2026-03-26T23:59:00-07:00',
       status: 'todo' as const,
       reviewSummary: {
@@ -306,6 +307,7 @@ describe('exporter package', () => {
     expect(artifact.content).toContain('"match_confidence": "high"');
     expect(artifact.content).toContain('"assignments": 1');
     expect(artifact.content).toContain('"reviewSummary"');
+    expect(artifact.content).toContain('"actionHints"');
     expect(artifact.content).toContain('"rubricLabels"');
     expect(artifact.content).toContain('"timelineEntries": 1');
     expect(artifact.content).toContain('"focusQueue": 1');
@@ -436,8 +438,9 @@ describe('exporter package', () => {
             id: 'admin:transcript:1',
             family: 'transcript',
             laneStatus: 'landed_summary_lane',
+            detailRuntimeStatus: 'pending',
             title: 'Transcript summary',
-            summary: 'Latest transcript lane is already a landed summary lane and stays export-first.',
+            summary: 'Latest transcript lane currently appears as a review-first summary and stays export-first.',
             importance: 'high',
             aiDefault: 'blocked',
             authoritySource: 'myuw summary lane',
@@ -450,7 +453,7 @@ describe('exporter package', () => {
     expect(artifact.packaging.authorizationLevel).toBe('confirm_required');
     expect(artifact.packaging.aiAllowed).toBe(false);
     expect(artifact.packaging.riskLabel).toBe('high');
-    expect(artifact.packaging.provenance.some((entry) => entry.label === 'Administrative landed summary lane')).toBe(true);
+    expect(artifact.packaging.provenance.some((entry) => entry.label === 'Administrative summary surface')).toBe(true);
     expect(
       artifact.packaging.provenance.some((entry) =>
         entry.detail?.includes('their presence does not mean a truthful runtime carrier is landed'),
@@ -507,6 +510,7 @@ describe('exporter package', () => {
             id: 'admin-summary:transcript:blocker',
             family: 'transcript',
             laneStatus: 'carrier_not_landed',
+            detailRuntimeStatus: 'blocked_missing_carrier',
             title: 'Transcript summary lane',
             summary: 'No truthful transcript runtime carrier is landed yet. Historical-record detail remains blocked until a lawful summary carrier is proven.',
             importance: 'high',
@@ -521,7 +525,7 @@ describe('exporter package', () => {
     expect(artifact.packaging.aiAllowed).toBe(false);
     expect(
       artifact.packaging.provenance.some((entry) =>
-        entry.detail?.includes('their presence does not mean every family has a landed summary lane'),
+        entry.detail?.includes('their presence does not mean every family has a summary-ready lane yet'),
       ),
     ).toBe(true);
     expect(artifact.content).toContain('carrier_not_landed');

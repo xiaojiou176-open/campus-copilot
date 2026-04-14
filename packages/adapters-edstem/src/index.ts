@@ -157,6 +157,54 @@ const EdStemResourcesPayloadSchema = z
   })
   .passthrough();
 
+const EdStemRawLessonSlideSchema = z
+  .object({
+    id: z.union([z.number(), z.string()]),
+    lesson_id: z.union([z.number(), z.string()]).optional(),
+    course_id: z.union([z.number(), z.string()]).optional(),
+    type: z.string().optional(),
+    title: z.string().nullable().optional(),
+    index: z.number().nullable().optional(),
+    status: z.string().nullable().optional(),
+  })
+  .passthrough();
+
+const EdStemRawLessonSchema = z
+  .object({
+    id: z.union([z.number(), z.string()]),
+    course_id: z.union([z.number(), z.string()]),
+    module_id: z.union([z.number(), z.string()]).nullable().optional(),
+    title: z.string().optional(),
+    kind: z.string().nullable().optional(),
+    type: z.string().nullable().optional(),
+    status: z.string().nullable().optional(),
+    state: z.string().nullable().optional(),
+    available_at: z.string().nullable().optional(),
+    effective_available_at: z.string().nullable().optional(),
+    due_at: z.string().nullable().optional(),
+    effective_due_at: z.string().nullable().optional(),
+    locked_at: z.string().nullable().optional(),
+    effective_locked_at: z.string().nullable().optional(),
+    solutions_at: z.string().nullable().optional(),
+    effective_solutions_at: z.string().nullable().optional(),
+    created_at: z.string().nullable().optional(),
+    updated_at: z.string().nullable().optional(),
+    submitted_at: z.string().nullable().optional(),
+    attempted_at: z.string().nullable().optional(),
+    attempt_id: z.union([z.number(), z.string()]).nullable().optional(),
+    attempts_remaining: z.number().nullable().optional(),
+    late_submissions: z.boolean().optional(),
+    slide_count: z.number().nullable().optional(),
+    slides: z.array(EdStemRawLessonSlideSchema).default([]),
+  })
+  .passthrough();
+
+const EdStemLessonPayloadSchema = z
+  .object({
+    lesson: EdStemRawLessonSchema,
+  })
+  .passthrough();
+
 type EdStemRawCourse = z.infer<typeof EdStemRawCourseSchema>;
 type EdStemRawCourseMembership = z.infer<typeof EdStemRawCourseMembershipSchema>;
 type EdStemRawUser = z.infer<typeof EdStemRawUserSchema>;
@@ -166,6 +214,8 @@ type EdStemRawActivity = z.infer<typeof EdStemRawActivitySchema>;
 type EdStemRawUserPayload = z.infer<typeof EdStemRawUserPayloadSchema>;
 type EdStemThreadsPayload = z.infer<typeof EdStemThreadsPayloadSchema>;
 type EdStemResourcesPayload = z.infer<typeof EdStemResourcesPayloadSchema>;
+type EdStemRawLesson = z.infer<typeof EdStemRawLessonSchema>;
+type EdStemLessonPayload = z.infer<typeof EdStemLessonPayloadSchema>;
 
 function decodeHtmlText(value: string | undefined) {
   if (!value) {
@@ -236,6 +286,10 @@ function parseEdStemCourseIdFromUrl(pageUrl: string) {
   return pageUrl.match(/\/us\/courses\/(?<courseId>\d+)/)?.groups?.courseId;
 }
 
+function parseEdStemLessonIdFromUrl(pageUrl: string) {
+  return pageUrl.match(/\/us\/courses\/\d+\/lessons\/(?<lessonId>[^/?#]+)/)?.groups?.lessonId;
+}
+
 function buildEdStemResourceDownloadUrl(rawResource: EdStemRawResource) {
   if (rawResource.link) {
     return toAbsoluteEdStemUrl(rawResource.link);
@@ -272,26 +326,47 @@ function slugifyEdStemResourcePart(value: string) {
     .slice(0, 48);
 }
 
+function buildEdStemResourceGroup(courseId: string, label: string | undefined, memberCount?: number) {
+  const normalized = decodeHtmlText(label);
+  if (!normalized) {
+    return undefined;
+  }
+
+  return {
+    key: `edstem:resource-group:${courseId}:${slugifyEdStemResourcePart(normalized)}`,
+    label: normalized,
+    memberCount,
+  };
+}
+
 function parseEdStemResourcesFromDom(pageHtml: string, pageUrl: string) {
   const courseId = parseEdStemCourseIdFromUrl(pageUrl);
   if (!courseId) {
     return [];
   }
 
-  const groups = Array.from(
-    pageHtml.matchAll(
-      /<h2 class="res-group">(?<group>[\s\S]*?)<\/h2>\s*<div class="res-row">[\s\S]*?<div class="res-body (?<bodyClass>[^"]*)"[\s\S]*?<div class="res-name"[^>]*>(?<name>[\s\S]*?)<\/div>[\s\S]*?<div class="res-type"[^>]*>(?<type>[\s\S]*?)<\/div>/gi,
-    ),
+  const sections = Array.from(
+    pageHtml.matchAll(/<h2 class="res-group">(?<group>[\s\S]*?)<\/h2>(?<section>[\s\S]*?)(?=<h2 class="res-group">|<\/main>|<\/body>|$)/gi),
   );
 
-  return groups
-    .map((match, index): Resource | undefined => {
+  const resources: Resource[] = [];
+  for (const [sectionIndex, section] of sections.entries()) {
+    const group = decodeHtmlText(section.groups?.group);
+    const sectionHtml = section.groups?.section ?? '';
+    const rows = Array.from(
+      sectionHtml.matchAll(
+        /<div class="res-row">[\s\S]*?<div class="res-body (?<bodyClass>[^"]*)"[\s\S]*?<div class="res-name"[^>]*>(?<name>[\s\S]*?)<\/div>[\s\S]*?<div class="res-type"[^>]*>(?<type>[\s\S]*?)<\/div>[\s\S]*?<\/div>\s*<\/div>/gi,
+      ),
+    );
+
+    const resourceGroup = buildEdStemResourceGroup(courseId, group, rows.length > 0 ? rows.length : undefined);
+
+    for (const [rowIndex, match] of rows.entries()) {
       const title = decodeHtmlText(match.groups?.name);
-      const group = decodeHtmlText(match.groups?.group);
       const typeLabel = decodeHtmlText(match.groups?.type);
       const bodyClass = match.groups?.bodyClass ?? '';
       if (!title) {
-        return undefined;
+        continue;
       }
 
       const resourceKind: Resource['resourceKind'] = /type-link/i.test(bodyClass)
@@ -300,27 +375,32 @@ function parseEdStemResourcesFromDom(pageHtml: string, pageUrl: string) {
           ? 'embed'
           : 'file';
       const detailParts = [typeLabel, group, resourceKind === 'file' ? 'Download file' : undefined].filter(Boolean);
-      const resourceId = `edstem:resource:dom:${courseId}:${slugifyEdStemResourcePart(group ?? 'group')}:${slugifyEdStemResourcePart(title)}:${index + 1}`;
+      const resourceId = `edstem:resource:dom:${courseId}:${slugifyEdStemResourcePart(group ?? 'group')}:${slugifyEdStemResourcePart(title)}:${sectionIndex + 1}:${rowIndex + 1}`;
 
-      return ResourceSchema.parse({
-        id: resourceId,
-        kind: 'resource',
-        site: 'edstem',
-        source: {
+      resources.push(
+        ResourceSchema.parse({
+          id: resourceId,
+          kind: 'resource',
           site: 'edstem',
-          resourceId,
-          resourceType: 'resource',
+          source: {
+            site: 'edstem',
+            resourceId,
+            resourceType: 'resource',
+            url: pageUrl,
+          },
           url: pageUrl,
-        },
-        url: pageUrl,
-        courseId: `edstem:course:${courseId}`,
-        resourceKind,
-        title,
-        summary: group,
-        detail: detailParts.join(' · '),
-      });
-    })
-    .filter((resource): resource is Resource => Boolean(resource));
+          courseId: `edstem:course:${courseId}`,
+          resourceKind,
+          title,
+          summary: group,
+          detail: detailParts.join(' · '),
+          resourceGroup,
+        }),
+      );
+    }
+  }
+
+  return resources;
 }
 
 function findLatestLessonModuleLabel(prefixHtml: string) {
@@ -380,6 +460,65 @@ function parseEdStemLessonsFromDom(pageHtml: string, pageUrl: string) {
       });
     })
     .filter((resource): resource is Resource => Boolean(resource));
+}
+
+function buildEdStemLessonSummary(rawLesson: EdStemRawLesson) {
+  const parts = [
+    rawLesson.type ? `${rawLesson.type} lesson` : 'Lesson detail',
+    rawLesson.status ?? undefined,
+    rawLesson.slide_count ? `${rawLesson.slide_count} slide${rawLesson.slide_count === 1 ? '' : 's'}` : undefined,
+  ].filter(Boolean);
+
+  return parts.join(' · ');
+}
+
+function buildEdStemLessonDetail(rawLesson: EdStemRawLesson) {
+  const parts = [
+    rawLesson.state ? `State: ${rawLesson.state}` : undefined,
+    rawLesson.due_at ?? rawLesson.effective_due_at ? `Due: ${rawLesson.due_at ?? rawLesson.effective_due_at}` : undefined,
+    rawLesson.locked_at ?? rawLesson.effective_locked_at
+      ? `Locks: ${rawLesson.locked_at ?? rawLesson.effective_locked_at}`
+      : undefined,
+    rawLesson.effective_solutions_at ? `Solutions: ${rawLesson.effective_solutions_at}` : undefined,
+    rawLesson.attempt_id != null ? `Attempt: ${rawLesson.attempt_id}` : undefined,
+    rawLesson.attempts_remaining != null ? `Attempts remaining: ${rawLesson.attempts_remaining}` : undefined,
+    rawLesson.late_submissions ? 'Late submissions allowed' : undefined,
+    rawLesson.slides.length > 0
+      ? `Slides: ${rawLesson.slides
+          .slice(0, 3)
+          .map((slide) => [slide.index, decodeHtmlText(slide.title ?? undefined), slide.status].filter(Boolean).join(' · '))
+          .join('; ')}${rawLesson.slides.length > 3 ? `; +${rawLesson.slides.length - 3} more` : ''}`
+      : undefined,
+  ].filter(Boolean);
+
+  return parts.join(' · ');
+}
+
+function normalizeLessonDetail(rawLesson: EdStemRawLesson, pageUrl: string): Resource {
+  const courseId = String(rawLesson.course_id);
+  const lessonId = String(rawLesson.id);
+  const url = toAbsoluteEdStemUrl(`/us/courses/${courseId}/lessons/${lessonId}`);
+  const title = decodeHtmlText(rawLesson.title) ?? `Lesson ${lessonId}`;
+
+  return ResourceSchema.parse({
+    id: `edstem:lesson:${lessonId}`,
+    kind: 'resource',
+    site: 'edstem',
+    source: {
+      site: 'edstem',
+      resourceId: lessonId,
+      resourceType: 'lesson_detail',
+      url: url ?? pageUrl,
+    },
+    url: url ?? pageUrl,
+    courseId: `edstem:course:${courseId}`,
+    resourceKind: 'link',
+    title,
+    summary: buildEdStemLessonSummary(rawLesson),
+    detail: buildEdStemLessonDetail(rawLesson),
+    releasedAt: rawLesson.available_at ?? rawLesson.effective_available_at ?? rawLesson.created_at ?? undefined,
+    updatedAt: rawLesson.updated_at ?? undefined,
+  });
 }
 
 function isInstructorRole(rawRole: string | undefined) {
@@ -547,6 +686,32 @@ function normalizeResource(rawResource: EdStemRawResource): Resource | undefined
   });
 }
 
+function attachEdStemResourceGroups(resources: Resource[]) {
+  const counts = new Map<string, number>();
+  for (const resource of resources) {
+    if (resource.site !== 'edstem' || !resource.summary || !resource.courseId) {
+      continue;
+    }
+    const key = `${resource.courseId}:${resource.summary}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  return resources.map((resource) => {
+    if (resource.site !== 'edstem' || !resource.summary || !resource.courseId) {
+      return resource;
+    }
+    const count = counts.get(`${resource.courseId}:${resource.summary}`) ?? 0;
+    if (count <= 1) {
+      return resource;
+    }
+
+    return ResourceSchema.parse({
+      ...resource,
+      resourceGroup: buildEdStemResourceGroup(resource.courseId.replace(/^edstem:course:/, ''), resource.summary, count),
+    });
+  });
+}
+
 export class EdStemApiClient {
   constructor(
     private readonly executeRequest: EdStemRequestExecutor,
@@ -685,6 +850,17 @@ export class EdStemApiClient {
 
   getConfiguredPaths() {
     return this.paths;
+  }
+
+  async getLessonDetail(lessonId: string): Promise<EdStemRawLesson> {
+    try {
+      const payload = EdStemLessonPayloadSchema.parse(
+        await this.fetchJson(`/api/lessons/${lessonId}?view=1`),
+      ) as EdStemLessonPayload;
+      return payload.lesson;
+    } catch {
+      throw new EdStemApiError('malformed_response', 'EdStem lesson payload is malformed.');
+    }
   }
 }
 
@@ -886,7 +1062,9 @@ class EdStemResourcesPrivateCollector implements ResourceCollector<Resource> {
     }
 
     return this.client.getResources(courseId).then((resources) =>
-      resources.map(normalizeResource).filter((resource): resource is Resource => Boolean(resource)),
+      attachEdStemResourceGroups(
+        resources.map(normalizeResource).filter((resource): resource is Resource => Boolean(resource)),
+      ),
     );
   }
 }
@@ -942,6 +1120,29 @@ class EdStemLessonsDomCollector implements ResourceCollector<Resource> {
     }
 
     return resources;
+  }
+}
+
+class EdStemLessonDetailPrivateCollector implements ResourceCollector<Resource> {
+  readonly name = 'EdStemLessonDetailPrivateCollector';
+  readonly resource = 'resources';
+  readonly mode = 'private_api' as const;
+  readonly priority = 12;
+
+  constructor(private readonly client: EdStemApiClient) {}
+
+  async supports(ctx: AdapterContext) {
+    return ctx.site === 'edstem' && Boolean(parseEdStemLessonIdFromUrl(ctx.url));
+  }
+
+  async collect(ctx: AdapterContext) {
+    const lessonId = parseEdStemLessonIdFromUrl(ctx.url);
+    if (!lessonId) {
+      throw new EdStemApiError('unsupported_context', 'EdStem lesson detail requires a lesson-scoped URL.');
+    }
+
+    const lesson = await this.client.getLessonDetail(lessonId);
+    return [normalizeLessonDetail(lesson, ctx.url)];
   }
 }
 
@@ -1252,6 +1453,7 @@ export class EdStemAdapter implements SiteAdapter {
       collectors.push(new EdStemMessagesPrivateCollector(this.client));
       courseCollectors.push(new EdStemCoursesPrivateCollector(this.client));
       resourceCollectors.push(new EdStemResourcesPrivateCollector(this.client));
+      resourceCollectors.push(new EdStemLessonDetailPrivateCollector(this.client));
     }
     collectors.push(new EdStemMessagesDomCollector());
     courseCollectors.push(new EdStemCoursesDomCollector());

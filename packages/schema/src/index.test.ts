@@ -40,6 +40,16 @@ describe('schema package', () => {
         title: 'Homework 8 solutions',
         summary: 'Homework',
         detail: 'PDF · 452 KB',
+        resourceGroup: {
+          key: 'edstem:resource-group:1:homework',
+          label: 'Homework',
+          memberCount: 2,
+        },
+        resourceModule: {
+          key: 'canvas:module:1:week-1',
+          label: 'Week 1',
+          itemType: 'assignment',
+        },
         fileExtension: '.pdf',
         sizeBytes: 452000,
         downloadUrl: 'https://us.edstem.org/api/resources/123/download/homework-8-solutions.pdf?dl=1',

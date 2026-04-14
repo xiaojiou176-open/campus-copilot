@@ -1,5 +1,7 @@
 # Campus Copilot
 
+> The current flagship academic decision workspace in the broader **OpenCampus** family.
+
 > An academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
 
 [Docs](docs/README.md) · [Quickstart](#quickstart) · [Integrations](INTEGRATIONS.md) · [Distribution](DISTRIBUTION.md) · [Privacy](PRIVACY.md) · [Product Brief](docs/01-product-prd.md) · [Academic Safety](docs/17-academic-expansion-and-safety-contract.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [AI Collaboration](CLAUDE.md) · [Security](SECURITY.md) · [License](LICENSE)
@@ -9,6 +11,16 @@
 Real workbench proof, not concept art:
 
 ![Campus Copilot sidepanel overview](docs/assets/sidepanel-overview.png)
+
+## Naming Today
+
+This repo now uses a simple truthful split instead of pretending one name covers every layer:
+
+- **OpenCampus** = the umbrella/public-plane label for the broader family and future outward-facing surfaces
+- **Campus Copilot** = the current flagship student workbench shipping in this repository today
+- **Campus Copilot for UW** = the browser-extension distribution name when the school-specific surface needs to be explicit
+
+In plain language: **OpenCampus is the sign above the building, Campus Copilot is the desk you actually sit at right now.**
 
 ## Start Here In 60 Seconds
 

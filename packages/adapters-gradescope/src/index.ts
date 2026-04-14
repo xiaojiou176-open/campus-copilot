@@ -1015,6 +1015,7 @@ function enrichAssignmentWithSubmissionDetail(assignment: Assignment, detail: Gr
     score: detail.status === 'graded' ? assignment.score ?? detail.score : assignment.score,
     maxScore: assignment.maxScore ?? detail.maxScore,
     status: detail.status === 'graded' ? 'graded' : assignment.status,
+    actionHints: detail.actionHints ?? assignment.actionHints,
     reviewSummary: buildGradescopeReviewSummary(detail),
   });
 }
@@ -1047,6 +1048,7 @@ function buildAssignmentFromSubmissionDetail(detail: GradescopeSubmissionDetail)
     status: detail.status,
     score: detail.status === 'graded' ? detail.score : undefined,
     maxScore: detail.maxScore,
+    actionHints: detail.actionHints,
     reviewSummary: buildGradescopeReviewSummary(detail),
   });
 }

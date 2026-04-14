@@ -662,6 +662,21 @@ function normalizeCanvasModuleItemResource(
     url,
     rawItem.content_details?.media_entry_title ?? undefined,
   ]);
+  const normalizedItemType =
+    looksLikeRecording
+      ? 'recording'
+      : type === 'File'
+        ? 'file'
+        : type === 'Assignment'
+          ? 'assignment'
+          : type === 'Discussion'
+            ? 'discussion'
+            : type === 'Quiz'
+              ? 'quiz'
+              : type === 'SubHeader'
+                ? 'subheader'
+                : 'item';
+  const moduleLabel = rawModule.name?.trim() || 'Canvas module';
 
   return ResourceSchema.parse({
     id: `canvas:resource:module-item:${courseId}:${rawModule.id}:${rawItem.id}`,
@@ -690,8 +705,13 @@ function normalizeCanvasModuleItemResource(
     courseId: `canvas:course:${courseId}`,
     resourceKind: looksLikeRecording ? 'embed' : url ? 'link' : 'other',
     title,
-    summary: rawModule.name?.trim() || undefined,
+    summary: moduleLabel || undefined,
     detail: buildCanvasModuleItemDetail(rawModule, rawItem),
+    resourceModule: {
+      key: `canvas:module:${courseId}:${rawModule.id}`,
+      label: moduleLabel,
+      itemType: normalizedItemType,
+    },
     fileExtension: extractFileExtension(rawItem.content_details?.file_name ?? undefined),
   });
 }

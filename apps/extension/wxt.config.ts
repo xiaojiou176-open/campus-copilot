@@ -3,9 +3,10 @@ import { defineConfig } from 'wxt';
 export default defineConfig({
   srcDir: '.',
   manifest: {
-    name: 'Campus Copilot',
+    name: 'Campus Copilot for UW',
     short_name: 'Campus Copilot',
-    description: 'A local-first academic decision workspace with cited AI over Canvas, Gradescope, EdStem, and MyUW.',
+    description:
+      'The current OpenCampus flagship workspace: a local-first academic decision workspace with cited AI over Canvas, Gradescope, EdStem, and MyUW.',
     icons: {
       16: 'icon-16.png',
       32: 'icon-32.png',

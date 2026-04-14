@@ -272,8 +272,8 @@ function getResourceSemanticLabel(resource: OperationsSectionProps['currentResou
     if (resource.id.startsWith('edstem:lesson:')) {
       return 'lesson';
     }
-    if (resource.summary) {
-      return 'grouped resource';
+    if (resource.resourceGroup?.memberCount && resource.resourceGroup.memberCount > 1) {
+      return 'resource set';
     }
   }
 
@@ -304,11 +304,18 @@ function getAssignmentReviewSummary(assignment: OperationsSectionProps['currentA
   });
   const remaining = questions.length - visible.length;
 
-  return `Review summary: ${visible.join('; ')}${remaining > 0 ? `; +${remaining} more` : ''}`;
+  return `Question breakdown: ${visible.join('; ')}${remaining > 0 ? `; +${remaining} more` : ''}`;
+}
+
+function getAssignmentActionSummary(assignment: OperationsSectionProps['currentAssignments'][number]) {
+  if (!assignment.actionHints || assignment.actionHints.length === 0) {
+    return undefined;
+  }
+  return `Available actions: ${assignment.actionHints.join(' · ')}`;
 }
 
 function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
-  return summary.laneStatus === 'carrier_not_landed' ? 'carrier not landed' : 'landed summary lane';
+  return summary.laneStatus === 'carrier_not_landed' ? 'capture needed' : 'summary ready';
 }
 
 function renderAlertGroup(
@@ -1633,6 +1640,9 @@ export function WorkbenchOperationsSections({
                   </p>
                   {assignment.summary ? <p>{assignment.summary}</p> : null}
                   {assignment.detail ? <p className="surface__meta">{assignment.detail}</p> : null}
+                  {getAssignmentActionSummary(assignment) ? (
+                    <p className="surface__meta">{getAssignmentActionSummary(assignment)}</p>
+                  ) : null}
                   {getAssignmentReviewSummary(assignment) ? (
                     <p className="surface__meta">{getAssignmentReviewSummary(assignment)}</p>
                   ) : null}

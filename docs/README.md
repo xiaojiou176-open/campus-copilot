@@ -9,7 +9,7 @@ Use it like airport signs instead of a filing cabinet:
 - only then dive into ledgers, proof packets, or builder packaging
 
 The public story stays the same here as it does in the main README:
-**student decision workspace first, stable product contracts second, builder surfaces third**.
+**OpenCampus is the umbrella name, Campus Copilot is the current flagship decision workspace, stable product contracts come next, and builder surfaces come after that**.
 
 This router is for stable repository-facing docs.
 

@@ -135,13 +135,13 @@ const AI_SITE_POLICY_OVERLAYS: Record<AiPolicySite, AiSitePolicyOverlay> = {
   edstem: {
     site: 'edstem',
     siteLabel: 'EdStem',
-    allowedFamilies: ['threads', 'announcements', 'course links', 'resource metadata', 'lesson summaries'],
+    allowedFamilies: ['threads', 'announcements', 'course links', 'resource metadata', 'resource groups', 'lesson details'],
     exportOnlyFamilies: ['thread attachments', 'raw lesson bodies', 'raw resource files'],
     forbiddenAiObjects: ['private draft replies', 'raw attachment bodies', 'hidden thread content', 'raw lesson bodies', 'raw resource files'],
     carrierHonesty:
       'Treat EdStem as a read-only classroom discussion and course-resource carrier; shared lesson/resource summaries are allowed, but this repo still does not claim official LMS parity or raw material ingestion.',
     operatorNote:
-      'EdStem answers should focus on structured discussion context, resource metadata, and lesson-summary signals while keeping task-detail and grouped-material gaps explicit.',
+      'EdStem answers should focus on structured discussion context, resource metadata, resource-group signals, and lesson-detail signals while keeping broader grouped-material semantics explicit.',
   },
   myuw: {
     site: 'myuw',
@@ -169,7 +169,7 @@ const AI_SITE_POLICY_OVERLAYS: Record<AiPolicySite, AiSitePolicyOverlay> = {
     carrierHonesty:
       'Treat MyPlan as a read-only planning substrate and comparison-oriented carrier, not as proof of enrollment entitlement or registration execution state.',
     operatorNote:
-      'MyPlan answers should stay planning-oriented, keep requirement uncertainty visible, and prefer export-first review while the current lane remains a landed summary lane rather than a detail/runtime lane.',
+      'MyPlan answers should stay planning-oriented, keep requirement uncertainty visible, and prefer export-first review while the current lane remains a review-first summary lane rather than a detail/runtime lane.',
   },
   'time-schedule': {
     site: 'time-schedule',
