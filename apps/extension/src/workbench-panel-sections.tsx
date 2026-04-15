@@ -208,6 +208,43 @@ function formatClusterAuthorityLine(input: {
     : `Authority: ${authority} · ${input.sitesLabel}: ${input.relatedSites.join(' / ')}`;
 }
 
+function formatAuthorityFacetRole(value: string, uiLanguage: WorkbenchPanelsProps['uiLanguage']) {
+  const normalized = value.replace(/_/g, ' ');
+  if (uiLanguage !== 'zh-CN') {
+    return normalized;
+  }
+
+  switch (value) {
+    case 'course_identity':
+      return '课程身份';
+    case 'course_delivery':
+      return '课程执行面';
+    case 'discussion_runtime':
+      return '讨论流';
+    case 'assessment_runtime':
+      return '评估流';
+    case 'assignment_spec':
+      return '任务定义';
+    case 'schedule_signal':
+      return '时间信号';
+    case 'submission_state':
+      return '提交状态';
+    case 'grade_truth':
+      return '成绩真相';
+    default:
+      return normalized;
+  }
+}
+
+function formatAuthorityFacetSource(input: {
+  surface: string;
+  resourceType: string;
+  uiLanguage: WorkbenchPanelsProps['uiLanguage'];
+}) {
+  const authority = `${input.surface} · ${formatAuthorityType(input.resourceType)}`;
+  return input.uiLanguage === 'zh-CN' ? `权威来源: ${authority}` : `Authority: ${authority}`;
+}
+
 function renderClusterReviewControls(input: {
   targetKind: ClusterReviewTargetKind;
   cluster: {
@@ -1648,6 +1685,22 @@ export function WorkbenchOperationsSections({
                       sitesLabel: groupedOperationsCopy.sitesLabel,
                     })}
                   </p>
+                  {cluster.authorityNarrative ? <p className="surface__meta">{cluster.authorityNarrative}</p> : null}
+                  {cluster.authorityBreakdown?.length ? (
+                    <ul className="surface__list surface__list--compact">
+                      {cluster.authorityBreakdown.map((facet) => (
+                        <li key={`${cluster.id}:${facet.role}:${facet.surface}:${facet.entityKey}`}>
+                          <strong>{formatAuthorityFacetRole(facet.role, uiLanguage)}:</strong>{' '}
+                          {formatAuthorityFacetSource({
+                            surface: facet.surface,
+                            resourceType: facet.resourceType,
+                            uiLanguage,
+                          })}{' '}
+                          - {facet.reason}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   {renderClusterReviewControls({
                     targetKind: 'course_cluster',
                     cluster,
@@ -1692,6 +1745,22 @@ export function WorkbenchOperationsSections({
                     })}
                     {cluster.dueAt ? ` · ${text.currentTasks.dueAt(formatDateTime(uiLanguage, cluster.dueAt))}` : ''}
                   </p>
+                  {cluster.authorityNarrative ? <p className="surface__meta">{cluster.authorityNarrative}</p> : null}
+                  {cluster.authorityBreakdown?.length ? (
+                    <ul className="surface__list surface__list--compact">
+                      {cluster.authorityBreakdown.map((facet) => (
+                        <li key={`${cluster.id}:${facet.role}:${facet.surface}:${facet.entityKey}`}>
+                          <strong>{formatAuthorityFacetRole(facet.role, uiLanguage)}:</strong>{' '}
+                          {formatAuthorityFacetSource({
+                            surface: facet.surface,
+                            resourceType: facet.resourceType,
+                            uiLanguage,
+                          })}{' '}
+                          - {facet.reason}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   {renderClusterReviewControls({
                     targetKind: 'work_item_cluster',
                     cluster,

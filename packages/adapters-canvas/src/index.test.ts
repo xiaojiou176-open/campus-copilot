@@ -623,6 +623,82 @@ describe('CanvasApiClient', () => {
     }
   });
 
+  it('keeps module completion requirements in resource detail truth', async () => {
+    const client = new CanvasApiClient(
+      okExecutor({
+        [CANVAS_COURSES_PATH]: [
+          {
+            id: 42,
+            name: 'CSE 142',
+            course_code: 'CSE 142',
+            html_url: 'https://canvas.example.edu/courses/42',
+          },
+        ],
+        ...canvasDepthResourcePayloads(42, {
+          [canvasModulesPath(42)]: [
+            {
+              id: 7001,
+              name: 'Week 1',
+              published: true,
+              items: [
+                {
+                  id: 8101,
+                  type: 'Page',
+                  title: 'Week 1 overview',
+                  html_url: 'https://canvas.example.edu/courses/42/modules/items/8101',
+                  page_url: 'week-1-overview',
+                  published: true,
+                  completion_requirement: {
+                    type: 'must_view',
+                  },
+                },
+                {
+                  id: 8107,
+                  type: 'Assignment',
+                  title: 'Checkpoint 1',
+                  html_url: 'https://canvas.example.edu/courses/42/assignments/88',
+                  published: true,
+                  completion_requirement: {
+                    type: 'min_score',
+                    min_score: 8,
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+        [canvasSubmissionFeedbackPath(42, [])]: [],
+        '/api/v1/courses/42/assignments?include[]=submission&order_by=due_at&per_page=100': [],
+        '/api/v1/announcements?per_page=100&context_codes%5B%5D=course_42': [],
+        '/api/v1/conversations?scope=inbox&per_page=100': [],
+        '/api/v1/calendar_events?all_events=true&per_page=100&context_codes%5B%5D=course_42': [],
+      }),
+    );
+
+    const adapter = createCanvasAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://canvas.example.edu/courses/42',
+      site: 'canvas',
+      now: '2026-03-24T18:00:00-07:00',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.resources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'canvas:resource:module-item:42:7001:8101',
+            detail: 'Page · Week 1 · Requirement: view',
+          }),
+          expect.objectContaining({
+            id: 'canvas:resource:module-item:42:7001:8107',
+            detail: 'Assignment · Week 1 · Requirement: score at least 8',
+          }),
+        ]),
+      );
+    }
+  });
+
   it('uses the detail attachment hint even when the latest message body is empty', async () => {
     const client = new CanvasApiClient(
       okExecutor({

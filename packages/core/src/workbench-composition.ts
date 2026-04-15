@@ -161,7 +161,10 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
       authorityNarrative: cluster.authorityNarrative,
       authorityBreakdown: cluster.authorityBreakdown?.map((entry) => ({
         role: entry.role,
-        authoritySource: `${entry.surface}:${entry.resourceType}`,
+        surface: entry.surface,
+        entityKey: entry.entityKey,
+        resourceType: entry.resourceType,
+        label: entry.label,
         reason: entry.reason,
       })),
       matchConfidence: cluster.confidenceBand,
@@ -177,7 +180,10 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
       authorityNarrative: cluster.authorityNarrative,
       authorityBreakdown: cluster.authorityBreakdown?.map((entry) => ({
         role: entry.role,
-        authoritySource: `${entry.surface}:${entry.resourceType}`,
+        surface: entry.surface,
+        entityKey: entry.entityKey,
+        resourceType: entry.resourceType,
+        label: entry.label,
         reason: entry.reason,
       })),
       matchConfidence: cluster.confidenceBand,

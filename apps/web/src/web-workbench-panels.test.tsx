@@ -452,6 +452,34 @@ describe('web workbench planning pulse', () => {
             authoritySurface: 'course-sites',
             authorityEntityKey: 'course-sites:course:cse312:26sp',
             authorityResourceType: 'course_page',
+            authorityNarrative:
+              'Course identity stays on the course website while Canvas keeps the execution lane and Gradescope keeps the assessment lane.',
+            authorityBreakdown: [
+              {
+                role: 'course_identity',
+                surface: 'course-sites',
+                entityKey: 'course-sites:course:cse312:26sp',
+                resourceType: 'course_page',
+                label: 'CSE 312',
+                reason: 'Course website is the canonical course identity surface.',
+              },
+              {
+                role: 'course_delivery',
+                surface: 'canvas',
+                entityKey: 'canvas:course:cse312',
+                resourceType: 'course',
+                label: 'CSE 312',
+                reason: 'Canvas still owns module and assignment delivery.',
+              },
+              {
+                role: 'assessment_runtime',
+                surface: 'gradescope',
+                entityKey: 'gradescope:course:cse312',
+                resourceType: 'assignment_row',
+                label: 'CSE 312',
+                reason: 'Gradescope still owns grading and rubric truth.',
+              },
+            ],
             confidenceBand: 'high',
             confidenceScore: 0.92,
             needsReview: false,
@@ -472,6 +500,25 @@ describe('web workbench planning pulse', () => {
             authoritySurface: 'course-sites',
             authorityEntityKey: 'course-sites:assignment:hw5',
             authorityResourceType: 'assignment_row',
+            authorityNarrative: 'Course site keeps the assignment spec while Canvas still reflects the submission state.',
+            authorityBreakdown: [
+              {
+                role: 'assignment_spec',
+                surface: 'course-sites',
+                entityKey: 'course-sites:assignment:hw5',
+                resourceType: 'assignment_row',
+                label: 'Homework 5',
+                reason: 'Course site owns the assignment spec.',
+              },
+              {
+                role: 'submission_state',
+                surface: 'canvas',
+                entityKey: 'canvas:assignment:hw5',
+                resourceType: 'assignment',
+                label: 'Homework 5',
+                reason: 'Canvas still owns the submission state.',
+              },
+            ],
             confidenceBand: 'medium',
             confidenceScore: 0.7,
             needsReview: true,
@@ -512,6 +559,9 @@ describe('web workbench planning pulse', () => {
 
     expect(html).toContain('canvas · gradescope · course-sites · authority course-sites · course page');
     expect(html).toContain('authority course-sites · assignment row');
+    expect(html).toContain('Course identity stays on the course website while Canvas keeps the execution lane and Gradescope keeps the assessment lane.');
+    expect(html).toContain('course identity:</strong> course-sites · course page - Course website is the canonical course identity surface.');
+    expect(html).toContain('assessment runtime:</strong> gradescope · assignment row - Gradescope still owns grading and rubric truth.');
     expect(html).toContain('Accept');
     expect(html).toContain('Review later');
     expect(html).toContain('Dismiss');

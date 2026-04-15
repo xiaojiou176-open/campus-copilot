@@ -258,8 +258,19 @@ describe('cluster substrate', () => {
     expect(view.courseClusters).toHaveLength(1);
     expect(view.courseClusters[0]?.confidenceBand).toBe('high');
     expect(view.courseClusters[0]?.authoritySurface).toBe('course-sites');
+    expect(view.courseClusters[0]?.authorityNarrative).toContain('课程身份以 course-sites 为准');
+    expect(view.courseClusters[0]?.authorityNarrative).toContain('课程执行面以 canvas 为准');
+    expect(view.courseClusters[0]?.authorityNarrative).toContain('评估流以 gradescope 为准');
+    expect(view.courseClusters[0]?.authorityBreakdown?.map((facet) => facet.role)).toEqual([
+      'course_identity',
+      'course_delivery',
+      'assessment_runtime',
+    ]);
     expect(view.workItemClusters.some((cluster) => cluster.title === 'Homework 5')).toBe(true);
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authoritySurface).toBe('course-sites');
+    expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityNarrative).toContain(
+      '作业规格以 course-sites 为准',
+    );
     expect(view.administrativeSummaries.some((summary) => summary.family === 'dars')).toBe(true);
     expect(view.administrativeSummaries.find((summary) => summary.family === 'dars')?.detailRuntimeStatus).toBe(
       'review_ready',

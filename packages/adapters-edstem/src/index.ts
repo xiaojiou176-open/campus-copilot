@@ -463,13 +463,37 @@ function parseEdStemLessonsFromDom(pageHtml: string, pageUrl: string) {
 }
 
 function buildEdStemLessonSummary(rawLesson: EdStemRawLesson) {
+  const slideTypeBreakdown = buildEdStemLessonSlideTypeBreakdown(rawLesson);
   const parts = [
     rawLesson.type ? `${rawLesson.type} lesson` : 'Lesson detail',
     rawLesson.status ?? undefined,
     rawLesson.slide_count ? `${rawLesson.slide_count} slide${rawLesson.slide_count === 1 ? '' : 's'}` : undefined,
+    slideTypeBreakdown,
   ].filter(Boolean);
 
   return parts.join(' · ');
+}
+
+function buildEdStemLessonSlideTypeBreakdown(rawLesson: EdStemRawLesson) {
+  const typeCounts = new Map<string, number>();
+
+  for (const slide of rawLesson.slides) {
+    const normalizedType = decodeHtmlText(slide.type ?? undefined)?.trim().toLowerCase();
+    if (!normalizedType) {
+      continue;
+    }
+
+    typeCounts.set(normalizedType, (typeCounts.get(normalizedType) ?? 0) + 1);
+  }
+
+  if (typeCounts.size === 0) {
+    return undefined;
+  }
+
+  return Array.from(typeCounts.entries())
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .map(([typeLabel, count]) => `${count} ${count === 1 ? typeLabel : `${typeLabel}s`}`)
+    .join(', ');
 }
 
 function buildEdStemLessonResourceGroup(rawLesson: EdStemRawLesson) {

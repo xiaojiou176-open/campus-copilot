@@ -119,6 +119,17 @@ function formatClusterAuthoritySummary(input: {
   return `${input.relatedSites.join(' · ')} · authority ${authority}`;
 }
 
+function formatAuthorityFacetRole(value: string) {
+  return value.replace(/_/g, ' ');
+}
+
+function formatAuthorityFacetSource(input: {
+  surface: string;
+  resourceType: string;
+}) {
+  return `${input.surface} · ${formatAuthorityType(input.resourceType)}`;
+}
+
 function getClusterReviewStatusText(decision: ClusterReviewDecision | undefined, needsReview: boolean) {
   if (decision === 'accepted') {
     return 'Accepted locally';
@@ -788,6 +799,21 @@ export function WebWorkbenchPanels(props: {
                       relatedSites: cluster.relatedSites,
                     })}
                   </p>
+                  {cluster.authorityNarrative ? <p className="meta">{cluster.authorityNarrative}</p> : null}
+                  {cluster.authorityBreakdown?.length ? (
+                    <ul className="list list--compact">
+                      {cluster.authorityBreakdown.map((facet) => (
+                        <li key={`${cluster.id}:${facet.role}:${facet.surface}:${facet.entityKey}`}>
+                          <strong>{formatAuthorityFacetRole(facet.role)}:</strong>{' '}
+                          {formatAuthorityFacetSource({
+                            surface: facet.surface,
+                            resourceType: facet.resourceType,
+                          })}{' '}
+                          - {facet.reason}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   {renderClusterReviewControls({
                     targetKind: 'course_cluster',
                     cluster,
@@ -830,6 +856,21 @@ export function WebWorkbenchPanels(props: {
                     })}
                     {cluster.dueAt ? ` · due ${formatDateTime(cluster.dueAt)}` : ''}
                   </p>
+                  {cluster.authorityNarrative ? <p className="meta">{cluster.authorityNarrative}</p> : null}
+                  {cluster.authorityBreakdown?.length ? (
+                    <ul className="list list--compact">
+                      {cluster.authorityBreakdown.map((facet) => (
+                        <li key={`${cluster.id}:${facet.role}:${facet.surface}:${facet.entityKey}`}>
+                          <strong>{formatAuthorityFacetRole(facet.role)}:</strong>{' '}
+                          {formatAuthorityFacetSource({
+                            surface: facet.surface,
+                            resourceType: facet.resourceType,
+                          })}{' '}
+                          - {facet.reason}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   {renderClusterReviewControls({
                     targetKind: 'work_item_cluster',
                     cluster,
