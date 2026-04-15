@@ -261,12 +261,19 @@ describe('cluster substrate', () => {
     expect(view.courseClusters[0]?.authorityNarrative).toContain('课程身份以 course-sites 为准');
     expect(view.courseClusters[0]?.authorityNarrative).toContain('课程执行面以 canvas 为准');
     expect(view.courseClusters[0]?.authorityNarrative).toContain('评估流以 gradescope 为准');
+    expect(view.courseClusters[0]?.authorityNarrative).toContain('当前还未见独立讨论流佐证');
+    expect(view.courseClusters[0]?.summary).toContain('canvas与gradescope 保留为已 landed runtime 面');
+    expect(view.courseClusters[0]?.summary).toContain('当前还未见独立讨论流佐证');
+    expect(view.courseClusters[0]?.summary).not.toContain('EdStem');
     expect(view.courseClusters[0]?.authorityBreakdown?.map((facet) => facet.role)).toEqual([
       'course_identity',
       'course_delivery',
       'assessment_runtime',
     ]);
     expect(view.courseClusters[0]?.authorityBreakdown?.[0]?.reason).toContain('字段佐证锁在 课程标题 / 课程代码 / 学期 / 课程链接');
+    expect(view.courseClusters[0]?.authorityBreakdown?.[0]?.reason).toContain(
+      '当前值锁在 title=CSE 312: Foundations of Computing II / code=CSE 312 / term=26sp / linkHost=courses.cs.washington.edu',
+    );
     expect(view.courseClusters[0]?.authorityBreakdown?.[1]?.reason).toContain(
       '字段佐证锁在 modules / assignments / announcements / day-to-day runtime',
     );
@@ -281,8 +288,17 @@ describe('cluster substrate', () => {
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityBreakdown?.[0]?.reason).toContain(
       '字段佐证锁在 title / summary/spec / deep-link',
     );
+    expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityBreakdown?.[0]?.reason).toContain(
+      '当前值锁在 title=Homework 5 / linkHost=www.gradescope.com',
+    );
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityBreakdown?.[1]?.reason).toContain(
       '字段佐证锁在 dueAt',
+    );
+    expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityBreakdown?.[1]?.reason).toContain(
+      '当前值锁在 dueAt=2026-04-15T23:59:00-07:00',
+    );
+    expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityBreakdown?.[2]?.reason).toContain(
+      '当前值锁在 status=todo',
     );
     expect(view.administrativeSummaries.some((summary) => summary.family === 'dars')).toBe(true);
     expect(view.administrativeSummaries.find((summary) => summary.family === 'dars')?.detailRuntimeStatus).toBe(

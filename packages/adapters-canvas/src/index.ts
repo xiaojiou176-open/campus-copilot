@@ -1088,7 +1088,20 @@ function buildCanvasAssignmentDetail(rawSubmission: CanvasRawSubmission | undefi
         comment && typeof comment === 'object' && 'attachments' in comment
           ? buildCanvasAttachmentHint(comment.attachments)
           : undefined;
-      return [stripCanvasHtml(comment.comment ?? undefined), attachmentHint];
+      const commentText = stripCanvasHtml(comment.comment ?? undefined);
+      const feedbackBody = [commentText, attachmentHint].filter((value): value is string => Boolean(value)).join(' · ');
+      if (!feedbackBody) {
+        return [];
+      }
+
+      const feedbackAuthor = normalizeCanvasDetailLabel(comment.author_name ?? undefined);
+      const feedbackAt = comment.created_at ?? undefined;
+      const feedbackContext = [feedbackAuthor, feedbackAt].filter((value): value is string => Boolean(value));
+      if (feedbackContext.length === 0) {
+        return [feedbackBody];
+      }
+
+      return [`Feedback (${feedbackContext.join(' · ')}): ${feedbackBody}`];
     }),
     stripCanvasHtml(rawSubmission?.submission_html_comments ?? undefined),
     ...Object.values(rawSubmission?.rubric_assessment ?? {}).flatMap((entry) => {
@@ -1263,6 +1276,38 @@ function buildCanvasThreadHint(rawConversationDetail: CanvasRawConversationDetai
   return `${count}-message thread`;
 }
 
+function buildCanvasIntermediateProgressHint(
+  rawConversationDetail: CanvasRawConversationDetail | undefined,
+  initialBody: string | undefined,
+  latestPreview: string | undefined,
+): string | undefined {
+  const middleMessages = rawConversationDetail?.messages?.slice(1, -1) ?? [];
+  if (middleMessages.length === 0) {
+    return undefined;
+  }
+
+  const middleBodies = middleMessages
+    .map((message) => stripCanvasHtml(message.body ?? undefined))
+    .filter((body): body is string => Boolean(body));
+
+  if (middleBodies.length === 1) {
+    const middleBody = middleBodies[0];
+    if (middleBody && middleBody !== initialBody && middleBody !== latestPreview) {
+      return `In between: ${middleBody}`;
+    }
+  }
+
+  const intermediateCount = rawConversationDetail?.messages?.length
+    ? Math.max(rawConversationDetail.messages.length - 2, 0)
+    : middleMessages.length;
+
+  if (intermediateCount <= 0) {
+    return undefined;
+  }
+
+  return intermediateCount === 1 ? '1 update in between' : `${intermediateCount} updates in between`;
+}
+
 function buildCanvasMessageSummary(
   rawConversation: CanvasRawConversation,
   rawConversationDetail?: CanvasRawConversationDetail,
@@ -1279,8 +1324,14 @@ function buildCanvasMessageSummary(
     threadHint && initialBody && latestPreview && initialBody !== latestPreview
       ? `Started: ${initialBody}`
       : undefined;
+  const intermediateHint =
+    threadHint && initialBody && latestPreview && initialBody !== latestPreview
+      ? buildCanvasIntermediateProgressHint(rawConversationDetail, initialBody, latestPreview)
+      : undefined;
   const latestHint = latestPreview ? (startHint ? `Latest: ${latestPreview}` : latestPreview) : undefined;
-  const detailSummary = [startHint, latestHint, attachmentHint, threadHint].filter(Boolean).join(' · ');
+  const detailSummary = [startHint, intermediateHint, latestHint, attachmentHint, threadHint]
+    .filter(Boolean)
+    .join(' · ');
 
   if (detailSummary) {
     return detailSummary;

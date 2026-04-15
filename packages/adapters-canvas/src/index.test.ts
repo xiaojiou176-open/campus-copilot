@@ -628,6 +628,68 @@ describe('CanvasApiClient', () => {
     }
   });
 
+  it('includes feedback provenance when submission comments expose author and time', async () => {
+    const client = new CanvasApiClient(
+      okExecutor({
+        [CANVAS_COURSES_PATH]: [
+          {
+            id: 42,
+            name: 'CSE 142',
+            course_code: 'CSE 142',
+            html_url: 'https://canvas.example.edu/courses/42',
+          },
+        ],
+        ...canvasDepthResourcePayloads(42),
+        [canvasSubmissionFeedbackPath(42, [10])]: [
+          {
+            assignment_id: 10,
+            submission_comments: [
+              {
+                author_name: 'Course staff',
+                created_at: '2026-03-24T12:45:00-07:00',
+                comment: '<p>Great revision on the loop invariant write-up.</p>',
+              },
+            ],
+          },
+        ],
+        '/api/v1/courses/42/assignments?include[]=submission&order_by=due_at&per_page=100': [
+          {
+            id: 10,
+            course_id: 42,
+            name: 'Homework 3',
+            html_url: 'https://canvas.example.edu/courses/42/assignments/10',
+            due_at: '2026-03-26T23:59:00-07:00',
+            points_possible: 25,
+            submission: {
+              workflow_state: 'submitted',
+              submitted_at: '2026-03-24T08:15:00-07:00',
+              score: 24,
+            },
+          },
+        ],
+        '/api/v1/announcements?per_page=100&context_codes%5B%5D=course_42': [],
+        '/api/v1/conversations?scope=inbox&per_page=100': [],
+        '/api/v1/calendar_events?all_events=true&per_page=100&context_codes%5B%5D=course_42': [],
+      }),
+    );
+
+    const adapter = createCanvasAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://canvas.example.edu/courses/42',
+      site: 'canvas',
+      now: '2026-03-24T18:00:00-07:00',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.assignments?.[0]).toMatchObject({
+        title: 'Homework 3',
+        detail:
+          'Feedback (Course staff · 2026-03-24T12:45:00-07:00): Great revision on the loop invariant write-up.',
+      });
+    }
+  });
+
   it('keeps module completion requirements in resource detail truth', async () => {
     const client = new CanvasApiClient(
       okExecutor({
@@ -823,7 +885,70 @@ describe('CanvasApiClient', () => {
       expect(result.snapshot.messages?.[0]).toMatchObject({
         title: 'Project checkpoint',
         summary:
-          'Started: Initial scheduling question. · Latest: Can we move the milestone review? · 3-message thread',
+          'Started: Initial scheduling question. · In between: Follow-up from the TA. · Latest: Can we move the milestone review? · 3-message thread',
+        unread: false,
+      });
+    }
+  });
+
+  it('keeps intermediate thread progression truth when a conversation detail exposes multiple updates', async () => {
+    const client = new CanvasApiClient(
+      okExecutor({
+        [CANVAS_COURSES_PATH]: [
+          {
+            id: 42,
+            name: 'CSE 142',
+            course_code: 'CSE 142',
+            html_url: 'https://canvas.example.edu/courses/42',
+          },
+        ],
+        ...canvasDepthResourcePayloads(42),
+        '/api/v1/courses/42/assignments?include[]=submission&order_by=due_at&per_page=100': [],
+        '/api/v1/announcements?per_page=100&context_codes%5B%5D=course_42': [],
+        '/api/v1/conversations?scope=inbox&per_page=100': [
+          {
+            id: 410,
+            subject: 'Capstone check-in',
+            last_message: 'Can we lock the project scope today?',
+            last_message_at: '2026-03-24T15:30:00-07:00',
+            workflow_state: 'read',
+            context_code: 'course_42',
+            html_url: 'https://canvas.example.edu/conversations/410',
+          },
+        ],
+        '/api/v1/conversations/410': {
+          id: 410,
+          subject: 'Capstone check-in',
+          last_message: 'Can we lock the project scope today?',
+          last_message_at: '2026-03-24T15:30:00-07:00',
+          workflow_state: 'read',
+          context_code: 'course_42',
+          html_url: 'https://canvas.example.edu/conversations/410',
+          message_count: 4,
+          messages: [
+            { body: '<p>Initial capstone scope question.</p>', attachments: [] },
+            { body: '<p>TA follow-up with milestone concerns.</p>', attachments: [] },
+            { body: '<p>Instructor asked for a tighter proposal.</p>', attachments: [] },
+            { body: '<p>Can we lock the project scope today?</p>', attachments: [] },
+          ],
+        },
+        '/api/v1/calendar_events?all_events=true&per_page=100&context_codes%5B%5D=course_42': [],
+      }),
+    );
+
+    const adapter = createCanvasAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://canvas.example.edu/courses/42',
+      site: 'canvas',
+      now: '2026-03-24T18:00:00-07:00',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.messages?.[0]).toMatchObject({
+        title: 'Capstone check-in',
+        summary:
+          'Started: Initial capstone scope question. · 2 updates in between · Latest: Can we lock the project scope today? · 4-message thread',
         unread: false,
       });
     }

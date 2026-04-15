@@ -510,6 +510,83 @@ describe('exporter package', () => {
     );
   });
 
+  it('surfaces value-level authority corroboration separately when breakdown reasons carry current values', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'markdown',
+      input: {
+        ...baseInput,
+        resources: [],
+        assignments: [],
+        announcements: [],
+        messages: [],
+        grades: [],
+        events: [],
+        alerts: [],
+        timelineEntries: [],
+        focusQueue: [],
+        weeklyLoad: [],
+        syncRuns: [],
+        changeEvents: [],
+        courseClusters: [
+          {
+            id: 'cluster:course:cse312',
+            title: 'CSE 312',
+            summary: 'Course website now leads the course identity merge.',
+            authoritySource: 'course-sites:course_page',
+            authorityNarrative: '课程身份与执行面已经分层对齐。',
+            authorityBreakdown: [
+              {
+                role: 'course_identity',
+                surface: 'course-sites',
+                entityKey: 'course-sites:course:cse312:26sp',
+                resourceType: 'course_page',
+                label: 'CSE 312',
+                reason:
+                  '课程网站承担课程身份 authority。 字段佐证锁在 课程标题 / 课程代码 / 学期 / 课程链接。 当前值锁在 title=CSE 312 / code=CSE 312 / term=26sp / linkHost=courses.cs.washington.edu。',
+              },
+            ],
+            matchConfidence: 'high' as const,
+            relatedSites: ['course-sites'],
+          },
+        ],
+        workItemClusters: [
+          {
+            id: 'cluster:work:cse312:hw5',
+            title: 'Homework 5',
+            summary: 'Assignment merge still needs human confirmation.',
+            authoritySource: 'course-sites:assignment_row',
+            authorityNarrative: 'course-sites owns the assignment spec.',
+            authorityBreakdown: [
+              {
+                role: 'schedule_signal',
+                surface: 'course-sites',
+                entityKey: 'course-sites:assignment:hw5',
+                resourceType: 'assignment_row',
+                label: 'Homework 5',
+                reason:
+                  '时间锚点以课程网站为准。 字段佐证锁在 dueAt。 当前值锁在 dueAt=2026-03-26T23:59:00-07:00。',
+              },
+            ],
+            matchConfidence: 'medium' as const,
+            relatedSites: ['course-sites'],
+            workType: 'assignment',
+          },
+        ],
+      },
+    });
+
+    expect(artifact.content).toContain(
+      'course identity: course-sites · course page · fields title/code/term/link · values title=CSE 312 / code=CSE 312 / term=26sp / linkHost=courses.cs.washington.edu - 课程网站承担课程身份 authority。 字段佐证锁在 课程标题 / 课程代码 / 学期 / 课程链接。',
+    );
+    expect(artifact.content).toContain(
+      'coverage gaps delivery runtime not landed · discussion runtime not landed · assessment runtime not landed',
+    );
+    expect(artifact.content).toContain(
+      'schedule signal: course-sites · assignment row · fields dueAt/startAt/endAt · values dueAt=2026-03-26T23:59:00-07:00 - 时间锚点以课程网站为准。 字段佐证锁在 dueAt。',
+    );
+  });
+
   it('treats locally reviewed cluster decisions as resolved export statuses instead of open review blockers', () => {
     const artifact = createExportArtifact({
       preset: 'current_view',

@@ -1361,10 +1361,12 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
     const disposition = getClusterDisposition(cluster);
     const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
     const surfaceCoverageMap = formatAuthoritySurfaceCoverageMap(cluster.authorityBreakdown);
+    const coverageGaps = formatCourseAuthorityCoverageGaps(cluster.authorityBreakdown);
     const detailParts = [
       `Authority: ${cluster.authoritySource}`,
       boundaryMap ? `Boundary map: ${boundaryMap}` : '',
       surfaceCoverageMap ? `Surface coverage: ${surfaceCoverageMap}` : '',
+      coverageGaps ? `Coverage gaps: ${coverageGaps}` : '',
       cluster.authorityNarrative ? `Narrative: ${cluster.authorityNarrative}` : '',
       ...formatAuthorityBreakdownLines(cluster.authorityBreakdown),
     ].filter(Boolean);
@@ -1706,6 +1708,37 @@ function formatAuthoritySurfaceCoverageMap(
     .join(' · ');
 }
 
+function formatCourseAuthorityCoverageGaps(
+  breakdown:
+    | Array<{
+        role: string;
+      }>
+    | undefined,
+) {
+  if (!breakdown || breakdown.length === 0) {
+    return undefined;
+  }
+
+  const roles = new Set(breakdown.map((facet) => facet.role));
+  const gaps: string[] = [];
+
+  if (!roles.has('course_delivery')) {
+    gaps.push('delivery runtime not landed');
+  }
+  if (!roles.has('discussion_runtime')) {
+    gaps.push('discussion runtime not landed');
+  }
+  if (!roles.has('assessment_runtime')) {
+    gaps.push('assessment runtime not landed');
+  }
+
+  if (gaps.length === 0) {
+    return undefined;
+  }
+
+  return `coverage gaps ${gaps.join(' · ')}`;
+}
+
 function formatAuthorityBreakdownLines(
   breakdown:
     | Array<{
@@ -1720,11 +1753,21 @@ function formatAuthorityBreakdownLines(
     return [];
   }
 
+  const extractAuthorityValueWitness = (reason: string) => {
+    const match = reason.match(/当前值锁在\s+([^。]+)(?:。|$)/);
+    return match?.[1]?.trim();
+  };
+
+  const stripAuthorityValueWitness = (reason: string) => reason.replace(/\s*当前值锁在\s+[^。]+。?/g, '').trim();
+
   return breakdown.map((facet) => {
-    const reason = facet.reason ? ` - ${facet.reason}` : '';
+    const valueWitness = facet.reason ? extractAuthorityValueWitness(facet.reason) : undefined;
+    const cleanReason = facet.reason ? stripAuthorityValueWitness(facet.reason) : '';
+    const reason = cleanReason ? ` - ${cleanReason}` : '';
     const fieldTokens = getAuthorityFieldMapTokens({ role: facet.role, resourceType: facet.resourceType });
     const fields = fieldTokens.length > 0 ? ` · fields ${fieldTokens.join('/')}` : '';
-    return `${formatAuthorityRole(facet.role)}: ${formatAuthoritySource(`${facet.surface}:${facet.resourceType}`)}${fields}${reason}`;
+    const values = valueWitness ? ` · values ${valueWitness}` : '';
+    return `${formatAuthorityRole(facet.role)}: ${formatAuthoritySource(`${facet.surface}:${facet.resourceType}`)}${fields}${values}${reason}`;
   });
 }
 
@@ -1913,12 +1956,14 @@ function renderMarkdown(dataset: ExportDataset) {
         const narrative = cluster.authorityNarrative ? ` - authority narrative ${cluster.authorityNarrative}` : '';
         const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
         const surfaceCoverageMap = formatAuthoritySurfaceCoverageMap(cluster.authorityBreakdown);
+        const coverageGaps = formatCourseAuthorityCoverageGaps(cluster.authorityBreakdown);
         const breakdown = formatAuthorityBreakdownLines(cluster.authorityBreakdown)
           .map((line) => `\n  - ${line}`)
           .join('');
         const boundary = boundaryMap ? ` - boundary map ${boundaryMap}` : '';
         const surfaceCoverage = surfaceCoverageMap ? ` - surface coverage ${surfaceCoverageMap}` : '';
-        return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}${boundary}${surfaceCoverage}${narrative}${breakdown}`;
+        const gaps = coverageGaps ? ` - ${coverageGaps}` : '';
+        return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}${boundary}${surfaceCoverage}${gaps}${narrative}${breakdown}`;
       }),
     ),
   );

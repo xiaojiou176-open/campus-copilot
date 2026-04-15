@@ -346,6 +346,21 @@ function buildTimeScheduleSeatAvailabilitySummary(detail: ReturnType<typeof extr
   return undefined;
 }
 
+function buildTimeScheduleAdvisorySummaries(detail: ReturnType<typeof extractTimeScheduleSectionDetailPage>) {
+  const advisories: string[] = [];
+  if (detail.noteLines.some((line) => /SELF-PLACEMENT/i.test(line))) {
+    advisories.push('Advisory: Self-placement guidance available');
+  }
+
+  const noCreditLine = detail.noteLines.find((line) => /NO CREDIT FOR STUDENTS WHO HAVE COMPLETED/i.test(line));
+  const blockedCourseMatch = noCreditLine?.match(/COMPLETED\s+(?<course>[A-Z]{2,5}\s*\d{3}[A-Z]?)\b/i);
+  if (blockedCourseMatch?.groups?.course) {
+    advisories.push(`Restriction: No credit after ${blockedCourseMatch.groups.course.replace(/\s+/g, ' ').trim()}`);
+  }
+
+  return advisories;
+}
+
 function buildTimeScheduleDetailSnapshot(pageHtml: string, url: string): SiteSnapshotPayload {
   const detail = extractTimeScheduleSectionDetailPage(pageHtml);
   const primaryMeeting = detail.meetings[0];
@@ -354,6 +369,7 @@ function buildTimeScheduleDetailSnapshot(pageHtml: string, url: string): SiteSna
       ? `${primaryMeeting.days} ${primaryMeeting.timeText}`.trim()
       : 'meeting pattern unavailable';
   const seatAvailabilitySummary = buildTimeScheduleSeatAvailabilitySummary(detail);
+  const advisorySummaries = buildTimeScheduleAdvisorySummaries(detail);
   const detailParts = [
     meetingPattern,
     primaryMeeting?.location,
@@ -364,6 +380,7 @@ function buildTimeScheduleDetailSnapshot(pageHtml: string, url: string): SiteSna
     detail.credits ? `${detail.credits} credits` : undefined,
     detail.generalEducation ? `Reqs: ${detail.generalEducation}` : undefined,
     detail.textbooksAvailable ? 'Textbooks listed' : undefined,
+    ...advisorySummaries,
   ].filter(Boolean);
 
   return {

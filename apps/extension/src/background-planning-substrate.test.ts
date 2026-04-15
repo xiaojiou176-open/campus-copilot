@@ -168,6 +168,7 @@ describe('background planning substrate capture', () => {
     expect(record.terms[0]?.summary).toContain('Backup path: MATH 300 Mathematical Reasoning.');
     expect(record.terms[0]?.summary).toContain('Schedule options: Balanced load (CSE 421, CSE 331).');
     expect(record.terms[0]?.summary).toContain('Next term path: Summer 2026 -> INFO 340 Client-Side Development.');
+    expect(record.terms[0]?.summary).toContain('Next decision lane: Summer 2026 -> Summer focus (INFO 340).');
     expect(record.terms[1]).toMatchObject({
       termCode: 'su26',
       termLabel: 'Summer 2026',

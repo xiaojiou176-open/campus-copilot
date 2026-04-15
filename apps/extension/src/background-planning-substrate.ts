@@ -236,6 +236,7 @@ function buildPlanningTermSummary(
     visiblePlannedCourseCount?: number;
     issuesSummary?: string;
     futureTermPathSummary?: string;
+    futureDecisionSummary?: string;
   },
 ) {
   const parts = [];
@@ -270,6 +271,9 @@ function buildPlanningTermSummary(
   if (options?.futureTermPathSummary) {
     parts.push(options.futureTermPathSummary);
   }
+  if (options?.futureDecisionSummary) {
+    parts.push(options.futureDecisionSummary);
+  }
   return parts.join(' ').trim();
 }
 
@@ -298,6 +302,31 @@ function buildFutureTermPathSummary(
   return `${lead}: ${visibleFutureTerms.join('; ')}${futureTerms.length > 2 ? '; ...' : '.'}`;
 }
 
+function buildFutureDecisionSummary(
+  terms: MyPlanBootstrapPlanningSummary['terms'],
+  currentTerm: Pick<MyPlanBootstrapTermSummary, 'termCode' | 'termLabel'>,
+) {
+  const currentIndex = terms.findIndex((term) => termSummariesMatch(term, currentTerm));
+  if (currentIndex < 0) {
+    return undefined;
+  }
+
+  const futureTerms = terms
+    .slice(currentIndex + 1)
+    .filter((term) => term.scheduleOptionSummaries.length > 0);
+  if (futureTerms.length === 0) {
+    return undefined;
+  }
+
+  const visibleFutureTerms = futureTerms.slice(0, 2).map((term) => {
+    const optionPath = term.scheduleOptionSummaries.slice(0, 2).join('; ');
+    return `${term.termLabel} -> ${optionPath}${term.scheduleOptionSummaries.length > 2 ? '; ...' : ''}`;
+  });
+  const lead = futureTerms.length === 1 ? 'Next decision lane' : 'Future decision lane';
+
+  return `${lead}: ${visibleFutureTerms.join('; ')}${futureTerms.length > 2 ? '; ...' : '.'}`;
+}
+
 function mergeBootstrapTerms(
   previousTerms: PlanningSubstrateOwner['terms'],
   visibleTerm: PlanningSubstrateOwner['terms'][number] | undefined,
@@ -319,6 +348,9 @@ function mergeBootstrapTerms(
     const futureTermPathSummary = matchedBootstrap
       ? buildFutureTermPathSummary(bootstrapSummary.terms, matchedBootstrap)
       : undefined;
+    const futureDecisionSummary = matchedBootstrap
+      ? buildFutureDecisionSummary(bootstrapSummary.terms, matchedBootstrap)
+      : undefined;
     const enrichedVisibleTerm = matchedBootstrap
       ? {
           ...visibleTerm,
@@ -329,6 +361,7 @@ function mergeBootstrapTerms(
             visiblePlannedCourseCount: visibleTerm.plannedCourseCount,
             issuesSummary: visibleIssuesSummary,
             futureTermPathSummary,
+            futureDecisionSummary,
           }),
         }
       : visibleTerm;

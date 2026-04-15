@@ -785,20 +785,41 @@ function parseEdStemCommentDepths(pageHtml: string) {
 function buildEdStemThreadStructureSummary(
   summary: string | undefined,
   replyDepths: Iterable<number>,
+  threadActionSummary?: string,
 ) {
   const depths = Array.from(replyDepths);
-  if (depths.length === 0) {
-    return summary;
+  const parts: string[] = [];
+
+  if (summary) {
+    parts.push(summary);
   }
 
-  const topLevelReplies = depths.filter((depth) => depth === 0).length;
-  const nestedReplies = depths.length - topLevelReplies;
-  const structureParts = [
-    `${depths.length} ${depths.length === 1 ? 'reply' : 'replies'}`,
-    nestedReplies > 0 ? `${nestedReplies} nested` : undefined,
-  ].filter(Boolean);
+  if (depths.length > 0) {
+    const topLevelReplies = depths.filter((depth) => depth === 0).length;
+    const nestedReplies = depths.length - topLevelReplies;
+    parts.push(
+      [
+        `${depths.length} ${depths.length === 1 ? 'reply' : 'replies'}`,
+        nestedReplies > 0 ? `${nestedReplies} nested` : undefined,
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    );
+  }
 
-  return [summary, structureParts.join(' · ')].filter(Boolean).join(' · ');
+  if (threadActionSummary) {
+    parts.push(threadActionSummary);
+  }
+
+  return parts.join(' · ') || undefined;
+}
+
+function buildEdStemThreadActionSummary(pageHtml: string) {
+  if (/data-cy="thread-action-reply"/i.test(pageHtml)) {
+    return 'Reply available';
+  }
+
+  return undefined;
 }
 
 function buildEdStemReplySummary(content: string | undefined, replyToCommentId?: string, depth = 0) {
@@ -1448,6 +1469,7 @@ function parseDirectThreadMessages(pageHtml: string, pageUrl: string): Message[]
       fallbackTitle: title ?? `EdStem thread ${threadId}`,
     }),
     commentDepths.values(),
+    buildEdStemThreadActionSummary(pageHtml),
   );
 
   if (!title && !threadSummary) {

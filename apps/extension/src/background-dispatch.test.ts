@@ -222,6 +222,8 @@ describe('background site dispatch', () => {
       expect(result.snapshot.events?.[0]?.detail).toContain('4 credits');
       expect(result.snapshot.events?.[0]?.detail).toContain('Reqs: NSc,RSN');
       expect(result.snapshot.events?.[0]?.detail).toContain('Textbooks listed');
+      expect(result.snapshot.events?.[0]?.detail).toContain('Advisory: Self-placement guidance available');
+      expect(result.snapshot.events?.[0]?.detail).toContain('Restriction: No credit after CSE 142');
     }
 
     const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
@@ -245,6 +247,8 @@ describe('background site dispatch', () => {
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('4 credits');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('Reqs: NSc,RSN');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('Textbooks listed');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Advisory: Self-placement guidance available');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Restriction: No credit after CSE 142');
   });
 
   it('falls back to EdStem dashboard DOM when path config is missing but the active tab still exposes course cards', async () => {
