@@ -23,7 +23,7 @@ Before creating a tag or GitHub Release:
 2. the release notes must match `CHANGELOG.md`
 3. public-facing capability wording must stay consistent with:
    - `README.md`
-   - `docs/09-implementation-decisions.md`
+   - `docs/08-phase-plan-and-repo-writing-brief.md`
    - `policies/integration-boundaries.yaml`
 4. no manual live-only success should be promoted into the release notes as deterministic proof
 

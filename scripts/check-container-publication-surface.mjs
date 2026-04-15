@@ -4,12 +4,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fromRepoRoot = (relativePath) => path.join(repoRoot, relativePath);
-const packetPath = 'docs/container-publication-prep.md';
 
 export function validateContainerPublicationSurface() {
   const failures = [];
 
-  for (const requiredPath of [packetPath, 'Dockerfile', 'DISTRIBUTION.md', 'docs/15-publication-submission-packet.md']) {
+  for (const requiredPath of ['Dockerfile', 'DISTRIBUTION.md', 'README.md', 'packages/mcp-server/README.md']) {
     if (!existsSync(fromRepoRoot(requiredPath))) {
       failures.push(`missing_container_publication_path:${requiredPath}`);
     }
@@ -20,9 +19,7 @@ export function validateContainerPublicationSurface() {
   }
 
   const dockerfile = readFileSync(fromRepoRoot('Dockerfile'), 'utf8');
-  const packet = readFileSync(fromRepoRoot(packetPath), 'utf8');
   const distribution = readFileSync(fromRepoRoot('DISTRIBUTION.md'), 'utf8');
-  const packetLedger = readFileSync(fromRepoRoot('docs/15-publication-submission-packet.md'), 'utf8');
   const readme = readFileSync(fromRepoRoot('README.md'), 'utf8');
   const mcpReadme = readFileSync(fromRepoRoot('packages/mcp-server/README.md'), 'utf8');
 
@@ -43,32 +40,20 @@ export function validateContainerPublicationSurface() {
     }
   }
 
-  const packetSnippets = [
-    'campus-copilot-api:local',
-    'ghcr.io/xiaojiou176-open/campus-copilot-api',
-    'thin local BFF',
-    'not the stdio MCP transport',
-    'pnpm check:container-publication-surface',
-    'pnpm smoke:docker:api',
-  ];
-
-  for (const snippet of packetSnippets) {
-    if (!packet.includes(snippet)) {
-      failures.push(`container_publication_packet_missing_snippet:${snippet}`);
-    }
+  if (!distribution.includes('ghcr.io/xiaojiou176-open/campus-copilot-api')) {
+    failures.push('container_publication_distribution_missing_public_image');
   }
-
-  if (!distribution.includes('docs/container-publication-prep.md')) {
+  if (!distribution.includes('pnpm smoke:docker:api')) {
+    failures.push('container_publication_distribution_missing_smoke');
+  }
+  if (!distribution.includes('container-ready (repo-local)')) {
     failures.push('container_publication_distribution_missing_packet_link');
   }
-  if (!packetLedger.includes('container-publication-prep.md')) {
-    failures.push('container_publication_submission_packet_missing_link');
+  if (!readme.includes('DISTRIBUTION.md')) {
+    failures.push('container_publication_readme_missing_distribution_link');
   }
-  if (!readme.includes('docs/container-publication-prep.md')) {
-    failures.push('container_publication_readme_missing_packet_link');
-  }
-  if (!mcpReadme.includes('../../docs/container-publication-prep.md')) {
-    failures.push('container_publication_mcp_readme_missing_packet_link');
+  if (!mcpReadme.includes('../../DISTRIBUTION.md')) {
+    failures.push('container_publication_mcp_readme_missing_distribution_link');
   }
 
   return failures;

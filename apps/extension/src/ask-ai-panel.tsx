@@ -179,6 +179,90 @@ export function AskAiPanel(props: {
       </div>
 
       <div className="surface__ask-ai-flow surface__ask-ai-flow--compact">
+        <div className="surface__ask-ai-sidebar surface__ask-ai-sidebar--supporting">
+          <aside aria-live="polite" className="surface__status-intro surface__status-intro--compact surface__status-intro--supporting">
+            <div className="surface__item-header">
+              <div className="surface__status-intro-copy">
+                <p className="surface__meta-label">{text.askAi.runtimeSummary}</p>
+                <p className="surface__item-lead">
+                  {uiLanguage === 'zh-CN' ? '伴随可信快照' : 'Companion trust snapshot'}
+                </p>
+                <p className="surface__meta">
+                  {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
+                  {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
+                </p>
+                <p className="surface__meta">{trustSnapshot}</p>
+                <p className="surface__meta">{text.askAi.manualOnlyBadge}</p>
+              </div>
+              <span className={`surface__badge surface__badge--${selectedProviderReady ? 'success' : 'warning'}`}>
+                {selectedProviderReady ? text.meta.ready : text.meta.notReady}
+              </span>
+            </div>
+          </aside>
+
+          <details className="surface__advanced-settings surface__advanced-settings--supporting">
+            <summary className="surface__advanced-settings-summary">
+              <span>{policyReviewLabel}</span>
+              <span className="surface__badge surface__badge--neutral">{structuredInputs.length} items</span>
+            </summary>
+            <div className="surface__advanced-settings-body">
+              <article className="surface__status-card surface__status-card--success">
+                <div className="surface__item-header">
+                  <h3>{text.askAi.whatAiCanSee}</h3>
+                  <span className="surface__badge surface__badge--success">{text.meta.ready}</span>
+                </div>
+                <div className="surface__evidence-grid surface__evidence-grid--compact">
+                  <article className="surface__evidence-card" key={structuredInputs[0].label}>
+                    <p className="surface__meta-label">{structuredInputs[0].label}</p>
+                    <p className="surface__item-lead">{structuredInputs[0].value}</p>
+                  </article>
+                  <article className="surface__evidence-card" key={structuredInputs[3].label}>
+                    <p className="surface__meta-label">{structuredInputs[3].label}</p>
+                    <p className="surface__item-lead">{structuredInputs[3].value}</p>
+                  </article>
+                  <article className="surface__evidence-card" key={structuredInputs[9].label}>
+                    <p className="surface__meta-label">{structuredInputs[9].label}</p>
+                    <p className="surface__item-lead">{structuredInputs[9].value}</p>
+                  </article>
+                </div>
+                <p className="surface__meta">
+                  {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
+                  {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
+                </p>
+              </article>
+
+              <article className="surface__status-card surface__status-card--warning">
+                <div className="surface__item-header">
+                  <h3>{text.askAi.guardrailsTitle}</h3>
+                  <span className="surface__badge surface__badge--danger">{text.askAi.manualOnlyBadge}</span>
+                </div>
+                <p className="surface__item-lead">{text.askAi.whatAiCannotDo}</p>
+                <p className="surface__meta">{text.askAi.redZoneDescription}</p>
+                <p className="surface__meta">{aiGuardrails.redZone.summary}</p>
+                <p className="surface__meta">{redZoneHardStop.manualOnlyNote}</p>
+              </article>
+
+              {currentPolicyOverlay ? (
+                <article className="surface__status-card">
+                  <div className="surface__item-header">
+                    <h3>Current site policy overlay</h3>
+                    <span className="surface__badge surface__badge--neutral">{currentPolicyOverlay.siteLabel}</span>
+                  </div>
+                  <p className="surface__item-lead">
+                    Allowed structured families: {currentPolicyOverlay.allowedFamilies.join(', ')}
+                  </p>
+                  <p className="surface__meta">
+                    Export-first only: {currentPolicyOverlay.exportOnlyFamilies.join(', ') || 'none'}.
+                  </p>
+                  <p className="surface__meta">
+                    Forbidden AI objects: {currentPolicyOverlay.forbiddenAiObjects.join(', ')}.
+                  </p>
+                </article>
+              ) : null}
+            </div>
+          </details>
+        </div>
+
         <div className="surface__ask-ai-shell">
           <div className="surface__question-card surface__question-card--primary">
             <div className="surface__section-head">
@@ -186,8 +270,8 @@ export function AskAiPanel(props: {
                 <h3>{text.askAi.questionBox}</h3>
                 <p className="surface__meta">
                   {uiLanguage === 'zh-CN'
-                    ? '先从眼前这张工作台发问。支持证据和运行时控件都退到这个提问框之后，不再抢整块面板的主叙事。'
-                    : 'Ask from the visible workspace first. Supporting evidence and runtime controls stay behind this composer instead of taking over the whole panel.'}
+                    ? '先看上面的策略、证据与边界，再基于眼前这张工作台发问。这个提问框现在明确排在可信证据之后。'
+                    : 'Review the visible evidence and boundary notes first, then ask from the current workspace. The composer now sits after the trust-first support lane.'}
                 </p>
               </div>
               <span className="surface__badge surface__badge--neutral">{selectedProviderLabel}</span>
@@ -298,91 +382,6 @@ export function AskAiPanel(props: {
               </div>
             ) : null}
           </div>
-
-        </div>
-
-        <div className="surface__ask-ai-sidebar surface__ask-ai-sidebar--supporting">
-          <aside aria-live="polite" className="surface__status-intro surface__status-intro--compact surface__status-intro--supporting">
-            <div className="surface__item-header">
-              <div className="surface__status-intro-copy">
-                <p className="surface__meta-label">{text.askAi.runtimeSummary}</p>
-                <p className="surface__item-lead">
-                  {uiLanguage === 'zh-CN' ? '伴随可信快照' : 'Companion trust snapshot'}
-                </p>
-                <p className="surface__meta">
-                  {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
-                  {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
-                </p>
-                <p className="surface__meta">{trustSnapshot}</p>
-                <p className="surface__meta">{text.askAi.manualOnlyBadge}</p>
-              </div>
-              <span className={`surface__badge surface__badge--${selectedProviderReady ? 'success' : 'warning'}`}>
-                {selectedProviderReady ? text.meta.ready : text.meta.notReady}
-              </span>
-            </div>
-          </aside>
-
-          <details className="surface__advanced-settings surface__advanced-settings--supporting">
-            <summary className="surface__advanced-settings-summary">
-              <span>{policyReviewLabel}</span>
-              <span className="surface__badge surface__badge--neutral">{structuredInputs.length} items</span>
-            </summary>
-            <div className="surface__advanced-settings-body">
-              <article className="surface__status-card surface__status-card--success">
-                <div className="surface__item-header">
-                  <h3>{text.askAi.whatAiCanSee}</h3>
-                  <span className="surface__badge surface__badge--success">{text.meta.ready}</span>
-                </div>
-                <div className="surface__evidence-grid surface__evidence-grid--compact">
-                  <article className="surface__evidence-card" key={structuredInputs[0].label}>
-                    <p className="surface__meta-label">{structuredInputs[0].label}</p>
-                    <p className="surface__item-lead">{structuredInputs[0].value}</p>
-                  </article>
-                  <article className="surface__evidence-card" key={structuredInputs[3].label}>
-                    <p className="surface__meta-label">{structuredInputs[3].label}</p>
-                    <p className="surface__item-lead">{structuredInputs[3].value}</p>
-                  </article>
-                  <article className="surface__evidence-card" key={structuredInputs[9].label}>
-                    <p className="surface__meta-label">{structuredInputs[9].label}</p>
-                    <p className="surface__item-lead">{structuredInputs[9].value}</p>
-                  </article>
-                </div>
-                <p className="surface__meta">
-                  {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
-                  {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
-                </p>
-              </article>
-
-              <article className="surface__status-card surface__status-card--warning">
-                <div className="surface__item-header">
-                  <h3>{text.askAi.guardrailsTitle}</h3>
-                  <span className="surface__badge surface__badge--danger">{text.askAi.manualOnlyBadge}</span>
-                </div>
-                <p className="surface__item-lead">{text.askAi.whatAiCannotDo}</p>
-                <p className="surface__meta">{text.askAi.redZoneDescription}</p>
-                <p className="surface__meta">{aiGuardrails.redZone.summary}</p>
-                <p className="surface__meta">{redZoneHardStop.manualOnlyNote}</p>
-              </article>
-
-              {currentPolicyOverlay ? (
-                <article className="surface__status-card">
-                  <div className="surface__item-header">
-                    <h3>Current site policy overlay</h3>
-                    <span className="surface__badge surface__badge--neutral">{currentPolicyOverlay.siteLabel}</span>
-                  </div>
-                  <p className="surface__item-lead">
-                    Allowed structured families: {currentPolicyOverlay.allowedFamilies.join(', ')}
-                  </p>
-                  <p className="surface__meta">
-                    Export-first only: {currentPolicyOverlay.exportOnlyFamilies.join(', ') || 'none'}.
-                  </p>
-                  <p className="surface__meta">
-                    Forbidden AI objects: {currentPolicyOverlay.forbiddenAiObjects.join(', ')}.
-                  </p>
-                </article>
-              ) : null}
-            </div>
-          </details>
         </div>
 
         <details className="surface__advanced-settings">

@@ -73,7 +73,7 @@ describe('ask ai panel guardrails', () => {
     expect(html).toContain('Layer 1 read/export');
     expect(html).toContain('Layer 2 AI read');
     expect(html).toContain('Ask AI still re-checks the current view packaging before anything leaves the extension.');
-    expect(html.indexOf('Question box')).toBeLessThan(html.indexOf('Policy review and visible evidence'));
+    expect(html.indexOf('Policy review and visible evidence')).toBeLessThan(html.indexOf('Question box'));
     expect(html.indexOf('Policy review and visible evidence')).toBeLessThan(html.indexOf('What AI can see'));
     expect(html.indexOf('What AI can see')).toBeLessThan(html.indexOf('Academic safety guardrails'));
     expect(html.indexOf('Policy review and visible evidence')).toBeLessThan(html.indexOf('Advanced material analysis'));

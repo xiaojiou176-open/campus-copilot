@@ -118,5 +118,5 @@ The repository must not commit:
 ## Canonical Cross-References
 
 - Site boundary classes: [`integration-boundaries.md`](integration-boundaries.md)
-- Diagnostics rules: [`diagnostics-and-logging.md`](diagnostics-and-logging.md)
-- Locked implementation choices: [`09-implementation-decisions.md`](09-implementation-decisions.md)
+- Manual live procedure: [`live-validation-runbook.md`](live-validation-runbook.md)
+- Repo-writing split: [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md)

@@ -16,14 +16,12 @@ Read these first:
 
 1. [`README.md`](README.md)
 2. [`CLAUDE.md`](CLAUDE.md) if you use an AI coding or review assistant
-3. [`docs/09-implementation-decisions.md`](docs/09-implementation-decisions.md)
+3. [`docs/08-phase-plan-and-repo-writing-brief.md`](docs/08-phase-plan-and-repo-writing-brief.md)
 4. [`docs/verification-matrix.md`](docs/verification-matrix.md)
 5. [`docs/integration-boundaries.md`](docs/integration-boundaries.md)
-6. [`docs/diagnostics-and-logging.md`](docs/diagnostics-and-logging.md)
-7. [`docs/disk-governance.md`](docs/disk-governance.md)
-8. [`DISTRIBUTION.md`](DISTRIBUTION.md) and [`INTEGRATIONS.md`](INTEGRATIONS.md) if your change touches public routing, bundles, or package claims
-9. [`PRIVACY.md`](PRIVACY.md) if your change touches permissions, uploads, or browser-store-facing posture
-10. The relevant numbered brief in [`docs/README.md`](docs/README.md) for the subsystem you are touching
+6. [`DISTRIBUTION.md`](DISTRIBUTION.md) and [`INTEGRATIONS.md`](INTEGRATIONS.md) if your change touches public routing, bundles, or package claims
+7. [`PRIVACY.md`](PRIVACY.md) if your change touches permissions, uploads, or browser-store-facing posture
+8. The relevant numbered brief in [`docs/README.md`](docs/README.md) for the subsystem you are touching
 
 The numbered docs under `docs/01-08` are now concise English canonical briefs.
 Do not treat them as free-form long essays, and do not create translated duplicates.
@@ -37,7 +35,7 @@ Do not treat them as free-form long essays, and do not create translated duplica
 - Do not add a second hand-maintained source of truth for the same technical fact.
 - Do not add manual, provider-dependent, or multimodal checks to the default required CI lane.
 - Do not add `self-hosted`, `shared-pool`, or equivalent repo-private runner assumptions back into the default public PR lane.
-- Do not add repo-local or repo-external state/cache paths without documenting their cleanup class in [`docs/disk-governance.md`](docs/disk-governance.md).
+- Do not add repo-local or repo-external state/cache paths without documenting their cleanup class in the current maintainership packets.
 
 ## Required Verification
 

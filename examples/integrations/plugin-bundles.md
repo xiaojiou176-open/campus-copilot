@@ -11,7 +11,7 @@ Think of it like a travel wallet:
 These bundles are **repo-public preview surfaces**.
 They are **not** official marketplace listings, hosted plugin directories, or write-capable browser-control plugins.
 
-If you need the exact blocker ledger behind these bundles, pair this router with [`../../docs/14-public-distribution-scoreboard.md`](../../docs/14-public-distribution-scoreboard.md).
+If you need the exact repo-side publication truth behind these bundles, pair this router with [`../../DISTRIBUTION.md`](../../DISTRIBUTION.md).
 
 ## Bundle matrix
 
@@ -67,7 +67,7 @@ It keeps the launch command short and lets Codex/Claude-style consumers point at
 This repository does **not** currently ship a native `openclaw.plugin.json`.
 It does, however, already qualify as a compatible OpenClaw bundle through the existing Claude-style layout rooted at [`../../skills`](../../skills), so the current truthful state is a `plugin-grade repo bundle`.
 The repo-owned [`../../skills/catalog.json`](../../skills/catalog.json) is only a local bundle index for this repository; it is not the native OpenClaw plugin manifest.
-Use [`../../docs/14-public-distribution-scoreboard.md`](../../docs/14-public-distribution-scoreboard.md) for the remaining official-listing/publication ledger.
+Use [`../../DISTRIBUTION.md`](../../DISTRIBUTION.md) for the remaining official-listing/publication ledger.
 
 ## Public-ready threshold
 

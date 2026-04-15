@@ -660,12 +660,17 @@ function formatGradescopeQuestionScore(question: Pick<GradescopeSubmissionQuesti
   return undefined;
 }
 
-function buildGradescopeAnnotationSummaryCount(count: number | undefined) {
-  if (!count || count <= 0) {
+function buildGradescopeAnnotationSummary(input: {
+  count: number | undefined;
+  pageNumbers?: number[];
+}) {
+  if (!input.count || input.count <= 0) {
     return undefined;
   }
 
-  return `[${count} annotation${count === 1 ? '' : 's'}]`;
+  const countText = `${input.count} annotation${input.count === 1 ? '' : 's'}`;
+  const pageText = formatGradescopeAnnotationPages(input.pageNumbers ?? []);
+  return pageText ? `[${countText} on ${pageText}]` : `[${countText}]`;
 }
 
 function buildGradescopeEvaluationSummaryCount(comments: string[] | undefined) {
@@ -713,7 +718,10 @@ function buildGradescopeQuestionBreakdownSummary(detail: GradescopeSubmissionDet
       const label = normalizeQuestionLabel(question);
       const scoreText = formatGradescopeQuestionScore(question);
       const rubricText = buildGradescopeRubricLabelSummary(question.rubricLabels);
-      const annotationText = buildGradescopeAnnotationSummaryCount(question.annotationCount);
+      const annotationText = buildGradescopeAnnotationSummary({
+        count: question.annotationCount,
+        pageNumbers: question.annotationPages,
+      });
       const evaluationText = buildGradescopeEvaluationSummaryCount(question.evaluationComments);
       return [label, scoreText, rubricText ? `(${rubricText})` : undefined, evaluationText, annotationText].filter(Boolean).join(' ');
     })

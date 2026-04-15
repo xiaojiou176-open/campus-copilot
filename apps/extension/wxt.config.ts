@@ -6,7 +6,7 @@ export default defineConfig({
     name: 'Campus Copilot for UW',
     short_name: 'Campus Copilot',
     description:
-      'The current OpenCampus flagship workspace: a local-first academic decision workspace with cited AI over Canvas, Gradescope, EdStem, and MyUW.',
+      'Campus Copilot for UW: a local-first academic decision workspace with cited AI over Canvas, Gradescope, EdStem, and MyUW.',
     icons: {
       16: 'icon-16.png',
       32: 'icon-32.png',

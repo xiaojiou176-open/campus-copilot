@@ -358,6 +358,30 @@ export const CrossSiteEvidenceItemSchema = z
   .strict();
 export type CrossSiteEvidenceItem = z.infer<typeof CrossSiteEvidenceItemSchema>;
 
+export const ClusterAuthorityRoleSchema = z.enum([
+  'course_identity',
+  'course_delivery',
+  'discussion_runtime',
+  'assessment_runtime',
+  'assignment_spec',
+  'schedule_signal',
+  'submission_state',
+  'feedback_detail',
+]);
+export type ClusterAuthorityRole = z.infer<typeof ClusterAuthorityRoleSchema>;
+
+export const ClusterAuthorityFacetSchema = z
+  .object({
+    role: ClusterAuthorityRoleSchema,
+    surface: ClusterSurfaceSchema,
+    entityKey: z.string().min(1),
+    resourceType: z.string().min(1),
+    label: z.string().min(1),
+    reason: z.string().min(1),
+  })
+  .strict();
+export type ClusterAuthorityFacet = z.infer<typeof ClusterAuthorityFacetSchema>;
+
 export const CourseClusterSchema = z
   .object({
     id: z.string().min(1),
@@ -376,6 +400,8 @@ export const CourseClusterSchema = z
     members: z.array(ClusterMemberRefSchema),
     evidenceBundle: z.array(CrossSiteEvidenceItemSchema),
     summary: z.string().min(1),
+    authorityNarrative: z.string().min(1).optional(),
+    authorityBreakdown: z.array(ClusterAuthorityFacetSchema).optional(),
     reviewDecision: z.enum(['accepted', 'review_later', 'dismissed']).optional(),
     reviewDecidedAt: IsoDateTimeSchema.optional(),
     createdAt: IsoDateTimeSchema,
@@ -414,6 +440,8 @@ export const WorkItemClusterSchema = z
     members: z.array(ClusterMemberRefSchema),
     evidenceBundle: z.array(CrossSiteEvidenceItemSchema),
     summary: z.string().min(1),
+    authorityNarrative: z.string().min(1).optional(),
+    authorityBreakdown: z.array(ClusterAuthorityFacetSchema).optional(),
     reviewDecision: z.enum(['accepted', 'review_later', 'dismissed']).optional(),
     reviewDecidedAt: IsoDateTimeSchema.optional(),
     createdAt: IsoDateTimeSchema,
@@ -476,11 +504,28 @@ export type AdministrativeSummaryFamily = z.infer<typeof AdministrativeSummaryFa
 export const AdministrativeAiDefaultSchema = z.enum(['blocked', 'confirm_required', 'allowed']);
 export type AdministrativeAiDefault = z.infer<typeof AdministrativeAiDefaultSchema>;
 
-export const AdministrativeLaneStatusSchema = z.enum(['landed_summary_lane', 'carrier_not_landed']);
+export const AdministrativeLaneStatusSchema = z.enum([
+  'landed_summary_lane',
+  'standalone_detail_runtime_lane',
+  'carrier_not_landed',
+]);
 export type AdministrativeLaneStatus = z.infer<typeof AdministrativeLaneStatusSchema>;
 
-export const AdministrativeDetailRuntimeStatusSchema = z.enum(['pending', 'blocked_missing_carrier']);
+export const AdministrativeDetailRuntimeStatusSchema = z.enum([
+  'review_ready',
+  'pending',
+  'blocked_missing_carrier',
+]);
 export type AdministrativeDetailRuntimeStatus = z.infer<typeof AdministrativeDetailRuntimeStatusSchema>;
+
+export const AdministrativePromotionBlockerSchema = z
+  .object({
+    id: z.string().min(1),
+    summary: z.string().min(1),
+    whyItStopsPromotion: z.string().min(1),
+  })
+  .strict();
+export type AdministrativePromotionBlocker = z.infer<typeof AdministrativePromotionBlockerSchema>;
 
 export const AdminCarrierFamilySchema = z.enum(['transcript', 'finaid', 'accounts', 'tuition_detail', 'profile']);
 export type AdminCarrierFamily = z.infer<typeof AdminCarrierFamilySchema>;
@@ -489,14 +534,18 @@ export const AdminCarrierRecordSchema = z
   .object({
     id: z.string().min(1),
     family: AdminCarrierFamilySchema,
+    laneStatus: AdministrativeLaneStatusSchema.default('landed_summary_lane'),
+    detailRuntimeStatus: AdministrativeDetailRuntimeStatusSchema.default('pending'),
     title: z.string().min(1),
     summary: z.string().min(1),
+    detailRuntimeNote: z.string().min(1).optional(),
     sourceSurface: ClusterSurfaceSchema,
     sourceUrl: z.url().optional(),
     authoritySource: z.string().min(1),
     importance: ImportanceLevelSchema,
     aiDefault: AdministrativeAiDefaultSchema,
     nextAction: z.string().min(1).optional(),
+    exactBlockers: z.array(AdministrativePromotionBlockerSchema).default([]),
     updatedAt: IsoDateTimeSchema,
   })
   .strict();
@@ -506,15 +555,17 @@ export const AdministrativeSummarySchema = z
   .object({
     id: z.string().min(1),
     family: AdministrativeSummaryFamilySchema,
-    laneStatus: AdministrativeLaneStatusSchema,
-    detailRuntimeStatus: AdministrativeDetailRuntimeStatusSchema,
+    laneStatus: AdministrativeLaneStatusSchema.default('landed_summary_lane'),
+    detailRuntimeStatus: AdministrativeDetailRuntimeStatusSchema.default('pending'),
     title: z.string().min(1),
     summary: z.string().min(1),
+    detailRuntimeNote: z.string().min(1).optional(),
     importance: ImportanceLevelSchema,
     aiDefault: AdministrativeAiDefaultSchema,
     authoritySource: z.string().min(1),
     sourceSurface: ClusterSurfaceSchema,
     nextAction: z.string().min(1).optional(),
+    exactBlockers: z.array(AdministrativePromotionBlockerSchema).default([]),
     updatedAt: IsoDateTimeSchema,
   })
   .strict();

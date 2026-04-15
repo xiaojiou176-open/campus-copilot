@@ -239,7 +239,7 @@ export function validateSkillCatalog(catalog = readSkillCatalog()) {
   const readme = readFileSync(path.join(repoRoot, 'skills/README.md'), 'utf8');
   const distribution = readFileSync(path.join(repoRoot, 'DISTRIBUTION.md'), 'utf8');
   const integrations = readFileSync(path.join(repoRoot, 'INTEGRATIONS.md'), 'utf8');
-  const preflightDoc = readFileSync(path.join(repoRoot, 'docs/16-distribution-preflight-packets.md'), 'utf8');
+  const preflightDoc = readFileSync(path.join(repoRoot, 'DISTRIBUTION.md'), 'utf8');
 
   if (!readme.includes('skills/catalog.json')) {
     failures.push('skill_catalog_readme_missing_catalog_link');

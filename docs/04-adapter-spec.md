@@ -20,7 +20,7 @@ official/private API -> page state -> DOM -> last-resort heuristics
 ```
 
 The exact boundary class for each site lives in [`integration-boundaries.md`](integration-boundaries.md).
-The exhaustive per-site classification lives in [`13-site-depth-exhaustive-ledger.md`](13-site-depth-exhaustive-ledger.md).
+The current public capability snapshot lives in [`site-capability-matrix.md`](site-capability-matrix.md).
 
 ## Adapter Responsibilities
 
@@ -62,5 +62,5 @@ Those items may become broader later, but they should not be described as implem
 - Boundary classes: [`integration-boundaries.md`](integration-boundaries.md)
 - Security posture: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
 - Capability buckets: [`site-capability-matrix.md`](site-capability-matrix.md)
-- Exhaustive depth ledger: [`13-site-depth-exhaustive-ledger.md`](13-site-depth-exhaustive-ledger.md)
-- Wave 1B contract freeze ledger: [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md)
+- Repo-writing split: [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md)
+- Academic expansion contract: [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)

@@ -46,6 +46,6 @@ jobs:
       - name: Manual follow-up reminder
         run: |
           echo "Manual lane only:"
-          echo "- Review docs/github-surface-checklist.md"
+          echo "- Review the current maintainership checklist before any owner-side launch action"
           echo "- Review docs/storefront-assets.md"
           echo "- If assets changed, re-capture screenshots locally and review them before merge"

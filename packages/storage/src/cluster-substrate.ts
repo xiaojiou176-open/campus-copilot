@@ -11,6 +11,7 @@ import {
   type AdministrativeSummary,
   type ClusterMemberRef,
   type ClusterSurface,
+  type ClusterAuthorityFacet,
   type CourseCluster,
   type CrossSiteEvidenceItem,
   type MergeHealthSummary,
@@ -156,6 +157,279 @@ function evidence(code: string, label: string, detail?: string): CrossSiteEviden
   return { code, label, detail };
 }
 
+function authorityFacet(input: {
+  role: ClusterAuthorityFacet['role'];
+  surface: ClusterSurface;
+  entityKey: string;
+  resourceType: string;
+  label: string;
+  reason: string;
+}): ClusterAuthorityFacet {
+  return {
+    role: input.role,
+    surface: input.surface,
+    entityKey: input.entityKey,
+    resourceType: input.resourceType,
+    label: input.label,
+    reason: input.reason,
+  };
+}
+
+function buildCourseAuthorityBreakdown(input: {
+  members: Course[];
+  authority: Course;
+  courseSitesCsAuthorityOverride: boolean;
+  exactAnchor: boolean;
+}) {
+  const breakdown: ClusterAuthorityFacet[] = [];
+  const { members, authority, courseSitesCsAuthorityOverride, exactAnchor } = input;
+
+  breakdown.push(
+    authorityFacet({
+      role: 'course_identity',
+      surface: authority.site,
+      entityKey: authority.id,
+      resourceType: authority.source.resourceType,
+      label: authority.title,
+      reason: courseSitesCsAuthorityOverride
+        ? 'CS 课程当前以课程网站承担课程身份 authority，避免把 Canvas/Gradescope/EdStem 误讲成同层课程定义面。'
+        : exactAnchor
+        ? '课程网站已经给出跨站精确锚点，所以课程身份可以 anchored 到同一个课程对象。'
+        : '当前课程簇以最强课程级 carrier 作为课程身份 authority。',
+    }),
+  );
+
+  const canvasMember = members.find((member) => member.site === 'canvas');
+  if (canvasMember) {
+    breakdown.push(
+      authorityFacet({
+        role: 'course_delivery',
+        surface: canvasMember.site,
+        entityKey: canvasMember.id,
+        resourceType: canvasMember.source.resourceType,
+        label: canvasMember.title,
+        reason: 'Canvas 仍然是课程执行面的 strongest runtime：模块、作业、公告、消息等日常课堂流转优先看这里。',
+      }),
+    );
+  }
+
+  const edstemMember = members.find((member) => member.site === 'edstem');
+  if (edstemMember) {
+    breakdown.push(
+      authorityFacet({
+        role: 'discussion_runtime',
+        surface: edstemMember.site,
+        entityKey: edstemMember.id,
+        resourceType: edstemMember.source.resourceType,
+        label: edstemMember.title,
+        reason: 'EdStem 负责讨论/问答 runtime，所以它是课程讨论面的真实 authority。',
+      }),
+    );
+  }
+
+  const gradescopeMember = members.find((member) => member.site === 'gradescope');
+  if (gradescopeMember) {
+    breakdown.push(
+      authorityFacet({
+        role: 'assessment_runtime',
+        surface: gradescopeMember.site,
+        entityKey: gradescopeMember.id,
+        resourceType: gradescopeMember.source.resourceType,
+        label: gradescopeMember.title,
+        reason: 'Gradescope 负责测评/回评 runtime，所以它是课程评估面的真实 authority。',
+      }),
+    );
+  }
+
+  return breakdown;
+}
+
+function buildCourseAuthorityNarrative(breakdown: ClusterAuthorityFacet[]) {
+  const parts: string[] = [];
+  const identity = breakdown.find((item) => item.role === 'course_identity');
+  const delivery = breakdown.find((item) => item.role === 'course_delivery');
+  const discussion = breakdown.find((item) => item.role === 'discussion_runtime');
+  const assessment = breakdown.find((item) => item.role === 'assessment_runtime');
+
+  if (identity) {
+    parts.push(`课程身份以 ${identity.surface} 为准`);
+  }
+  if (delivery) {
+    parts.push(`课程执行面以 ${delivery.surface} 为准`);
+  }
+  if (discussion) {
+    parts.push(`讨论流以 ${discussion.surface} 为准`);
+  }
+  if (assessment) {
+    parts.push(`评估流以 ${assessment.surface} 为准`);
+  }
+
+  return parts.join('；');
+}
+
+function pickWorkFacetMember(
+  members: WorkItemCandidate[],
+  role: ClusterAuthorityFacet['role'],
+  workType: WorkItemCluster['workType'],
+) {
+  const score = (member: WorkItemCandidate) => {
+    if (role === 'assignment_spec') {
+      if (member.surface === 'course-sites') return 100;
+      if (member.surface === 'canvas') return 95;
+      if (member.surface === 'gradescope') return 88;
+      if (member.surface === 'edstem') return 84;
+      return 0;
+    }
+
+    if (role === 'schedule_signal') {
+      if (!member.dueAt && !member.startAt && !member.endAt) {
+        return 0;
+      }
+      if (member.surface === 'course-sites') return 100;
+      if (member.surface === 'canvas') return 95;
+      if (member.surface === 'gradescope') return 92;
+      if (member.surface === 'myuw') return 86;
+      if (member.surface === 'time-schedule') return 82;
+      return 60;
+    }
+
+    if (role === 'submission_state') {
+      if (workType === 'grade_signal') {
+        if (member.surface === 'gradescope') return 100;
+        if (member.surface === 'canvas') return 92;
+      }
+      if (member.surface === 'canvas') return 100;
+      if (member.surface === 'gradescope') return 96;
+      if (member.surface === 'edstem') return 70;
+      return 0;
+    }
+
+    if (role === 'feedback_detail') {
+      if (member.relation === 'grade_feedback' && member.surface === 'gradescope') return 100;
+      if (member.relation === 'grade_feedback' && member.surface === 'canvas') return 92;
+      if (member.surface === 'gradescope') return 86;
+      if (member.surface === 'canvas') return 74;
+      return 0;
+    }
+
+    return 0;
+  };
+
+  return [...members].sort((left, right) => score(right) - score(left))[0];
+}
+
+function buildWorkAuthorityBreakdown(input: {
+  members: WorkItemCandidate[];
+  authority: WorkItemCandidate;
+  workType: WorkItemCluster['workType'];
+}) {
+  const { members, authority, workType } = input;
+  const breakdown: ClusterAuthorityFacet[] = [];
+
+  const specMember =
+    workType === 'assignment' || workType === 'deadline_signal'
+      ? pickWorkFacetMember(members, 'assignment_spec', workType)
+      : undefined;
+  if (specMember && (specMember.surface === 'course-sites' || specMember.surface === 'canvas' || specMember.surface === 'gradescope')) {
+    breakdown.push(
+      authorityFacet({
+        role: 'assignment_spec',
+        surface: specMember.surface,
+        entityKey: specMember.entityKey,
+        resourceType: specMember.resourceType,
+        label: specMember.label,
+        reason:
+          specMember.surface === 'course-sites'
+            ? '课程网站负责题目规格/说明书，所以 assignment spec 先以 course-sites 为准。'
+            : '站内 assignment carrier 仍然是 assignment spec 的更强说明面。',
+      }),
+    );
+  }
+
+  const scheduleMember = pickWorkFacetMember(members, 'schedule_signal', workType);
+  if (scheduleMember && (scheduleMember.dueAt || scheduleMember.startAt || scheduleMember.endAt)) {
+    breakdown.push(
+      authorityFacet({
+        role: 'schedule_signal',
+        surface: scheduleMember.surface,
+        entityKey: scheduleMember.entityKey,
+        resourceType: scheduleMember.resourceType,
+        label: scheduleMember.label,
+        reason: '时间锚点优先跟随带有截止/开始/结束时间的 strongest carrier，避免把 loose title match 当成日程真相。',
+      }),
+    );
+  }
+
+  const submissionMember = pickWorkFacetMember(members, 'submission_state', workType);
+  if (submissionMember && (submissionMember.surface === 'canvas' || submissionMember.surface === 'gradescope')) {
+    breakdown.push(
+      authorityFacet({
+        role: 'submission_state',
+        surface: submissionMember.surface,
+        entityKey: submissionMember.entityKey,
+        resourceType: submissionMember.resourceType,
+        label: submissionMember.label,
+        reason:
+          submissionMember.surface === 'canvas'
+            ? 'Canvas 仍然是提交状态/待办状态的 strongest runtime lane。'
+            : 'Gradescope 当前承担更强的提交/评分 runtime，所以 submission state 跟随 Gradescope。',
+      }),
+    );
+  }
+
+  const feedbackMember = pickWorkFacetMember(members, 'feedback_detail', workType);
+  if (feedbackMember && (feedbackMember.relation === 'grade_feedback' || feedbackMember.surface === 'gradescope')) {
+    breakdown.push(
+      authorityFacet({
+        role: 'feedback_detail',
+        surface: feedbackMember.surface,
+        entityKey: feedbackMember.entityKey,
+        resourceType: feedbackMember.resourceType,
+        label: feedbackMember.label,
+        reason: '评分、rubric、annotation 与回评细节优先跟随最强 feedback carrier，而不是复用 assignment spec surface。',
+      }),
+    );
+  }
+
+  if (breakdown.length === 0) {
+    breakdown.push(
+      authorityFacet({
+        role: workType === 'deadline_signal' ? 'schedule_signal' : 'assignment_spec',
+        surface: authority.surface,
+        entityKey: authority.entityKey,
+        resourceType: authority.resourceType,
+        label: authority.label,
+        reason: '当前只有一个可用 carrier，所以统一沿用主 authority。',
+      }),
+    );
+  }
+
+  return breakdown;
+}
+
+function buildWorkAuthorityNarrative(breakdown: ClusterAuthorityFacet[]) {
+  const parts: string[] = [];
+  const spec = breakdown.find((item) => item.role === 'assignment_spec');
+  const schedule = breakdown.find((item) => item.role === 'schedule_signal');
+  const submission = breakdown.find((item) => item.role === 'submission_state');
+  const feedback = breakdown.find((item) => item.role === 'feedback_detail');
+
+  if (spec) {
+    parts.push(`作业规格以 ${spec.surface} 为准`);
+  }
+  if (schedule) {
+    parts.push(`时间锚点以 ${schedule.surface} 为准`);
+  }
+  if (submission) {
+    parts.push(`提交状态以 ${submission.surface} 为准`);
+  }
+  if (feedback) {
+    parts.push(`反馈细节以 ${feedback.surface} 为准`);
+  }
+
+  return parts.join('；');
+}
+
 function confidenceFromSites(distinctSites: number, hasStrongKey: boolean) {
   if (distinctSites >= 2 && hasStrongKey) {
     return MatchConfidenceBandSchema.parse('high');
@@ -232,13 +506,20 @@ function buildCourseClusters(courses: Course[]) {
     const relatedSites = [...new Set(members.map((member) => member.site))];
     const normalizedCourseCode = canonicalCourseCode ?? normalizeCourseCode(authority);
     const band = confidenceFromSites(relatedSites.length, exactAnchor || Boolean(normalizedCourseCode));
+    const authorityBreakdown = buildCourseAuthorityBreakdown({
+      members,
+      authority,
+      courseSitesCsAuthorityOverride,
+      exactAnchor,
+    });
+    const authorityNarrative = buildCourseAuthorityNarrative(authorityBreakdown);
     const summary =
       members.length === 1
         ? `${authority.title} 当前来自单站课程 carrier，等待后续跨站证据补齐。`
         : courseSitesCsAuthorityOverride
-        ? `${authority.title} 已形成跨站课程簇；当前 CS 课程优先由课程网站担任课程级 authority。`
+        ? `${authority.title} 已形成跨站课程簇；当前 CS 课程优先由课程网站担任课程级 authority，并把 Canvas/Gradescope/EdStem 保留为各自 runtime 面。`
         : band === 'high'
-        ? `${authority.title} 已由 ${relatedSites.length} 个站点事实对齐成同一门课程。`
+        ? `${authority.title} 已由 ${relatedSites.length} 个站点事实对齐成同一门课程，不再只是 loose 拼图。`
         : band === 'medium'
         ? `${authority.title} 已形成跨站课程簇，但仍需人工留意可能匹配。`
         : `${authority.title} 当前只形成单站课程簇，后续仍需更多证据。`;
@@ -314,6 +595,8 @@ function buildCourseClusters(courses: Course[]) {
           ...(exactAnchor ? [evidence('exact_anchor', 'A course-site link points directly at another course carrier.')] : []),
         ],
         summary,
+        authorityNarrative,
+        authorityBreakdown,
         createdAt: now,
         updatedAt: now,
       }),
@@ -469,6 +752,8 @@ function buildWorkItemClusters(
       relatedSites.length,
       exactAnchor || (Boolean(authority.courseClusterId) && Boolean(authority.dueAt || authority.startAt || authority.endAt)),
     );
+    const authorityBreakdown = buildWorkAuthorityBreakdown({ members, authority, workType });
+    const authorityNarrative = buildWorkAuthorityNarrative(authorityBreakdown);
     const title = authority.title;
     const dueAt = authority.dueAt ?? members.find((member) => member.dueAt)?.dueAt;
     const startAt = authority.startAt ?? members.find((member) => member.startAt)?.startAt;
@@ -544,10 +829,12 @@ function buildWorkItemClusters(
         ],
         summary:
           band === 'high'
-            ? `${title} 已被折成高置信度统一工作项。`
+            ? `${title} 已被折成高置信度统一工作项，并开始按规格/时间/提交/反馈拆分 authority。`
             : band === 'medium'
-            ? `${title} 已形成可用工作项簇，但仍应显示为可能匹配。`
+            ? `${title} 已形成可用工作项簇，但 authority 仍有一部分需要人工复核。`
             : `${title} 当前仍是单站工作项或低置信度候选。`,
+        authorityNarrative,
+        authorityBreakdown,
         createdAt: observedAt,
         updatedAt: observedAt,
       }),
@@ -636,15 +923,17 @@ function buildAdministrativeSummaries(
       AdministrativeSummarySchema.parse({
         id: carrier.id.replace('admin-carrier', 'admin-summary'),
         family: carrier.family,
-        laneStatus: 'landed_summary_lane',
-        detailRuntimeStatus: 'pending',
+        laneStatus: carrier.laneStatus,
+        detailRuntimeStatus: carrier.detailRuntimeStatus,
         title: carrier.title,
         summary: carrier.summary,
+        detailRuntimeNote: carrier.detailRuntimeNote,
         importance: carrier.importance,
         aiDefault: carrier.aiDefault,
         authoritySource: carrier.authoritySource,
         sourceSurface: carrier.sourceSurface,
         nextAction: carrier.nextAction,
+        exactBlockers: carrier.exactBlockers,
         updatedAt: carrier.updatedAt,
       }),
     );
@@ -725,6 +1014,13 @@ function buildAdministrativeSummaries(
         authoritySource: 'myuw candidate summary (capture needed)',
         sourceSurface: blocker.sourceSurface,
         nextAction: blocker.nextAction,
+        exactBlockers: [
+          {
+            id: `${blocker.family}_missing_runtime_lane`,
+            summary: blocker.summary,
+            whyItStopsPromotion: blocker.nextAction,
+          },
+        ],
         updatedAt: blockerUpdatedAt,
       }),
     );

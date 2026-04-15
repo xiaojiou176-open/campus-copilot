@@ -35,12 +35,8 @@ const requiredFiles = [
   'skills/current-view-triage/SKILL.md',
   'skills/openclaw-readonly-consumer/SKILL.md',
   'skills/site-overview-audit/SKILL.md',
-  'docs/14-public-distribution-scoreboard.md',
-  'docs/15-publication-submission-packet.md',
-  'docs/16-distribution-preflight-packets.md',
   'docs/17-academic-expansion-and-safety-contract.md',
   'packages/mcp-server/mcpb.manifest.json',
-  'docs/container-publication.packet.json',
   'docs/assets/hero-workbench-overview.svg',
   'docs/assets/social-preview-source.svg',
   'docs/assets/social-preview.png',
@@ -97,9 +93,9 @@ const publicSkillFiles = [
   'skills/switchyard-runtime-check/SKILL.md',
 ];
 
-const expectedRepositoryUrl = 'https://github.com/xiaojiou176-open/campus-copilot.git';
-const expectedIssuesUrl = 'https://github.com/xiaojiou176-open/campus-copilot/issues';
-const expectedRootHomepage = 'https://xiaojiou176-open.github.io/campus-copilot/';
+const expectedRepositoryUrl = 'https://github.com/xiaojiou176-open/OpenCampus.git';
+const expectedIssuesUrl = 'https://github.com/xiaojiou176-open/OpenCampus/issues';
+const expectedRootHomepage = 'https://xiaojiou176-open.github.io/OpenCampus/';
 
 const failures = [];
 
@@ -149,8 +145,6 @@ if (existsSync('README.md')) {
     'examples/openclaw-readonly.md',
     'skills/openclaw-readonly-consumer/SKILL.md',
     'pnpm proof:public',
-    'docs/14-public-distribution-scoreboard.md',
-    'docs/16-distribution-preflight-packets.md',
     'docs/17-academic-expansion-and-safety-contract.md',
     'docs/10-builder-api-and-ecosystem-fit.md',
     'docs/api/openapi.yaml',
@@ -215,7 +209,6 @@ if (existsSync('examples/README.md')) {
     'site-overview-audit-example.md',
     'toolbox-chooser.md',
     'mcp/README.md',
-    '../docs/14-public-distribution-scoreboard.md',
     'integrations/codex-mcp.example.json',
     'integrations/codex-mcp-shell.example.json',
     'integrations/claude-code-mcp.example.json',
@@ -294,7 +287,7 @@ if (existsSync('docs/17-academic-expansion-and-safety-contract.md')) {
 
 if (existsSync('docs/10-builder-api-and-ecosystem-fit.md')) {
   const builderFit = readFileSync('docs/10-builder-api-and-ecosystem-fit.md', 'utf8');
-  const requiredBuilderFitSnippets = ['../examples/toolbox-chooser.md', '14-public-distribution-scoreboard.md'];
+  const requiredBuilderFitSnippets = ['../examples/toolbox-chooser.md', '../DISTRIBUTION.md'];
   for (const snippet of requiredBuilderFitSnippets) {
     if (!builderFit.includes(snippet)) {
       failures.push(`builder_fit_missing_reference:${snippet}`);
@@ -369,7 +362,7 @@ for (const manifestPath of publicPackageManifests) {
   if (typeof pkg.description !== 'string' || pkg.description.trim().length === 0) {
     failures.push(`public_package_description_missing:${manifestPath}`);
   }
-  if (typeof pkg.homepage !== 'string' || !pkg.homepage.includes('github.com/xiaojiou176-open/campus-copilot/tree/main/')) {
+  if (typeof pkg.homepage !== 'string' || !pkg.homepage.includes('github.com/xiaojiou176-open/OpenCampus/tree/main/')) {
     failures.push(`public_package_homepage_missing:${manifestPath}`);
   }
   if (
@@ -416,7 +409,7 @@ for (const manifestPath of publicPackageManifests) {
       failures.push(`public_package_server_metadata_missing:${serverMetadataPath}`);
     } else {
       const metadata = JSON.parse(readFileSync(serverMetadataPath, 'utf8'));
-      const expectedBundleUrl = `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
+      const expectedBundleUrl = `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
       if (metadata.name !== pkg.mcpName) {
         failures.push(`public_package_server_metadata_name_mismatch:${serverMetadataPath}`);
       }
@@ -453,7 +446,7 @@ if (existsSync('docs/README.md')) {
     'api/openapi.yaml',
     '../examples/README.md',
     '../skills/README.md',
-    '14-public-distribution-scoreboard.md',
+    '../DISTRIBUTION.md',
   ];
   for (const link of requiredDocsHubLinks) {
     if (!docsHub.includes(link)) {

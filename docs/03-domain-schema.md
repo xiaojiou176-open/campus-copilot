@@ -95,5 +95,5 @@ Without schema-first design, the repo would collapse into:
 
 - Runtime chain: [`02-system-architecture.md`](02-system-architecture.md)
 - Adapter contract: [`04-adapter-spec.md`](04-adapter-spec.md)
-- Locked implementation choices: [`09-implementation-decisions.md`](09-implementation-decisions.md)
-- Wave 1B contract freeze ledger: [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md)
+- Product boundary: [`01-product-prd.md`](01-product-prd.md)
+- Current capability snapshot: [`site-capability-matrix.md`](site-capability-matrix.md)

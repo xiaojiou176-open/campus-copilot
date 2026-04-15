@@ -99,8 +99,8 @@ The academic expansion lane has an extra safety rule:
 
 ## Canonical Cross-References
 
-- Current locked choices: [`09-implementation-decisions.md`](09-implementation-decisions.md)
-- Wave 1B contract freeze ledger: [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md)
+- Extension order and repo-writing split: [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md)
+- Current capability snapshot: [`site-capability-matrix.md`](site-capability-matrix.md)
 - Validation boundaries: [`verification-matrix.md`](verification-matrix.md)
 - Integration risk classes: [`integration-boundaries.md`](integration-boundaries.md)
 - Academic expansion and safety contract: [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)

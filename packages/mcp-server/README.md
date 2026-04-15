@@ -39,8 +39,7 @@ Registry-unblock progress in this repo:
 - preregistry metadata now lives beside the package in [`server.json`](./server.json) and the package-level `mcpName`
 - the bundle manifest now lives in [`mcpb.manifest.json`](./mcpb.manifest.json)
 - repo-side submit-ready fields now also live in [`registry-submission.packet.json`](./registry-submission.packet.json)
-- the consolidated preflight ledger lives in [`../../docs/16-distribution-preflight-packets.md`](../../docs/16-distribution-preflight-packets.md)
-- the container/image packet lives in [`../../docs/container-publication-prep.md`](../../docs/container-publication-prep.md)
+- the public distribution router lives in [`../../DISTRIBUTION.md`](../../DISTRIBUTION.md)
 - registry discovery-page read-back is still a separate upstream step; this README does not imply the listing UI has already been re-read
 
 Registry preflight proof from the repo root:
@@ -58,9 +57,9 @@ That preflight checks the late-stage alignment work that tends to drift:
 - example config plus truthful install wording
 - the repo-owned submission packet that the owner can reuse later
 
-Related packet docs:
+Related public distribution doc:
 
-- [`../../docs/16-distribution-preflight-packets.md`](../../docs/16-distribution-preflight-packets.md)
+- [`../../DISTRIBUTION.md`](../../DISTRIBUTION.md)
 
 ## Pair It With The Container Path
 

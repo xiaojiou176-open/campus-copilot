@@ -34,6 +34,37 @@ function detectAdminCarrierFamily(url: string) {
   return undefined;
 }
 
+type AdminCarrierLane = Pick<
+  AdminCarrierRecord,
+  'laneStatus' | 'detailRuntimeStatus' | 'detailRuntimeNote' | 'exactBlockers'
+>;
+
+function buildPromotionBlocker(id: string, summary: string, whyItStopsPromotion: string) {
+  return {
+    id,
+    summary,
+    whyItStopsPromotion,
+  };
+}
+
+function buildReviewReadyLane(note: string, exactBlockers: AdminCarrierRecord['exactBlockers']): AdminCarrierLane {
+  return {
+    laneStatus: 'standalone_detail_runtime_lane',
+    detailRuntimeStatus: 'review_ready',
+    detailRuntimeNote: note,
+    exactBlockers,
+  };
+}
+
+function buildPendingLane(note: string, exactBlockers: AdminCarrierRecord['exactBlockers']): AdminCarrierLane {
+  return {
+    laneStatus: 'landed_summary_lane',
+    detailRuntimeStatus: 'pending',
+    detailRuntimeNote: note,
+    exactBlockers,
+  };
+}
+
 function buildTranscriptCarrier(pageHtml: string, url: string, now: string): AdminCarrierRecord {
   const classValue = extractFirstMatch(pageHtml, /<th>Class<\/th>[\s\S]*?<td[^>]*>([\s\S]*?)<\/td>/i);
   const majorValue = extractFirstMatch(pageHtml, /<th>Major<\/th>[\s\S]*?<td[^>]*>([\s\S]*?)<\/td>/i);
@@ -45,6 +76,21 @@ function buildTranscriptCarrier(pageHtml: string, url: string, now: string): Adm
   return {
     id: 'admin-carrier:transcript',
     family: 'transcript',
+    ...buildReviewReadyLane(
+      'Transcript detail now has a standalone review-first lane backed by the transcript page, but it still stops at export/manual review instead of AI-readable record detail.',
+      [
+        buildPromotionBlocker(
+          'transcript_ai_export_first',
+          'Transcript detail remains export-first and AI-blocked.',
+          'The landed lane is lawful for manual/export review, but the repo still forbids direct AI reading of transcript detail.',
+        ),
+        buildPromotionBlocker(
+          'transcript_line_item_history_not_normalized',
+          'Line-item transcript history is not yet normalized into standalone structured records.',
+          'The current lane captures standing/GPA/credits summaries, not a complete course-by-course historical ledger.',
+        ),
+      ],
+    ),
     title: 'Unofficial transcript',
     summary: `Transcript summary shows class ${classValue || 'unknown'}, major ${majorValue || 'unknown'}, total credits earned ${transferCredits || 'unknown'}, cumulative GPA ${cumulativeGpa || 'unknown'}, standing ${standing || 'unknown'}, and ${workInProgress || 'unknown'} credits currently in progress.`,
     sourceSurface: 'myuw',
@@ -73,6 +119,21 @@ function buildFinaidCarrier(pageHtml: string, url: string, now: string): AdminCa
   return {
     id: 'admin-carrier:finaid',
     family: 'finaid',
+    ...buildReviewReadyLane(
+      'Financial-aid detail now has a standalone review-first lane backed by the aid-status page, but checklist/doc-detail and AI access still stay blocked.',
+      [
+        buildPromotionBlocker(
+          'finaid_ai_export_first',
+          'Financial-aid detail remains export-first and AI-blocked.',
+          'The current lane is only approved for manual/export review, not direct AI analysis of aid detail.',
+        ),
+        buildPromotionBlocker(
+          'finaid_document_checklist_not_normalized',
+          'Aid document/checklist detail is not yet normalized into a stronger runtime lane.',
+          'The landed summary captures status and borrowing context, but not a full aid-document or requirement ledger.',
+        ),
+      ],
+    ),
     title: 'Financial aid status',
     summary: `Financial aid summary shows ${messagesCount || 'unknown'} message(s); current status says "${mainStatus}". Estimated total borrowing is $${totalPrincipal || 'unknown'} with estimated monthly repayment $${monthlyPayment || 'unknown'}.`,
     sourceSurface: 'myuw',
@@ -101,6 +162,21 @@ function buildAccountsCarrier(pageHtml: string, url: string, now: string): Admin
     {
       id: 'admin-carrier:tuition-detail',
       family: 'tuition_detail',
+      ...buildPendingLane(
+        'The accounts page only provides a billing overview and statement handoff. It does not yet land the standalone statement-backed tuition detail lane.',
+        [
+          buildPromotionBlocker(
+            'tuition_statement_detail_not_opened',
+            'Accounts overview only points at the statement-backed lane.',
+            'The accounts card gives billing overview context, but it is not the standalone statement detail lane.',
+          ),
+          buildPromotionBlocker(
+            'tuition_ai_export_first',
+            'Tuition detail remains export-first and AI-blocked.',
+            'Even after a stronger statement carrier lands, billing detail must still stay review/export-first before any AI analysis.',
+          ),
+        ],
+      ),
       title: 'Tuition and fees summary',
       summary: `Accounts page shows billing overview amount due $${amountDue || 'unknown'} and a direct tuition statement handoff for deeper review.`,
       sourceSurface: 'myuw',
@@ -114,6 +190,21 @@ function buildAccountsCarrier(pageHtml: string, url: string, now: string): Admin
     {
       id: 'admin-carrier:accounts',
       family: 'accounts',
+      ...buildReviewReadyLane(
+        'Accounts detail now has a standalone review-first lane backed by the MyUW accounts page, but it still avoids billing actions and AI-readable account detail.',
+        [
+          buildPromotionBlocker(
+            'accounts_ai_export_first',
+            'Accounts detail remains export-first and AI-blocked.',
+            'The landed lane supports review/export, not direct AI analysis of account-state detail.',
+          ),
+          buildPromotionBlocker(
+            'accounts_subsystems_not_split',
+            'Accounts subsystems are still summarized together instead of becoming separate runtime lanes.',
+            'Eligibility, Husky account, library, and tuition handoff still share one review lane rather than multiple fully normalized detail lanes.',
+          ),
+        ],
+      ),
       title: 'Accounts summary',
       summary: `Accounts page shows eligibility ${huskyStatus || 'unknown'}, account balance $${huskyAccount || 'unknown'}, and library panel ${libraryHeader}.`,
       sourceSurface: 'myuw',
@@ -137,6 +228,21 @@ function buildProfileCarrier(pageHtml: string, url: string, now: string): AdminC
   return {
     id: 'admin-carrier:profile',
     family: 'profile',
+    ...buildReviewReadyLane(
+      'Profile detail now has a standalone review-first lane backed by the profile page, but personally identifying detail stays export-first and AI-blocked.',
+      [
+        buildPromotionBlocker(
+          'profile_ai_export_first',
+          'Profile detail remains export-first and AI-blocked.',
+          'The landed lane is only approved for manual/export review so personal identifiers do not enter AI by default.',
+        ),
+        buildPromotionBlocker(
+          'profile_field_history_not_normalized',
+          'Profile field history and lower-level personal-record detail are not normalized into a richer runtime lane.',
+          'The current lane captures visible summary sections, not full change history or deeper personal-record breakdowns.',
+        ),
+      ],
+    ),
     title: 'MyUW profile summary',
     summary: `Profile page confirms preferred-name ${preferredNamePresent ? 'support' : 'absence'}, pronouns ${pronounsPresent ? 'visibility' : 'not visible'}, local-contact block ${localAddressPresent ? 'present' : 'not visible'}, email section ${emailSectionPresent ? 'present' : 'not visible'}, and ${emergencyContactCount || 0} emergency contact record(s).`,
     sourceSurface: 'myuw',
@@ -176,6 +282,21 @@ function buildTuitionDetailCarrier(pageHtml: string, url: string, now: string): 
   return {
     id: 'admin-carrier:tuition-detail',
     family: 'tuition_detail',
+    ...buildReviewReadyLane(
+      'Tuition detail now has a standalone review-first lane backed by the statement page, but billing actions and longitudinal statement history remain outside the current runtime lane.',
+      [
+        buildPromotionBlocker(
+          'tuition_ai_export_first',
+          'Tuition detail remains export-first and AI-blocked.',
+          'The statement-backed lane supports manual/export review but still does not authorize direct AI reading of billing detail.',
+        ),
+        buildPromotionBlocker(
+          'tuition_actions_not_supported',
+          'Billing actions and broader statement history are still outside the landed lane.',
+          'The current lane summarizes the active statement, not payment actions, account mutations, or a full historical statement ledger.',
+        ),
+      ],
+    ),
     title: 'Tuition statement summary',
     summary: `${quarter || 'Current quarter'} tuition statement shows balance due $${dueAmount || 'unknown'}, tuition classification ${
       tuitionClassification || 'unknown'

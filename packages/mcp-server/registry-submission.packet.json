@@ -14,7 +14,7 @@
     "publishConfigAccess": "public",
     "releaseTag": "v0.1.1",
     "releaseAsset": "campus-copilot-mcp-0.1.1.mcpb",
-    "releaseAssetUrl": "https://github.com/xiaojiou176-open/campus-copilot/releases/download/v0.1.1/campus-copilot-mcp-0.1.1.mcpb",
+    "releaseAssetUrl": "https://github.com/xiaojiou176-open/OpenCampus/releases/download/v0.1.1/campus-copilot-mcp-0.1.1.mcpb",
     "fileSha256": "381a1bdf42cf83cd832039b6e1df7fa20f08f8ea2a6eb92329f64cde7bb61814",
     "npmPublicationRequiredBeforeRegistrySubmit": false
   },
@@ -24,7 +24,7 @@
     "title": "Campus Copilot MCP",
     "description": "Read-only MCP server for the local Campus Copilot BFF and imported workspace snapshots.",
     "repository": {
-      "url": "https://github.com/xiaojiou176-open/campus-copilot",
+      "url": "https://github.com/xiaojiou176-open/OpenCampus",
       "source": "github",
       "subfolder": "packages/mcp-server"
     },
@@ -38,11 +38,11 @@
       "examples/integrations/codex-mcp.example.json",
       "examples/integrations/claude-code-mcp.example.json"
     ],
-    "packetDoc": "docs/16-distribution-preflight-packets.md"
+    "packetDoc": "DISTRIBUTION.md"
   },
   "ownerWorkflow": {
     "buildLocalBundle": "pnpm --filter @campus-copilot/mcp-server build && node scripts/build-mcpb-bundle.mjs",
-    "uploadReleaseAsset": "gh release upload v0.1.1 campus-copilot-mcp-0.1.1.mcpb --repo xiaojiou176-open/campus-copilot --clobber",
+    "uploadReleaseAsset": "gh release upload v0.1.1 campus-copilot-mcp-0.1.1.mcpb --repo xiaojiou176-open/OpenCampus --clobber",
     "login": "mcp-publisher login github",
     "publishMetadata": "mcp-publisher publish packages/mcp-server/server.json"
   },

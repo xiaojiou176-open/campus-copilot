@@ -225,7 +225,7 @@ This section answers a narrower question:
 ## Canonical Cross-References
 
 - Product scope: [`01-product-prd.md`](01-product-prd.md)
-- Latest V2 product contract freeze: [`18-v2-product-contract-freeze.md`](18-v2-product-contract-freeze.md)
+- Current public product boundary summary: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
 - Security/privacy brief: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
 - Integration boundary registry: [`integration-boundaries.md`](integration-boundaries.md)
 - Verification matrix: [`verification-matrix.md`](verification-matrix.md)

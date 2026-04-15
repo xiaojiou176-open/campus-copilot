@@ -25,8 +25,8 @@ When extending the repo, keep this order:
 ## How To Use This Brief
 
 - use it as an extension-order guardrail
-- use [`09-implementation-decisions.md`](09-implementation-decisions.md) for current locked choices
-- use [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md) when you need the current-vs-next-vs-later boundary
+- use [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md) for the current public safety and boundary summary
+- use [`site-capability-matrix.md`](site-capability-matrix.md) when you need the public capability snapshot
 - use [`verification-matrix.md`](verification-matrix.md) for verification lanes
 - use [`integration-boundaries.md`](integration-boundaries.md) for external boundary honesty
 

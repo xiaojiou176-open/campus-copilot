@@ -395,9 +395,13 @@ Typical current cases:
 
 - broader grouped-material or richer download carriers beyond the current shipped site-depth contract
 
-When the task is explicitly about these still-unproven depth paths, pair this lane with the repo-local skill:
+When the task is explicitly about these still-unproven depth paths, first enter the repo-local live router:
 
-- [`.agents/skills/selective-gap-proof-capture/SKILL.md`](../.agents/skills/selective-gap-proof-capture/SKILL.md)
+- [`.agents/skills/l1-campus-live-routing/SKILL.md`](../.agents/skills/l1-campus-live-routing/SKILL.md)
+
+Then follow its module map into:
+
+- [`.agents/skills/l1-campus-live-routing/modules/l2-real-session-adapter-triage/SKILL.md`](../.agents/skills/l1-campus-live-routing/modules/l2-real-session-adapter-triage/SKILL.md)
 
 Working rule:
 
@@ -472,7 +476,7 @@ Examples:
 
 ## What Must Never Move Back Into High-Authority Docs
 
-Do **not** move these back into `README.md` or `09-implementation-decisions.md`:
+Do **not** move these back into `README.md` or the public numbered briefs:
 
 - daily site counts
 - `localhost:9222`-style operational notes

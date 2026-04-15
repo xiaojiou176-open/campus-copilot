@@ -116,6 +116,7 @@ describe('web workbench planning pulse', () => {
             authoritySource: 'myuw summary lane',
             sourceSurface: 'myuw',
             nextAction: 'Export before sharing with AI.',
+            exactBlockers: [],
             updatedAt: '2026-04-01T03:00:00.000Z',
           },
         ],
@@ -155,7 +156,7 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Imported snapshot: Imported planning packet');
     expect(html).toContain('Read/export partial · AI blocked');
     expect(html).toContain('Allowed: planning substrates, degree requirement summaries, schedule option context.');
-    expect(html).toContain('Review-ready summaries: transcript.');
+    expect(html).toContain('No review-ready administrative summary families are visible in this slice.');
     expect(html).toContain('detail runtime pending');
     expect(html).toContain('Planning Pulse');
     expect(html).toContain('Allen School planning draft');
@@ -386,7 +387,7 @@ describe('web workbench planning pulse', () => {
             site: 'gradescope',
             title: 'Concept Check 30',
             status: 'graded',
-            summary: 'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations]',
+            summary: 'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations on page 3]',
             detail: 'Actions: Download graded copy | Submission history | Request regrade (Please select a question.)',
             actionHints: ['Download graded copy', 'Submission history', 'Request regrade (Please select a question.)'],
             reviewSummary: {
@@ -397,6 +398,7 @@ describe('web workbench planning pulse', () => {
                   maxScore: 9,
                   rubricLabels: ['Needs work'],
                   annotationCount: 3,
+                  annotationPages: [3],
                 },
               ],
             },
@@ -420,7 +422,7 @@ describe('web workbench planning pulse', () => {
       }),
     );
 
-    expect(html).toContain('Question breakdown: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations]');
+    expect(html).toContain('Question breakdown: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations on page 3]');
     expect(html).toContain('Available actions: Download graded copy · Submission history · Request regrade (Please select a question.)');
   });
 

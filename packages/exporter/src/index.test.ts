@@ -56,7 +56,8 @@ const baseInput = {
             score: 1,
             maxScore: 1,
             rubricLabels: ['Correct'],
-            annotationPages: [],
+            annotationPages: [3],
+            annotationCount: 1,
           },
         ],
       },
@@ -407,7 +408,7 @@ describe('exporter package', () => {
       input: baseInput,
     });
 
-    expect(artifact.content).toContain('review Q1 1 / 1 (Correct)');
+    expect(artifact.content).toContain('review Q1 1 / 1 (Correct) [1 annotation on page 3]');
     expect(artifact.content).toContain('resource set Homework (2 items)');
     expect(artifact.content).toContain('module Week 1 (assignment)');
     expect(artifact.content).toContain('authority course-sites · course page');

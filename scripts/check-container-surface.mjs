@@ -33,9 +33,6 @@ export function validateContainerSurface() {
   const mcpReadme = readFileSync(fromRepoRoot('packages/mcp-server/README.md'), 'utf8');
   const distribution = readFileSync(fromRepoRoot('DISTRIBUTION.md'), 'utf8');
   const readme = readFileSync(fromRepoRoot('README.md'), 'utf8');
-  const scoreboard = readFileSync(fromRepoRoot('docs/14-public-distribution-scoreboard.md'), 'utf8');
-  const submissionPacket = readFileSync(fromRepoRoot('docs/container-publication.packet.json'), 'utf8');
-  const preflightDoc = readFileSync(fromRepoRoot('docs/16-distribution-preflight-packets.md'), 'utf8');
   const smokeScript = existsSync(fromRepoRoot('scripts/docker-api-smoke.sh'))
     ? readFileSync(fromRepoRoot('scripts/docker-api-smoke.sh'), 'utf8')
     : '';
@@ -104,23 +101,8 @@ export function validateContainerSurface() {
   if (!readme.includes('run a local Docker path with health checks')) {
     failures.push('root_readme_missing_container_entry');
   }
-  if (!scoreboard.includes('repo-owned container path') && !scoreboard.includes('Containerized API sidecar')) {
-    failures.push('scoreboard_missing_container_surface');
-  }
-  if (!scoreboard.includes('container-publication.packet.json')) {
-    failures.push('scoreboard_missing_container_packet_reference');
-  }
-  if (!submissionPacket.includes('"canonicalPublic": "ghcr.io/xiaojiou176-open/campus-copilot-api"')) {
-    failures.push('container_packet_missing_canonical_public_image');
-  }
-  if (!submissionPacket.includes('"notMcpTransport": true')) {
-    failures.push('container_packet_missing_truth_boundary');
-  }
-  if (!preflightDoc.includes('campus-copilot-api:local')) {
-    failures.push('preflight_doc_missing_local_image_tag');
-  }
-  if (!preflightDoc.includes('ghcr.io/xiaojiou176-open/campus-copilot-api')) {
-    failures.push('preflight_doc_missing_public_image_coordinate');
+  if (!distribution.includes('campus-copilot-api:local')) {
+    failures.push('distribution_missing_local_image_tag');
   }
 
   return failures;

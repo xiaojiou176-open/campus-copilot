@@ -408,6 +408,7 @@ describe('core contracts', () => {
             aiDefault: 'blocked',
             authoritySource: 'myuw summary lane',
             sourceSurface: 'myuw',
+            exactBlockers: [],
             updatedAt: '2026-04-12T08:00:00.000Z',
           },
         ],
@@ -487,6 +488,13 @@ describe('core contracts', () => {
             aiDefault: 'blocked',
             authoritySource: 'myuw candidate summary (capture needed)',
             sourceSurface: 'myuw',
+            exactBlockers: [
+              {
+                id: 'transcript_missing_runtime_lane',
+                summary: 'Transcript detail still needs a stronger lawful runtime carrier.',
+                whyItStopsPromotion: 'Current summary lane is export-first and cannot claim standalone detail-runtime truth.',
+              },
+            ],
             updatedAt: '2026-04-12T08:00:00.000Z',
           },
         ],

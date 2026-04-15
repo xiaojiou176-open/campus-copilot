@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { pathToFileURL } from 'node:url';
 import { chromium } from '@playwright/test';
 import { getCacheGovernancePolicy, getChromeProcessList, getRepoBrowserRootStatus } from './lib/cache-governance.mjs';
 import {
@@ -49,6 +50,30 @@ function selectRequestedUrl(flags) {
 
   const site = typeof flags.site === 'string' ? flags.site.trim() : 'canvas';
   return SITE_URLS[site] ?? SITE_URLS.canvas;
+}
+
+function normalizeRequestedPageUrl(value) {
+  try {
+    const parsed = new URL(value);
+    return `${parsed.origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return undefined;
+  }
+}
+
+export function shouldNavigateRequestedPage(input) {
+  if (input.reload) {
+    return true;
+  }
+
+  const current = normalizeRequestedPageUrl(input.currentUrl);
+  const requested = normalizeRequestedPageUrl(input.requestedUrl);
+
+  if (!current || !requested) {
+    return true;
+  }
+
+  return current !== requested;
 }
 
 function resolveOutputDir(rootDir, runId) {
@@ -240,7 +265,14 @@ async function captureEvidence() {
 
     attachEvidenceListeners(page, state, pendingRequests);
 
-    if (createdFreshPage || flags.reload === 'true') {
+    if (
+      createdFreshPage ||
+      shouldNavigateRequestedPage({
+        currentUrl: page.url(),
+        requestedUrl,
+        reload: flags.reload === 'true',
+      })
+    ) {
       await page.goto(requestedUrl, {
         waitUntil: 'domcontentloaded',
         timeout: sessionConfig.navigationTimeoutMs,
@@ -331,4 +363,6 @@ async function captureEvidence() {
   }
 }
 
-await captureEvidence();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await captureEvidence();
+}

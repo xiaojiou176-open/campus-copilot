@@ -211,6 +211,7 @@ function getAssignmentReviewSummary(assignment: {
       rubricLabels: string[];
       evaluationCommentCount?: number;
       annotationCount?: number;
+      annotationPages?: number[];
     }>;
   };
 }) {
@@ -229,15 +230,35 @@ function getAssignmentReviewSummary(assignment: {
       question.evaluationCommentCount !== undefined
         ? ` [${question.evaluationCommentCount} comment${question.evaluationCommentCount === 1 ? '' : 's'}]`
         : '';
-    const annotations =
-      question.annotationCount !== undefined
-        ? ` [${question.annotationCount} annotation${question.annotationCount === 1 ? '' : 's'}]`
-        : '';
+    const annotations = formatAssignmentAnnotationLabel({
+      count: question.annotationCount,
+      pageNumbers: question.annotationPages,
+    });
     return `${question.label}${score}${rubric}${comments}${annotations}`;
   });
   const remaining = questions.length - visible.length;
 
   return `Question breakdown: ${visible.join('; ')}${remaining > 0 ? `; +${remaining} more` : ''}`;
+}
+
+function formatAssignmentAnnotationLabel(input: {
+  count?: number;
+  pageNumbers?: number[];
+}) {
+  if (input.count === undefined) {
+    return undefined;
+  }
+
+  const countText = `${input.count} annotation${input.count === 1 ? '' : 's'}`;
+  if (!input.pageNumbers || input.pageNumbers.length === 0) {
+    return ` [${countText}]`;
+  }
+
+  const pageText =
+    input.pageNumbers.length === 1
+      ? `page ${input.pageNumbers[0]}`
+      : `pages ${input.pageNumbers.join(', ')}`;
+  return ` [${countText} on ${pageText}]`;
 }
 
 function getAssignmentActionSummary(assignment: { actionHints?: string[] }) {
@@ -248,12 +269,21 @@ function getAssignmentActionSummary(assignment: { actionHints?: string[] }) {
 }
 
 function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
-  return summary.laneStatus === 'carrier_not_landed' ? 'capture needed' : 'summary ready';
+  if (summary.laneStatus === 'carrier_not_landed') {
+    return 'capture needed';
+  }
+  if (summary.laneStatus === 'standalone_detail_runtime_lane') {
+    return 'detail-runtime lane';
+  }
+  return 'summary ready';
 }
 
 function getAdministrativeDetailRuntimeLabel(summary: AdministrativeSummary) {
   if (summary.detailRuntimeStatus === 'blocked_missing_carrier') {
     return 'detail runtime blocked';
+  }
+  if (summary.detailRuntimeStatus === 'review_ready') {
+    return 'detail runtime review-ready';
   }
   if (summary.detailRuntimeStatus === 'pending') {
     return 'detail runtime pending';
@@ -290,6 +320,7 @@ export function WebWorkbenchPanels(props: {
         rubricLabels: string[];
         evaluationCommentCount?: number;
         annotationCount?: number;
+        annotationPages?: number[];
       }>;
     };
     actionHints?: string[];
@@ -389,7 +420,16 @@ export function WebWorkbenchPanels(props: {
   const importedScope = props.importedEnvelope?.scope;
   const importedPackaging = props.importedEnvelope?.packaging;
   const currentOverlay = getAiSitePolicyOverlay(currentScope?.site);
-  const summaryFamilies = [...new Set(administrativeSummaries.map((summary) => summary.family))];
+  const reviewReadyFamilies = [
+    ...new Set(
+      administrativeSummaries
+        .filter(
+          (summary) =>
+            summary.laneStatus === 'standalone_detail_runtime_lane' || summary.detailRuntimeStatus === 'review_ready',
+        )
+        .map((summary) => summary.family),
+    ),
+  ];
   const exportFirstFamilies = [...new Set(currentOverlay?.exportOnlyFamilies ?? [])];
 
   function getSiteLabel(site?: string) {
@@ -664,9 +704,9 @@ export function WebWorkbenchPanels(props: {
                         currentOverlay.exportOnlyFamilies.join(', ') || 'none'
                       }. Forbidden AI objects: ${currentOverlay.forbiddenAiObjects.join(', ') || 'none'}. `
                     : 'Choose a site-scoped slice to review the active site overlay and carrier honesty notes. '}
-                  {summaryFamilies.length > 0
-                    ? `Review-ready summaries: ${summaryFamilies.join(', ')}. `
-                    : 'No administrative summary families are visible in this slice. '}
+                  {reviewReadyFamilies.length > 0
+                    ? `Review-ready summaries: ${reviewReadyFamilies.join(', ')}. `
+                    : 'No review-ready administrative summary families are visible in this slice. '}
                   {exportFirstFamilies.length > 0
                     ? `Export-first families in this view: ${exportFirstFamilies.join(', ')}. `
                     : 'No site-scoped export-first families are visible in this slice yet. '}
@@ -829,6 +869,12 @@ export function WebWorkbenchPanels(props: {
                   </div>
                 </div>
                 <p>{summary.summary}</p>
+                {summary.detailRuntimeNote ? <p className="meta">{summary.detailRuntimeNote}</p> : null}
+                {summary.exactBlockers.length > 0 ? (
+                  <p className="meta">
+                    Exact blockers: {summary.exactBlockers.slice(0, 2).map((blocker) => blocker.id).join(' · ')}
+                  </p>
+                ) : null}
                 <p className="meta">
                   {summary.authoritySource}
                   {summary.nextAction ? ` · ${summary.nextAction}` : ''}

@@ -161,8 +161,8 @@ It decouples:
 
 ## Canonical Cross-References
 
-- Locked choices: [`09-implementation-decisions.md`](09-implementation-decisions.md)
+- Product boundary: [`01-product-prd.md`](01-product-prd.md)
 - Security and upload limits: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
 - Validation lanes: [`verification-matrix.md`](verification-matrix.md)
 - Export and user surfaces: [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
-- Wave 1B contract freeze ledger: [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md)
+- Integration fit: [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md)

@@ -21,11 +21,8 @@ export function validateMcpRegistryPreflight() {
   const packet = readJson('packages/mcp-server/registry-submission.packet.json');
   const readme = readFileSync(fromRepoRoot('packages/mcp-server/README.md'), 'utf8');
   const distribution = readFileSync(fromRepoRoot('DISTRIBUTION.md'), 'utf8');
-  const scoreboard = readFileSync(fromRepoRoot('docs/14-public-distribution-scoreboard.md'), 'utf8');
-  const submissionPacketDoc = readFileSync(fromRepoRoot('docs/15-publication-submission-packet.md'), 'utf8');
-  const preflightDoc = readFileSync(fromRepoRoot('docs/16-distribution-preflight-packets.md'), 'utf8');
   const examples = readFileSync(fromRepoRoot('examples/integrations/README.md'), 'utf8');
-  const expectedBundleUrl = `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
+  const expectedBundleUrl = `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
 
   if (pkg.private !== false) {
     failures.push('mcp_registry_package_must_be_public');
@@ -61,7 +58,7 @@ export function validateMcpRegistryPreflight() {
   if (server.version !== pkg.version) {
     failures.push('mcp_registry_server_version_drift');
   }
-  if (server.repository?.url !== 'https://github.com/xiaojiou176-open/campus-copilot') {
+  if (server.repository?.url !== 'https://github.com/xiaojiou176-open/OpenCampus') {
     failures.push('mcp_registry_server_repository_url_drift');
   }
   if (server.repository?.source !== 'github') {
@@ -121,7 +118,7 @@ export function validateMcpRegistryPreflight() {
   if (packet.server?.repository?.subfolder !== 'packages/mcp-server') {
     failures.push('mcp_registry_packet_repository_subfolder_drift');
   }
-  if (packet.docs?.packetDoc !== 'docs/16-distribution-preflight-packets.md') {
+  if (packet.docs?.packetDoc !== 'DISTRIBUTION.md') {
     failures.push('mcp_registry_packet_doc_reference_drift');
   }
 
@@ -141,27 +138,11 @@ export function validateMcpRegistryPreflight() {
     }
   }
 
-  const repoDocSnippets = [
-    'registry-submission.packet.json',
-    'mcpb.manifest.json',
-    'check:mcp-registry-preflight',
-    'mcp-publisher login github',
-    'mcp-publisher publish packages/mcp-server/server.json',
-  ];
-  for (const snippet of repoDocSnippets) {
-    if (!preflightDoc.includes(snippet)) {
-      failures.push(`mcp_registry_preflight_doc_missing_snippet:${snippet}`);
-    }
-  }
-
   if (!distribution.includes('check:mcp-registry-preflight')) {
     failures.push('mcp_registry_distribution_missing_preflight');
   }
-  if (!scoreboard.includes('registry-submission.packet.json')) {
-    failures.push('mcp_registry_scoreboard_missing_packet_reference');
-  }
-  if (!submissionPacketDoc.includes('registry-submission.packet.json')) {
-    failures.push('mcp_registry_submission_packet_doc_missing_reference');
+  if (!distribution.includes('registry-submission.packet.json')) {
+    failures.push('mcp_registry_distribution_missing_packet_reference');
   }
   if (!examples.includes('codex-mcp.example.json') || !examples.includes('claude-code-mcp.example.json')) {
     failures.push('mcp_registry_examples_missing_config_routes');

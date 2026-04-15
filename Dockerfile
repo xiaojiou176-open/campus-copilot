@@ -27,9 +27,9 @@ ENV HOST=0.0.0.0
 
 LABEL org.opencontainers.image.title="Campus Copilot API" \
       org.opencontainers.image.description="Thin local HTTP BFF for Campus Copilot provider status, ask flows, and health checks." \
-      org.opencontainers.image.url="https://xiaojiou176-open.github.io/campus-copilot/" \
-      org.opencontainers.image.documentation="https://github.com/xiaojiou176-open/campus-copilot/blob/main/DISTRIBUTION.md" \
-      org.opencontainers.image.source="https://github.com/xiaojiou176-open/campus-copilot" \
+      org.opencontainers.image.url="https://xiaojiou176-open.github.io/OpenCampus/" \
+      org.opencontainers.image.documentation="https://github.com/xiaojiou176-open/OpenCampus/blob/main/DISTRIBUTION.md" \
+      org.opencontainers.image.source="https://github.com/xiaojiou176-open/OpenCampus" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.vendor="Yifeng (Terry) Yu" \
       org.opencontainers.image.version="${CAMPUS_COPILOT_VERSION}" \
