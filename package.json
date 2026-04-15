@@ -68,6 +68,7 @@
     "test:coverage": "node scripts/test-coverage.mjs",
     "cleanup:repo:safe": "bash scripts/cleanup-repo-safe.sh",
     "cleanup:runtime": "bash scripts/cleanup-runtime.sh",
+    "cleanup:runtime:closeout": "CAMPUS_COPILOT_RUNTIME_CLEAN_LEVEL=closeout bash scripts/cleanup-runtime.sh",
     "preflight:live": "node --env-file-if-exists=.env scripts/live-preflight.mjs",
     "diagnose:live": "pnpm cleanup:runtime && pnpm preflight:live",
     "support:bundle": "node --env-file-if-exists=.env scripts/support-bundle.mjs",

@@ -328,7 +328,7 @@ test('classifyPage prefers authenticated course surfaces over generic school-log
     classifyPage(
       'https://www.gradescope.com/',
       'Your Courses | Gradescope',
-      'Hello Terry Yu Log Out You have already linked this University of Washington NetID to Gradescope. Course Dashboard',
+      'Hello Example Student Log Out You have already linked this University of Washington NetID to Gradescope. Course Dashboard',
     ),
     'likely_authenticated',
   );
