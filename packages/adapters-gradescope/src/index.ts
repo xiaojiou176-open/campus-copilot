@@ -211,6 +211,10 @@ type GradescopeDerivedCourseHint = {
   courseId: string;
   title?: string;
 };
+type GradescopeRubricCriterion = {
+  label: string;
+  points?: number;
+};
 type GradescopeSubmissionQuestion = {
   label: string;
   title?: string;
@@ -218,6 +222,7 @@ type GradescopeSubmissionQuestion = {
   score?: number;
   maxScore?: number;
   rubricLabels?: string[];
+  rubricCriteria?: GradescopeRubricCriterion[];
   evaluationComments?: string[];
   annotationCount?: number;
   annotationPreview?: string;
@@ -665,6 +670,41 @@ function buildGradescopeRubricLabelSummary(labels: string[] | undefined) {
   return preview.join(', ');
 }
 
+function buildGradescopeRubricCriteriaDetail(criteria: GradescopeRubricCriterion[] | undefined) {
+  const seenCriteria = new Set<string>();
+  const normalizedCriteria: Array<{ label: string; points: number | undefined }> = [];
+  for (const criterion of criteria ?? []) {
+    const label = decodeHtmlText(criterion.label);
+    if (!label) {
+      continue;
+    }
+
+    const points = toOptionalNumber(criterion.points);
+    const key = `${label}::${points ?? 'na'}`;
+    if (seenCriteria.has(key)) {
+      continue;
+    }
+
+    seenCriteria.add(key);
+    normalizedCriteria.push({ label, points });
+  }
+  if (normalizedCriteria.length === 0) {
+    return undefined;
+  }
+
+  const hasWeightedCriteria = normalizedCriteria.some((criterion) => criterion.points !== undefined);
+  if (!hasWeightedCriteria) {
+    return normalizedCriteria.map((criterion) => criterion.label).join(', ');
+  }
+
+  return `Rubric: ${normalizedCriteria
+    .map((criterion) => {
+      const pointsText = formatGradescopeEvaluationPoints(criterion.points);
+      return pointsText ? `${criterion.label} (${pointsText})` : criterion.label;
+    })
+    .join(' | ')}`;
+}
+
 function formatGradescopeQuestionScore(question: Pick<GradescopeSubmissionQuestion, 'score' | 'maxScore'>) {
   if (question.score !== undefined && question.maxScore !== undefined) {
     return `${question.score} / ${question.maxScore}`;
@@ -790,14 +830,15 @@ function buildGradescopeQuestionBreakdownDetail(detail: GradescopeSubmissionDeta
     .map((question) => {
       const label = normalizeQuestionLabel(question);
       const scoreText = formatGradescopeQuestionScore(question);
-      const rubricLabels = Array.from(
-        new Set(
-          (question.rubricLabels ?? [])
-            .map((label) => decodeHtmlText(label))
-            .filter((label): label is string => Boolean(label)),
-        ),
-      );
-      const rubricText = rubricLabels.length > 0 ? rubricLabels.join(', ') : undefined;
+      const fallbackRubricText =
+        Array.from(
+          new Set(
+            (question.rubricLabels ?? [])
+              .map((label) => decodeHtmlText(label))
+              .filter((label): label is string => Boolean(label)),
+          ),
+        ).join(', ') || undefined;
+      const rubricText = buildGradescopeRubricCriteriaDetail(question.rubricCriteria) ?? fallbackRubricText;
       const commentText = buildGradescopeEvaluationDetailText(question.evaluationComments);
       return [label, scoreText, rubricText, commentText, question.annotationPreview].filter(Boolean).join(' · ');
     })
@@ -909,7 +950,7 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
         .filter((questionSubmission) => questionSubmission.active !== false)
         .map((questionSubmission) => [String(questionSubmission.question_id), questionSubmission]),
     );
-    const rubricLabelsByQuestionId = new Map<string, string[]>();
+    const rubricCriteriaByQuestionId = new Map<string, GradescopeRubricCriterion[]>();
     for (const rubricItem of viewerProps.rubric_items
       .filter((item) => item.present)
       .sort((left, right) => (left.position ?? 0) - (right.position ?? 0))) {
@@ -918,9 +959,12 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
       }
 
       const questionId = String(rubricItem.question_id);
-      const currentLabels = rubricLabelsByQuestionId.get(questionId) ?? [];
-      currentLabels.push(rubricItem.description);
-      rubricLabelsByQuestionId.set(questionId, currentLabels);
+      const currentCriteria = rubricCriteriaByQuestionId.get(questionId) ?? [];
+      currentCriteria.push({
+        label: rubricItem.description,
+        points: toOptionalNumber(rubricItem.weight),
+      });
+      rubricCriteriaByQuestionId.set(questionId, currentCriteria);
     }
 
     const questions = viewerProps.questions
@@ -984,6 +1028,17 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
           ),
         ).sort((left, right) => left - right);
         const annotationCount = (questionSubmission?.annotations ?? []).length;
+        const rubricCriteria = [
+          ...(rubricCriteriaByQuestionId.get(String(question.id)) ?? []),
+          ...annotationRubricLabels
+            .filter(
+              (label) =>
+                !(rubricCriteriaByQuestionId.get(String(question.id)) ?? []).some(
+                  (criterion) => decodeHtmlText(criterion.label) === label,
+                ),
+            )
+            .map((label) => ({ label })),
+        ];
         return [
           {
             label,
@@ -992,8 +1047,9 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
             score: toOptionalNumber(questionSubmission?.score),
             maxScore: toOptionalNumber(question.weight),
             rubricLabels: Array.from(
-              new Set([...(rubricLabelsByQuestionId.get(String(question.id)) ?? []), ...annotationRubricLabels]),
-            ),
+              new Set(rubricCriteria.map((criterion) => decodeHtmlText(criterion.label)).filter(Boolean)),
+            ) as string[],
+            rubricCriteria: rubricCriteria.length > 0 ? rubricCriteria : undefined,
             evaluationComments: (questionSubmission?.evaluations ?? [])
               .map((evaluation) => {
                 const comment = decodeHtmlText(evaluation.comments ?? undefined);

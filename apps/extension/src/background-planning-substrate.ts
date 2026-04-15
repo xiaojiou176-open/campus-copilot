@@ -30,6 +30,11 @@ type MyPlanBootstrapPlanningSummary = {
   programExplorationCount: number;
   terms: MyPlanBootstrapTermSummary[];
 };
+type AuditRequirementSignal = {
+  label: string;
+  statusLabel?: 'not completed' | 'in progress' | 'completed';
+  totalsSummary?: string;
+};
 
 function decodeEntities(input: string) {
   return input
@@ -266,6 +271,115 @@ function sumCounts(terms: PlanningSubstrateOwner['terms'], key: 'plannedCourseCo
   return terms.reduce((total, term) => total + term[key], 0);
 }
 
+function normalizeAuditRequirementStatus(rawStatus: string | undefined): AuditRequirementSignal['statusLabel'] | undefined {
+  const normalized = rawStatus?.trim().toLowerCase();
+  if (!normalized) {
+    return undefined;
+  }
+  if (normalized.includes('not completed')) {
+    return 'not completed';
+  }
+  if (normalized.includes('in progress')) {
+    return 'in progress';
+  }
+  if (normalized.includes('completed')) {
+    return 'completed';
+  }
+  return undefined;
+}
+
+function getAuditRequirementStatusRank(status: AuditRequirementSignal['statusLabel']) {
+  switch (status) {
+    case 'not completed':
+      return 0;
+    case 'in progress':
+      return 1;
+    case 'completed':
+      return 2;
+    default:
+      return 3;
+  }
+}
+
+function formatAuditRequirementStatus(status: AuditRequirementSignal['statusLabel']) {
+  if (!status) {
+    return 'Visible';
+  }
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function extractAuditRequirementSignals(pageHtml: string) {
+  const openings = Array.from(pageHtml.matchAll(/<div[^>]*class="[^"]*\baudit-requirement requirement\b[^"]*"[^>]*>/gi));
+  if (openings.length === 0) {
+    return [];
+  }
+
+  const signals: AuditRequirementSignal[] = [];
+  for (const [index, opening] of openings.entries()) {
+    const start = opening.index ?? 0;
+    const end = openings[index + 1]?.index ?? pageHtml.length;
+    const block = pageHtml.slice(start, end);
+    const statusLabel = normalizeAuditRequirementStatus(
+      stripTags(block.match(/<span[^>]*class="[^"]*\bsr-only\b[^"]*"[^>]*>(?<text>[\s\S]*?)<\/span>/i)?.groups?.text ?? ''),
+    );
+    const infoBlock = block.match(/<div[^>]*class="[^"]*\baudit-requirement-info\b[^"]*"[^>]*>(?<info>[\s\S]*?)<\/div>/i)?.groups?.info ?? '';
+    const infoTexts = Array.from(
+      infoBlock.matchAll(/<div[^>]*class="[^"]*\btext\b[^"]*"[^>]*>(?<text>[\s\S]*?)<\/div>/gi),
+    )
+      .map((match) => stripTags(match.groups?.text ?? ''))
+      .filter(Boolean);
+    const label = infoTexts[0] ?? stripTags(infoBlock);
+    if (!label) {
+      continue;
+    }
+
+    const totalsSummary = stripTags(
+      block.match(/<div[^>]*class="[^"]*\baudit-requirement-totals\b[^"]*"[^>]*>(?<text>[\s\S]*?)<\/div>/i)?.groups?.text ?? '',
+    );
+
+    signals.push({
+      label,
+      statusLabel,
+      totalsSummary: totalsSummary || undefined,
+    });
+  }
+
+  const deduped = new Map<string, AuditRequirementSignal>();
+  for (const signal of signals) {
+    const key = signal.label.toLowerCase();
+    if (!deduped.has(key)) {
+      deduped.set(key, signal);
+    }
+  }
+
+  return Array.from(deduped.values());
+}
+
+function buildAuditRequirementSpineSummary(pageHtml: string) {
+  const signals = extractAuditRequirementSignals(pageHtml);
+  if (signals.length === 0) {
+    return undefined;
+  }
+
+  const prioritized = [...signals].sort((left, right) => {
+    const rankDiff = getAuditRequirementStatusRank(left.statusLabel) - getAuditRequirementStatusRank(right.statusLabel);
+    if (rankDiff !== 0) {
+      return rankDiff;
+    }
+    return left.label.localeCompare(right.label);
+  });
+  const highlightedPool = prioritized.filter((signal) => signal.statusLabel !== 'completed');
+  const sourcePool = highlightedPool.length > 0 ? highlightedPool : prioritized;
+  const visibleSignals = sourcePool.slice(0, 3);
+  const renderedSignals = visibleSignals.map((signal) => {
+    const totalsSuffix = signal.totalsSummary ? ` (${signal.totalsSummary})` : '';
+    return `${formatAuditRequirementStatus(signal.statusLabel)}: ${signal.label}${totalsSuffix}`;
+  });
+  const remainingCount = sourcePool.length - visibleSignals.length;
+
+  return `Visible DARS requirement spine: ${renderedSignals.join('; ')}${remainingCount > 0 ? `; +${remainingCount} more visible requirement signal(s).` : '.'}`;
+}
+
 function buildPlanningBase(previous: PlanningSubstrateOwner | undefined, capturedAt: string) {
   return {
     id: previous?.id ?? 'myplan:planning-substrate:live',
@@ -425,7 +539,8 @@ function buildAuditCaptureFromHtml(
     pageHtml.match(/<div[^>]*class="audit-requirement-totals"[^>]*>(?<text>[\s\S]*?)<\/div>/i)?.groups?.text ?? '',
   );
   const requirementGroupCount = Array.from(pageHtml.matchAll(/class="audit-requirement requirement\b/gi)).length;
-  const degreeProgressSummary = [auditState, totals].filter(Boolean).join(' ');
+  const requirementSpineSummary = buildAuditRequirementSpineSummary(pageHtml);
+  const degreeProgressSummary = [auditState, totals, requirementSpineSummary].filter(Boolean).join(' ');
   const transferPlanningSummary = pageHtml.includes('Find CTC Transfer Equivalency')
     ? 'CTC transfer equivalency tools are visible from the current DARS audit page.'
     : base.transferPlanningSummary;

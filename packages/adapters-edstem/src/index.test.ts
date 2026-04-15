@@ -903,7 +903,7 @@ describe('EdStemApiClient', () => {
             title: '[HW1 problem 7(a)] redacted lesson title',
             summary: 'python lesson · attempted · 3 slides · 2 documents, 1 challenge · 2 unseen, 1 completed',
             detail:
-              'State: scheduled · Due: 2026-04-09T16:59:00+10:00 · Locks: 2026-04-12T16:59:00+10:00 · Solutions: 2026-04-13T04:00:00+10:00 · Late submissions allowed · Progress: 2 unseen, 1 completed · Slides: 1 · redacted slide title 1 · document · completed; 2 · redacted slide title 2 · document · unseen; 3 · redacted coding challenge · challenge · unseen',
+              'State: scheduled · Due: 2026-04-09T16:59:00+10:00 · Locks: 2026-04-12T16:59:00+10:00 · Solutions: 2026-04-13T04:00:00+10:00 · Late submissions allowed · Progress: 2 unseen, 1 completed · Meaning: Mixed progress · Slides: 1 · redacted slide title 1 · document · completed · Review document; 2 · redacted slide title 2 · document · unseen · Open document; 3 · redacted coding challenge · challenge · unseen · Start challenge',
           }),
           expect.objectContaining({
             id: 'edstem:lesson-slide:redacted-lesson-a:redacted-slide-1',
@@ -918,12 +918,12 @@ describe('EdStemApiClient', () => {
               label: '[HW1 problem 7(a)] redacted lesson title',
               memberCount: 3,
             },
-            detail: 'Slide 1 · document · completed · Lesson state: scheduled',
+            detail: 'Slide 1 · document · completed · Review document · Lesson progress: Mixed progress · Lesson state: scheduled',
             url: 'https://edstem.org/us/courses/96846/lessons/redacted-lesson-a/slides/redacted-slide-1',
           }),
           expect.objectContaining({
             id: 'edstem:lesson-slide:redacted-lesson-a:redacted-slide-3',
-            detail: 'Slide 3 · challenge · unseen · Lesson state: scheduled',
+            detail: 'Slide 3 · challenge · unseen · Start challenge · Lesson progress: Mixed progress · Lesson state: scheduled',
           }),
         ]),
       );
@@ -1010,6 +1010,10 @@ describe('EdStemApiClient', () => {
         summary: 'python lesson · attempted · 3 slides · 2 documents, 1 challenge · 2 unseen, 1 completed',
         detail: expect.stringContaining('Progress: 2 unseen, 1 completed'),
       });
+      expect(result.snapshot.resources?.[0]?.detail).toContain('Meaning: Mixed progress');
+      expect(result.snapshot.resources?.[0]?.detail).toContain('Start challenge');
+      expect(result.snapshot.resources?.[1]?.detail).toContain('Review document');
+      expect(result.snapshot.resources?.[3]?.detail).toContain('Lesson progress: Mixed progress');
     }
   });
 

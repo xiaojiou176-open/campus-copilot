@@ -728,9 +728,18 @@ function buildCanvasModuleItemCompletionRequirementDetail(rawItem: CanvasRawModu
     return undefined;
   }
 
+  const completionStatus =
+    rawItem.completion_requirement?.completed === true
+      ? 'met'
+      : rawItem.completion_requirement?.completed === false
+        ? 'pending'
+        : undefined;
+
   if (requirementType === 'min_score') {
     const minScore = toOptionalNumber(rawItem.completion_requirement?.min_score);
-    return minScore == null ? 'Requirement: minimum score' : `Requirement: score at least ${minScore}`;
+    const requirementLabel =
+      minScore == null ? 'Requirement: minimum score' : `Requirement: score at least ${minScore}`;
+    return completionStatus ? `${requirementLabel} (${completionStatus})` : requirementLabel;
   }
 
   const requirementLabel =
@@ -741,10 +750,11 @@ function buildCanvasModuleItemCompletionRequirementDetail(rawItem: CanvasRawModu
         : requirementType === 'must_contribute'
           ? 'contribute'
           : requirementType === 'must_mark_done'
-            ? 'mark done'
-            : requirementType.replace(/_/g, ' ');
+          ? 'mark done'
+          : requirementType.replace(/_/g, ' ');
 
-  return `Requirement: ${requirementLabel}`;
+  const requirementDetail = `Requirement: ${requirementLabel}`;
+  return completionStatus ? `${requirementDetail} (${completionStatus})` : requirementDetail;
 }
 
 function normalizeCanvasModuleItemResource(

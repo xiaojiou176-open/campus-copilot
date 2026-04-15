@@ -87,6 +87,53 @@ type WorkItemCandidate = {
   url?: string;
 };
 
+function formatCorroboratedFieldList(fields: Array<string | undefined>) {
+  const normalized = fields.filter((field): field is string => Boolean(field));
+  if (normalized.length === 0) {
+    return '';
+  }
+  return `字段佐证锁在 ${normalized.join(' / ')}。`;
+}
+
+function buildCourseIdentityFieldCorroboration(input: {
+  authority: Course;
+  exactAnchor: boolean;
+}) {
+  const termKey = extractTermKey(input.authority.url);
+  return formatCorroboratedFieldList([
+    '课程标题',
+    input.authority.code ?? extractCourseCode(input.authority.title) ? '课程代码' : undefined,
+    termKey ? '学期' : undefined,
+    input.authority.url ? (input.exactAnchor ? '跨站深链' : '课程链接') : undefined,
+  ]);
+}
+
+function buildWorkFieldCorroboration(input: {
+  role: ClusterAuthorityFacet['role'];
+  member: WorkItemCandidate;
+}) {
+  switch (input.role) {
+    case 'assignment_spec':
+      return formatCorroboratedFieldList([
+        'title',
+        'summary/spec',
+        input.member.url ? 'deep-link' : undefined,
+      ]);
+    case 'schedule_signal':
+      return formatCorroboratedFieldList([
+        input.member.dueAt ? 'dueAt' : undefined,
+        input.member.startAt ? 'startAt' : undefined,
+        input.member.endAt ? 'endAt' : undefined,
+      ]);
+    case 'submission_state':
+      return formatCorroboratedFieldList(['status', 'submission runtime']);
+    case 'feedback_detail':
+      return formatCorroboratedFieldList(['score', 'rubric', 'comment', 'annotation']);
+    default:
+      return '';
+  }
+}
+
 function normalizeWhitespace(value: string) {
   return value.replace(/\s+/g, ' ').trim();
 }
@@ -206,10 +253,10 @@ function buildCourseAuthorityBreakdown(input: {
       resourceType: authority.source.resourceType,
       label: authority.title,
       reason: courseSitesCsAuthorityOverride
-        ? 'CS 课程当前以课程网站承担课程身份 authority，避免把 Canvas/Gradescope/EdStem 误讲成同层课程定义面。'
+        ? `CS 课程当前以课程网站承担课程身份 authority，避免把 Canvas/Gradescope/EdStem 误讲成同层课程定义面。 ${buildCourseIdentityFieldCorroboration({ authority, exactAnchor })}`.trim()
         : exactAnchor
-        ? '课程网站已经给出跨站精确锚点，所以课程身份可以 anchored 到同一个课程对象。'
-        : '当前课程簇以最强课程级 carrier 作为课程身份 authority。',
+        ? `课程网站已经给出跨站精确锚点，所以课程身份可以 anchored 到同一个课程对象。 ${buildCourseIdentityFieldCorroboration({ authority, exactAnchor })}`.trim()
+        : `当前课程簇以最强课程级 carrier 作为课程身份 authority。 ${buildCourseIdentityFieldCorroboration({ authority, exactAnchor })}`.trim(),
     }),
   );
 
@@ -222,7 +269,8 @@ function buildCourseAuthorityBreakdown(input: {
         entityKey: canvasMember.id,
         resourceType: canvasMember.source.resourceType,
         label: canvasMember.title,
-        reason: 'Canvas 仍然是课程执行面的 strongest runtime：模块、作业、公告、消息等日常课堂流转优先看这里。',
+        reason:
+          'Canvas 仍然是课程执行面的 strongest runtime：模块、作业、公告、消息等日常课堂流转优先看这里。 字段佐证锁在 modules / assignments / announcements / day-to-day runtime。',
       }),
     );
   }
@@ -236,7 +284,8 @@ function buildCourseAuthorityBreakdown(input: {
         entityKey: edstemMember.id,
         resourceType: edstemMember.source.resourceType,
         label: edstemMember.title,
-        reason: 'EdStem 负责讨论/问答 runtime，所以它是课程讨论面的真实 authority。',
+        reason:
+          'EdStem 负责讨论/问答 runtime，所以它是课程讨论面的真实 authority。 字段佐证锁在 threads / replies / lesson discussion entry。',
       }),
     );
   }
@@ -250,7 +299,8 @@ function buildCourseAuthorityBreakdown(input: {
         entityKey: gradescopeMember.id,
         resourceType: gradescopeMember.source.resourceType,
         label: gradescopeMember.title,
-        reason: 'Gradescope 负责测评/回评 runtime，所以它是课程评估面的真实 authority。',
+        reason:
+          'Gradescope 负责测评/回评 runtime，所以它是课程评估面的真实 authority。 字段佐证锁在 submissions / scores / review entry.',
       }),
     );
   }
@@ -354,8 +404,8 @@ function buildWorkAuthorityBreakdown(input: {
         label: specMember.label,
         reason:
           specMember.surface === 'course-sites'
-            ? '课程网站负责题目规格/说明书，所以 assignment spec 先以 course-sites 为准。'
-            : '站内 assignment carrier 仍然是 assignment spec 的更强说明面。',
+            ? `课程网站负责题目规格/说明书，所以 assignment spec 先以 course-sites 为准。 ${buildWorkFieldCorroboration({ role: 'assignment_spec', member: specMember })}`.trim()
+            : `站内 assignment carrier 仍然是 assignment spec 的更强说明面。 ${buildWorkFieldCorroboration({ role: 'assignment_spec', member: specMember })}`.trim(),
       }),
     );
   }
@@ -369,7 +419,8 @@ function buildWorkAuthorityBreakdown(input: {
         entityKey: scheduleMember.entityKey,
         resourceType: scheduleMember.resourceType,
         label: scheduleMember.label,
-        reason: '时间锚点优先跟随带有截止/开始/结束时间的 strongest carrier，避免把 loose title match 当成日程真相。',
+        reason:
+          `时间锚点优先跟随带有截止/开始/结束时间的 strongest carrier，避免把 loose title match 当成日程真相。 ${buildWorkFieldCorroboration({ role: 'schedule_signal', member: scheduleMember })}`.trim(),
       }),
     );
   }
@@ -385,8 +436,8 @@ function buildWorkAuthorityBreakdown(input: {
         label: submissionMember.label,
         reason:
           submissionMember.surface === 'canvas'
-            ? 'Canvas 仍然是提交状态/待办状态的 strongest runtime lane。'
-            : 'Gradescope 当前承担更强的提交/评分 runtime，所以 submission state 跟随 Gradescope。',
+            ? `Canvas 仍然是提交状态/待办状态的 strongest runtime lane。 ${buildWorkFieldCorroboration({ role: 'submission_state', member: submissionMember })}`.trim()
+            : `Gradescope 当前承担更强的提交/评分 runtime，所以 submission state 跟随 Gradescope。 ${buildWorkFieldCorroboration({ role: 'submission_state', member: submissionMember })}`.trim(),
       }),
     );
   }
@@ -400,7 +451,8 @@ function buildWorkAuthorityBreakdown(input: {
         entityKey: feedbackMember.entityKey,
         resourceType: feedbackMember.resourceType,
         label: feedbackMember.label,
-        reason: '评分、rubric、annotation 与回评细节优先跟随最强 feedback carrier，而不是复用 assignment spec surface。',
+        reason:
+          `评分、rubric、annotation 与回评细节优先跟随最强 feedback carrier，而不是复用 assignment spec surface。 ${buildWorkFieldCorroboration({ role: 'feedback_detail', member: feedbackMember })}`.trim(),
       }),
     );
   }
@@ -413,7 +465,10 @@ function buildWorkAuthorityBreakdown(input: {
         entityKey: authority.entityKey,
         resourceType: authority.resourceType,
         label: authority.label,
-        reason: '当前只有一个可用 carrier，所以统一沿用主 authority。',
+        reason: `当前只有一个可用 carrier，所以统一沿用主 authority。 ${buildWorkFieldCorroboration({
+          role: workType === 'deadline_signal' ? 'schedule_signal' : 'assignment_spec',
+          member: authority,
+        })}`.trim(),
       }),
     );
   }

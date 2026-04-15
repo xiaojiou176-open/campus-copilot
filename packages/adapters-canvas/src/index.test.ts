@@ -653,6 +653,7 @@ describe('CanvasApiClient', () => {
                   published: true,
                   completion_requirement: {
                     type: 'must_view',
+                    completed: false,
                   },
                 },
                 {
@@ -664,6 +665,7 @@ describe('CanvasApiClient', () => {
                   completion_requirement: {
                     type: 'min_score',
                     min_score: 8,
+                    completed: true,
                   },
                 },
               ],
@@ -687,19 +689,19 @@ describe('CanvasApiClient', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.snapshot.resources).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            id: 'canvas:resource:module-item:42:7001:8101',
-            detail: 'Page · Week 1 · Page ref: week-1-overview · Requirement: view',
-          }),
-          expect.objectContaining({
-            id: 'canvas:resource:module-item:42:7001:8107',
-            detail: 'Assignment · Week 1 · Requirement: score at least 8',
-          }),
-        ]),
-      );
-    }
+        expect(result.snapshot.resources).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: 'canvas:resource:module-item:42:7001:8101',
+              detail: 'Page · Week 1 · Page ref: week-1-overview · Requirement: view (pending)',
+            }),
+            expect.objectContaining({
+              id: 'canvas:resource:module-item:42:7001:8107',
+              detail: 'Assignment · Week 1 · Requirement: score at least 8 (met)',
+            }),
+          ]),
+        );
+      }
   });
 
   it('uses the detail attachment hint even when the latest message body is empty', async () => {

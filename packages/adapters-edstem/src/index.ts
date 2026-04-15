@@ -512,6 +512,86 @@ function buildEdStemLessonSlideStatusBreakdown(rawLesson: EdStemRawLesson) {
   return buildEdStemLessonCountBreakdown(rawLesson.slides.map((slide) => slide.status ?? undefined), (label) => label);
 }
 
+function normalizeEdStemLessonStateToken(value: string | undefined | null) {
+  return decodeHtmlText(value ?? undefined)?.trim().toLowerCase().replace(/[_-]+/g, ' ');
+}
+
+function buildEdStemLessonProgressMeaning(rawLesson: EdStemRawLesson) {
+  const statuses = rawLesson.slides
+    .map((slide) => normalizeEdStemLessonStateToken(slide.status))
+    .filter((status): status is string => Boolean(status));
+
+  if (statuses.length === 0) {
+    return undefined;
+  }
+
+  const distinctStatuses = Array.from(new Set(statuses));
+  if (distinctStatuses.length > 1) {
+    return 'Mixed progress';
+  }
+
+  switch (distinctStatuses[0]) {
+    case 'completed':
+      return 'Completed';
+    case 'unseen':
+    case 'not started':
+      return 'Not started';
+    case 'attempted':
+    case 'started':
+    case 'in progress':
+      return 'In progress';
+    default:
+      return decodeHtmlText(distinctStatuses[0]);
+  }
+}
+
+function buildEdStemLessonSlideActionLabel(
+  rawLesson: EdStemRawLesson,
+  slide: z.infer<typeof EdStemRawLessonSlideSchema>,
+) {
+  const slideType = normalizeEdStemLessonStateToken(slide.type);
+  const slideStatus = normalizeEdStemLessonStateToken(slide.status);
+  const lessonState = normalizeEdStemLessonStateToken(rawLesson.state);
+
+  if (slideStatus === 'completed') {
+    if (slideType === 'challenge') {
+      return 'Review completed challenge';
+    }
+
+    if (slideType === 'document') {
+      return 'Review document';
+    }
+
+    return 'Review slide';
+  }
+
+  if (slideStatus === 'attempted' || slideStatus === 'started' || slideStatus === 'in progress') {
+    if (slideType === 'challenge') {
+      return 'Continue challenge';
+    }
+
+    return 'Continue slide';
+  }
+
+  if (slideStatus === 'unseen' || slideStatus === 'not started') {
+    if (slideType === 'challenge') {
+      return 'Start challenge';
+    }
+
+    if (slideType === 'document') {
+      return 'Open document';
+    }
+
+    return 'Open slide';
+  }
+
+  if (lessonState === 'scheduled') {
+    return 'Open slide';
+  }
+
+  return undefined;
+}
+
 function buildEdStemLessonResourceGroup(rawLesson: EdStemRawLesson) {
   const courseId = String(rawLesson.course_id);
   const lessonId = String(rawLesson.id);
@@ -526,6 +606,7 @@ function buildEdStemLessonResourceGroup(rawLesson: EdStemRawLesson) {
 
 function buildEdStemLessonDetail(rawLesson: EdStemRawLesson) {
   const slideStatusBreakdown = buildEdStemLessonSlideStatusBreakdown(rawLesson);
+  const progressMeaning = buildEdStemLessonProgressMeaning(rawLesson);
   const parts = [
     rawLesson.state ? `State: ${rawLesson.state}` : undefined,
     rawLesson.due_at ?? rawLesson.effective_due_at ? `Due: ${rawLesson.due_at ?? rawLesson.effective_due_at}` : undefined,
@@ -537,11 +618,18 @@ function buildEdStemLessonDetail(rawLesson: EdStemRawLesson) {
     rawLesson.attempts_remaining != null ? `Attempts remaining: ${rawLesson.attempts_remaining}` : undefined,
     rawLesson.late_submissions ? 'Late submissions allowed' : undefined,
     slideStatusBreakdown ? `Progress: ${slideStatusBreakdown}` : undefined,
+    progressMeaning ? `Meaning: ${progressMeaning}` : undefined,
     rawLesson.slides.length > 0
       ? `Slides: ${rawLesson.slides
           .slice(0, 3)
           .map((slide) =>
-            [slide.index, decodeHtmlText(slide.title ?? undefined), decodeHtmlText(slide.type ?? undefined), slide.status]
+            [
+              slide.index,
+              decodeHtmlText(slide.title ?? undefined),
+              decodeHtmlText(slide.type ?? undefined),
+              slide.status,
+              buildEdStemLessonSlideActionLabel(rawLesson, slide),
+            ]
               .filter(Boolean)
               .join(' · '),
           )
@@ -556,11 +644,17 @@ function buildEdStemLessonSlideDetail(
   rawLesson: EdStemRawLesson,
   slide: z.infer<typeof EdStemRawLessonSlideSchema>,
 ) {
+  const lessonProgressMeaning = buildEdStemLessonProgressMeaning(rawLesson);
   const parts = [
     slide.index != null ? `Slide ${slide.index}` : 'Lesson slide',
     slide.type ? decodeHtmlText(slide.type) : undefined,
     slide.status ? decodeHtmlText(slide.status) : undefined,
+    buildEdStemLessonSlideActionLabel(rawLesson, slide),
   ].filter(Boolean);
+
+  if (lessonProgressMeaning) {
+    parts.push(`Lesson progress: ${lessonProgressMeaning}`);
+  }
 
   const lessonState = rawLesson.state ? `Lesson state: ${rawLesson.state}` : undefined;
   if (lessonState) {

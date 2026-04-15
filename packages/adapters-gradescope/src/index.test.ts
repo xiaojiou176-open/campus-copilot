@@ -394,7 +394,7 @@ describe('GradescopeApiClient', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.snapshot.assignments?.[0]?.summary).toContain('Graded 1 / 9 · Q1 redacted-text 1 / 9 (redacted-text)');
-      expect(result.snapshot.assignments?.[0]?.detail).toBe('Q1 redacted-text · 1 / 9 · redacted-text');
+      expect(result.snapshot.assignments?.[0]?.detail).toBe('Q1 redacted-text · 1 / 9 · Rubric: redacted-text (+1 pts)');
       expect(result.snapshot.assignments?.[0]?.score).toBe(1);
       expect(result.snapshot.assignments?.[0]?.maxScore).toBe(9);
     }
@@ -433,7 +433,7 @@ describe('GradescopeApiClient', () => {
         'Graded 5 / 5 · Q1 1 / 1 (Correct); Q2 1 / 1 (Correct); Q3 1 / 1 (Correct); +2 more',
       );
       expect(result.snapshot.assignments?.[0]?.detail).toBe(
-        'Q1 · 1 / 1 · Correct; Q2 · 1 / 1 · Correct; Q3 · 1 / 1 · Correct; Q4 · 1 / 1 · Correct; Q5 · 1 / 1 · Correct',
+        'Q1 · 1 / 1 · Rubric: Correct (+1 pts); Q2 · 1 / 1 · Rubric: Correct (+1 pts); Q3 · 1 / 1 · Rubric: Correct (+1 pts); Q4 · 1 / 1 · Rubric: Correct (+1 pts); Q5 · 1 / 1 · Rubric: Correct (+1 pts)',
       );
       expect(result.snapshot.assignments?.[0]?.score).toBe(5);
       expect(result.snapshot.assignments?.[0]?.maxScore).toBe(5);
@@ -699,7 +699,7 @@ describe('GradescopeApiClient', () => {
         maxScore: 9,
       });
       expect(result.snapshot.assignments?.[0]?.summary).toContain('Graded 1 / 9 · Q1 redacted-text 1 / 9 (redacted-text)');
-      expect(result.snapshot.assignments?.[0]?.detail).toBe('Q1 redacted-text · 1 / 9 · redacted-text');
+      expect(result.snapshot.assignments?.[0]?.detail).toBe('Q1 redacted-text · 1 / 9 · Rubric: redacted-text (+1 pts)');
       expect(result.snapshot.grades?.[0]).toMatchObject({
         id: 'gradescope:grade:380090124',
         assignmentId: 'gradescope:assignment:7421057',
@@ -737,7 +737,7 @@ describe('GradescopeApiClient', () => {
         'Graded 5 / 5 · Q1 1 / 1 (Correct); Q2 1 / 1 (Correct); Q3 1 / 1 (Correct); +2 more',
       );
       expect(result.snapshot.assignments?.[0]?.detail).toBe(
-        'Q1 · 1 / 1 · Correct; Q2 · 1 / 1 · Correct; Q3 · 1 / 1 · Correct; Q4 · 1 / 1 · Correct; Q5 · 1 / 1 · Correct',
+        'Q1 · 1 / 1 · Rubric: Correct (+1 pts); Q2 · 1 / 1 · Rubric: Correct (+1 pts); Q3 · 1 / 1 · Rubric: Correct (+1 pts); Q4 · 1 / 1 · Rubric: Correct (+1 pts); Q5 · 1 / 1 · Rubric: Correct (+1 pts)',
       );
       expect(result.snapshot.assignments?.[0]?.reviewSummary).toEqual({
         questions: [
@@ -814,9 +814,10 @@ describe('GradescopeApiClient', () => {
       expect(result.snapshot.assignments?.[0]?.summary).toContain('Autograder result 18 / 18 (Autograder passed)');
       expect(result.snapshot.assignments?.[0]?.summary).toContain('[1 comment]');
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Q2.1 Difference between addresses · 3 / 3');
-      expect(result.snapshot.assignments?.[0]?.detail).toContain('Correct type casting');
-      expect(result.snapshot.assignments?.[0]?.detail).toContain('Correct explanation');
-      expect(result.snapshot.assignments?.[0]?.detail).toContain('Correct steps');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain('Rubric: Autograder passed (+18 pts)');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain(
+        'Rubric: Correct type casting (+1.5 pts) | Correct explanation (+1 pts) | Correct steps (+0.5 pts)',
+      );
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Comment: Solid explanation here. Like how you equated the ptrdiff_t to the size in bytes.');
     }
   });
@@ -845,6 +846,9 @@ describe('GradescopeApiClient', () => {
     if (result.ok) {
       expect(result.snapshot.assignments?.[0]?.detail).toContain(
         'Comment (-0.5 pts): Solid explanation here. Like how you equated the ptrdiff_t to the size in bytes.',
+      );
+      expect(result.snapshot.assignments?.[0]?.detail).toContain(
+        'Rubric: Correct type casting (+1.5 pts) | Correct explanation (+1 pts) | Correct steps (+0.5 pts)',
       );
     }
   });
@@ -946,6 +950,7 @@ describe('GradescopeApiClient', () => {
       expect(result.snapshot.assignments?.[0]?.summary).toContain('Autograder result 18 / 18 (Autograder passed)');
       expect(result.snapshot.assignments?.[0]?.summary).toContain('[1 comment]');
       expect(result.snapshot.assignments?.[0]?.summary).toContain('Graded 24 / 24');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain('Rubric: Autograder passed (+18 pts)');
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Comment: Solid explanation here. Like how you equated the ptrdiff_t to the size in bytes.');
     }
   });
@@ -986,6 +991,9 @@ describe('GradescopeApiClient', () => {
     if (result.ok) {
       expect(result.snapshot.assignments?.[0]?.detail).toContain(
         'Comment (-0.5 pts): Solid explanation here. Like how you equated the ptrdiff_t to the size in bytes.',
+      );
+      expect(result.snapshot.assignments?.[0]?.detail).toContain(
+        'Rubric: Correct type casting (+1.5 pts) | Correct explanation (+1 pts) | Correct steps (+0.5 pts)',
       );
     }
   });

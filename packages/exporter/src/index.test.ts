@@ -480,12 +480,20 @@ describe('exporter package', () => {
       'authority narrative Course identity stays on the course website while Canvas keeps the execution lane, EdStem keeps the discussion lane, and Gradescope keeps the assessment lane.',
     );
     expect(artifact.content).toContain(
-      'boundary map identity=course-sites · delivery=canvas · discussion=edstem · assessment=gradescope',
+      'boundary map identity[title/code/term/link]=course-sites · delivery[modules/assignments/announcements/runtime]=canvas · discussion[threads/replies/lesson-entry]=edstem · assessment[submissions/scores/review]=gradescope',
     );
-    expect(artifact.content).toContain('course identity: course-sites · course page - Course identity stays on the course website.');
-    expect(artifact.content).toContain('discussion runtime: edstem · thread - EdStem keeps the discussion lane.');
-    expect(artifact.content).toContain('assessment runtime: gradescope · assignment row - Gradescope keeps the assessment lane.');
-    expect(artifact.content).toContain('boundary map spec=course-sites · submission=canvas · feedback=gradescope');
+    expect(artifact.content).toContain(
+      'course identity: course-sites · course page · fields title/code/term/link - Course identity stays on the course website.',
+    );
+    expect(artifact.content).toContain(
+      'discussion runtime: edstem · thread · fields threads/replies/lesson-entry - EdStem keeps the discussion lane.',
+    );
+    expect(artifact.content).toContain(
+      'assessment runtime: gradescope · assignment row · fields submissions/scores/review - Gradescope keeps the assessment lane.',
+    );
+    expect(artifact.content).toContain(
+      'boundary map spec[title/spec/link]=course-sites · submission[status/submission]=canvas · feedback[score/rubric/comment/annotation]=gradescope',
+    );
   });
 
   it('treats locally reviewed cluster decisions as resolved export statuses instead of open review blockers', () => {

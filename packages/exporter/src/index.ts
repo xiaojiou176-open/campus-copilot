@@ -1609,11 +1609,49 @@ function formatAuthorityBoundaryKey(value: string) {
   }
 }
 
+function getAuthorityFieldMapTokens(input: {
+  role: string;
+  resourceType?: string;
+}) {
+  switch (input.role) {
+    case 'course_identity':
+      return ['title', 'code', 'term', 'link'];
+    case 'course_delivery':
+      return ['modules', 'assignments', 'announcements', 'runtime'];
+    case 'discussion_runtime':
+      return ['threads', 'replies', 'lesson-entry'];
+    case 'assessment_runtime':
+      return ['submissions', 'scores', 'review'];
+    case 'assignment_spec':
+      return input.resourceType === 'assignment_row' ? ['title', 'spec', 'link'] : ['title', 'spec'];
+    case 'schedule_signal':
+      return input.resourceType === 'event' ? ['startAt', 'endAt'] : ['dueAt', 'startAt', 'endAt'];
+    case 'submission_state':
+      return ['status', 'submission'];
+    case 'feedback_detail':
+      return ['score', 'rubric', 'comment', 'annotation'];
+    default:
+      return [];
+  }
+}
+
+function formatAuthorityBoundaryFacetLabel(input: {
+  role: string;
+  resourceType?: string;
+}) {
+  const fieldTokens = getAuthorityFieldMapTokens(input);
+  if (fieldTokens.length === 0) {
+    return formatAuthorityBoundaryKey(input.role);
+  }
+  return `${formatAuthorityBoundaryKey(input.role)}[${fieldTokens.join('/')}]`;
+}
+
 function formatAuthorityBoundaryMap(
   breakdown:
     | Array<{
         role: string;
         surface: string;
+        resourceType?: string;
       }>
     | undefined,
 ) {
@@ -1621,7 +1659,9 @@ function formatAuthorityBoundaryMap(
     return undefined;
   }
 
-  return breakdown.map((facet) => `${formatAuthorityBoundaryKey(facet.role)}=${facet.surface}`).join(' · ');
+  return breakdown
+    .map((facet) => `${formatAuthorityBoundaryFacetLabel({ role: facet.role, resourceType: facet.resourceType })}=${facet.surface}`)
+    .join(' · ');
 }
 
 function formatAuthorityBreakdownLines(
@@ -1640,7 +1680,9 @@ function formatAuthorityBreakdownLines(
 
   return breakdown.map((facet) => {
     const reason = facet.reason ? ` - ${facet.reason}` : '';
-    return `${formatAuthorityRole(facet.role)}: ${formatAuthoritySource(`${facet.surface}:${facet.resourceType}`)}${reason}`;
+    const fieldTokens = getAuthorityFieldMapTokens({ role: facet.role, resourceType: facet.resourceType });
+    const fields = fieldTokens.length > 0 ? ` · fields ${fieldTokens.join('/')}` : '';
+    return `${formatAuthorityRole(facet.role)}: ${formatAuthoritySource(`${facet.surface}:${facet.resourceType}`)}${fields}${reason}`;
   });
 }
 

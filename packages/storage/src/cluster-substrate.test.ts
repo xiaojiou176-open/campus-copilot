@@ -266,10 +266,20 @@ describe('cluster substrate', () => {
       'course_delivery',
       'assessment_runtime',
     ]);
+    expect(view.courseClusters[0]?.authorityBreakdown?.[0]?.reason).toContain('字段佐证锁在 课程标题 / 课程代码 / 学期 / 课程链接');
+    expect(view.courseClusters[0]?.authorityBreakdown?.[1]?.reason).toContain(
+      '字段佐证锁在 modules / assignments / announcements / day-to-day runtime',
+    );
     expect(view.workItemClusters.some((cluster) => cluster.title === 'Homework 5')).toBe(true);
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authoritySurface).toBe('course-sites');
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityNarrative).toContain(
       '作业规格以 course-sites 为准',
+    );
+    expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityBreakdown?.[0]?.reason).toContain(
+      '字段佐证锁在 title / summary/spec / deep-link',
+    );
+    expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityBreakdown?.[1]?.reason).toContain(
+      '字段佐证锁在 dueAt',
     );
     expect(view.administrativeSummaries.some((summary) => summary.family === 'dars')).toBe(true);
     expect(view.administrativeSummaries.find((summary) => summary.family === 'dars')?.detailRuntimeStatus).toBe(

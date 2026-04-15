@@ -79,8 +79,30 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
         <h1>Bachelor of Science (Computer Science)</h1>
         <div class="audit-state">NOTE: At least one requirement still incomplete.</div>
         <div class="audit-requirement-totals">Earned: 106 credits In-progress: 14 credits Needs: 60 credits</div>
-        <div class="audit-requirement requirement 180SUM Status_NO"></div>
-        <div class="audit-requirement requirement UWGPA Status_NO"></div>
+        <div class="audit-requirement requirement 180SUM Status_NO">
+          <div class="audit-requirement-status status Status_NO">
+            <span aria-hidden="true" title="Not completed">NO</span>
+            <span class="sr-only">Not completed</span>
+          </div>
+          <div class="audit-requirement-info">
+            <div class="text linkify">Complete at least 180 total credits for the degree.</div>
+          </div>
+          <div class="audit-requirement-details">
+            <div class="audit-requirement-totals">Earned: 106 credits In-progress: 14 credits Needs: 60 credits</div>
+          </div>
+        </div>
+        <div class="audit-requirement requirement WRITING Status_NO">
+          <div class="audit-requirement-status status Status_NO">
+            <span aria-hidden="true" title="Not completed">NO</span>
+            <span class="sr-only">Not completed</span>
+          </div>
+          <div class="audit-requirement-info">
+            <div class="text linkify">Writing across the curriculum (10 credits required).</div>
+          </div>
+          <div class="audit-requirement-details">
+            <div class="audit-requirement-totals">Earned: 3 credits Needs: 7 credits</div>
+          </div>
+        </div>
         <a href="/audit/#/equivalency">Find CTC Transfer Equivalency</a>
       </main>
     `);
@@ -98,6 +120,8 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
     expect(stored?.termCount).toBe(1);
     expect(stored?.requirementGroupCount).toBe(2);
     expect(stored?.degreeProgressSummary).toContain('At least one requirement still incomplete');
+    expect(stored?.degreeProgressSummary).toContain('Visible DARS requirement spine:');
+    expect(stored?.degreeProgressSummary).toContain('Writing across the curriculum');
     expect(stored?.exactBlockers ?? []).toHaveLength(0);
   });
 

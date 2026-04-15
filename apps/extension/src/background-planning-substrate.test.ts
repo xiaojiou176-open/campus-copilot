@@ -212,8 +212,30 @@ describe('background planning substrate capture', () => {
           <h1>Bachelor of Science (Computer Science)</h1>
           <div class="audit-state">NOTE: At least one requirement still incomplete.</div>
           <div class="audit-requirement-totals">Earned: 106 credits In-progress: 14 credits Needs: 60 credits</div>
-          <div class="audit-requirement requirement 180SUM Status_NO"></div>
-          <div class="audit-requirement requirement UWGPA Status_NO"></div>
+          <div class="audit-requirement requirement 180SUM Status_NO">
+            <div class="audit-requirement-status status Status_NO">
+              <span aria-hidden="true" title="Not completed">NO</span>
+              <span class="sr-only">Not completed</span>
+            </div>
+            <div class="audit-requirement-info">
+              <div class="text linkify">Complete at least 180 total credits for the degree.</div>
+            </div>
+            <div class="audit-requirement-details">
+              <div class="audit-requirement-totals">Earned: 106 credits In-progress: 14 credits Needs: 60 credits</div>
+            </div>
+          </div>
+          <div class="audit-requirement requirement WRITING Status_NO">
+            <div class="audit-requirement-status status Status_NO">
+              <span aria-hidden="true" title="Not completed">NO</span>
+              <span class="sr-only">Not completed</span>
+            </div>
+            <div class="audit-requirement-info">
+              <div class="text linkify">Writing across the curriculum (10 credits required).</div>
+            </div>
+            <div class="audit-requirement-details">
+              <div class="audit-requirement-totals">Earned: 3 credits Needs: 7 credits</div>
+            </div>
+          </div>
           <a href="/audit/#/equivalency">Find CTC Transfer Equivalency</a>
         </main>
       `,
@@ -225,5 +247,59 @@ describe('background planning substrate capture', () => {
     expect(record.requirementGroupCount).toBe(2);
     expect(record.degreeProgressSummary).toContain('At least one requirement still incomplete');
     expect(record.degreeProgressSummary).toContain('Earned: 106 credits');
+    expect(record.degreeProgressSummary).toContain('Visible DARS requirement spine:');
+    expect(record.degreeProgressSummary).toContain('Writing across the curriculum');
+    expect(record.degreeProgressSummary).toContain('Needs: 7 credits');
+  });
+
+  it('prioritizes incomplete DARS requirement signals in the degree progress summary', () => {
+    const record = buildMyPlanPlanningSubstrateFromHtml({
+      url: 'https://myplan.uw.edu/audit/#/degree',
+      capturedAt: '2026-04-11T12:05:00-07:00',
+      pageHtml: `
+        <main>
+          <h1>Audit a UW Degree Program (DARS)</h1>
+          <div class="audit-state">NOTE: Requirement review available.</div>
+          <div class="audit-requirement-totals">Earned: 150 credits Needs: 30 credits</div>
+          <div class="audit-requirement requirement ENGLCOMP Status_OK">
+            <div class="audit-requirement-status status Status_OK">
+              <span aria-hidden="true" title="Completed">OK</span>
+              <span class="sr-only">Completed</span>
+            </div>
+            <div class="audit-requirement-info">
+              <div class="text linkify">English composition completed.</div>
+            </div>
+          </div>
+          <div class="audit-requirement requirement RSN Status_IP">
+            <div class="audit-requirement-status status Status_IP">
+              <span aria-hidden="true" title="In progress">IP</span>
+              <span class="sr-only">In progress</span>
+            </div>
+            <div class="audit-requirement-info">
+              <div class="text linkify">Reasoning and symbols requirement.</div>
+            </div>
+            <div class="audit-requirement-details">
+              <div class="audit-requirement-totals">Earned: 0 credits In-progress: 5 credits Needs: 0 credits</div>
+            </div>
+          </div>
+          <div class="audit-requirement requirement WRITING Status_NO">
+            <div class="audit-requirement-status status Status_NO">
+              <span aria-hidden="true" title="Not completed">NO</span>
+              <span class="sr-only">Not completed</span>
+            </div>
+            <div class="audit-requirement-info">
+              <div class="text linkify">Writing across the curriculum.</div>
+            </div>
+            <div class="audit-requirement-details">
+              <div class="audit-requirement-totals">Earned: 3 credits Needs: 7 credits</div>
+            </div>
+          </div>
+        </main>
+      `,
+    });
+
+    expect(record.degreeProgressSummary).toContain('Not completed: Writing across the curriculum.');
+    expect(record.degreeProgressSummary).toContain('In progress: Reasoning and symbols requirement.');
+    expect(record.degreeProgressSummary).not.toContain('Completed: English composition completed.');
   });
 });
