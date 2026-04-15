@@ -321,6 +321,31 @@ function isTimeScheduleSectionDetailUrl(url: string) {
   return /sdb\.admin\.washington\.edu\/timeschd\/uwnetid\/sln\.asp/i.test(url);
 }
 
+function formatTimeScheduleDetailStatus(status: ReturnType<typeof extractTimeScheduleSectionDetailPage>['status']) {
+  if (status === 'open') {
+    return 'Open';
+  }
+  if (status === 'closed') {
+    return 'Closed';
+  }
+  return undefined;
+}
+
+function buildTimeScheduleSeatAvailabilitySummary(detail: ReturnType<typeof extractTimeScheduleSectionDetailPage>) {
+  if (detail.spaceAvailable != null) {
+    const seatsLabel = detail.spaceAvailable === 1 ? '1 seat available' : `${detail.spaceAvailable} seats available`;
+    return detail.currentEnrollment != null && detail.enrollmentLimit != null
+      ? `${seatsLabel} (${detail.currentEnrollment}/${detail.enrollmentLimit} enrolled)`
+      : seatsLabel;
+  }
+
+  if (detail.currentEnrollment != null && detail.enrollmentLimit != null) {
+    return `${detail.currentEnrollment}/${detail.enrollmentLimit} enrolled`;
+  }
+
+  return undefined;
+}
+
 function buildTimeScheduleDetailSnapshot(pageHtml: string, url: string): SiteSnapshotPayload {
   const detail = extractTimeScheduleSectionDetailPage(pageHtml);
   const primaryMeeting = detail.meetings[0];
@@ -328,14 +353,17 @@ function buildTimeScheduleDetailSnapshot(pageHtml: string, url: string): SiteSna
     primaryMeeting && primaryMeeting.days && primaryMeeting.timeText
       ? `${primaryMeeting.days} ${primaryMeeting.timeText}`.trim()
       : 'meeting pattern unavailable';
+  const seatAvailabilitySummary = buildTimeScheduleSeatAvailabilitySummary(detail);
   const detailParts = [
     meetingPattern,
     primaryMeeting?.location,
     primaryMeeting?.instructor,
-    detail.status !== 'unknown' ? detail.status : undefined,
-    detail.currentEnrollment != null && detail.enrollmentLimit != null
-      ? `${detail.currentEnrollment}/${detail.enrollmentLimit} enrolled`
-      : undefined,
+    formatTimeScheduleDetailStatus(detail.status),
+    seatAvailabilitySummary,
+    detail.sectionType ? `${detail.sectionType} section` : undefined,
+    detail.credits ? `${detail.credits} credits` : undefined,
+    detail.generalEducation ? `Reqs: ${detail.generalEducation}` : undefined,
+    detail.textbooksAvailable ? 'Textbooks listed' : undefined,
   ].filter(Boolean);
 
   return {
@@ -487,7 +515,7 @@ function buildTimeSchedulePlanningSubstrate(input: {
     ? 'public_course_offerings_planning_lane_with_sln_detail'
     : TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture;
   const currentTruth = capturedFromDetailPage
-    ? 'Time Schedule still stays read-only and public-offerings-first, but the current planning lane now also has an authenticated SLN detail corroboration for richer section context, including concrete meeting, location, and enrollment proof.'
+    ? 'Time Schedule still stays read-only and public-offerings-first, but the current planning lane now also has an authenticated SLN detail corroboration for richer section context, including concrete meeting, location, seat-availability, and exposed section-type / credit / requirement-tag proof.'
     : TIME_SCHEDULE_STAGE_UNDERSTANDING.currentTruth;
   const detailCorroboration = capturedFromDetailPage ? buildTimeScheduleDetailCorroboration(input.snapshot) : undefined;
   const termSummary = capturedFromDetailPage

@@ -433,7 +433,8 @@ describe('CanvasApiClient', () => {
       expect(result.snapshot.messages?.[0]).toMatchObject({
         courseId: 'canvas:course:42',
         title: 'Midterm logistics',
-        summary: 'Please review the updated logistics note. · Attachment: midterm-logistics.pdf · 2-message thread',
+        summary:
+          'Started: Initial question · Latest: Please review the updated logistics note. · Attachment: midterm-logistics.pdf · 2-message thread',
         unread: true,
       });
       expect(result.snapshot.grades?.[0]).toMatchObject({
@@ -821,7 +822,8 @@ describe('CanvasApiClient', () => {
     if (result.ok) {
       expect(result.snapshot.messages?.[0]).toMatchObject({
         title: 'Project checkpoint',
-        summary: 'Can we move the milestone review? · 3-message thread',
+        summary:
+          'Started: Initial scheduling question. · Latest: Can we move the milestone review? · 3-message thread',
         unread: false,
       });
     }
