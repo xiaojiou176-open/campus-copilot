@@ -901,7 +901,7 @@ describe('EdStemApiClient', () => {
               resourceType: 'lesson_detail',
             }),
             title: '[HW1 problem 7(a)] redacted lesson title',
-            summary: 'python lesson · attempted · 3 slides',
+            summary: 'python lesson · attempted · 3 slides · 2 documents, 1 challenge',
             detail:
               'State: scheduled · Due: 2026-04-09T16:59:00+10:00 · Locks: 2026-04-12T16:59:00+10:00 · Solutions: 2026-04-13T04:00:00+10:00 · Late submissions allowed · Slides: 1 · redacted slide title 1 · document · completed; 2 · redacted slide title 2 · document · unseen; 3 · redacted coding challenge · challenge · unseen',
           }),
@@ -929,6 +929,46 @@ describe('EdStemApiClient', () => {
       );
       expect(result.outcome).toBe('success');
       expect(result.health.reason).toBe('edstem_sync_success');
+    }
+  });
+
+  it('surfaces lesson slide-type composition in the grouped lesson summary', async () => {
+    const client = new EdStemApiClient(
+      okExecutor({
+        '/api/user': {
+          courses: [
+            {
+              course: {
+                id: 96846,
+                code: 'CSE 312 - 26sp',
+                name: 'Foundations of Computing II',
+              },
+            },
+          ],
+        },
+        '/api/courses/96846/threads?limit=30&sort=new': {
+          threads: [],
+          users: [],
+        },
+        '/api/lessons/redacted-lesson-a?view=1': readJsonFixture('/lesson-detail-api.json'),
+      }),
+      lessonDetailPaths,
+    );
+
+    const adapter = createEdStemAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://edstem.org/us/courses/96846/lessons/redacted-lesson-a',
+      site: 'edstem',
+      now: '2026-04-14T10:00:00-07:00',
+      pageHtml: '<html><body>lesson detail</body></html>',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.resources?.[0]).toMatchObject({
+        id: 'edstem:lesson:redacted-lesson-a',
+        summary: 'python lesson · attempted · 3 slides · 2 documents, 1 challenge',
+      });
     }
   });
 

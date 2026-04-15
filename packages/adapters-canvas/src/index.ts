@@ -124,6 +124,14 @@ const CanvasRawModuleItemContentDetailsSchema = z
   })
   .passthrough();
 
+const CanvasRawModuleItemCompletionRequirementSchema = z
+  .object({
+    type: z.string().nullable().optional(),
+    min_score: z.union([z.number(), z.string()]).nullable().optional(),
+    completed: z.boolean().optional(),
+  })
+  .passthrough();
+
 const CanvasRawModuleItemSchema = z
   .object({
     id: z.union([z.number(), z.string()]),
@@ -135,6 +143,7 @@ const CanvasRawModuleItemSchema = z
     published: z.boolean().optional(),
     content_id: z.union([z.number(), z.string()]).nullable().optional(),
     content_details: CanvasRawModuleItemContentDetailsSchema.nullable().optional(),
+    completion_requirement: CanvasRawModuleItemCompletionRequirementSchema.nullable().optional(),
   })
   .passthrough();
 
@@ -662,10 +671,40 @@ function buildCanvasModuleItemDetail(rawModule: CanvasRawModule, rawItem: Canvas
       : type === 'ExternalUrl'
         ? 'External link'
         : type === 'ExternalTool'
-          ? 'External tool'
+        ? 'External tool'
           : type || 'Item';
+  const detailParts = [typeLabel, rawModule.name?.trim() || 'Canvas module'];
+  const completionRequirement = buildCanvasModuleItemCompletionRequirementDetail(rawItem);
+  if (completionRequirement) {
+    detailParts.push(completionRequirement);
+  }
 
-  return [typeLabel, rawModule.name?.trim() || 'Canvas module'].join(' · ');
+  return detailParts.join(' · ');
+}
+
+function buildCanvasModuleItemCompletionRequirementDetail(rawItem: CanvasRawModuleItem) {
+  const requirementType = rawItem.completion_requirement?.type?.trim();
+  if (!requirementType) {
+    return undefined;
+  }
+
+  if (requirementType === 'min_score') {
+    const minScore = toOptionalNumber(rawItem.completion_requirement?.min_score);
+    return minScore == null ? 'Requirement: minimum score' : `Requirement: score at least ${minScore}`;
+  }
+
+  const requirementLabel =
+    requirementType === 'must_view'
+      ? 'view'
+      : requirementType === 'must_submit'
+        ? 'submit'
+        : requirementType === 'must_contribute'
+          ? 'contribute'
+          : requirementType === 'must_mark_done'
+            ? 'mark done'
+            : requirementType.replace(/_/g, ' ');
+
+  return `Requirement: ${requirementLabel}`;
 }
 
 function normalizeCanvasModuleItemResource(
