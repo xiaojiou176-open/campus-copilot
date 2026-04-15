@@ -51,6 +51,20 @@ function isClusterReviewPending(input: {
   return input.reviewDecision !== 'accepted' && input.reviewDecision !== 'dismissed';
 }
 
+function shouldCountClusterAsMerged(input: {
+  confidenceBand: 'high' | 'medium' | 'low';
+  needsReview: boolean;
+  reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
+}) {
+  if (input.confidenceBand === 'low') {
+    return false;
+  }
+  if (!input.needsReview) {
+    return true;
+  }
+  return input.reviewDecision === 'accepted';
+}
+
 const TUITION_PATTERN = /\b(tuition|payment|billing|bill|fee|fees|account)\b/i;
 const COURSE_CODE_PATTERN = /\b([A-Z]{2,5})\s*([0-9]{2,3}[A-Z]?)\b/;
 
@@ -828,7 +842,7 @@ export async function getMergeHealthSummary(db: CampusCopilotDB = campusCopilotD
   }).length;
 
   return MergeHealthSummarySchema.parse({
-    mergedCount: [...courseClusters, ...workItemClusters].filter((cluster) => cluster.confidenceBand !== 'low').length,
+    mergedCount: [...courseClusters, ...workItemClusters].filter((cluster) => shouldCountClusterAsMerged(cluster)).length,
     possibleMatchCount: [...courseClusters, ...workItemClusters].filter((cluster) => isClusterReviewPending(cluster)).length,
     unresolvedCount: [...courseClusters, ...workItemClusters].filter(
       (cluster) => isClusterReviewPending(cluster),

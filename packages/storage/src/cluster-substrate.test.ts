@@ -340,6 +340,73 @@ describe('cluster substrate', () => {
     expect(acceptedCluster?.needsReview).toBe(true);
     expect(acceptedCluster?.reviewDecision).toBe('accepted');
     expect(acceptedCluster?.reviewDecidedAt).toBeTruthy();
+    expect(mergeHealth.mergedCount).toBe(1);
+    expect(mergeHealth.possibleMatchCount).toBe(0);
+    expect(mergeHealth.unresolvedCount).toBe(0);
+  });
+
+  it('does not count locally dismissed clusters as merged health', async () => {
+    const db = createCampusCopilotDb('cluster-substrate-review-dismissed-test');
+
+    const canvasCourse: Course = {
+      id: 'canvas:course:seminar',
+      kind: 'course',
+      site: 'canvas',
+      source: { site: 'canvas', resourceId: 'seminar', resourceType: 'course' },
+      title: 'Foundations Seminar',
+      url: 'https://canvas.uw.edu/courses/1883999',
+    };
+    const edstemCourse: Course = {
+      id: 'edstem:course:seminar',
+      kind: 'course',
+      site: 'edstem',
+      source: { site: 'edstem', resourceId: 'seminar', resourceType: 'course' },
+      title: 'Foundations Seminar',
+      url: 'https://edstem.org/us/courses/22/discussion/',
+    };
+
+    await replaceSiteSnapshot(
+      'canvas',
+      {
+        courses: [canvasCourse],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: now,
+      },
+      db,
+    );
+
+    await replaceSiteSnapshot(
+      'edstem',
+      {
+        courses: [edstemCourse],
+      },
+      {
+        status: 'success',
+        lastSyncedAt: now,
+      },
+      db,
+    );
+
+    const initialView = await getWorkbenchView(now, { site: 'all', onlyUnseenUpdates: false }, db);
+    const reviewCluster = initialView.courseClusters[0];
+
+    expect(reviewCluster).toBeDefined();
+
+    await setClusterReviewDecision(
+      {
+        targetKind: 'course_cluster',
+        targetId: reviewCluster!.id,
+        decision: 'dismissed',
+      },
+      db,
+    );
+
+    await recomputeClusterSubstrate(db);
+
+    const mergeHealth = await getMergeHealthSummary(db);
+    expect(mergeHealth.mergedCount).toBe(0);
     expect(mergeHealth.possibleMatchCount).toBe(0);
     expect(mergeHealth.unresolvedCount).toBe(0);
   });
