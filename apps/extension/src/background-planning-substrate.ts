@@ -21,6 +21,13 @@ type MyPlanBootstrapTermSummary = {
   plannedCourseCount: number;
   backupCourseCount: number;
   scheduleOptionCount: number;
+  backupCourseSummaries: string[];
+  scheduleOptionSummaries: string[];
+};
+type MyPlanBootstrapProgramExplorationSummary = {
+  label: string;
+  kind?: string;
+  summary?: string;
 };
 type MyPlanBootstrapPlanningSummary = {
   planId: string;
@@ -28,6 +35,7 @@ type MyPlanBootstrapPlanningSummary = {
   lastUpdatedAt?: string;
   transferPlanningSummary?: string;
   programExplorationCount: number;
+  programExplorationSummaries: MyPlanBootstrapProgramExplorationSummary[];
   terms: MyPlanBootstrapTermSummary[];
 };
 type AuditRequirementSignal = {
@@ -62,6 +70,11 @@ function readNonEmptyString(record: Record<string, unknown>, key: string) {
 function readRecordArray(record: Record<string, unknown>, key: string) {
   const value = record[key];
   return Array.isArray(value) ? value.filter(isRecord) : [];
+}
+
+function readStringArray(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0) : [];
 }
 
 function normalizeTermIdentity(value: string) {
@@ -131,14 +144,47 @@ function buildBootstrapPlanningSummary(pageHtml: string): MyPlanBootstrapPlannin
       const planStatus = readNonEmptyString(term, 'planStatus');
       const normalizedPlanStatus =
         planStatus === 'draft' || planStatus === 'saved' || planStatus === 'submitted' ? planStatus : undefined;
+      const plannedCourses = readRecordArray(term, 'plannedCourses').map((course) => ({
+        id: readNonEmptyString(course, 'id'),
+        code: readNonEmptyString(course, 'code'),
+        title: readNonEmptyString(course, 'title'),
+      }));
+      const plannedCourseCodeById = new Map<string, string>();
+      for (const course of plannedCourses) {
+        if (!course.id) {
+          continue;
+        }
+        plannedCourseCodeById.set(course.id, course.code ?? course.title ?? course.id);
+      }
+      const backupCourseSummaries = readRecordArray(term, 'backupCourses')
+        .map((course) => {
+          const code = readNonEmptyString(course, 'code');
+          const title = readNonEmptyString(course, 'title');
+          return [code, title].filter(Boolean).join(' ').trim();
+        })
+        .filter(Boolean);
+      const scheduleOptionSummaries = readRecordArray(term, 'scheduleOptions')
+        .map((option) => {
+          const label = readNonEmptyString(option, 'label');
+          const plannedCourseCodes = readStringArray(option, 'plannedCourseIds')
+            .map((courseId) => plannedCourseCodeById.get(courseId) ?? courseId)
+            .filter(Boolean);
+          if (label && plannedCourseCodes.length > 0) {
+            return `${label} (${plannedCourseCodes.join(', ')})`;
+          }
+          return label ?? undefined;
+        })
+        .filter((summary): summary is string => Boolean(summary));
 
       return {
         termCode,
         termLabel,
         planStatus: normalizedPlanStatus,
-        plannedCourseCount: readRecordArray(term, 'plannedCourses').length,
-        backupCourseCount: readRecordArray(term, 'backupCourses').length,
-        scheduleOptionCount: readRecordArray(term, 'scheduleOptions').length,
+        plannedCourseCount: plannedCourses.length,
+        backupCourseCount: backupCourseSummaries.length,
+        scheduleOptionCount: scheduleOptionSummaries.length,
+        backupCourseSummaries,
+        scheduleOptionSummaries,
       };
     })
     .filter((term): term is MyPlanBootstrapTermSummary => Boolean(term));
@@ -153,12 +199,33 @@ function buildBootstrapPlanningSummary(pageHtml: string): MyPlanBootstrapPlannin
     lastUpdatedAt: readNonEmptyString(plan, 'lastUpdatedAt'),
     transferPlanningSummary: readNonEmptyString(plan, 'transferPlanningSummary'),
     programExplorationCount: readRecordArray(plan, 'programExplorationResults').length,
+    programExplorationSummaries: readRecordArray(plan, 'programExplorationResults')
+      .map((result): MyPlanBootstrapProgramExplorationSummary | undefined => {
+        const label = readNonEmptyString(result, 'label');
+        if (!label) {
+          return undefined;
+        }
+        return {
+          label,
+          kind: readNonEmptyString(result, 'kind'),
+          summary: readNonEmptyString(result, 'summary'),
+        };
+      })
+      .filter((result): result is MyPlanBootstrapProgramExplorationSummary => Boolean(result)),
     terms,
   };
 }
 
 function buildPlanningTermSummary(
-  term: Pick<MyPlanBootstrapTermSummary, 'plannedCourseCount' | 'backupCourseCount' | 'scheduleOptionCount' | 'planStatus'>,
+  term: Pick<
+    MyPlanBootstrapTermSummary,
+    | 'plannedCourseCount'
+    | 'backupCourseCount'
+    | 'scheduleOptionCount'
+    | 'planStatus'
+    | 'backupCourseSummaries'
+    | 'scheduleOptionSummaries'
+  >,
   options?: {
     visiblePlannedCourseCount?: number;
     issuesSummary?: string;
@@ -171,6 +238,14 @@ function buildPlanningTermSummary(
   parts.push(
     `${term.plannedCourseCount} planned course(s), ${term.backupCourseCount} backup option(s), ${term.scheduleOptionCount} schedule option(s).`,
   );
+  if (term.backupCourseSummaries.length > 0) {
+    parts.push(`Backup path: ${term.backupCourseSummaries.slice(0, 2).join('; ')}${term.backupCourseSummaries.length > 2 ? '; ...' : '.'}`);
+  }
+  if (term.scheduleOptionSummaries.length > 0) {
+    parts.push(
+      `Schedule options: ${term.scheduleOptionSummaries.slice(0, 2).join('; ')}${term.scheduleOptionSummaries.length > 2 ? '; ...' : '.'}`,
+    );
+  }
   if (options?.visiblePlannedCourseCount != null) {
     const visibleSummary =
       options.issuesSummary && options.issuesSummary.length > 0
@@ -224,6 +299,26 @@ function mergeBootstrapTerms(
   }
 
   return nextTerms;
+}
+
+function buildTransferPlanningSummary(
+  bootstrapSummary: MyPlanBootstrapPlanningSummary | undefined,
+  fallbackSummary: string | undefined,
+) {
+  const baseSummary = bootstrapSummary?.transferPlanningSummary ?? fallbackSummary;
+  const explorationSummary =
+    bootstrapSummary && bootstrapSummary.programExplorationSummaries.length > 0
+      ? `Program exploration: ${bootstrapSummary.programExplorationSummaries
+          .slice(0, 2)
+          .map((result) =>
+            [result.label, result.kind ? `(${result.kind})` : undefined, result.summary ? `- ${result.summary}` : undefined]
+              .filter(Boolean)
+              .join(' '),
+          )
+          .join('; ')}${bootstrapSummary.programExplorationSummaries.length > 2 ? '; ...' : '.'}`
+      : undefined;
+
+  return [baseSummary, explorationSummary].filter(Boolean).join(' ').trim() || undefined;
 }
 
 function detectPlanningCaptureKind(url: string | undefined): PlanningCaptureKind | undefined {
@@ -502,7 +597,7 @@ function buildPlanCaptureFromHtml(
     backupCourseCount: sumCounts(terms, 'backupCourseCount'),
     scheduleOptionCount: sumCounts(terms, 'scheduleOptionCount'),
     degreeProgressSummary,
-    transferPlanningSummary: bootstrapSummary?.transferPlanningSummary ?? transferPlanningSummary,
+    transferPlanningSummary: buildTransferPlanningSummary(bootstrapSummary, transferPlanningSummary),
     programExplorationCount: bootstrapSummary?.programExplorationCount ?? base.programExplorationCount,
     requirementGroupCount: base.requirementGroupCount,
   };

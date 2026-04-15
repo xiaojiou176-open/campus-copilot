@@ -568,6 +568,7 @@ describe('EdStemApiClient', () => {
         },
         url: 'https://edstem.org/us/courses/855/discussion/709033?comment=1654435',
       });
+      expect(result.snapshot.messages?.[4]?.summary).toContain('Reply to comment 1651940');
       expect(result.snapshot.messages?.[4]?.summary).not.toContain('<');
       expect(result.health.code).toBe('partial_success');
     }
@@ -1093,6 +1094,7 @@ describe('EdStemApiClient', () => {
         },
         url: 'https://edstem.org/us/courses/855/discussion/709033?comment=1654435',
       });
+      expect(result.snapshot.messages?.[4]?.summary).toContain('Reply to comment 1651940');
       expect(result.snapshot.messages?.[4]?.summary).not.toContain('<');
     }
   });

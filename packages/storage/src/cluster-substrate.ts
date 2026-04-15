@@ -134,6 +134,59 @@ function buildWorkFieldCorroboration(input: {
   }
 }
 
+function joinChineseLabels(labels: string[]) {
+  if (labels.length === 0) {
+    return '';
+  }
+  if (labels.length === 1) {
+    return labels[0]!;
+  }
+  if (labels.length === 2) {
+    return `${labels[0]}与${labels[1]}`;
+  }
+  return `${labels.slice(0, -1).join('、')}与${labels[labels.length - 1]}`;
+}
+
+function formatAuthorityRoleLabel(role: ClusterAuthorityFacet['role']) {
+  switch (role) {
+    case 'course_identity':
+      return '课程身份';
+    case 'course_delivery':
+      return '课程执行面';
+    case 'discussion_runtime':
+      return '讨论流';
+    case 'assessment_runtime':
+      return '评估流';
+    case 'assignment_spec':
+      return '作业规格';
+    case 'schedule_signal':
+      return '时间锚点';
+    case 'submission_state':
+      return '提交状态';
+    case 'feedback_detail':
+      return '反馈细节';
+    default:
+      return String(role).replace(/_/g, ' ');
+  }
+}
+
+function buildCompressedAuthorityNarrative(breakdown: ClusterAuthorityFacet[]) {
+  const grouped = new Map<string, string[]>();
+
+  for (const facet of breakdown) {
+    const roleLabel = formatAuthorityRoleLabel(facet.role);
+    const existing = grouped.get(facet.surface) ?? [];
+    if (!existing.includes(roleLabel)) {
+      existing.push(roleLabel);
+    }
+    grouped.set(facet.surface, existing);
+  }
+
+  return [...grouped.entries()]
+    .map(([surface, roleLabels]) => `${surface} 负责${joinChineseLabels(roleLabels)}`)
+    .join('；');
+}
+
 function normalizeWhitespace(value: string) {
   return value.replace(/\s+/g, ' ').trim();
 }
@@ -477,26 +530,7 @@ function buildWorkAuthorityBreakdown(input: {
 }
 
 function buildWorkAuthorityNarrative(breakdown: ClusterAuthorityFacet[]) {
-  const parts: string[] = [];
-  const spec = breakdown.find((item) => item.role === 'assignment_spec');
-  const schedule = breakdown.find((item) => item.role === 'schedule_signal');
-  const submission = breakdown.find((item) => item.role === 'submission_state');
-  const feedback = breakdown.find((item) => item.role === 'feedback_detail');
-
-  if (spec) {
-    parts.push(`作业规格以 ${spec.surface} 为准`);
-  }
-  if (schedule) {
-    parts.push(`时间锚点以 ${schedule.surface} 为准`);
-  }
-  if (submission) {
-    parts.push(`提交状态以 ${submission.surface} 为准`);
-  }
-  if (feedback) {
-    parts.push(`反馈细节以 ${feedback.surface} 为准`);
-  }
-
-  return parts.join('；');
+  return buildCompressedAuthorityNarrative(breakdown);
 }
 
 function confidenceFromSites(distinctSites: number, hasStrongKey: boolean) {
@@ -898,9 +932,9 @@ function buildWorkItemClusters(
         ],
         summary:
           band === 'high'
-            ? `${title} 已被折成高置信度统一工作项，并开始按规格/时间/提交/反馈拆分 authority。`
+            ? `${title} 已被折成高置信度统一工作项：${authorityNarrative}。`
             : band === 'medium'
-            ? `${title} 已形成可用工作项簇，但 authority 仍有一部分需要人工复核。`
+            ? `${title} 已形成可用工作项簇：${authorityNarrative}；但 authority 仍有一部分需要人工复核。`
             : `${title} 当前仍是单站工作项或低置信度候选。`,
         authorityNarrative,
         authorityBreakdown,

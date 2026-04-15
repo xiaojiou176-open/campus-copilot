@@ -665,6 +665,34 @@ function normalizeCanvasDetailLabel(value: string | null | undefined) {
   return normalized.replace(/[_-]+/g, ' ');
 }
 
+function deriveCanvasRecordingSourceLabel(url: string | undefined, kind: 'module_item' | 'media_object') {
+  if (kind === 'media_object') {
+    return 'Canvas media library';
+  }
+
+  if (!url) {
+    return undefined;
+  }
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    const pathname = parsed.pathname.toLowerCase();
+
+    if (hostname.includes('panopto')) {
+      return 'Panopto';
+    }
+
+    if (pathname.includes('/media_objects/')) {
+      return 'Canvas media library';
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
 function extractCanvasPageReference(pageUrl: string | null | undefined) {
   const normalizedPageUrl = pageUrl?.trim();
   if (!normalizedPageUrl) {
@@ -707,12 +735,23 @@ function buildCanvasModuleItemDetail(rawModule: CanvasRawModule, rawItem: Canvas
         ? 'External tool'
           : type || 'Item';
   const detailParts = [typeLabel, rawModule.name?.trim() || 'Canvas module'];
+  const recordingSourceLabel = looksLikeRecording
+    ? deriveCanvasRecordingSourceLabel(
+        toOptionalAbsoluteUrl(
+          rawItem.external_url ?? rawItem.html_url ?? rawItem.content_details?.url ?? undefined,
+        ),
+        'module_item',
+      )
+    : undefined;
   const pageReference =
     type === 'Page'
       ? extractCanvasPageReference(rawItem.page_url ?? rawItem.content_details?.page_url ?? undefined)
       : undefined;
   if (pageReference) {
     detailParts.push(`Page ref: ${pageReference}`);
+  }
+  if (recordingSourceLabel) {
+    detailParts.push(`Source: ${recordingSourceLabel}`);
   }
   const completionRequirement = buildCanvasModuleItemCompletionRequirementDetail(rawItem);
   if (completionRequirement) {
@@ -888,6 +927,13 @@ function buildCanvasMediaDetail(rawMedia: CanvasRawMediaObject) {
   const mediaType = normalizeCanvasDetailLabel(rawMedia.media_type ?? undefined);
   if (mediaType) {
     parts.push(mediaType);
+  }
+  const sourceLabel = deriveCanvasRecordingSourceLabel(
+    toOptionalAbsoluteUrl(rawMedia.html_url ?? rawMedia.url ?? undefined),
+    'media_object',
+  );
+  if (sourceLabel) {
+    parts.push(`Source: ${sourceLabel}`);
   }
   const freshnessAnchor = rawMedia.updated_at ?? rawMedia.created_at ?? undefined;
   if (freshnessAnchor) {

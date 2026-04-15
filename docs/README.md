@@ -2,7 +2,7 @@
 
 This file is the docs front door.
 
-Use it like airport signs:
+Treat it like airport signs, not a second maintainer dashboard:
 
 - start with the route that matches your intent
 - read the shortest stable brief first
@@ -33,13 +33,13 @@ If you only want one sane reading path, use this order:
 
 ## Proof And Launch Lane
 
-Use this route when you need stable repo-local proof:
+Use this route when you need stable repo-local proof without turning the docs hub into a launch control room:
 
 1. [`verification-matrix.md`](verification-matrix.md)
 2. [`site-capability-matrix.md`](site-capability-matrix.md)
-3. [`live-validation-runbook.md`](live-validation-runbook.md)
-4. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
-5. [`storefront-assets.md`](storefront-assets.md)
+3. [`storefront-assets.md`](storefront-assets.md)
+4. [`live-validation-runbook.md`](live-validation-runbook.md)
+5. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
 6. [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
 
 Keep the split honest:
@@ -60,25 +60,25 @@ Use this route only when you already understand the product and need the integra
 
 ## Public Docs Snapshot
 
-The shortest public-safe docs set is still built around:
+The shortest public-safe docs set is built around:
 
 - [`01-product-prd.md`](01-product-prd.md)
 - [`02-system-architecture.md`](02-system-architecture.md)
 - [`03-domain-schema.md`](03-domain-schema.md)
 - [`04-adapter-spec.md`](04-adapter-spec.md)
-- [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md)
 - [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
 - [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
+- [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)
 - [`api/openapi.yaml`](api/openapi.yaml)
 
-Supporting routes that remain useful but secondary:
+Supporting routes that stay useful but clearly secondary:
 
+- [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md)
 - [`verification-matrix.md`](verification-matrix.md)
 - [`site-capability-matrix.md`](site-capability-matrix.md)
 - [`integration-boundaries.md`](integration-boundaries.md)
 - [`live-validation-runbook.md`](live-validation-runbook.md)
 - [`storefront-assets.md`](storefront-assets.md)
-- [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)
 - [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md)
 
 ## Rules
@@ -88,4 +88,5 @@ Supporting routes that remain useful but secondary:
 - Public docs should route people into the product, proof, and builder surfaces without turning the docs hub into a maintainer control room.
 - If a fact belongs to runtime verification, keep it with [`verification-matrix.md`](verification-matrix.md) or [`live-validation-runbook.md`](live-validation-runbook.md).
 - If a fact belongs to API/integration fit, keep it with [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md) or [`api/openapi.yaml`](api/openapi.yaml).
+- Use [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md) plus [`../examples/README.md`](../examples/README.md) as the second-layer builder router instead of expanding this hub with every MCP or plugin packet.
 - If a fact belongs to owner-side launch or publication, route to [`../DISTRIBUTION.md`](../DISTRIBUTION.md) instead of expanding the docs front door.

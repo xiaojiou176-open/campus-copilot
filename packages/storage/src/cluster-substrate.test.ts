@@ -273,7 +273,10 @@ describe('cluster substrate', () => {
     expect(view.workItemClusters.some((cluster) => cluster.title === 'Homework 5')).toBe(true);
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authoritySurface).toBe('course-sites');
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityNarrative).toContain(
-      '作业规格以 course-sites 为准',
+      'course-sites 负责作业规格与时间锚点',
+    );
+    expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.summary).toContain(
+      'course-sites 负责作业规格与时间锚点；canvas 负责提交状态',
     );
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authorityBreakdown?.[0]?.reason).toContain(
       '字段佐证锁在 title / summary/spec / deep-link',

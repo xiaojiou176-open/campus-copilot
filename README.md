@@ -70,7 +70,7 @@ If you are new, follow this order:
 1. Read this README as the student-facing front door.
 2. Run the local workbench through [Quickstart](#quickstart).
 3. Open the short docs router at [`docs/README.md`](docs/README.md).
-4. Use proof and builder routes only after the product story is clear.
+4. Only then choose a second-layer route: proof if you want receipts, builder docs if you need integration seams.
 
 ## Current Product Shape
 
@@ -94,19 +94,21 @@ The honest split is:
 
 ## Repo-Local Proof Path
 
-Use this route when you want proof, not maintainer archaeology:
+Use this route when you want receipts after the product story is clear.
 
 1. Start with [`docs/storefront-assets.md`](docs/storefront-assets.md).
-2. Continue with [`docs/verification-matrix.md`](docs/verification-matrix.md) and [`DISTRIBUTION.md`](DISTRIBUTION.md).
-3. Open [`examples/README.md`](examples/README.md) and [`examples/toolbox-chooser.md`](examples/toolbox-chooser.md) only if you want the example or builder lane afterward.
+2. Continue with [`docs/verification-matrix.md`](docs/verification-matrix.md).
+3. Use [`DISTRIBUTION.md`](DISTRIBUTION.md) only for owner-side launch or listing truth, not as the main product explanation.
 
-Secondary proof receipts still live here when you need them:
+If you need the deeper appendix afterward, these receipts still exist without taking over the front door:
 
 - [`docs/assets/weekly-assignments-example.md`](docs/assets/weekly-assignments-example.md)
 - [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md)
 - [`examples/site-overview-audit-example.md`](examples/site-overview-audit-example.md)
 - `pnpm proof:public`
 - [`INTEGRATIONS.md`](INTEGRATIONS.md)
+- [`examples/README.md`](examples/README.md)
+- [`examples/toolbox-chooser.md`](examples/toolbox-chooser.md)
 - [`examples/integrations/plugin-bundles.md`](examples/integrations/plugin-bundles.md)
 - run a local Docker path with health checks through [`DISTRIBUTION.md`](DISTRIBUTION.md)
 
@@ -162,11 +164,9 @@ Only if autodiscovery fails do you need to open Settings and enter a manual `BFF
 
 Use this section only after the student-facing workspace story already makes sense.
 
-- Start with [`docs/10-builder-api-and-ecosystem-fit.md`](docs/10-builder-api-and-ecosystem-fit.md) for the truthful integration split.
-- Use [`examples/README.md`](examples/README.md), [`examples/toolbox-chooser.md`](examples/toolbox-chooser.md), and [`examples/integrations/README.md`](examples/integrations/README.md) for consumer routing.
-- Use [`examples/mcp/README.md`](examples/mcp/README.md), [`examples/integrations/codex-mcp-shell.example.json`](examples/integrations/codex-mcp-shell.example.json), and [`examples/integrations/claude-code-mcp-shell.example.json`](examples/integrations/claude-code-mcp-shell.example.json) for MCP wiring.
-- Use [`examples/integrations/plugin-bundles.md`](examples/integrations/plugin-bundles.md), [`examples/openclaw-readonly.md`](examples/openclaw-readonly.md), and [`skills/openclaw-readonly-consumer/SKILL.md`](skills/openclaw-readonly-consumer/SKILL.md) only for repo-bundle and local runtime consumers.
-- Use [`docs/api/openapi.yaml`](docs/api/openapi.yaml), [`packages/mcp-server/README.md`](packages/mcp-server/README.md), and [`skills/README.md`](skills/README.md) only when you need contract entrypoints.
+- Start with [`docs/10-builder-api-and-ecosystem-fit.md`](docs/10-builder-api-and-ecosystem-fit.md). That file is the builder appendix, not the product pitch.
+- For routing, use [`docs/api/openapi.yaml`](docs/api/openapi.yaml), [`examples/README.md`](examples/README.md), [`examples/toolbox-chooser.md`](examples/toolbox-chooser.md), and [`examples/integrations/README.md`](examples/integrations/README.md) before opening package-level detail.
+- For deeper local-consumer examples only, continue to [`examples/mcp/README.md`](examples/mcp/README.md), [`examples/integrations/codex-mcp-shell.example.json`](examples/integrations/codex-mcp-shell.example.json), [`examples/integrations/claude-code-mcp-shell.example.json`](examples/integrations/claude-code-mcp-shell.example.json), [`examples/integrations/plugin-bundles.md`](examples/integrations/plugin-bundles.md), [`examples/openclaw-readonly.md`](examples/openclaw-readonly.md), [`skills/openclaw-readonly-consumer/SKILL.md`](skills/openclaw-readonly-consumer/SKILL.md), [`packages/mcp-server/README.md`](packages/mcp-server/README.md), and [`skills/README.md`](skills/README.md).
 
 ## Boundaries
 
