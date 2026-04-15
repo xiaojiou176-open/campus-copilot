@@ -304,6 +304,23 @@ describe('workbench operations sections', () => {
             releasedAt: '2026-04-03T09:00:00.000Z',
           },
           {
+            id: 'edstem:lesson-slide:162340:954014',
+            kind: 'resource',
+            site: 'edstem',
+            source: { site: 'edstem', resourceId: '954014', resourceType: 'lesson_slide' },
+            courseId: 'edstem:course:11',
+            resourceKind: 'link',
+            title: 'Week 8 slide 1',
+            resourceGroup: {
+              key: 'edstem:resource-group:11:lesson:162340',
+              label: 'Week 8 review walkthrough',
+              memberCount: 3,
+            },
+            summary: 'Week 8 review walkthrough',
+            detail: 'Slide 1 · document · completed · Lesson state: scheduled',
+            url: 'https://us.edstem.org/courses/11/lessons/162340/slides/954014',
+          },
+          {
             id: 'canvas:resource:module-item:42:7001:8107',
             kind: 'resource',
             site: 'canvas',
@@ -384,12 +401,16 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Q1 1 / 1 · Correct; Q2 0 / 1 · Incorrect');
     expect(markup).toContain('Study Materials');
     expect(markup).toContain('Week 8 review sheet');
-    expect(markup).toContain('resource set');
+    expect(markup).toContain('lesson slide');
     expect(markup).toContain('Resource set: Homework · 2 items');
+    expect(markup).toContain('Resource set: Week 8 review walkthrough · 3 items');
     expect(markup).toContain('Module: Week 1 · assignment');
     expect(markup).toContain('Download file · PDF · 452 KB');
+    expect(markup).toContain('Slide 1 · document · completed · Lesson state: scheduled');
     expect(markup).toContain('Open download');
+    expect(markup).toContain('Open link');
     expect(markup).toContain('https://us.edstem.org/api/resources/1/download/week-8-review-sheet.pdf?dl=1');
+    expect(markup).toContain('https://us.edstem.org/courses/11/lessons/162340/slides/954014');
     expect(markup).toContain('Notice Signals');
     expect(markup).toContain('Spring quarter tuition is due.');
     expect(markup).toContain('Administrative lane');

@@ -890,20 +890,43 @@ describe('EdStemApiClient', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.snapshot.resources).toEqual([
-        expect.objectContaining({
-          id: 'edstem:lesson:redacted-lesson-a',
-          courseId: 'edstem:course:96846',
-          resourceKind: 'link',
-          source: expect.objectContaining({
-            resourceType: 'lesson_detail',
+      expect(result.snapshot.resources).toHaveLength(4);
+      expect(result.snapshot.resources).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'edstem:lesson:redacted-lesson-a',
+            courseId: 'edstem:course:96846',
+            resourceKind: 'link',
+            source: expect.objectContaining({
+              resourceType: 'lesson_detail',
+            }),
+            title: '[HW1 problem 7(a)] redacted lesson title',
+            summary: 'python lesson · attempted · 3 slides',
+            detail:
+              'State: scheduled · Due: 2026-04-09T16:59:00+10:00 · Locks: 2026-04-12T16:59:00+10:00 · Solutions: 2026-04-13T04:00:00+10:00 · Late submissions allowed · Slides: 1 · redacted slide title 1 · completed; 2 · redacted slide title 2 · unseen; 3 · redacted coding challenge · unseen',
           }),
-          title: '[HW1 problem 7(a)] redacted lesson title',
-          summary: 'python lesson · attempted · 3 slides',
-          detail:
-            'State: scheduled · Due: 2026-04-09T16:59:00+10:00 · Locks: 2026-04-12T16:59:00+10:00 · Solutions: 2026-04-13T04:00:00+10:00 · Late submissions allowed · Slides: 1 · redacted slide title 1 · completed; 2 · redacted slide title 2 · unseen; 3 · redacted coding challenge · unseen',
-        }),
-      ]);
+          expect.objectContaining({
+            id: 'edstem:lesson-slide:redacted-lesson-a:redacted-slide-1',
+            courseId: 'edstem:course:96846',
+            resourceKind: 'link',
+            source: expect.objectContaining({
+              resourceType: 'lesson_slide',
+            }),
+            summary: '[HW1 problem 7(a)] redacted lesson title',
+            resourceGroup: {
+              key: 'edstem:resource-group:96846:lesson:redacted-lesson-a',
+              label: '[HW1 problem 7(a)] redacted lesson title',
+              memberCount: 3,
+            },
+            detail: 'Slide 1 · document · completed · Lesson state: scheduled',
+            url: 'https://edstem.org/us/courses/96846/lessons/redacted-lesson-a/slides/redacted-slide-1',
+          }),
+          expect.objectContaining({
+            id: 'edstem:lesson-slide:redacted-lesson-a:redacted-slide-3',
+            detail: 'Slide 3 · challenge · unseen · Lesson state: scheduled',
+          }),
+        ]),
+      );
       expect(result.outcome).toBe('success');
       expect(result.health.reason).toBe('edstem_sync_success');
     }

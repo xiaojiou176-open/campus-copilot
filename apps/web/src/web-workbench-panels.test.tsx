@@ -205,6 +205,21 @@ describe('web workbench planning pulse', () => {
             detail: 'Lesson · attempted · Closed Due: Wed April 8th, 11:59pm',
           },
           {
+            id: 'edstem:lesson-slide:162340:954014',
+            site: 'edstem',
+            source: { resourceType: 'lesson_slide' },
+            title: 'redacted slide title 1',
+            resourceKind: 'link',
+            resourceGroup: {
+              key: 'edstem:resource-group:96846:lesson:redacted-lesson-a',
+              label: '[HW1 problem 7(a)] Python Tutorial & Coding Exercises',
+              memberCount: 3,
+            },
+            summary: '[HW1 problem 7(a)] Python Tutorial & Coding Exercises',
+            detail: 'Slide 1 · document · completed · Lesson state: scheduled',
+            url: 'https://edstem.org/us/courses/96846/lessons/162340/slides/954014',
+          },
+          {
             id: 'edstem:resource:dom:96846:a-using-spring-2026:starter-code:1',
             site: 'edstem',
             title: 'Starter code',
@@ -250,11 +265,15 @@ describe('web workbench planning pulse', () => {
 
     expect(html).toContain('Study Materials');
     expect(html).toContain('lesson');
-    expect(html).toContain('resource set');
+    expect(html).toContain('lesson slide');
+    expect(html).toContain('Slide 1 · document · completed · Lesson state: scheduled');
+    expect(html).toContain('Resource set: [HW1 problem 7(a)] Python Tutorial &amp; Coding Exercises · 3 items');
     expect(html).toContain('Resource set: A. Using - Spring 2026 · 2 items');
     expect(html).toContain('Module: Week 1 · assignment');
     expect(html).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
     expect(html).toContain('ZIP · A. Using - Spring 2026 · Download file');
+    expect(html).toContain('Open link');
+    expect(html).toContain('href="https://edstem.org/us/courses/96846/lessons/162340/slides/954014"');
   });
 
   it('shows Canvas semantic badges for landed module, group, and recording carriers', () => {

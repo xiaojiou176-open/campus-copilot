@@ -265,6 +265,10 @@ function getResourceActionLabel(
   }
 }
 
+function getResourceHref(resource: OperationsSectionProps['currentResources'][number]) {
+  return resource.downloadUrl ?? resource.url;
+}
+
 function getResourceSemanticLabel(resource: OperationsSectionProps['currentResources'][number]) {
   if (resource.site === 'canvas') {
     switch (resource.source.resourceType) {
@@ -291,6 +295,9 @@ function getResourceSemanticLabel(resource: OperationsSectionProps['currentResou
   if (resource.site === 'edstem') {
     if (resource.id.startsWith('edstem:lesson:')) {
       return 'lesson';
+    }
+    if (resource.source.resourceType === 'lesson_slide') {
+      return 'lesson slide';
     }
     if (resource.resourceGroup?.memberCount && resource.resourceGroup.memberCount > 1) {
       return 'resource set';
@@ -1759,11 +1766,11 @@ export function WorkbenchOperationsSections({
                   {formatResourceContextSummary(resource, uiLanguage) ? (
                     <p className="surface__meta">{formatResourceContextSummary(resource, uiLanguage)}</p>
                   ) : null}
-                  {resource.downloadUrl ? (
+                  {getResourceHref(resource) ? (
                     <p className="surface__meta">
                       <a
                         className="surface__resource-link"
-                        href={resource.downloadUrl}
+                        href={getResourceHref(resource)}
                         rel="noreferrer"
                         target="_blank"
                       >

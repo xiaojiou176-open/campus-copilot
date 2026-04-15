@@ -73,6 +73,9 @@ function getResourceSemanticLabel(resource: {
     if (resource.id.startsWith('edstem:lesson:')) {
       return 'lesson';
     }
+    if (resource.source?.resourceType === 'lesson_slide') {
+      return 'lesson slide';
+    }
     if (resource.resourceGroup?.memberCount && resource.resourceGroup.memberCount > 1) {
       return 'resource set';
     }
@@ -94,6 +97,10 @@ function getResourceContextSummary(resource: {
     parts.push(`Resource set: ${resource.resourceGroup.label}${count}`);
   }
   return parts.length > 0 ? parts.join(' · ') : undefined;
+}
+
+function getResourceHref(resource: { downloadUrl?: string; url?: string }) {
+  return resource.downloadUrl ?? resource.url;
 }
 
 function formatAuthorityType(value: string) {
@@ -298,6 +305,7 @@ export function WebWorkbenchPanels(props: {
     summary?: string;
     detail?: string;
     releasedAt?: string;
+    url?: string;
     downloadUrl?: string;
   }>;
   currentAnnouncements: Array<{
@@ -906,9 +914,9 @@ export function WebWorkbenchPanels(props: {
                   {props.siteLabels[resource.site]}
                   {resource.releasedAt ? ` · released ${formatDateTime(resource.releasedAt)}` : ''}
                 </p>
-                {resource.downloadUrl ? (
+                {getResourceHref(resource) ? (
                   <p className="meta">
-                    <a className="resource-link" href={resource.downloadUrl} rel="noreferrer" target="_blank">
+                    <a className="resource-link" href={getResourceHref(resource)} rel="noreferrer" target="_blank">
                       {getResourceActionLabel(resource.resourceKind)}
                     </a>
                   </p>

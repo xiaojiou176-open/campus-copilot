@@ -472,6 +472,18 @@ function buildEdStemLessonSummary(rawLesson: EdStemRawLesson) {
   return parts.join(' · ');
 }
 
+function buildEdStemLessonResourceGroup(rawLesson: EdStemRawLesson) {
+  const courseId = String(rawLesson.course_id);
+  const lessonId = String(rawLesson.id);
+  const label = decodeHtmlText(rawLesson.title) ?? `Lesson ${lessonId}`;
+  const memberCount = rawLesson.slide_count && rawLesson.slide_count > 0 ? rawLesson.slide_count : rawLesson.slides.length;
+  return {
+    key: `edstem:resource-group:${courseId}:lesson:${lessonId}`,
+    label,
+    memberCount: memberCount > 0 ? memberCount : undefined,
+  };
+}
+
 function buildEdStemLessonDetail(rawLesson: EdStemRawLesson) {
   const parts = [
     rawLesson.state ? `State: ${rawLesson.state}` : undefined,
@@ -490,6 +502,24 @@ function buildEdStemLessonDetail(rawLesson: EdStemRawLesson) {
           .join('; ')}${rawLesson.slides.length > 3 ? `; +${rawLesson.slides.length - 3} more` : ''}`
       : undefined,
   ].filter(Boolean);
+
+  return parts.join(' · ');
+}
+
+function buildEdStemLessonSlideDetail(
+  rawLesson: EdStemRawLesson,
+  slide: z.infer<typeof EdStemRawLessonSlideSchema>,
+) {
+  const parts = [
+    slide.index != null ? `Slide ${slide.index}` : 'Lesson slide',
+    slide.type ? decodeHtmlText(slide.type) : undefined,
+    slide.status ? decodeHtmlText(slide.status) : undefined,
+  ].filter(Boolean);
+
+  const lessonState = rawLesson.state ? `Lesson state: ${rawLesson.state}` : undefined;
+  if (lessonState) {
+    parts.push(lessonState);
+  }
 
   return parts.join(' · ');
 }
@@ -518,6 +548,40 @@ function normalizeLessonDetail(rawLesson: EdStemRawLesson, pageUrl: string): Res
     detail: buildEdStemLessonDetail(rawLesson),
     releasedAt: rawLesson.available_at ?? rawLesson.effective_available_at ?? rawLesson.created_at ?? undefined,
     updatedAt: rawLesson.updated_at ?? undefined,
+  });
+}
+
+function normalizeLessonSlideResources(rawLesson: EdStemRawLesson, pageUrl: string): Resource[] {
+  const courseId = String(rawLesson.course_id);
+  const lessonId = String(rawLesson.id);
+  const lessonUrl = toAbsoluteEdStemUrl(`/us/courses/${courseId}/lessons/${lessonId}`);
+  const resourceGroup = buildEdStemLessonResourceGroup(rawLesson);
+
+  return rawLesson.slides.map((slide) => {
+    const slideId = String(slide.id);
+    const slideUrl = toAbsoluteEdStemUrl(`/us/courses/${courseId}/lessons/${lessonId}/slides/${slideId}`) ?? lessonUrl ?? pageUrl;
+    const title = decodeHtmlText(slide.title ?? undefined) ?? `Lesson slide ${slide.index ?? slideId}`;
+
+    return ResourceSchema.parse({
+      id: `edstem:lesson-slide:${lessonId}:${slideId}`,
+      kind: 'resource',
+      site: 'edstem',
+      source: {
+        site: 'edstem',
+        resourceId: slideId,
+        resourceType: 'lesson_slide',
+        url: slideUrl,
+      },
+      url: slideUrl,
+      courseId: `edstem:course:${courseId}`,
+      resourceKind: 'link',
+      title,
+      summary: resourceGroup.label,
+      detail: buildEdStemLessonSlideDetail(rawLesson, slide),
+      resourceGroup,
+      releasedAt: rawLesson.available_at ?? rawLesson.effective_available_at ?? rawLesson.created_at ?? undefined,
+      updatedAt: rawLesson.updated_at ?? undefined,
+    });
   });
 }
 
@@ -1142,7 +1206,7 @@ class EdStemLessonDetailPrivateCollector implements ResourceCollector<Resource> 
     }
 
     const lesson = await this.client.getLessonDetail(lessonId);
-    return [normalizeLessonDetail(lesson, ctx.url)];
+    return [normalizeLessonDetail(lesson, ctx.url), ...normalizeLessonSlideResources(lesson, ctx.url)];
   }
 }
 
