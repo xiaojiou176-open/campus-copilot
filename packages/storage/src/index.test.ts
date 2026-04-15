@@ -3,6 +3,7 @@ import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Announcement, Assignment, Course, Event, Grade, Message } from '@campus-copilot/schema';
 import * as storage from './index';
+import { WorkItemClusterSchema } from './contracts';
 import {
   clearLocalEntityOverlayField,
   createCampusCopilotDb,
@@ -1192,6 +1193,163 @@ describe('storage package', () => {
     expect(focusItem?.pinned).toBe(true);
     expect(focusItem?.note).toBe('Pinned should override snooze hiding');
     expect(dueBucket?.items.some((item) => item.id === assignment.id)).toBe(true);
+  });
+
+  it('treats accepted work-item clusters as merged in queue, alerts, and weekly load', async () => {
+    const dueAt = '2026-03-25T08:30:00-07:00';
+    const canvasAssignment: Assignment = {
+      id: 'canvas:assignment:cluster-accepted',
+      kind: 'assignment',
+      site: 'canvas',
+      source,
+      title: 'Homework 5',
+      dueAt,
+      status: 'todo',
+    };
+    const courseSiteAssignment: Assignment = {
+      id: 'course-sites:assignment:cluster-accepted',
+      kind: 'assignment',
+      site: 'course-sites',
+      source: { site: 'course-sites', resourceId: 'cluster-accepted', resourceType: 'assignment_row' },
+      title: 'Homework 5',
+      dueAt,
+      status: 'unknown',
+    };
+
+    await replaceSiteSnapshot(
+      'canvas',
+      { assignments: [canvasAssignment] },
+      { status: 'success', lastSyncedAt: '2026-03-24T19:20:00-07:00' },
+      db,
+    );
+    await replaceSiteSnapshot(
+      'course-sites',
+      { assignments: [courseSiteAssignment] },
+      { status: 'success', lastSyncedAt: '2026-03-24T19:20:00-07:00' },
+      db,
+    );
+
+    await db.work_item_clusters.put(
+      WorkItemClusterSchema.parse({
+        id: 'cluster:work:accepted-homework-5',
+        workType: 'assignment',
+        title: 'Homework 5',
+        status: 'todo',
+        dueAt,
+        authoritySurface: 'course-sites',
+        authorityEntityKey: courseSiteAssignment.id,
+        authorityResourceType: 'assignment_row',
+        confidenceBand: 'medium',
+        confidenceScore: 0.7,
+        needsReview: true,
+        reviewDecision: 'accepted',
+        reviewDecidedAt: '2026-03-24T19:21:00-07:00',
+        relatedSites: ['canvas', 'course-sites'],
+        memberEntityKeys: [canvasAssignment.id, courseSiteAssignment.id],
+        members: [],
+        evidenceBundle: [],
+        summary: 'Accepted locally as the canonical assignment merge.',
+        createdAt: '2026-03-24T19:20:00-07:00',
+        updatedAt: '2026-03-24T19:21:00-07:00',
+      }),
+    );
+
+    const [queue, alerts, weeklyLoad] = await Promise.all([
+      getFocusQueue('2026-03-24T19:22:00-07:00', db),
+      getPriorityAlerts('2026-03-24T19:22:00-07:00', db),
+      getWeeklyLoad('2026-03-24T19:22:00-07:00', db),
+    ]);
+
+    const matchingQueueItems = queue.filter((item) => item.title === 'Homework 5');
+    const matchingAlerts = alerts.filter((alert) => alert.title.includes('Homework 5'));
+    const dueBucket = weeklyLoad.find((entry) => entry.dateKey === '2026-03-25');
+
+    expect(matchingQueueItems).toHaveLength(1);
+    expect(matchingQueueItems[0]?.entityId).toBe(courseSiteAssignment.id);
+    expect(matchingAlerts).toHaveLength(1);
+    expect(matchingAlerts[0]?.source.resourceType).toBe('cluster_alert');
+    expect(dueBucket?.assignmentCount).toBe(1);
+    expect(dueBucket?.items).toEqual([
+      {
+        id: courseSiteAssignment.id,
+        kind: 'assignment',
+        site: 'course-sites',
+      },
+    ]);
+  });
+
+  it('keeps dismissed work-item clusters expanded as separate member items', async () => {
+    const dueAt = '2026-03-25T08:30:00-07:00';
+    const canvasAssignment: Assignment = {
+      id: 'canvas:assignment:cluster-dismissed',
+      kind: 'assignment',
+      site: 'canvas',
+      source,
+      title: 'Homework 6',
+      dueAt,
+      status: 'todo',
+    };
+    const courseSiteAssignment: Assignment = {
+      id: 'course-sites:assignment:cluster-dismissed',
+      kind: 'assignment',
+      site: 'course-sites',
+      source: { site: 'course-sites', resourceId: 'cluster-dismissed', resourceType: 'assignment_row' },
+      title: 'Homework 6',
+      dueAt,
+      status: 'unknown',
+    };
+
+    await replaceSiteSnapshot(
+      'canvas',
+      { assignments: [canvasAssignment] },
+      { status: 'success', lastSyncedAt: '2026-03-24T19:20:00-07:00' },
+      db,
+    );
+    await replaceSiteSnapshot(
+      'course-sites',
+      { assignments: [courseSiteAssignment] },
+      { status: 'success', lastSyncedAt: '2026-03-24T19:20:00-07:00' },
+      db,
+    );
+
+    await db.work_item_clusters.put(
+      WorkItemClusterSchema.parse({
+        id: 'cluster:work:dismissed-homework-6',
+        workType: 'assignment',
+        title: 'Homework 6',
+        status: 'todo',
+        dueAt,
+        authoritySurface: 'course-sites',
+        authorityEntityKey: courseSiteAssignment.id,
+        authorityResourceType: 'assignment_row',
+        confidenceBand: 'medium',
+        confidenceScore: 0.7,
+        needsReview: true,
+        reviewDecision: 'dismissed',
+        reviewDecidedAt: '2026-03-24T19:21:00-07:00',
+        relatedSites: ['canvas', 'course-sites'],
+        memberEntityKeys: [canvasAssignment.id, courseSiteAssignment.id],
+        members: [],
+        evidenceBundle: [],
+        summary: 'Dismissed locally; keep member assignments separate.',
+        createdAt: '2026-03-24T19:20:00-07:00',
+        updatedAt: '2026-03-24T19:21:00-07:00',
+      }),
+    );
+
+    const [queue, alerts, weeklyLoad] = await Promise.all([
+      getFocusQueue('2026-03-24T19:22:00-07:00', db),
+      getPriorityAlerts('2026-03-24T19:22:00-07:00', db),
+      getWeeklyLoad('2026-03-24T19:22:00-07:00', db),
+    ]);
+
+    const matchingQueueItems = queue.filter((item) => item.title === 'Homework 6');
+    const matchingAlerts = alerts.filter((alert) => alert.title.includes('Homework 6'));
+    const dueBucket = weeklyLoad.find((entry) => entry.dateKey === '2026-03-25');
+
+    expect(matchingQueueItems).toHaveLength(2);
+    expect(matchingAlerts).toHaveLength(2);
+    expect(dueBucket?.assignmentCount).toBe(2);
   });
 
   it('deletes the overlay row when the last local-only field is cleared', async () => {

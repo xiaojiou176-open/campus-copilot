@@ -16,9 +16,11 @@ import {
   compareNewest,
   getEventActionAt,
   isAssignmentOpen,
+  isClusterReviewPending,
   isMyUWDecisionSignalAnnouncement,
   isMyUWDecisionSignalEvent,
   isPast,
+  shouldUseMergedCluster,
   isWithinHours,
   isWithinUpcomingHours,
   makePriorityReason,
@@ -60,7 +62,7 @@ export async function getPriorityAlerts(now: string, db: CampusCopilotDB = campu
 
   if (hasClusterFirstSurface) {
     for (const cluster of workItemClusters) {
-      if (cluster.needsReview) {
+      if (!shouldUseMergedCluster(cluster)) {
         continue;
       }
       const actionAt = cluster.dueAt ?? cluster.startAt ?? cluster.endAt ?? cluster.updatedAt;
@@ -81,10 +83,10 @@ export async function getPriorityAlerts(now: string, db: CampusCopilotDB = campu
             alertKind: 'overdue',
             title: `${cluster.title} 已逾期`,
             summary: cluster.summary,
-            importance: cluster.needsReview ? 'high' : 'critical',
+            importance: isClusterReviewPending(cluster) ? 'high' : 'critical',
             relatedEntities: [],
             triggeredAt: now,
-            reasons: [makePriorityReason('overdue', '统一工作项已过期', cluster.needsReview ? 'high' : 'critical')],
+            reasons: [makePriorityReason('overdue', '统一工作项已过期', isClusterReviewPending(cluster) ? 'high' : 'critical')],
           }),
         );
         continue;
@@ -104,10 +106,10 @@ export async function getPriorityAlerts(now: string, db: CampusCopilotDB = campu
             alertKind: 'due_soon',
             title: `${cluster.title} 48 小时内截止`,
             summary: cluster.summary,
-            importance: cluster.needsReview ? 'medium' : 'high',
+            importance: isClusterReviewPending(cluster) ? 'medium' : 'high',
             relatedEntities: [],
             triggeredAt: cluster.dueAt,
-            reasons: [makePriorityReason('due_soon', '统一工作项即将到期', cluster.needsReview ? 'medium' : 'high')],
+            reasons: [makePriorityReason('due_soon', '统一工作项即将到期', isClusterReviewPending(cluster) ? 'medium' : 'high')],
           }),
         );
         continue;
@@ -187,7 +189,7 @@ export async function getPriorityAlerts(now: string, db: CampusCopilotDB = campu
 
   for (const assignment of assignments) {
     const cluster = workItemClusterByEntityKey.get(assignment.id);
-    if (cluster && !cluster.needsReview && emittedClusterIds.has(cluster.id)) {
+    if (cluster && shouldUseMergedCluster(cluster) && emittedClusterIds.has(cluster.id)) {
       continue;
     }
     if (!isAssignmentOpen(assignment)) {
@@ -249,7 +251,7 @@ export async function getPriorityAlerts(now: string, db: CampusCopilotDB = campu
 
   for (const grade of grades) {
     const cluster = workItemClusterByEntityKey.get(grade.id);
-    if (cluster && !cluster.needsReview && emittedClusterIds.has(cluster.id)) {
+    if (cluster && shouldUseMergedCluster(cluster) && emittedClusterIds.has(cluster.id)) {
       continue;
     }
     const gradeTime = grade.releasedAt ?? grade.gradedAt;

@@ -145,6 +145,16 @@ function getClusterReviewStatusClass(decision: ClusterReviewDecision | undefined
   return needsReview ? 'badge badge-warning' : 'badge badge-success';
 }
 
+function isPendingClusterReview(input: {
+  needsReview: boolean;
+  reviewDecision?: ClusterReviewDecision;
+}) {
+  if (!input.needsReview) {
+    return false;
+  }
+  return input.reviewDecision !== 'accepted' && input.reviewDecision !== 'dismissed';
+}
+
 function renderClusterReviewControls(input: {
   targetKind: ClusterReviewTargetKind;
   cluster: {
@@ -768,7 +778,9 @@ export function WebWorkbenchPanels(props: {
                     <strong>{cluster.title}</strong>
                     <div className="badge-row">
                       <span className="badge">{cluster.workType}</span>
-                      <span className={cluster.needsReview ? 'badge badge-warning' : 'badge badge-success'}>{cluster.confidenceBand}</span>
+                      <span className={isPendingClusterReview(cluster) ? 'badge badge-warning' : 'badge badge-success'}>
+                        {cluster.confidenceBand}
+                      </span>
                       <span className={getClusterReviewStatusClass(cluster.reviewDecision, cluster.needsReview)}>
                         {getClusterReviewStatusText(cluster.reviewDecision, cluster.needsReview)}
                       </span>

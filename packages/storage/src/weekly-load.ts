@@ -8,6 +8,7 @@ import {
   isOverlayDismissed,
   isOverlaySnoozed,
   isPast,
+  shouldUseMergedCluster,
   isWithinUpcomingHours,
   startOfUtcDay,
   toDateKey,
@@ -66,7 +67,7 @@ export async function getWeeklyLoad(now: string, db: CampusCopilotDB = campusCop
     }
 
     const cluster = workItemClusterByEntityKey.get(assignment.id);
-    if (cluster && !cluster.needsReview) {
+    if (cluster && shouldUseMergedCluster(cluster)) {
       if (emittedClusterIds.has(cluster.id)) {
         continue;
       }
@@ -140,7 +141,7 @@ export async function getWeeklyLoad(now: string, db: CampusCopilotDB = campusCop
     }
 
     const cluster = workItemClusterByEntityKey.get(event.id);
-    if (cluster && !cluster.needsReview) {
+    if (cluster && shouldUseMergedCluster(cluster)) {
       if (emittedClusterIds.has(cluster.id)) {
         continue;
       }

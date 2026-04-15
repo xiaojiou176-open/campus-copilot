@@ -26,6 +26,7 @@ import {
   compareFocusQueueItems,
   getEventActionAt,
   isAssignmentOpen,
+  isClusterReviewPending,
   isMyUWDecisionSignalAnnouncement,
   isMyUWDecisionSignalEvent,
   isOverlayDismissed,
@@ -34,6 +35,7 @@ import {
   isWithinHours,
   isWithinUpcomingHours,
   makePriorityReason,
+  shouldUseMergedCluster,
   toEntityRef,
 } from './storage-shared.ts';
 
@@ -93,7 +95,7 @@ function buildWorkItemClusterFocusItem(
     score += 105;
   }
 
-  if (cluster.needsReview) {
+  if (isClusterReviewPending(cluster)) {
     reasons.push(
       makePriorityReason('recently_updated', '当前工作项仍是可能匹配', 'medium', undefined, '这条统一工作项仍需要人工确认。'),
     );
@@ -730,7 +732,7 @@ export async function getFocusQueue(now: string, db: CampusCopilotDB = campusCop
       continue;
     }
 
-    if (cluster.needsReview) {
+    if (isClusterReviewPending(cluster)) {
       if (cluster.authorityEntityKey !== assignment.id || emittedClusterIds.has(cluster.id)) {
         continue;
       }
@@ -748,17 +750,31 @@ export async function getFocusQueue(now: string, db: CampusCopilotDB = campusCop
       continue;
     }
 
-    if (!emittedClusterIds.has(cluster.id)) {
-      emittedClusterIds.add(cluster.id);
-      const item = buildWorkItemClusterFocusItem(
-        cluster,
-        now,
-        overlayMap.get(cluster.authorityEntityKey),
-        cluster.authoritySurface === 'myplan' ? undefined : syncStateBySite.get(cluster.authoritySurface),
-      );
-      if (item) {
-        items.push(item);
+    if (shouldUseMergedCluster(cluster)) {
+      if (!emittedClusterIds.has(cluster.id)) {
+        emittedClusterIds.add(cluster.id);
+        const item = buildWorkItemClusterFocusItem(
+          cluster,
+          now,
+          overlayMap.get(cluster.authorityEntityKey),
+          cluster.authoritySurface === 'myplan' ? undefined : syncStateBySite.get(cluster.authoritySurface),
+        );
+        if (item) {
+          items.push(item);
+        }
       }
+      continue;
+    }
+
+    const item = buildAssignmentFocusItem(
+      assignment,
+      overlayMap.get(assignment.id),
+      now,
+      recentChangeMap.get(assignment.id),
+      syncStateBySite.get(assignment.site),
+    );
+    if (item) {
+      items.push(item);
     }
   }
 
@@ -791,7 +807,7 @@ export async function getFocusQueue(now: string, db: CampusCopilotDB = campusCop
       continue;
     }
 
-    if (cluster.needsReview) {
+    if (isClusterReviewPending(cluster)) {
       if (cluster.authorityEntityKey !== grade.id || emittedClusterIds.has(cluster.id)) {
         continue;
       }
@@ -809,17 +825,31 @@ export async function getFocusQueue(now: string, db: CampusCopilotDB = campusCop
       continue;
     }
 
-    if (!emittedClusterIds.has(cluster.id)) {
-      emittedClusterIds.add(cluster.id);
-      const item = buildWorkItemClusterFocusItem(
-        cluster,
-        now,
-        overlayMap.get(cluster.authorityEntityKey),
-        cluster.authoritySurface === 'myplan' ? undefined : syncStateBySite.get(cluster.authoritySurface),
-      );
-      if (item) {
-        items.push(item);
+    if (shouldUseMergedCluster(cluster)) {
+      if (!emittedClusterIds.has(cluster.id)) {
+        emittedClusterIds.add(cluster.id);
+        const item = buildWorkItemClusterFocusItem(
+          cluster,
+          now,
+          overlayMap.get(cluster.authorityEntityKey),
+          cluster.authoritySurface === 'myplan' ? undefined : syncStateBySite.get(cluster.authoritySurface),
+        );
+        if (item) {
+          items.push(item);
+        }
       }
+      continue;
+    }
+
+    const item = buildGradeFocusItem(
+      grade,
+      overlayMap.get(grade.id),
+      now,
+      recentChangeMap.get(grade.id),
+      syncStateBySite.get(grade.site),
+    );
+    if (item) {
+      items.push(item);
     }
   }
 
@@ -839,7 +869,7 @@ export async function getFocusQueue(now: string, db: CampusCopilotDB = campusCop
       continue;
     }
 
-    if (cluster.needsReview) {
+    if (isClusterReviewPending(cluster)) {
       if (cluster.authorityEntityKey !== event.id || emittedClusterIds.has(cluster.id)) {
         continue;
       }
@@ -857,17 +887,31 @@ export async function getFocusQueue(now: string, db: CampusCopilotDB = campusCop
       continue;
     }
 
-    if (!emittedClusterIds.has(cluster.id)) {
-      emittedClusterIds.add(cluster.id);
-      const item = buildWorkItemClusterFocusItem(
-        cluster,
-        now,
-        overlayMap.get(cluster.authorityEntityKey),
-        cluster.authoritySurface === 'myplan' ? undefined : syncStateBySite.get(cluster.authoritySurface),
-      );
-      if (item) {
-        items.push(item);
+    if (shouldUseMergedCluster(cluster)) {
+      if (!emittedClusterIds.has(cluster.id)) {
+        emittedClusterIds.add(cluster.id);
+        const item = buildWorkItemClusterFocusItem(
+          cluster,
+          now,
+          overlayMap.get(cluster.authorityEntityKey),
+          cluster.authoritySurface === 'myplan' ? undefined : syncStateBySite.get(cluster.authoritySurface),
+        );
+        if (item) {
+          items.push(item);
+        }
       }
+      continue;
+    }
+
+    const item = buildEventFocusItem(
+      event,
+      overlayMap.get(event.id),
+      now,
+      recentChangeMap.get(event.id),
+      syncStateBySite.get(event.site),
+    );
+    if (item) {
+      items.push(item);
     }
   }
 

@@ -180,6 +180,28 @@ export function buildRecentChangeMap(changeEvents: ChangeEvent[]) {
   return map;
 }
 
+export function isClusterReviewPending(input: {
+  needsReview?: boolean;
+  reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
+}) {
+  if (!input.needsReview) {
+    return false;
+  }
+
+  return input.reviewDecision !== 'accepted' && input.reviewDecision !== 'dismissed';
+}
+
+export function shouldUseMergedCluster(input: {
+  needsReview?: boolean;
+  reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
+}) {
+  if (!input.needsReview) {
+    return true;
+  }
+
+  return input.reviewDecision === 'accepted';
+}
+
 export function compareFocusQueueItems(left: FocusQueueItem, right: FocusQueueItem) {
   if (right.score !== left.score) {
     return right.score - left.score;
