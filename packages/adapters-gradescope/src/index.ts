@@ -951,6 +951,14 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
               .filter((content): content is string => Boolean(content)),
           ),
         );
+        const annotationRubricLabels = Array.from(
+          new Set(
+            (questionSubmission?.annotations ?? [])
+              .flatMap((annotation) => annotation.links ?? [])
+              .map((link) => decodeHtmlText(link.rubric_item?.description ?? undefined))
+              .filter((label): label is string => Boolean(label)),
+          ),
+        );
         const annotationPageNumbers = Array.from(
           new Set(
             (questionSubmission?.annotations ?? [])
@@ -966,7 +974,9 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
             modality: isAutograderQuestion({ label, title: questionTitle }) ? 'autograder' : 'manual',
             score: toOptionalNumber(questionSubmission?.score),
             maxScore: toOptionalNumber(question.weight),
-            rubricLabels: rubricLabelsByQuestionId.get(String(question.id)),
+            rubricLabels: Array.from(
+              new Set([...(rubricLabelsByQuestionId.get(String(question.id)) ?? []), ...annotationRubricLabels]),
+            ),
             evaluationComments: (questionSubmission?.evaluations ?? [])
               .map((evaluation) => decodeHtmlText(evaluation.comments ?? undefined))
               .filter((comment): comment is string => Boolean(comment)),

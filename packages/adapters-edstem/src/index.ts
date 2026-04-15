@@ -464,36 +464,52 @@ function parseEdStemLessonsFromDom(pageHtml: string, pageUrl: string) {
 
 function buildEdStemLessonSummary(rawLesson: EdStemRawLesson) {
   const slideTypeBreakdown = buildEdStemLessonSlideTypeBreakdown(rawLesson);
+  const slideStatusBreakdown = buildEdStemLessonSlideStatusBreakdown(rawLesson);
   const parts = [
     rawLesson.type ? `${rawLesson.type} lesson` : 'Lesson detail',
     rawLesson.status ?? undefined,
     rawLesson.slide_count ? `${rawLesson.slide_count} slide${rawLesson.slide_count === 1 ? '' : 's'}` : undefined,
     slideTypeBreakdown,
+    slideStatusBreakdown,
   ].filter(Boolean);
 
   return parts.join(' · ');
 }
 
-function buildEdStemLessonSlideTypeBreakdown(rawLesson: EdStemRawLesson) {
-  const typeCounts = new Map<string, number>();
+function buildEdStemLessonCountBreakdown(
+  values: Array<string | undefined>,
+  formatLabel: (label: string, count: number) => string,
+) {
+  const counts = new Map<string, number>();
 
-  for (const slide of rawLesson.slides) {
-    const normalizedType = decodeHtmlText(slide.type ?? undefined)?.trim().toLowerCase();
-    if (!normalizedType) {
+  for (const value of values) {
+    const normalized = decodeHtmlText(value)?.trim().toLowerCase().replace(/[_-]+/g, ' ');
+    if (!normalized) {
       continue;
     }
 
-    typeCounts.set(normalizedType, (typeCounts.get(normalizedType) ?? 0) + 1);
+    counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
   }
 
-  if (typeCounts.size === 0) {
+  if (counts.size === 0) {
     return undefined;
   }
 
-  return Array.from(typeCounts.entries())
+  return Array.from(counts.entries())
     .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
-    .map(([typeLabel, count]) => `${count} ${count === 1 ? typeLabel : `${typeLabel}s`}`)
+    .map(([label, count]) => `${count} ${formatLabel(label, count)}`)
     .join(', ');
+}
+
+function buildEdStemLessonSlideTypeBreakdown(rawLesson: EdStemRawLesson) {
+  return buildEdStemLessonCountBreakdown(
+    rawLesson.slides.map((slide) => slide.type ?? undefined),
+    (label, count) => (count === 1 ? label : `${label}s`),
+  );
+}
+
+function buildEdStemLessonSlideStatusBreakdown(rawLesson: EdStemRawLesson) {
+  return buildEdStemLessonCountBreakdown(rawLesson.slides.map((slide) => slide.status ?? undefined), (label) => label);
 }
 
 function buildEdStemLessonResourceGroup(rawLesson: EdStemRawLesson) {
@@ -509,6 +525,7 @@ function buildEdStemLessonResourceGroup(rawLesson: EdStemRawLesson) {
 }
 
 function buildEdStemLessonDetail(rawLesson: EdStemRawLesson) {
+  const slideStatusBreakdown = buildEdStemLessonSlideStatusBreakdown(rawLesson);
   const parts = [
     rawLesson.state ? `State: ${rawLesson.state}` : undefined,
     rawLesson.due_at ?? rawLesson.effective_due_at ? `Due: ${rawLesson.due_at ?? rawLesson.effective_due_at}` : undefined,
@@ -519,6 +536,7 @@ function buildEdStemLessonDetail(rawLesson: EdStemRawLesson) {
     rawLesson.attempt_id != null ? `Attempt: ${rawLesson.attempt_id}` : undefined,
     rawLesson.attempts_remaining != null ? `Attempts remaining: ${rawLesson.attempts_remaining}` : undefined,
     rawLesson.late_submissions ? 'Late submissions allowed' : undefined,
+    slideStatusBreakdown ? `Progress: ${slideStatusBreakdown}` : undefined,
     rawLesson.slides.length > 0
       ? `Slides: ${rawLesson.slides
           .slice(0, 3)

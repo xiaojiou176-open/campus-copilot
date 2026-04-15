@@ -1359,8 +1359,10 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
 
   for (const cluster of dataset.courseClusters) {
     const disposition = getClusterDisposition(cluster);
+    const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
     const detailParts = [
       `Authority: ${cluster.authoritySource}`,
+      boundaryMap ? `Boundary map: ${boundaryMap}` : '',
       cluster.authorityNarrative ? `Narrative: ${cluster.authorityNarrative}` : '',
       ...formatAuthorityBreakdownLines(cluster.authorityBreakdown),
     ].filter(Boolean);
@@ -1393,8 +1395,10 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
 
   for (const cluster of dataset.workItemClusters) {
     const disposition = getClusterDisposition(cluster);
+    const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
     const detailParts = [
       `Authority: ${cluster.authoritySource}`,
+      boundaryMap ? `Boundary map: ${boundaryMap}` : '',
       cluster.authorityNarrative ? `Narrative: ${cluster.authorityNarrative}` : '',
       ...formatAuthorityBreakdownLines(cluster.authorityBreakdown),
     ].filter(Boolean);
@@ -1580,6 +1584,44 @@ function formatAuthoritySource(value: string) {
 
 function formatAuthorityRole(value: string) {
   return value.replace(/_/g, ' ');
+}
+
+function formatAuthorityBoundaryKey(value: string) {
+  switch (value) {
+    case 'course_identity':
+      return 'identity';
+    case 'course_delivery':
+      return 'delivery';
+    case 'discussion_runtime':
+      return 'discussion';
+    case 'assessment_runtime':
+      return 'assessment';
+    case 'assignment_spec':
+      return 'spec';
+    case 'schedule_signal':
+      return 'schedule';
+    case 'submission_state':
+      return 'submission';
+    case 'feedback_detail':
+      return 'feedback';
+    default:
+      return formatAuthorityRole(value);
+  }
+}
+
+function formatAuthorityBoundaryMap(
+  breakdown:
+    | Array<{
+        role: string;
+        surface: string;
+      }>
+    | undefined,
+) {
+  if (!breakdown || breakdown.length === 0) {
+    return undefined;
+  }
+
+  return breakdown.map((facet) => `${formatAuthorityBoundaryKey(facet.role)}=${facet.surface}`).join(' · ');
 }
 
 function formatAuthorityBreakdownLines(
@@ -1785,10 +1827,12 @@ function renderMarkdown(dataset: ExportDataset) {
       dataset.courseClusters.map((cluster) => {
         const flag = formatClusterDisposition(cluster);
         const narrative = cluster.authorityNarrative ? ` - authority narrative ${cluster.authorityNarrative}` : '';
+        const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
         const breakdown = formatAuthorityBreakdownLines(cluster.authorityBreakdown)
           .map((line) => `\n  - ${line}`)
           .join('');
-        return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}${narrative}${breakdown}`;
+        const boundary = boundaryMap ? ` - boundary map ${boundaryMap}` : '';
+        return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}${boundary}${narrative}${breakdown}`;
       }),
     ),
   );
@@ -1800,10 +1844,12 @@ function renderMarkdown(dataset: ExportDataset) {
         const due = cluster.dueAt ? ` - due ${cluster.dueAt}` : '';
         const flag = formatClusterDisposition(cluster);
         const narrative = cluster.authorityNarrative ? ` - authority narrative ${cluster.authorityNarrative}` : '';
+        const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
         const breakdown = formatAuthorityBreakdownLines(cluster.authorityBreakdown)
           .map((line) => `\n  - ${line}`)
           .join('');
-        return `- ${cluster.title} (${cluster.workType}; ${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)})${due} - ${cluster.summary}${narrative}${breakdown}`;
+        const boundary = boundaryMap ? ` - boundary map ${boundaryMap}` : '';
+        return `- ${cluster.title} (${cluster.workType}; ${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)})${due} - ${cluster.summary}${boundary}${narrative}${breakdown}`;
       }),
     ),
   );
