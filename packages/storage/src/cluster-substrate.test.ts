@@ -261,6 +261,12 @@ describe('cluster substrate', () => {
     expect(view.workItemClusters.some((cluster) => cluster.title === 'Homework 5')).toBe(true);
     expect(view.workItemClusters.find((cluster) => cluster.title === 'Homework 5')?.authoritySurface).toBe('course-sites');
     expect(view.administrativeSummaries.some((summary) => summary.family === 'dars')).toBe(true);
+    expect(view.administrativeSummaries.find((summary) => summary.family === 'dars')?.detailRuntimeStatus).toBe(
+      'review_ready',
+    );
+    expect(view.administrativeSummaries.find((summary) => summary.family === 'dars')?.laneStatus).toBe(
+      'standalone_detail_runtime_lane',
+    );
     expect(view.administrativeSummaries.some((summary) => summary.family === 'tuition')).toBe(true);
     expect(view.administrativeSummaries.find((summary) => summary.family === 'transcript')?.summary).toContain('carrier landed');
     expect(view.administrativeSummaries.find((summary) => summary.family === 'finaid')?.summary).toContain('carrier landed');

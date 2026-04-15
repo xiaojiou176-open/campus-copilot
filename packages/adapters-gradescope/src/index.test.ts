@@ -474,6 +474,45 @@ describe('GradescopeApiClient', () => {
     }
   });
 
+  it('prefers numeric submission detail over a composer link for the same course-page assignment', async () => {
+    const annotationFixtureHtml = buildSubmissionViewerFixtureHtml('submission-question-detail-annotations.json');
+    const client = new GradescopeApiClient(
+      okExecutor({
+        '/internal/assignments': undefined,
+        '/internal/grades': undefined,
+        '/courses/1144890/assignments/7244652/submissions/375869113': annotationFixtureHtml,
+      } as unknown as Record<string, unknown>),
+      paths,
+    );
+
+    const adapter = createGradescopeAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://www.gradescope.com/courses/1144890',
+      site: 'gradescope',
+      now: '2026-04-05T17:24:00-07:00',
+      pageHtml: `
+        <table>
+          <tr>
+            <td>
+              <a href="/courses/1144890/assignments/7244652/submissions/new">redacted-text composer</a>
+              <a href="/courses/1144890/assignments/7244652/submissions/375869113">redacted-text graded submission</a>
+            </td>
+            <td class="submissionStatus">7.5 / 15</td>
+          </tr>
+        </table>
+      `,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('[3 annotations on page 3]');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain(
+        'Annotations: redacted-annotation-1 | redacted-annotation-2 | +1 more (page 3)',
+      );
+      expect(result.snapshot.assignments?.[0]?.detail).toContain('Annotations: redacted-annotation-link (page 5)');
+    }
+  });
+
   it('promotes /submissions/new composer pages into assignment detail instead of treating them as link-only rows', async () => {
     const client = new GradescopeApiClient(
       okExecutor({

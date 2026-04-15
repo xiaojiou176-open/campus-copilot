@@ -460,6 +460,19 @@ function buildTimeSchedulePlanningSubstrate(input: {
 }) {
   const quarterLabel = inferTimeScheduleQuarterLabel(input.snapshot);
   const termCode = slugifyTimeScheduleQuarter(quarterLabel) || 'current-quarter';
+  const capturedFromDetailPage = isTimeScheduleSectionDetailUrl(input.sourceUrl);
+  const exactBlockers = TIME_SCHEDULE_EXACT_BLOCKERS.filter((blocker) =>
+    capturedFromDetailPage ? blocker.id !== 'dom_sln_detail_fallback' : true,
+  ).map((blocker) => ({ ...blocker }));
+  const runtimePosture = capturedFromDetailPage
+    ? 'public_course_offerings_planning_lane_with_sln_detail'
+    : TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture;
+  const currentTruth = capturedFromDetailPage
+    ? 'Time Schedule still stays read-only and public-offerings-first, but the current planning lane now also has an authenticated SLN detail corroboration for richer section context.'
+    : TIME_SCHEDULE_STAGE_UNDERSTANDING.currentTruth;
+  const termSummary = capturedFromDetailPage
+    ? `Public course offerings plus authenticated SLN detail were captured from ${input.sourceUrl}.`
+    : `Public course offerings captured from ${input.sourceUrl}.`;
 
   return {
     id: `time-schedule:planning-substrate:${termCode}`,
@@ -476,9 +489,9 @@ function buildTimeSchedulePlanningSubstrate(input: {
     requirementGroupCount: 0,
     programExplorationCount: 0,
     currentStage: TIME_SCHEDULE_STAGE_UNDERSTANDING.currentStage,
-    runtimePosture: TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture,
-    currentTruth: TIME_SCHEDULE_STAGE_UNDERSTANDING.currentTruth,
-    exactBlockers: TIME_SCHEDULE_EXACT_BLOCKERS.map((blocker) => ({ ...blocker })),
+    runtimePosture,
+    currentTruth,
+    exactBlockers,
     hardDeferredMoves: ['registration helper', 'watcher automation', 'enrollment-state truth'],
     terms: [
       {
@@ -487,7 +500,7 @@ function buildTimeSchedulePlanningSubstrate(input: {
         plannedCourseCount: input.snapshot.courses?.length ?? 0,
         backupCourseCount: 0,
         scheduleOptionCount: input.snapshot.events?.length ?? 0,
-        summary: `Public course offerings captured from ${input.sourceUrl}.`,
+        summary: termSummary,
       },
     ],
   };

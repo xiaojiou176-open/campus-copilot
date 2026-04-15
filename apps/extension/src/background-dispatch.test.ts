@@ -218,6 +218,15 @@ describe('background site dispatch', () => {
       expect(result.snapshot.events?.[0]?.detail).toContain('Wang,Matt');
       expect(result.snapshot.events?.[0]?.detail).toContain('161/250 enrolled');
     }
+
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    expect(storedPlanning[0]).toEqual(
+      expect.objectContaining({
+        source: 'time-schedule',
+        runtimePosture: 'public_course_offerings_planning_lane_with_sln_detail',
+      }),
+    );
+    expect(storedPlanning[0]?.exactBlockers.map((blocker) => blocker.id)).not.toContain('dom_sln_detail_fallback');
   });
 
   it('falls back to EdStem dashboard DOM when path config is missing but the active tab still exposes course cards', async () => {

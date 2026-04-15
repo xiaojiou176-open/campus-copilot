@@ -991,13 +991,18 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     <p>{modeCopy.authorization.description}</p>
                     <div className="surface__stack">
                       <p className="surface__meta-label">{modeCopy.authorization.currentReads}</p>
-                      <p className="surface__meta">Canvas assignments, announcements, inbox, deadlines, plus the current four-site read-only workspace.</p>
+                      <p className="surface__meta">
+                        Canvas, Gradescope, EdStem, and MyUW structured workspace facts, plus the current read-only
+                        planning/admin lanes such as MyPlan Planning Pulse, Time Schedule planning context, and
+                        review-first MyUW detail summaries.
+                      </p>
                       <p className="surface__meta-label">{modeCopy.authorization.plannedReads}</p>
                       <div className="surface__pill-row">
-                        <span className="surface__badge surface__badge--success">Canvas inbox</span>
-                        <span className="surface__badge surface__badge--warning">Canvas grades</span>
-                        <span className="surface__badge surface__badge--danger">Canvas syllabus</span>
-                        <span className="surface__badge surface__badge--danger">Canvas recordings</span>
+                        <span className="surface__badge surface__badge--success">MyPlan / DARS Planning Pulse</span>
+                        <span className="surface__badge surface__badge--success">MyUW review-first summaries</span>
+                        <span className="surface__badge surface__badge--warning">Canvas deeper runtime detail</span>
+                        <span className="surface__badge surface__badge--warning">Gradescope / EdStem deepwater tails</span>
+                        <span className="surface__badge surface__badge--danger">Register.UW / Notify.UW red zone</span>
                       </div>
                     </div>
                   </article>

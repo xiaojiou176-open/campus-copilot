@@ -157,6 +157,20 @@ function evidence(code: string, label: string, detail?: string): CrossSiteEviden
   return { code, label, detail };
 }
 
+function toAdministrativeBlockers(
+  blockers: Array<{
+    id: string;
+    summary: string;
+    whyItStopsPromotion: string;
+  }> = [],
+) {
+  return blockers.map((blocker) => ({
+    id: blocker.id,
+    summary: blocker.summary,
+    whyItStopsPromotion: blocker.whyItStopsPromotion,
+  }));
+}
+
 function authorityFacet(input: {
   role: ClusterAuthorityFacet['role'];
   surface: ClusterSurface;
@@ -869,21 +883,26 @@ function buildAdministrativeSummaries(
 
   if (latestMyPlan && (latestMyPlan.degreeProgressSummary || latestMyPlan.requirementGroupCount > 0)) {
     landedFamilies.add('dars');
+    const darsReviewReady = (latestMyPlan.exactBlockers?.length ?? 0) === 0;
     summaries.push(
       AdministrativeSummarySchema.parse({
         id: `admin-summary:dars:${latestMyPlan.id}`,
         family: 'dars',
-        laneStatus: 'landed_summary_lane',
-        detailRuntimeStatus: 'pending',
+        laneStatus: darsReviewReady ? 'standalone_detail_runtime_lane' : 'landed_summary_lane',
+        detailRuntimeStatus: darsReviewReady ? 'review_ready' : 'pending',
         title: `${latestMyPlan.planLabel} · Degree requirements`,
         summary:
           latestMyPlan.degreeProgressSummary ??
           `${latestMyPlan.requirementGroupCount} requirement group(s) are currently tracked in the planning substrate.`,
+        detailRuntimeNote: darsReviewReady
+          ? 'DARS now rides a review-first shared planning lane because both MyPlan plan context and audit-summary context are present in the current planning substrate.'
+          : 'DARS still stays summary-first until the shared planning substrate captures both the MyPlan plan half and the audit-summary half.',
         importance: latestMyPlan.requirementGroupCount > 0 ? 'high' : 'medium',
         aiDefault: 'blocked',
         authoritySource: 'myplan planning substrate (DARS summary lane)',
         sourceSurface: 'myplan',
         nextAction: 'Review or export the DARS-aligned summary before any AI analysis.',
+        exactBlockers: toAdministrativeBlockers(latestMyPlan.exactBlockers),
         updatedAt: latestMyPlan.capturedAt,
       }),
     );
