@@ -412,6 +412,28 @@ test('classifyPage recognizes review-first planning/admin detail pages as authen
   );
 });
 
+test('looksLikeMyPlanLoadingShell recognizes the generic MyPlan loading shell and ignores real planning views', async () => {
+  const { looksLikeMyPlanLoadingShell } = await import('./live-probe-shared.mjs');
+
+  assert.equal(
+    looksLikeMyPlanLoadingShell(
+      'https://myplan.uw.edu/plan/#/sp26',
+      'MyPlan',
+      'Navigate to MyPlan Loading Navigation Loading... MyPlan HelpContactTermsPrivacy',
+    ),
+    true,
+  );
+
+  assert.equal(
+    looksLikeMyPlanLoadingShell(
+      'https://myplan.uw.edu/plan/#/sp26',
+      'Spring 2026 - MyPlan',
+      'Navigate to Spring 2026 - MyPlan Manage My Spring 2026 Schedule Builder',
+    ),
+    false,
+  );
+});
+
 test('summarizeLiveProbe reports evidence coverage when probe output includes browser evidence', () => {
   const summary = summarizeLiveProbe({
     attachModeResolved: 'page_requested_profile',

@@ -577,6 +577,100 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('https://www.gradescope.com/courses/1211108/regrade_requests');
   });
 
+  it('shows administrative summary source, authority, blockers, and next action in the workbench', () => {
+    const markup = renderToStaticMarkup(
+      <WorkbenchOperationsSections
+        text={getUiText('en')}
+        uiLanguage="en"
+        surface="sidepanel"
+        planningSubstrates={[]}
+        administrativeSummaries={[
+          {
+            id: 'admin:transcript:1',
+            family: 'transcript',
+            laneStatus: 'standalone_detail_runtime_lane',
+            detailRuntimeStatus: 'review_ready',
+            detailRuntimeNote: 'Review-ready summary stays export-first until a stronger transcript detail lane is promoted.',
+            title: 'Transcript summary',
+            summary: 'Latest transcript lane currently appears as a review-first summary and stays export-first.',
+            importance: 'high',
+            aiDefault: 'blocked',
+            authoritySource: 'myuw summary lane',
+            sourceSurface: 'myuw',
+            nextAction: 'Export before sharing with AI.',
+            exactBlockers: [
+              {
+                id: 'transcript_ai_blocked',
+                summary: 'Transcript AI remains blocked.',
+                whyItStopsPromotion: 'Keep transcript review/export-first until a lawful summary workflow is explicitly promoted.',
+              },
+            ],
+            updatedAt: '2026-04-01T03:00:00.000Z',
+          },
+        ]}
+        currentResources={[]}
+        currentAssignments={[]}
+        currentAnnouncements={[]}
+        currentMessages={[]}
+        currentEvents={[]}
+        orderedSiteStatus={[]}
+        syncFeedback={{}}
+        onSyncSite={async () => {}}
+        onExport={async () => {}}
+        latestSyncRun={undefined}
+        recentChangeEvents={[]}
+      />,
+    );
+
+    expect(markup).toContain('Transcript summary');
+    expect(markup).toContain('detail-runtime lane');
+    expect(markup).toContain('detail runtime review-ready');
+    expect(markup).toContain('Review-ready summary stays export-first until a stronger transcript detail lane is promoted.');
+    expect(markup).toContain('Exact blockers: transcript_ai_blocked');
+    expect(markup).toContain('MyUW · myuw summary lane · Export before sharing with AI.');
+    expect(markup).toContain('myuw summary lane · Export before sharing with AI.');
+  });
+
+  it('shows course-sites spec witness strings on current task cards', () => {
+    const markup = renderToStaticMarkup(
+      <WorkbenchOperationsSections
+        text={getUiText('en')}
+        uiLanguage="en"
+        surface="sidepanel"
+        planningSubstrates={[]}
+        currentResources={[]}
+        currentAssignments={[
+          {
+            id: 'course-sites:assignment:cse312-pset1',
+            kind: 'assignment',
+            site: 'course-sites',
+            source: { site: 'course-sites', resourceId: 'cse312:pset1', resourceType: 'assignment_row' },
+            courseId: 'course-sites:course:cse312:26sp',
+            title: 'Pset 1',
+            status: 'unknown',
+            summary: 'Spec witness: PDF spec · HTML spec · LaTeX template. Released April 1.',
+            detail: 'Spec columns: Pset (pdf) · Pset (html) · Latex template.',
+            actionHints: ['Open PDF spec', 'Open HTML spec', 'Open LaTeX template'],
+            dueAt: '2026-04-08T23:59:00-07:00',
+          },
+        ]}
+        currentAnnouncements={[]}
+        currentMessages={[]}
+        currentEvents={[]}
+        orderedSiteStatus={[]}
+        syncFeedback={{}}
+        onSyncSite={async () => {}}
+        onExport={async () => {}}
+        latestSyncRun={undefined}
+        recentChangeEvents={[]}
+      />,
+    );
+
+    expect(markup).toContain('Spec witness: PDF spec · HTML spec · LaTeX template. Released April 1.');
+    expect(markup).toContain('Spec columns: Pset (pdf) · Pset (html) · Latex template.');
+    expect(markup).toContain('Available actions: Open PDF spec · Open HTML spec · Open LaTeX template');
+  });
+
   it('marks Canvas module, group, and recording carriers with semantic badges', () => {
     const markup = renderToStaticMarkup(
       <WorkbenchOperationsSections

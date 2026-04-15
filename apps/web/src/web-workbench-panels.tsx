@@ -961,7 +961,7 @@ export function WebWorkbenchPanels(props: {
                   </p>
                 ) : null}
                 <p className="meta">
-                  {summary.authoritySource}
+                  {props.siteLabels[summary.sourceSurface as Site] ?? summary.sourceSurface} · {summary.authoritySource}
                   {summary.nextAction ? ` · ${summary.nextAction}` : ''}
                 </p>
               </article>

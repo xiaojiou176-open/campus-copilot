@@ -1014,6 +1014,23 @@ function formatOptionalString(value: string | undefined) {
   return value ?? '';
 }
 
+function getExportResourceSemanticLabel(resource: ExportDataset['resources'][number]) {
+  if (resource.site === 'gradescope' && resource.source.resourceType === 'regrade_requests') {
+    return 'regrade hub';
+  }
+
+  if (resource.site === 'edstem') {
+    if (resource.source.resourceType === 'lesson_slide') {
+      return 'lesson slide';
+    }
+    if (resource.source.resourceType === 'lesson' || resource.source.resourceType === 'lesson_detail') {
+      return 'lesson';
+    }
+  }
+
+  return resource.resourceKind;
+}
+
 function buildCsvRows(dataset: ExportDataset): CsvRow[] {
   const rows: CsvRow[] = [];
   const sharedFields = {
@@ -1029,6 +1046,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
   };
 
   for (const resource of dataset.resources) {
+    const resourceSemanticLabel = getExportResourceSemanticLabel(resource);
     rows.push({
       ...sharedFields,
       kind: resource.kind,
@@ -1036,7 +1054,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       title: resource.title,
       courseId: formatOptionalString(resource.courseId),
       assignmentId: '',
-      status: resource.resourceKind,
+      status: resourceSemanticLabel,
       occurredAt: formatOptionalString(resource.releasedAt ?? resource.updatedAt ?? resource.createdAt),
       dueAt: '',
       startAt: '',
@@ -1831,7 +1849,7 @@ function renderMarkdown(dataset: ExportDataset) {
         const releasedAt = resource.releasedAt ? ` - released ${resource.releasedAt}` : '';
         const summary = resource.summary ? ` - ${resource.summary}` : '';
         const detail = resource.detail ? ` - detail ${resource.detail}` : '';
-        const kind = ` - kind ${resource.resourceKind}`;
+        const kind = ` - kind ${getExportResourceSemanticLabel(resource)}`;
         const group =
           resource.resourceGroup != null
             ? ` - resource set ${resource.resourceGroup.label}${

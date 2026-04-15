@@ -34,6 +34,7 @@ import {
   readDevToolsActivePortHint,
   reconcileObservedClassification,
   resolveChromeSessionConfig,
+  looksLikeMyPlanLoadingShell,
   shouldUseCdpTargetResults,
   shouldSkipBrowserCdpAttach,
   withTimeout,
@@ -486,23 +487,7 @@ async function probeSitesWithContext(context, attachModeResolved, allowExistingP
   }
 
   async function readPageSnapshot(page) {
-    try {
-      const title = await page.title();
-      const finalUrl = page.url();
-      const bodyText = await page.locator('body').innerText().catch(() => '');
-      return {
-        title,
-        finalUrl,
-        bodyPreview: bodyText.replace(/\s+/g, ' ').slice(0, 260),
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (!message.includes('Execution context was destroyed')) {
-        throw error;
-      }
-
-      await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
-      await page.waitForTimeout(750);
+    async function captureSnapshot() {
       const title = await page.title().catch(() => '');
       const finalUrl = page.url();
       const bodyText = await page.locator('body').innerText().catch(() => '');
@@ -511,6 +496,32 @@ async function probeSitesWithContext(context, attachModeResolved, allowExistingP
         finalUrl,
         bodyPreview: bodyText.replace(/\s+/g, ' ').slice(0, 260),
       };
+    }
+
+    try {
+      const initialSnapshot = await captureSnapshot();
+      if (looksLikeMyPlanLoadingShell(initialSnapshot.finalUrl, initialSnapshot.title, initialSnapshot.bodyPreview)) {
+        await page
+          .waitForFunction(() => {
+            const title = document.title ?? '';
+            const bodyText = document.body?.innerText ?? '';
+            const lowered = `${title} ${bodyText}`.toLowerCase();
+            return !(title.trim() === 'MyPlan' && (lowered.includes('loading navigation') || lowered.includes('loading...') || lowered.includes('loading myplan')));
+          }, { timeout: 4000 })
+          .catch(() => {});
+        await page.waitForTimeout(500);
+        return captureSnapshot();
+      }
+      return initialSnapshot;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (!message.includes('Execution context was destroyed')) {
+        throw error;
+      }
+
+      await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(750);
+      return captureSnapshot();
     }
   }
 

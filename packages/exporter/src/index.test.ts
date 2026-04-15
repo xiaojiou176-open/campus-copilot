@@ -440,6 +440,70 @@ describe('exporter package', () => {
     expect(artifact.content).toContain('"weeklyLoad": 1');
   });
 
+  it('labels regrade hubs and lesson resources with semantic labels in csv', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'csv',
+      input: {
+        ...baseInput,
+        resources: [
+          {
+            id: 'gradescope:resource:1211108:regrade_requests',
+            kind: 'resource' as const,
+            site: 'gradescope' as const,
+            source: {
+              site: 'gradescope' as const,
+              resourceId: '1211108:regrade_requests',
+              resourceType: 'regrade_requests',
+            },
+            courseId: 'gradescope:course:1211108',
+            resourceKind: 'other' as const,
+            title: 'Regrade requests',
+            summary: 'No submitted regrade requests yet.',
+            detail: 'Course-level regrade hub is currently empty.',
+            url: 'https://www.gradescope.com/courses/1211108/regrade_requests',
+          },
+          {
+            id: 'edstem:lesson:162340',
+            kind: 'resource' as const,
+            site: 'edstem' as const,
+            source: {
+              site: 'edstem' as const,
+              resourceId: '162340',
+              resourceType: 'lesson',
+            },
+            courseId: 'edstem:course:1',
+            resourceKind: 'link' as const,
+            title: 'Week 8 review walkthrough',
+            summary: 'Lesson summary',
+            detail: 'Lesson · attempted',
+            url: 'https://edstem.org/us/courses/1/lessons/162340',
+          },
+          {
+            id: 'edstem:lesson-slide:162340:954014',
+            kind: 'resource' as const,
+            site: 'edstem' as const,
+            source: {
+              site: 'edstem' as const,
+              resourceId: '954014',
+              resourceType: 'lesson_slide',
+            },
+            courseId: 'edstem:course:1',
+            resourceKind: 'link' as const,
+            title: 'Week 8 slide 1',
+            summary: 'Lesson slide summary',
+            detail: 'Slide 1',
+            url: 'https://edstem.org/us/courses/1/lessons/162340/slides/954014',
+          },
+        ],
+      },
+    });
+
+    expect(artifact.content).toContain('Regrade requests,gradescope:course:1211108,,regrade hub');
+    expect(artifact.content).toContain('Week 8 review walkthrough,edstem:course:1,,lesson');
+    expect(artifact.content).toContain('Week 8 slide 1,edstem:course:1,,lesson slide');
+  });
+
   it('builds current view as csv with assignment detail in the dedicated detail column', () => {
     const artifact = createExportArtifact({
       preset: 'current_view',
@@ -454,6 +518,123 @@ describe('exporter package', () => {
     expect(artifact.content).toContain('Q1 1 / 1 · Correct; Q2 0 / 1 · Incorrect');
     expect(artifact.content).toContain('Homework');
     expect(artifact.content).toContain('Week 1');
+  });
+
+  it('labels regrade hubs and lesson resources with semantic labels in markdown', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'markdown',
+      input: {
+        ...baseInput,
+        resources: [
+          {
+            id: 'gradescope:resource:1211108:regrade_requests',
+            kind: 'resource' as const,
+            site: 'gradescope' as const,
+            source: {
+              site: 'gradescope' as const,
+              resourceId: '1211108:regrade_requests',
+              resourceType: 'regrade_requests',
+            },
+            courseId: 'gradescope:course:1211108',
+            resourceKind: 'other' as const,
+            title: 'Regrade requests',
+            summary: 'No submitted regrade requests yet.',
+            detail: 'Course-level regrade hub is currently empty.',
+            url: 'https://www.gradescope.com/courses/1211108/regrade_requests',
+          },
+          {
+            id: 'edstem:lesson:162340',
+            kind: 'resource' as const,
+            site: 'edstem' as const,
+            source: {
+              site: 'edstem' as const,
+              resourceId: '162340',
+              resourceType: 'lesson',
+            },
+            courseId: 'edstem:course:1',
+            resourceKind: 'link' as const,
+            title: 'Week 8 review walkthrough',
+            summary: 'Lesson summary',
+            detail: 'Lesson · attempted',
+            url: 'https://edstem.org/us/courses/1/lessons/162340',
+          },
+          {
+            id: 'edstem:lesson-slide:162340:954014',
+            kind: 'resource' as const,
+            site: 'edstem' as const,
+            source: {
+              site: 'edstem' as const,
+              resourceId: '954014',
+              resourceType: 'lesson_slide',
+            },
+            courseId: 'edstem:course:1',
+            resourceKind: 'link' as const,
+            title: 'Week 8 slide 1',
+            summary: 'Lesson slide summary',
+            detail: 'Slide 1',
+            url: 'https://edstem.org/us/courses/1/lessons/162340/slides/954014',
+          },
+        ],
+      },
+    });
+
+    expect(artifact.content).toContain('- Regrade requests (gradescope) - kind regrade hub');
+    expect(artifact.content).toContain('- Week 8 review walkthrough (edstem) - kind lesson');
+    expect(artifact.content).toContain('- Week 8 slide 1 (edstem) - kind lesson slide');
+  });
+
+  it('keeps course-sites spec witness and regrade hub detail visible in markdown exports', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'markdown',
+      input: {
+        ...baseInput,
+        assignments: [
+          {
+            id: 'course-sites:assignment:cse312-pset1',
+            kind: 'assignment' as const,
+            site: 'course-sites' as const,
+            source: {
+              site: 'course-sites' as const,
+              resourceId: 'cse312:pset1',
+              resourceType: 'assignment_row',
+            },
+            courseId: 'course-sites:course:cse312:26sp',
+            title: 'Pset 1',
+            status: 'unknown' as const,
+            summary: 'Spec witness: PDF spec · HTML spec · LaTeX template. Released April 1.',
+            detail: 'Spec columns: Pset (pdf) · Pset (html) · Latex template.',
+            actionHints: ['Open PDF spec', 'Open HTML spec', 'Open LaTeX template'],
+            dueAt: '2026-04-08T23:59:00-07:00',
+          },
+        ],
+        resources: [
+          {
+            id: 'gradescope:resource:1211108:regrade_requests',
+            kind: 'resource' as const,
+            site: 'gradescope' as const,
+            source: {
+              site: 'gradescope' as const,
+              resourceId: '1211108:regrade_requests',
+              resourceType: 'regrade_requests',
+            },
+            courseId: 'gradescope:course:1211108',
+            resourceKind: 'other' as const,
+            title: 'Regrade requests',
+            summary: 'No submitted regrade requests yet.',
+            detail: 'Course-level regrade hub is currently empty. Columns: Question · Assignment · Requested · Status.',
+            url: 'https://www.gradescope.com/courses/1211108/regrade_requests',
+          },
+        ],
+      },
+    });
+
+    expect(artifact.content).toContain('Spec witness: PDF spec · HTML spec · LaTeX template. Released April 1.');
+    expect(artifact.content).toContain('detail Spec columns: Pset (pdf) · Pset (html) · Latex template.');
+    expect(artifact.content).toContain('actions Open PDF spec | Open HTML spec | Open LaTeX template');
+    expect(artifact.content).toContain('Regrade requests (gradescope) - kind regrade hub');
+    expect(artifact.content).toContain('detail Course-level regrade hub is currently empty. Columns: Question · Assignment · Requested · Status.');
   });
 
   it('builds focus queue as markdown without re-deriving scores', () => {

@@ -1892,7 +1892,7 @@ export function WorkbenchOperationsSections({
                   </p>
                 ) : null}
                 <p className="surface__meta">
-                  {summary.authoritySource}
+                  {SITE_LABELS[summary.sourceSurface as Site] ?? summary.sourceSurface} · {summary.authoritySource}
                   {summary.nextAction ? ` · ${summary.nextAction}` : ''}
                 </p>
               </article>

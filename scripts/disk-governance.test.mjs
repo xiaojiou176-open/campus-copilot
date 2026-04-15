@@ -343,6 +343,10 @@ test('cleanup:runtime closeout mode removes fresh sensitive runtime residue with
     mkdirSync(join(sandbox.repo, '.runtime-cache/public-distribution'), { recursive: true });
     mkdirSync(join(sandbox.repo, '.runtime-cache/memory-plane'), { recursive: true });
     mkdirSync(join(sandbox.repo, '.runtime-cache/git-closeout'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/rewrite-20260407'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/mcp-registry/unpacked'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/ui-audit/web'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/visual-proof/extension-smoke'), { recursive: true });
     mkdirSync(join(sandbox.repo, '.runtime-cache/coverage'), { recursive: true });
     writeFileSync(join(sandbox.repo, '.runtime-cache/raw/regrade.raw.html'), '<html>raw</html>', { encoding: 'utf8' });
     writeFileSync(
@@ -358,6 +362,10 @@ test('cleanup:runtime closeout mode removes fresh sensitive runtime residue with
     writeFileSync(join(sandbox.repo, '.runtime-cache/public-distribution/latest.json'), '{}', { encoding: 'utf8' });
     writeFileSync(join(sandbox.repo, '.runtime-cache/memory-plane/current-truth-ledger.md'), '# ledger', { encoding: 'utf8' });
     writeFileSync(join(sandbox.repo, '.runtime-cache/git-closeout/worker.patch'), 'diff --git', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/rewrite-20260407/main-protection.json'), '{}', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/mcp-registry/unpacked/manifest.json'), '{}', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/ui-audit/web/report.json'), '{}', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/visual-proof/extension-smoke/proof.json'), '{}', { encoding: 'utf8' });
     writeFileSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-15T00-00-00.000Z.json'), '{}', {
       encoding: 'utf8',
     });
@@ -394,6 +402,10 @@ test('cleanup:runtime closeout mode removes fresh sensitive runtime residue with
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/public-distribution/latest.json')), false);
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/memory-plane/current-truth-ledger.md')), false);
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/git-closeout/worker.patch')), false);
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/rewrite-20260407/main-protection.json')), false);
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/mcp-registry/unpacked/manifest.json')), false);
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/ui-audit/web/report.json')), false);
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/visual-proof/extension-smoke/proof.json')), false);
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/coverage/coverage-summary.json')), false);
     assert.equal(existsSync(join(externalCacheHome, 'browser/chrome-user-data/Profile 1')), true);
   } finally {

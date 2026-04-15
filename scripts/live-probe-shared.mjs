@@ -621,6 +621,19 @@ export function classifyPage(finalUrl, title, bodyPreview) {
   return classifyPageCore(finalUrl, title, bodyPreview);
 }
 
+export function looksLikeMyPlanLoadingShell(finalUrl, title, bodyPreview = '') {
+  const hostname = toHostname(finalUrl);
+  if (hostname !== 'myplan.uw.edu') {
+    return false;
+  }
+
+  const lowered = `${title} ${bodyPreview}`.toLowerCase();
+  return (
+    String(title ?? '').trim() === 'MyPlan' &&
+    (lowered.includes('loading navigation') || lowered.includes('loading...') || lowered.includes('loading myplan'))
+  );
+}
+
 export function classifyFromExistingTab(finalUrl, title, input = {}) {
   return determineAuthState({
     site: input.site,

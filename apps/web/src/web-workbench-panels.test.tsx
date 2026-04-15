@@ -430,6 +430,84 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('https://www.gradescope.com/courses/1211108/regrade_requests');
   });
 
+  it('shows administrative summary source, authority, blockers, and next action in the workbench', () => {
+    const html = renderToStaticMarkup(
+      createElement(WebWorkbenchPanels, {
+        workbenchReady: true,
+        todaySnapshot: {
+          totalAssignments: 0,
+          dueSoonAssignments: 0,
+          recentUpdates: 0,
+          newGrades: 0,
+          riskAlerts: 0,
+          syncedSites: 1,
+        },
+        recentUpdates: { unseenCount: 0, items: [] },
+        currentViewExport: undefined,
+        importedEnvelope: undefined,
+        focusQueue: [],
+        planningSubstrates: [],
+        weeklyLoad: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [
+          {
+            id: 'admin:transcript:1',
+            family: 'transcript',
+            laneStatus: 'standalone_detail_runtime_lane',
+            detailRuntimeStatus: 'review_ready',
+            detailRuntimeNote: 'Review-ready summary stays export-first until a stronger transcript detail lane is promoted.',
+            title: 'Transcript summary',
+            summary: 'Latest transcript lane currently appears as a review-first summary and stays export-first.',
+            importance: 'high',
+            aiDefault: 'blocked',
+            authoritySource: 'myuw summary lane',
+            sourceSurface: 'myuw',
+            nextAction: 'Export before sharing with AI.',
+            exactBlockers: [
+              {
+                id: 'transcript_ai_blocked',
+                summary: 'Transcript AI remains blocked.',
+                whyItStopsPromotion: 'Keep transcript review/export-first until a lawful summary workflow is explicitly promoted.',
+              },
+            ],
+            updatedAt: '2026-04-01T03:00:00.000Z',
+          },
+        ],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+        currentAssignments: [],
+        currentMessages: [],
+        currentResources: [],
+        currentAnnouncements: [],
+        currentEvents: [],
+        recentChangeEvents: [],
+        countsBySite: [],
+        topSyncRun: undefined,
+        siteLabels: {
+          canvas: 'Canvas',
+          gradescope: 'Gradescope',
+          edstem: 'EdStem',
+          myuw: 'MyUW',
+          'time-schedule': 'Time Schedule',
+          'course-sites': 'Course Websites',
+        },
+      }),
+    );
+
+    expect(html).toContain('Transcript summary');
+    expect(html).toContain('detail-runtime lane');
+    expect(html).toContain('detail runtime review-ready');
+    expect(html).toContain('Review-ready summary stays export-first until a stronger transcript detail lane is promoted.');
+    expect(html).toContain('Exact blockers: transcript_ai_blocked');
+    expect(html).toContain('MyUW · myuw summary lane · Export before sharing with AI.');
+    expect(html).toContain('myuw summary lane · Export before sharing with AI.');
+  });
+
   it('shows Canvas semantic badges for landed module, group, and recording carriers', () => {
     const html = renderToStaticMarkup(
       createElement(WebWorkbenchPanels, {
