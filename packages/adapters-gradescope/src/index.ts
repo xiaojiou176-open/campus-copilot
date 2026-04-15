@@ -121,6 +121,22 @@ const GradescopeSubmissionViewerSubmissionSchema = z
   })
   .passthrough();
 
+const GradescopeSubmissionViewerPastSubmissionSchema = z
+  .object({
+    id: z.union([z.number(), z.string()]).optional(),
+    created_at: z.string().nullable().optional(),
+    active: z.boolean().optional(),
+    show_path: z.string().optional(),
+  })
+  .passthrough();
+
+const GradescopeSubmissionViewerPathsSchema = z
+  .object({
+    graded_pdf_path: z.string().optional(),
+    regrade_requests_path: z.string().optional(),
+  })
+  .passthrough();
+
 const GradescopeSubmissionViewerQuestionSchema = z
   .object({
     id: z.union([z.number(), z.string()]),
@@ -199,6 +215,8 @@ const GradescopeSubmissionViewerPropsSchema = z
     questions: z.array(GradescopeSubmissionViewerQuestionSchema).default([]),
     question_submissions: z.array(GradescopeSubmissionViewerQuestionSubmissionSchema).default([]),
     rubric_items: z.array(GradescopeSubmissionViewerRubricItemSchema).default([]),
+    past_submissions: z.array(GradescopeSubmissionViewerPastSubmissionSchema).default([]),
+    paths: GradescopeSubmissionViewerPathsSchema.optional(),
   })
   .passthrough();
 
@@ -849,26 +867,36 @@ function buildGradescopeQuestionBreakdownDetail(detail: GradescopeSubmissionDeta
   return [baseDetail, actionText].filter(Boolean).join('; ') || undefined;
 }
 
-function parseGradescopeSubmissionActions(pageHtml: string | undefined) {
-  if (!pageHtml) {
+function parseGradescopeSubmissionActions(
+  pageHtml: string | undefined,
+  viewerProps?: Pick<GradescopeSubmissionViewerProps, 'past_submissions' | 'paths'>,
+) {
+  if (!pageHtml && !viewerProps) {
     return [];
   }
 
   const actionHints: string[] = [];
-  const gradedCopyHref = pageHtml.match(/href="(?<href>\/courses\/\d+\/assignments\/\d+\/submissions\/\d+\.pdf)"/i)?.groups?.href;
+  const gradedCopyHref =
+    viewerProps?.paths?.graded_pdf_path ??
+    pageHtml?.match(/href="(?<href>\/courses\/\d+\/assignments\/\d+\/submissions\/\d+\.pdf)"/i)?.groups?.href;
   if (gradedCopyHref) {
     actionHints.push('Download graded copy');
   }
 
-  if (/>\s*Submission History\s*</i.test(pageHtml)) {
+  const submissionHistoryCount = viewerProps?.past_submissions?.length;
+  if (submissionHistoryCount && submissionHistoryCount > 0) {
+    actionHints.push(
+      `Submission history (${submissionHistoryCount} submission${submissionHistoryCount === 1 ? '' : 's'} on record)`,
+    );
+  } else if (pageHtml && />\s*Submission History\s*</i.test(pageHtml)) {
     actionHints.push('Submission history');
   }
 
-  const regradeLabel = pageHtml.match(/aria-label="(?<label>\s*Request Regrade[^"]*)"/i)?.groups?.label?.trim();
+  const regradeLabel = pageHtml?.match(/aria-label="(?<label>\s*Request Regrade[^"]*)"/i)?.groups?.label?.trim();
   if (regradeLabel) {
     const normalized = regradeLabel.replace(/^Request Regrade\.?\s*/i, '').trim();
     actionHints.push(normalized ? `Request regrade (${normalized})` : 'Request regrade');
-  } else if (/>\s*Request Regrade\s*</i.test(pageHtml)) {
+  } else if (pageHtml && />\s*Request Regrade\s*</i.test(pageHtml)) {
     const disabled = /Request Regrade[\s\S]*?aria-disabled="true"/i.test(pageHtml);
     actionHints.push(disabled ? 'Request regrade (disabled)' : 'Request regrade');
   }
@@ -1088,7 +1116,7 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
         score: total.score,
         maxScore: total.maxScore,
         questions,
-        actionHints: parseGradescopeSubmissionActions(pageHtml),
+        actionHints: parseGradescopeSubmissionActions(pageHtml, viewerProps),
       } satisfies GradescopeSubmissionDetail;
     }
   }

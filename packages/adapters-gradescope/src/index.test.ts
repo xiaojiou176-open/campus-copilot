@@ -394,7 +394,10 @@ describe('GradescopeApiClient', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.snapshot.assignments?.[0]?.summary).toContain('Graded 1 / 9 · Q1 redacted-text 1 / 9 (redacted-text)');
-      expect(result.snapshot.assignments?.[0]?.detail).toBe('Q1 redacted-text · 1 / 9 · Rubric: redacted-text (+1 pts)');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain('Q1 redacted-text · 1 / 9 · Rubric: redacted-text (+1 pts)');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain(
+        'Actions: Download graded copy | Submission history (1 submission on record)',
+      );
       expect(result.snapshot.assignments?.[0]?.score).toBe(1);
       expect(result.snapshot.assignments?.[0]?.maxScore).toBe(9);
     }
@@ -630,6 +633,8 @@ describe('GradescopeApiClient', () => {
     expect(html).toContain('submissionOutlineHeader--totalPoints');
     expect(html).toContain('submissionOutlineQuestion');
     expect(html).toContain('submissionOutlineQuestion--score');
+    expect(html).toContain('Download Graded Copy');
+    expect(html).toContain('Submission History');
   });
 
   it('commits a redacted rich graded submission DOM fixture for grouped question-detail proof', () => {
@@ -699,7 +704,11 @@ describe('GradescopeApiClient', () => {
         maxScore: 9,
       });
       expect(result.snapshot.assignments?.[0]?.summary).toContain('Graded 1 / 9 · Q1 redacted-text 1 / 9 (redacted-text)');
-      expect(result.snapshot.assignments?.[0]?.detail).toBe('Q1 redacted-text · 1 / 9 · Rubric: redacted-text (+1 pts)');
+      expect(result.snapshot.assignments?.[0]?.detail).toContain('Q1 redacted-text · 1 / 9 · Rubric: redacted-text (+1 pts)');
+      expect(result.snapshot.assignments?.[0]?.actionHints).toEqual([
+        'Download graded copy',
+        'Submission history (1 submission on record)',
+      ]);
       expect(result.snapshot.grades?.[0]).toMatchObject({
         id: 'gradescope:grade:380090124',
         assignmentId: 'gradescope:assignment:7421057',
@@ -1168,7 +1177,36 @@ describe('GradescopeApiClient', () => {
     }
   });
 
-  it('surfaces graded-copy, history, and regrade availability from a graded submission page', async () => {
+  it('surfaces real graded-copy and submission-history availability from a graded submission page', async () => {
+    const client = new GradescopeApiClient(
+      okExecutor({
+        '/internal/assignments': undefined,
+        '/internal/grades': undefined,
+      } as unknown as Record<string, unknown>),
+      paths,
+    );
+
+    const adapter = createGradescopeAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://www.gradescope.com/courses/1211108/assignments/7421057/submissions/380090124',
+      site: 'gradescope',
+      now: '2026-04-13T08:00:00-07:00',
+      pageHtml: readFixture('submission-question-detail.html'),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.assignments?.[0]?.detail).toContain(
+        'Actions: Download graded copy | Submission history (1 submission on record)',
+      );
+      expect(result.snapshot.assignments?.[0]?.actionHints).toEqual([
+        'Download graded copy',
+        'Submission history (1 submission on record)',
+      ]);
+    }
+  });
+
+  it('still parses an explicit regrade affordance when a page exposes it', async () => {
     const client = new GradescopeApiClient(
       okExecutor({
         '/internal/assignments': undefined,
@@ -1184,16 +1222,13 @@ describe('GradescopeApiClient', () => {
       now: '2026-04-13T08:00:00-07:00',
       pageHtml: readFixture('submission-question-detail-rich.html').replace(
         '</section>',
-        '<ul><li><a href="/courses/1144890/assignments/7224260/submissions/374320968.pdf">Download Graded Copy</a></li><li><button type="button">Submission History</button></li><li><button type="button" aria-label=" Request Regrade. Please select a question.">Request Regrade</button></li></ul></section>',
+        '<ul><li><button type="button" aria-label=" Request Regrade. Please select a question.">Request Regrade</button></li></ul></section>',
       ),
     });
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.snapshot.assignments?.[0]?.detail).toContain('Actions: Download graded copy | Submission history | Request regrade (Please select a question.)');
       expect(result.snapshot.assignments?.[0]?.actionHints).toEqual([
-        'Download graded copy',
-        'Submission history',
         'Request regrade (Please select a question.)',
       ]);
     }
