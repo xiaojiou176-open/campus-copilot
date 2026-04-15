@@ -656,6 +656,39 @@ function buildCanvasModulePageUrl(pageUrl: string | null | undefined, courseUrl:
   }
 }
 
+function normalizeCanvasDetailLabel(value: string | null | undefined) {
+  const normalized = value?.trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  return normalized.replace(/[_-]+/g, ' ');
+}
+
+function extractCanvasPageReference(pageUrl: string | null | undefined) {
+  const normalizedPageUrl = pageUrl?.trim();
+  if (!normalizedPageUrl) {
+    return undefined;
+  }
+
+  if (!/[/:?#]/.test(normalizedPageUrl)) {
+    return decodeURIComponent(normalizedPageUrl);
+  }
+
+  try {
+    const parsed = new URL(normalizedPageUrl, 'https://canvas.example.edu');
+    const pageMatch = parsed.pathname.match(/\/pages\/(?<pageRef>[^/?#]+)/);
+    if (pageMatch?.groups?.pageRef) {
+      return decodeURIComponent(pageMatch.groups.pageRef);
+    }
+
+    const normalizedPath = parsed.pathname.replace(/\/+$/, '');
+    return normalizedPath ? decodeURIComponent(normalizedPath.split('/').at(-1) ?? '') || undefined : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function buildCanvasModuleItemDetail(rawModule: CanvasRawModule, rawItem: CanvasRawModuleItem) {
   const type = rawItem.type?.trim();
   const looksLikeRecording = looksLikeCanvasRecording([
@@ -674,6 +707,13 @@ function buildCanvasModuleItemDetail(rawModule: CanvasRawModule, rawItem: Canvas
         ? 'External tool'
           : type || 'Item';
   const detailParts = [typeLabel, rawModule.name?.trim() || 'Canvas module'];
+  const pageReference =
+    type === 'Page'
+      ? extractCanvasPageReference(rawItem.page_url ?? rawItem.content_details?.page_url ?? undefined)
+      : undefined;
+  if (pageReference) {
+    detailParts.push(`Page ref: ${pageReference}`);
+  }
   const completionRequirement = buildCanvasModuleItemCompletionRequirementDetail(rawItem);
   if (completionRequirement) {
     detailParts.push(completionRequirement);
@@ -802,8 +842,9 @@ function buildCanvasGroupDetail(rawGroup: CanvasRawGroup) {
   if (members != null) {
     parts.push(`${members} members`);
   }
-  if (rawGroup.join_level?.trim()) {
-    parts.push(rawGroup.join_level.trim());
+  const joinLevel = normalizeCanvasDetailLabel(rawGroup.join_level ?? undefined);
+  if (joinLevel) {
+    parts.push(`Join: ${joinLevel}`);
   }
 
   return parts.join(' · ');
@@ -834,8 +875,13 @@ function normalizeCanvasGroupResource(rawGroup: CanvasRawGroup, courseId: string
 
 function buildCanvasMediaDetail(rawMedia: CanvasRawMediaObject) {
   const parts = ['Canvas media'];
-  if (rawMedia.media_type?.trim()) {
-    parts.push(rawMedia.media_type.trim());
+  const mediaType = normalizeCanvasDetailLabel(rawMedia.media_type ?? undefined);
+  if (mediaType) {
+    parts.push(mediaType);
+  }
+  const freshnessAnchor = rawMedia.updated_at ?? rawMedia.created_at ?? undefined;
+  if (freshnessAnchor) {
+    parts.push(`Updated: ${freshnessAnchor}`);
   }
   return parts.join(' · ');
 }

@@ -325,6 +325,7 @@ describe('CanvasApiClient', () => {
             courseId: 'canvas:course:42',
             resourceKind: 'link',
             title: 'Week 1 overview',
+            detail: 'Page · Week 1 · Page ref: week-1-overview',
             url: 'https://canvas.example.edu/courses/42/pages/week-1-overview',
             source: expect.objectContaining({
               resourceType: 'page_reference',
@@ -415,12 +416,14 @@ describe('CanvasApiClient', () => {
             resourceKind: 'link',
             title: 'Project Team 7',
             summary: 'Coordinate the API milestone here.',
+            detail: 'Canvas group · 4 members · Join: invitation only',
           }),
           expect.objectContaining({
             id: 'canvas:resource:media:media-42',
             courseId: 'canvas:course:42',
             resourceKind: 'embed',
             title: 'Lecture capture 3',
+            detail: 'Canvas media · video · Updated: 2026-03-24T11:00:00-07:00',
           }),
         ]),
       );
@@ -688,7 +691,7 @@ describe('CanvasApiClient', () => {
         expect.arrayContaining([
           expect.objectContaining({
             id: 'canvas:resource:module-item:42:7001:8101',
-            detail: 'Page · Week 1 · Requirement: view',
+            detail: 'Page · Week 1 · Page ref: week-1-overview · Requirement: view',
           }),
           expect.objectContaining({
             id: 'canvas:resource:module-item:42:7001:8107',

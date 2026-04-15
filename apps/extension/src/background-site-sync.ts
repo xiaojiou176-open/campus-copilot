@@ -453,6 +453,25 @@ function inferTimeScheduleQuarterLabel(snapshot: SiteSnapshotPayload) {
   return match?.groups?.quarter?.trim() || 'Current quarter';
 }
 
+function buildTimeScheduleDetailCorroboration(snapshot: SiteSnapshotPayload) {
+  const primaryEvent = snapshot.events?.[0];
+  if (!primaryEvent) {
+    return undefined;
+  }
+
+  const detailParts = [primaryEvent.title, primaryEvent.location, primaryEvent.detail]
+    .filter((part): part is string => typeof part === 'string' && part.trim().length > 0);
+  if (detailParts.length === 0) {
+    return undefined;
+  }
+
+  const primaryCourse = snapshot.courses?.find((course) => course.id === primaryEvent.courseId);
+  const courseTitle =
+    primaryCourse?.title && primaryCourse.title !== primaryEvent.title ? primaryCourse.title.trim() : undefined;
+
+  return [detailParts[0], courseTitle, ...detailParts.slice(1)].filter(Boolean).join(' · ');
+}
+
 function buildTimeSchedulePlanningSubstrate(input: {
   snapshot: SiteSnapshotPayload;
   capturedAt: string;
@@ -468,10 +487,13 @@ function buildTimeSchedulePlanningSubstrate(input: {
     ? 'public_course_offerings_planning_lane_with_sln_detail'
     : TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture;
   const currentTruth = capturedFromDetailPage
-    ? 'Time Schedule still stays read-only and public-offerings-first, but the current planning lane now also has an authenticated SLN detail corroboration for richer section context.'
+    ? 'Time Schedule still stays read-only and public-offerings-first, but the current planning lane now also has an authenticated SLN detail corroboration for richer section context, including concrete meeting, location, and enrollment proof.'
     : TIME_SCHEDULE_STAGE_UNDERSTANDING.currentTruth;
+  const detailCorroboration = capturedFromDetailPage ? buildTimeScheduleDetailCorroboration(input.snapshot) : undefined;
   const termSummary = capturedFromDetailPage
-    ? `Public course offerings plus authenticated SLN detail were captured from ${input.sourceUrl}.`
+    ? detailCorroboration
+      ? `Public course offerings plus authenticated SLN detail were captured from ${input.sourceUrl}. Detail corroboration: ${detailCorroboration}.`
+      : `Public course offerings plus authenticated SLN detail were captured from ${input.sourceUrl}.`
     : `Public course offerings captured from ${input.sourceUrl}.`;
 
   return {

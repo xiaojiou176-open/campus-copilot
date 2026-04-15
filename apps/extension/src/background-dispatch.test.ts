@@ -226,7 +226,13 @@ describe('background site dispatch', () => {
         runtimePosture: 'public_course_offerings_planning_lane_with_sln_detail',
       }),
     );
+    expect(storedPlanning[0]?.currentTruth).toContain('meeting, location, and enrollment proof');
     expect(storedPlanning[0]?.exactBlockers.map((blocker) => blocker.id)).not.toContain('dom_sln_detail_fallback');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Detail corroboration: CSE 121 A');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('COMP PROGRAMMING I');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('WF 11:30-12:20');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('GUG 220');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('161/250 enrolled');
   });
 
   it('falls back to EdStem dashboard DOM when path config is missing but the active tab still exposes course cards', async () => {
