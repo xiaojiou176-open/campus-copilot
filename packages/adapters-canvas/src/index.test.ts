@@ -125,6 +125,7 @@ describe('CanvasApiClient', () => {
                   type: 'Page',
                   title: 'Week 1 overview',
                   html_url: 'https://canvas.example.edu/courses/42/modules/items/8101',
+                  page_url: 'week-1-overview',
                   published: true,
                 },
                 {
@@ -324,11 +325,16 @@ describe('CanvasApiClient', () => {
             courseId: 'canvas:course:42',
             resourceKind: 'link',
             title: 'Week 1 overview',
+            url: 'https://canvas.example.edu/courses/42/pages/week-1-overview',
+            source: expect.objectContaining({
+              resourceType: 'page_reference',
+              url: 'https://canvas.example.edu/courses/42/pages/week-1-overview',
+            }),
             summary: 'Week 1',
             resourceModule: {
               key: 'canvas:module:42:7001',
               label: 'Week 1',
-              itemType: 'item',
+              itemType: 'page',
             },
           }),
           expect.objectContaining({

@@ -498,7 +498,11 @@ function buildEdStemLessonDetail(rawLesson: EdStemRawLesson) {
     rawLesson.slides.length > 0
       ? `Slides: ${rawLesson.slides
           .slice(0, 3)
-          .map((slide) => [slide.index, decodeHtmlText(slide.title ?? undefined), slide.status].filter(Boolean).join(' · '))
+          .map((slide) =>
+            [slide.index, decodeHtmlText(slide.title ?? undefined), decodeHtmlText(slide.type ?? undefined), slide.status]
+              .filter(Boolean)
+              .join(' · '),
+          )
           .join('; ')}${rawLesson.slides.length > 3 ? `; +${rawLesson.slides.length - 3} more` : ''}`
       : undefined,
   ].filter(Boolean);

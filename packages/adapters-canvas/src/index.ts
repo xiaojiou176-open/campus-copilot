@@ -618,6 +618,35 @@ function looksLikeCanvasRecording(parts: Array<string | undefined>) {
   return parts.some((value) => Boolean(value && /(recording|panopto|lecture capture|video|media)/i.test(value)));
 }
 
+function buildCanvasModulePageUrl(pageUrl: string | null | undefined, courseUrl: string | undefined) {
+  const normalizedPageUrl = pageUrl?.trim();
+  if (!normalizedPageUrl) {
+    return undefined;
+  }
+
+  const absoluteUrl = toOptionalAbsoluteUrl(normalizedPageUrl);
+  if (absoluteUrl) {
+    return absoluteUrl;
+  }
+
+  if (!courseUrl) {
+    return undefined;
+  }
+
+  try {
+    const course = new URL(courseUrl);
+    const coursePath = course.pathname.replace(/\/+$/, '');
+    const normalizedPath = normalizedPageUrl.replace(/^\/+/, '');
+    const pagePath =
+      normalizedPath.startsWith('courses/') || normalizedPath.startsWith('pages/')
+        ? normalizedPath
+        : `${coursePath.replace(/^\/+/, '')}/pages/${normalizedPath}`;
+    return new URL(`/${pagePath}`, course.origin).toString();
+  } catch {
+    return undefined;
+  }
+}
+
 function buildCanvasModuleItemDetail(rawModule: CanvasRawModule, rawItem: CanvasRawModuleItem) {
   const type = rawItem.type?.trim();
   const looksLikeRecording = looksLikeCanvasRecording([
@@ -643,14 +672,22 @@ function normalizeCanvasModuleItemResource(
   rawModule: CanvasRawModule,
   rawItem: CanvasRawModuleItem,
   courseId: string,
+  courseUrl?: string,
 ): Resource | undefined {
   if (rawModule.published === false || rawItem.published === false) {
     return undefined;
   }
 
   const type = rawItem.type?.trim();
+  const pageUrl =
+    type === 'Page'
+      ? buildCanvasModulePageUrl(
+          rawItem.page_url ?? rawItem.content_details?.page_url ?? undefined,
+          courseUrl,
+        )
+      : undefined;
   const url = toOptionalAbsoluteUrl(
-    rawItem.external_url ?? rawItem.html_url ?? rawItem.content_details?.url ?? undefined,
+    rawItem.external_url ?? pageUrl ?? rawItem.html_url ?? rawItem.content_details?.url ?? undefined,
   );
   const title =
     rawItem.title?.trim() ||
@@ -667,6 +704,8 @@ function normalizeCanvasModuleItemResource(
       ? 'recording'
       : type === 'File'
         ? 'file'
+        : type === 'Page'
+          ? 'page'
         : type === 'Assignment'
           ? 'assignment'
           : type === 'Discussion'
@@ -690,12 +729,14 @@ function normalizeCanvasModuleItemResource(
           ? 'recording'
           : type === 'File'
             ? 'file_reference'
+            : type === 'Page'
+              ? 'page_reference'
             : type === 'Assignment'
               ? 'assignment_reference'
-          : type === 'Discussion'
-            ? 'discussion_reference'
-            : type === 'Quiz'
-              ? 'quiz_reference'
+            : type === 'Discussion'
+              ? 'discussion_reference'
+              : type === 'Quiz'
+                ? 'quiz_reference'
               : type === 'SubHeader'
                 ? 'module_header'
                 : 'module_item',
@@ -1257,7 +1298,7 @@ class CanvasResourcesApiCollector implements ResourceCollector<Resource> {
         for (const rawModule of rawModules) {
           collected.push(
             ...((rawModule.items ?? [])
-              .map((rawItem) => normalizeCanvasModuleItemResource(rawModule, rawItem, courseId))
+              .map((rawItem) => normalizeCanvasModuleItemResource(rawModule, rawItem, courseId, rawCourse.html_url))
               .filter((resource): resource is Resource => Boolean(resource))),
           );
         }

@@ -903,7 +903,7 @@ describe('EdStemApiClient', () => {
             title: '[HW1 problem 7(a)] redacted lesson title',
             summary: 'python lesson · attempted · 3 slides',
             detail:
-              'State: scheduled · Due: 2026-04-09T16:59:00+10:00 · Locks: 2026-04-12T16:59:00+10:00 · Solutions: 2026-04-13T04:00:00+10:00 · Late submissions allowed · Slides: 1 · redacted slide title 1 · completed; 2 · redacted slide title 2 · unseen; 3 · redacted coding challenge · unseen',
+              'State: scheduled · Due: 2026-04-09T16:59:00+10:00 · Locks: 2026-04-12T16:59:00+10:00 · Solutions: 2026-04-13T04:00:00+10:00 · Late submissions allowed · Slides: 1 · redacted slide title 1 · document · completed; 2 · redacted slide title 2 · document · unseen; 3 · redacted coding challenge · challenge · unseen',
           }),
           expect.objectContaining({
             id: 'edstem:lesson-slide:redacted-lesson-a:redacted-slide-1',
