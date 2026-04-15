@@ -366,6 +366,19 @@ function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
   return summary.laneStatus === 'carrier_not_landed' ? 'capture needed' : 'summary ready';
 }
 
+function getAdministrativeDetailRuntimeLabel(
+  summary: AdministrativeSummary,
+  uiLanguage: WorkbenchPanelsProps['uiLanguage'],
+) {
+  if (summary.detailRuntimeStatus === 'blocked_missing_carrier') {
+    return uiLanguage === 'zh-CN' ? 'detail runtime 缺 carrier' : 'detail runtime blocked';
+  }
+  if (summary.detailRuntimeStatus === 'pending') {
+    return uiLanguage === 'zh-CN' ? 'detail runtime 待提升' : 'detail runtime pending';
+  }
+  return undefined;
+}
+
 function renderAlertGroup(
   title: string,
   alerts: DecisionSectionProps['priorityAlerts'],
@@ -1657,6 +1670,11 @@ export function WorkbenchOperationsSections({
                   <div className="surface__pill-row">
                     <span className="surface__badge surface__badge--warning">{summary.family}</span>
                     <span className="surface__badge surface__badge--neutral">{getAdministrativeLaneLabel(summary)}</span>
+                    {getAdministrativeDetailRuntimeLabel(summary, uiLanguage) ? (
+                      <span className="surface__badge surface__badge--neutral">
+                        {getAdministrativeDetailRuntimeLabel(summary, uiLanguage)}
+                      </span>
+                    ) : null}
                     <span className={`surface__badge surface__badge--${summary.importance}`}>{summary.importance}</span>
                   </div>
                 </div>

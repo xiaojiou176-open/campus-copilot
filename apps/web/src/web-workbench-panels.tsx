@@ -234,6 +234,16 @@ function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
   return summary.laneStatus === 'carrier_not_landed' ? 'capture needed' : 'summary ready';
 }
 
+function getAdministrativeDetailRuntimeLabel(summary: AdministrativeSummary) {
+  if (summary.detailRuntimeStatus === 'blocked_missing_carrier') {
+    return 'detail runtime blocked';
+  }
+  if (summary.detailRuntimeStatus === 'pending') {
+    return 'detail runtime pending';
+  }
+  return undefined;
+}
+
 export function WebWorkbenchPanels(props: {
   workbenchReady: boolean;
   todaySnapshot?: TodaySnapshot;
@@ -792,6 +802,9 @@ export function WebWorkbenchPanels(props: {
                   <div className="badge-row">
                     <span className="badge badge-warning">{summary.family}</span>
                     <span className="badge">{getAdministrativeLaneLabel(summary)}</span>
+                    {getAdministrativeDetailRuntimeLabel(summary) ? (
+                      <span className="badge">{getAdministrativeDetailRuntimeLabel(summary)}</span>
+                    ) : null}
                     <span className="badge">{summary.importance}</span>
                   </div>
                 </div>
