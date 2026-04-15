@@ -739,11 +739,21 @@ describe('exporter package', () => {
             family: 'transcript',
             laneStatus: 'landed_summary_lane',
             detailRuntimeStatus: 'pending',
+            detailRuntimeNote:
+              'Review-ready summary stays export-first until a stronger transcript detail lane is promoted.',
             title: 'Transcript summary',
             summary: 'Latest transcript lane currently appears as a review-first summary and stays export-first.',
             importance: 'high',
             aiDefault: 'blocked',
             authoritySource: 'myuw summary lane',
+            sourceSurface: 'myuw',
+            exactBlockers: [
+              {
+                id: 'transcript_ai_blocked',
+                summary: 'Transcript AI remains blocked.',
+                whyItStopsPromotion: 'Keep transcript review/export-first until a lawful summary workflow is explicitly promoted.',
+              },
+            ],
           },
         ],
       },
@@ -762,6 +772,9 @@ describe('exporter package', () => {
     expect(artifact.content).toContain('"administrativeSummaries": 1');
     expect(artifact.content).toContain('"authorization_level": "confirm_required"');
     expect(artifact.content).toContain('"detailRuntimeStatus": "pending"');
+    expect(artifact.content).toContain('"detailRuntimeNote": "Review-ready summary stays export-first until a stronger transcript detail lane is promoted."');
+    expect(artifact.content).toContain('"sourceSurface": "myuw"');
+    expect(artifact.content).toContain('"exactBlockers"');
   });
 
   it('ignores caller-supplied packaging overrides that would overstate authorization truth', () => {
@@ -812,11 +825,21 @@ describe('exporter package', () => {
             family: 'transcript',
             laneStatus: 'carrier_not_landed',
             detailRuntimeStatus: 'blocked_missing_carrier',
+            detailRuntimeNote: 'Transcript runtime detail remains blocked until a lawful carrier is proven.',
             title: 'Transcript summary lane',
             summary: 'No truthful transcript runtime carrier is landed yet. Historical-record detail remains blocked until a lawful summary carrier is proven.',
             importance: 'high',
             aiDefault: 'blocked',
             authoritySource: 'myuw candidate lane',
+            sourceSurface: 'myuw',
+            exactBlockers: [
+              {
+                id: 'transcript_missing_runtime_lane',
+                summary: 'Transcript summary carrier is missing.',
+                whyItStopsPromotion:
+                  'Keep export-first and AI-blocked until a summary carrier is landed or an exact external blocker is proven.',
+              },
+            ],
           },
         ],
       },
@@ -832,7 +855,74 @@ describe('exporter package', () => {
         entry.detail?.includes('their presence does not mean every family has a summary-ready lane yet'),
       ),
     ).toBe(true);
+    expect(artifact.content).toContain('administrative_summary,myuw,current_view,myuw,,workspace_snapshot');
+    expect(artifact.content).toContain('Source surface: myuw | Authority: myuw candidate lane | Detail runtime: blocked missing carrier');
+    expect(artifact.content).toContain('Exact blockers: transcript_missing_runtime_lane');
     expect(artifact.content).toContain('carrier_not_landed');
-    expect(artifact.content).toContain('detail runtime blocked missing carrier');
+    expect(artifact.content).toContain('Detail runtime: blocked missing carrier');
+  });
+
+  it('renders administrative summaries in markdown with source, authority, and export-safe blocker context', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'markdown',
+      input: {
+        generatedAt,
+        authorization: {
+          policyVersion: 'wave2-deepwater-productization',
+          rules: [
+            {
+              id: 'workspace-layer1',
+              layer: 'layer1_read_export',
+              status: 'confirm_required',
+              resourceFamily: 'workspace_snapshot',
+            },
+            {
+              id: 'workspace-layer2',
+              layer: 'layer2_ai_read_analysis',
+              status: 'blocked',
+              resourceFamily: 'workspace_snapshot',
+            },
+          ],
+        },
+        administrativeSummaries: [
+          {
+            id: 'admin-summary:transcript:blocker',
+            family: 'transcript',
+            laneStatus: 'carrier_not_landed',
+            detailRuntimeStatus: 'blocked_missing_carrier',
+            detailRuntimeNote: 'Transcript runtime detail remains blocked until a lawful carrier is proven.',
+            title: 'Transcript summary lane',
+            summary:
+              'No truthful transcript runtime carrier is landed yet. Historical-record detail remains blocked until a lawful summary carrier is proven.',
+            importance: 'high',
+            aiDefault: 'blocked',
+            authoritySource: 'myuw candidate lane',
+            sourceSurface: 'myuw',
+            nextAction:
+              'Keep export-first and AI-blocked until a summary carrier is landed or an exact external blocker is proven.',
+            exactBlockers: [
+              {
+                id: 'transcript_missing_runtime_lane',
+                summary: 'Transcript summary carrier is missing.',
+                whyItStopsPromotion:
+                  'Keep export-first and AI-blocked until a summary carrier is landed or an exact external blocker is proven.',
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    expect(artifact.content).toContain('## Administrative Summaries');
+    expect(artifact.content).toContain(
+      'Transcript summary lane (transcript; source myuw; AI blocked; detail runtime blocked missing carrier; authority myuw candidate lane; exact blockers transcript_missing_runtime_lane)',
+    );
+    expect(artifact.content).toContain(
+      'note Transcript runtime detail remains blocked until a lawful carrier is proven.',
+    );
+    expect(artifact.content).toContain(
+      'next: Keep export-first and AI-blocked until a summary carrier is landed or an exact external blocker is proven.',
+    );
   });
 });

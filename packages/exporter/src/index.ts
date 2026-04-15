@@ -237,11 +237,13 @@ export interface ExportInput {
     family: string;
     laneStatus?: 'landed_summary_lane' | 'standalone_detail_runtime_lane' | 'carrier_not_landed';
     detailRuntimeStatus?: 'review_ready' | 'pending' | 'blocked_missing_carrier';
+    detailRuntimeNote?: string;
     title: string;
     summary: string;
     importance: string;
     aiDefault: string;
     authoritySource: string;
+    sourceSurface?: string;
     nextAction?: string;
     exactBlockers?: Array<{
       id: string;
@@ -1437,10 +1439,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
   }
 
   for (const summary of dataset.administrativeSummaries) {
+    const detailParts = formatAdministrativeSummaryExportDetailParts(summary);
     rows.push({
       ...sharedFields,
       kind: 'administrative_summary',
-      site: 'administrative',
+      site: summary.sourceSurface ?? 'administrative',
       title: summary.title,
       courseId: '',
       assignmentId: summary.id,
@@ -1463,9 +1466,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       outcome: '',
       changeCount: '',
       summary: summary.summary,
-      detail: [summary.detailRuntimeStatus ? `detail runtime ${summary.detailRuntimeStatus.replace(/_/g, ' ')}` : '', summary.nextAction ?? '']
-        .filter(Boolean)
-        .join(' · '),
+      detail: detailParts.join(' | '),
       url: '',
       relation: summary.family,
     });
@@ -1587,6 +1588,27 @@ function formatAssignmentReviewAnnotationLabel(input: {
 
 function formatAuthoritySource(value: string) {
   return value.replace(/_/g, ' ').replace(/:/g, ' · ');
+}
+
+function formatAdministrativeSummaryBlockerIds(
+  blockers?: Array<{
+    id: string;
+  }>,
+) {
+  return (blockers ?? []).map((blocker) => blocker.id).join(' · ');
+}
+
+function formatAdministrativeSummaryExportDetailParts(
+  summary: ExportDataset['administrativeSummaries'][number],
+) {
+  return [
+    summary.sourceSurface ? `Source surface: ${summary.sourceSurface}` : '',
+    `Authority: ${formatAuthoritySource(summary.authoritySource)}`,
+    summary.detailRuntimeStatus ? `Detail runtime: ${summary.detailRuntimeStatus.replace(/_/g, ' ')}` : '',
+    summary.detailRuntimeNote ? `Detail runtime note: ${summary.detailRuntimeNote}` : '',
+    summary.exactBlockers?.length ? `Exact blockers: ${formatAdministrativeSummaryBlockerIds(summary.exactBlockers)}` : '',
+    summary.nextAction ? `Next action: ${summary.nextAction}` : '',
+  ].filter(Boolean);
 }
 
 function formatAuthorityRole(value: string) {
@@ -1993,8 +2015,14 @@ function renderMarkdown(dataset: ExportDataset) {
       'Administrative Summaries',
       dataset.administrativeSummaries.map((summary) => {
         const detailRuntime = summary.detailRuntimeStatus ? `; detail runtime ${summary.detailRuntimeStatus.replace(/_/g, ' ')}` : '';
+        const sourceSurface = summary.sourceSurface ? `; source ${summary.sourceSurface}` : '';
+        const authority = `; authority ${formatAuthoritySource(summary.authoritySource)}`;
+        const exactBlockers = summary.exactBlockers?.length
+          ? `; exact blockers ${formatAdministrativeSummaryBlockerIds(summary.exactBlockers)}`
+          : '';
+        const detailRuntimeNote = summary.detailRuntimeNote ? `; note ${summary.detailRuntimeNote}` : '';
         const nextAction = summary.nextAction ? ` - next: ${summary.nextAction}` : '';
-        return `- ${summary.title} (${summary.family}; AI ${summary.aiDefault}${detailRuntime}) - ${summary.summary}${nextAction}`;
+        return `- ${summary.title} (${summary.family}${sourceSurface}; AI ${summary.aiDefault}${detailRuntime}${authority}${exactBlockers}) - ${summary.summary}${detailRuntimeNote}${nextAction}`;
       }),
     ),
   );

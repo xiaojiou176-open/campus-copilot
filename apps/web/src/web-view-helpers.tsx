@@ -39,6 +39,10 @@ export function getResourceActionLabel(input: {
   downloadUrl?: string;
   source?: { resourceType?: string };
 }) {
+  if (input.site === 'gradescope' && input.source?.resourceType === 'regrade_requests') {
+    return 'Open regrade hub';
+  }
+
   if (input.site === 'edstem') {
     if (input.source?.resourceType === 'lesson_slide') {
       return 'Open slide';

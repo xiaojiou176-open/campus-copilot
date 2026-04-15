@@ -167,6 +167,96 @@ describe('web workbench planning pulse', () => {
     expect(html.indexOf('Weekly Load')).toBeLessThan(html.indexOf('Auth &amp; Export Management'));
   });
 
+  it('shows the true planning source badge when the latest substrate came from Time Schedule', () => {
+    const html = renderToStaticMarkup(
+      createElement(WebWorkbenchPanels, {
+        workbenchReady: true,
+        todaySnapshot: {
+          totalAssignments: 0,
+          dueSoonAssignments: 0,
+          recentUpdates: 0,
+          newGrades: 0,
+          riskAlerts: 0,
+          syncedSites: 1,
+        },
+        recentUpdates: { unseenCount: 0, items: [] },
+        currentViewExport: undefined,
+        importedEnvelope: undefined,
+        focusQueue: [],
+        planningSubstrates: [
+          {
+            id: 'myplan:plan:1',
+            source: 'myplan',
+            fit: 'derived_planning_substrate',
+            readOnly: true,
+            capturedAt: '2026-04-01T00:00:00.000Z',
+            lastUpdatedAt: '2026-04-01T03:00:00.000Z',
+            planId: 'plan-1',
+            planLabel: 'Allen School planning draft',
+            termCount: 3,
+            plannedCourseCount: 9,
+            backupCourseCount: 2,
+            scheduleOptionCount: 4,
+            requirementGroupCount: 5,
+            programExplorationCount: 1,
+            exactBlockers: [],
+            hardDeferredMoves: [],
+            terms: [],
+          },
+          {
+            id: 'time-schedule:planning:1',
+            source: 'time-schedule',
+            fit: 'derived_planning_substrate',
+            readOnly: true,
+            capturedAt: '2026-04-01T04:00:00.000Z',
+            lastUpdatedAt: '2026-04-01T05:00:00.000Z',
+            planId: 'timeschedule-1',
+            planLabel: 'Time Schedule · Spring 2026',
+            termCount: 1,
+            plannedCourseCount: 2,
+            backupCourseCount: 0,
+            scheduleOptionCount: 1,
+            requirementGroupCount: 0,
+            programExplorationCount: 0,
+            exactBlockers: [],
+            hardDeferredMoves: [],
+            terms: [],
+          },
+        ],
+        weeklyLoad: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+        currentAssignments: [],
+        currentMessages: [],
+        currentResources: [],
+        currentAnnouncements: [],
+        currentEvents: [],
+        recentChangeEvents: [],
+        countsBySite: [],
+        topSyncRun: undefined,
+        siteLabels: {
+          canvas: 'Canvas',
+          gradescope: 'Gradescope',
+          edstem: 'EdStem',
+          myuw: 'MyUW',
+          'time-schedule': 'Time Schedule',
+          'course-sites': 'Course Websites',
+        },
+      }),
+    );
+
+    expect(html).toContain('Time Schedule · Spring 2026');
+    expect(html).toContain('<span class="badge">Time Schedule</span>');
+    expect(html).not.toContain('<span class="badge">MyPlan</span><span class="badge">Read-only</span>');
+  });
+
   it('shows EdStem lesson and grouped-resource badges in study materials', () => {
     const html = renderToStaticMarkup(
       createElement(WebWorkbenchPanels, {
@@ -275,6 +365,69 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('ZIP · A. Using - Spring 2026 · Download file');
     expect(html).toContain('Open slide');
     expect(html).toContain('href="https://edstem.org/us/courses/96846/lessons/162340/slides/954014"');
+  });
+
+  it('labels Gradescope regrade hub resources as a queue instead of a generic download', () => {
+    const html = renderToStaticMarkup(
+      createElement(WebWorkbenchPanels, {
+        workbenchReady: true,
+        todaySnapshot: {
+          totalAssignments: 0,
+          dueSoonAssignments: 0,
+          recentUpdates: 0,
+          newGrades: 0,
+          riskAlerts: 0,
+          syncedSites: 1,
+        },
+        recentUpdates: { unseenCount: 0, items: [] },
+        currentViewExport: undefined,
+        importedEnvelope: undefined,
+        focusQueue: [],
+        planningSubstrates: [],
+        weeklyLoad: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+        currentAssignments: [],
+        currentMessages: [],
+        currentResources: [
+          {
+            id: 'gradescope:resource:1211108:regrade_requests',
+            site: 'gradescope',
+            source: { resourceType: 'regrade_requests' },
+            title: 'Regrade requests',
+            resourceKind: 'other',
+            summary: 'No submitted regrade requests yet.',
+            detail: 'Course-level regrade hub is currently empty. Columns: Question · Assignment · Requested · Status.',
+            url: 'https://www.gradescope.com/courses/1211108/regrade_requests',
+          },
+        ],
+        currentAnnouncements: [],
+        currentEvents: [],
+        recentChangeEvents: [],
+        countsBySite: [],
+        topSyncRun: undefined,
+        siteLabels: {
+          canvas: 'Canvas',
+          gradescope: 'Gradescope',
+          edstem: 'EdStem',
+          myuw: 'MyUW',
+          'time-schedule': 'Time Schedule',
+          'course-sites': 'Course Websites',
+        },
+      }),
+    );
+
+    expect(html).toContain('Regrade requests');
+    expect(html).toContain('regrade hub');
+    expect(html).toContain('Open regrade hub');
+    expect(html).toContain('https://www.gradescope.com/courses/1211108/regrade_requests');
   });
 
   it('shows Canvas semantic badges for landed module, group, and recording carriers', () => {
