@@ -385,6 +385,33 @@ test('classifyPage treats Duo prompt and session expiry pages as login_required 
   );
 });
 
+test('classifyPage recognizes review-first planning/admin detail pages as authenticated surfaces', () => {
+  assert.equal(
+    classifyPage(
+      'https://myplan.uw.edu/audit/#/degree',
+      'Audit Your Degree - MyPlan',
+      'Sign Out Audit Degree (DARS) Date Prepared: 04/06/26 Catalog Year: AU 25',
+    ),
+    'likely_authenticated',
+  );
+  assert.equal(
+    classifyPage(
+      'https://sdb.admin.uw.edu/sisStudents/uwnetid/untranscript.aspx',
+      'Unofficial Transcript',
+      'CUM GPA Academic Standing Date Prepared',
+    ),
+    'likely_authenticated',
+  );
+  assert.equal(
+    classifyPage(
+      'https://sdb.admin.uw.edu/sisStudents/uwnetid/tuition.aspx',
+      'Tuition Charge Statement',
+      'Official Tuition Charge Statement Amount Due Spring 2026',
+    ),
+    'likely_authenticated',
+  );
+});
+
 test('summarizeLiveProbe reports evidence coverage when probe output includes browser evidence', () => {
   const summary = summarizeLiveProbe({
     attachModeResolved: 'page_requested_profile',
@@ -761,6 +788,20 @@ test('summarizeLiveProbe separates campus login and provider login states', () =
         source: 'fresh_page',
         nextStep: 'myuw: continue the canonical school SSO re-entry in the requested profile',
       },
+      {
+        name: 'myplan_plan',
+        classification: 'likely_authenticated',
+        finalUrl: 'https://myplan.uw.edu/plan/#/sp26',
+        title: 'Spring 2026 - MyPlan',
+        source: 'fresh_page',
+      },
+      {
+        name: 'transcript',
+        classification: 'login_required',
+        finalUrl: 'https://idp.u.washington.edu/idp/profile/SAML2/Redirect/SSO?execution=e2s2',
+        title: 'UW NetID sign-in',
+        source: 'fresh_page',
+      },
       { name: 'openai', classification: 'login_required', source: 'fresh_page' },
       { name: 'gemini', classification: 'likely_authenticated', source: 'fresh_page' },
     ],
@@ -773,6 +814,9 @@ test('summarizeLiveProbe separates campus login and provider login states', () =
   assert.deepEqual(summary.campusAuthenticatedSites, []);
   assert.equal(summary.campusAuthenticatedAll, false);
   assert.equal(summary.campusNextSteps.myuw, 'myuw: continue the canonical school SSO re-entry in the requested profile');
+  assert.deepEqual(summary.planningAdminAuthenticatedSites, ['myplan_plan']);
+  assert.deepEqual(summary.planningAdminSessionResumableSites, ['transcript']);
+  assert.equal(summary.planningAdminNextSteps.transcript, 'transcript: continue the canonical school SSO re-entry in the requested profile');
 });
 
 test('describeRequestedProfileEvidence marks existing-tab fallback as unconfirmed without listener proof', () => {

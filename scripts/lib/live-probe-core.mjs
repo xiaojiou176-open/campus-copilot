@@ -290,11 +290,21 @@ export function classifyPage(finalUrl = '', title = '', bodyPreview = '') {
     lowered.includes('dashboard') ||
     lowered.includes('course') ||
     lowered.includes('home - myuw') ||
+    lowered.includes('accounts - myuw') ||
+    lowered.includes('profile - myuw') ||
+    lowered.includes('financial aid status') ||
+    lowered.includes('tuition charge statement') ||
+    lowered.includes('unofficial transcript') ||
+    lowered.includes('audit your degree - myplan') ||
+    lowered.includes('myplan planning') ||
     lowered.includes('your courses') ||
     lowered.includes('sign out') ||
     lowered.includes('log out') ||
     lowered.includes('edit account') ||
     lowered.includes('account summaries') ||
+    lowered.includes('date prepared:') ||
+    lowered.includes('catalog year:') ||
+    lowered.includes('amount due') ||
     lowered.includes('/dashboard') ||
     lowered.includes('/courses/') ||
     lowered.includes('/prompts/new_chat')

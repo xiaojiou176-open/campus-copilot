@@ -306,6 +306,20 @@ function parseGradescopeAssignmentDetailLinks(pageHtml: string | undefined) {
   }));
 }
 
+function rankGradescopeSubmissionDetailLink(link: {
+  submissionId?: string;
+}) {
+  if (link.submissionId && link.submissionId !== 'new') {
+    return 0;
+  }
+
+  if (link.submissionId === 'new') {
+    return 2;
+  }
+
+  return 1;
+}
+
 async function enrichAssignmentsWithSubmissionDetails(input: {
   assignments: Assignment[];
   client?: GradescopeApiClient;
@@ -325,9 +339,9 @@ async function enrichAssignmentsWithSubmissionDetails(input: {
     const assignmentIdsToEnrich = new Set(
       input.assignments.map((assignment) => assignment.id.replace(/^gradescope:assignment:/, '')),
     );
-    const seenSubmissionAssignmentIds = new Set<string>();
-    const submissionLinks = parseGradescopeAssignmentDetailLinks(input.currentPageHtml)
-      .filter((link) => {
+    const submissionLinks = Array.from(
+      parseGradescopeAssignmentDetailLinks(input.currentPageHtml)
+        .filter((link) => {
         if (!link.assignmentId) {
           return false;
         }
@@ -336,13 +350,20 @@ async function enrichAssignmentsWithSubmissionDetails(input: {
           return false;
         }
 
-        if (seenSubmissionAssignmentIds.has(link.assignmentId)) {
-          return false;
-        }
-
-        seenSubmissionAssignmentIds.add(link.assignmentId);
         return true;
       })
+        .reduce((bestLinksByAssignmentId, link) => {
+          const currentBest = bestLinksByAssignmentId.get(link.assignmentId);
+          if (
+            !currentBest ||
+            rankGradescopeSubmissionDetailLink(link) < rankGradescopeSubmissionDetailLink(currentBest)
+          ) {
+            bestLinksByAssignmentId.set(link.assignmentId, link);
+          }
+          return bestLinksByAssignmentId;
+        }, new Map<string, ReturnType<typeof parseGradescopeAssignmentDetailLinks>[number]>())
+        .values(),
+    )
       .slice(0, MAX_SUBMISSION_DETAIL_FETCHES);
     for (const link of submissionLinks) {
       try {

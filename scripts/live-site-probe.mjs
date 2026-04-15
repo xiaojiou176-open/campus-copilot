@@ -15,6 +15,7 @@ import {
   buildCdpTargetSummary,
   collectChromeDebugCandidateUrls,
   SITE_TARGETS,
+  PLANNING_ADMIN_TARGETS,
   determineAuthState,
   buildProbeHeader,
   buildProbeNextStep,
@@ -324,6 +325,16 @@ function probeCdpTargetTabs(targets, cdpSummary, attachInput) {
 async function probeSitesWithContext(context, attachModeResolved, allowExistingPages) {
   const results = [];
 
+  function shouldNavigateRequestedPage(currentUrl, requestedUrl) {
+    try {
+      const current = new URL(currentUrl);
+      const requested = new URL(requestedUrl);
+      return `${current.origin}${current.pathname}${current.search}${current.hash}` !== `${requested.origin}${requested.pathname}${requested.search}${requested.hash}`;
+    } catch {
+      return true;
+    }
+  }
+
   async function findBestExistingPageMatch(requestedUrl) {
     const pages = context.pages();
     const candidates = await Promise.all(
@@ -503,7 +514,9 @@ async function probeSitesWithContext(context, attachModeResolved, allowExistingP
     }
   }
 
-  for (const [name, url] of SITE_TARGETS) {
+  const probeTargets = [...SITE_TARGETS, ...PLANNING_ADMIN_TARGETS];
+
+  for (const [name, url] of probeTargets) {
     const existingPage = allowExistingPages
       ? await findBestExistingPageMatch(url)
       : undefined;
@@ -512,7 +525,7 @@ async function probeSitesWithContext(context, attachModeResolved, allowExistingP
     evidenceCollector.attach(page);
 
     try {
-      if (!existingPage) {
+      if (!existingPage || shouldNavigateRequestedPage(page.url(), url)) {
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: sessionConfig.navigationTimeoutMs });
         await page.waitForTimeout(1000);
       }
@@ -811,7 +824,8 @@ try {
     sessionConfig,
   });
   const cdpBrowserIsAmbiguous = (listeningDebugProcesses.length || debugProcesses.length) > 1;
-  const cdpTargetResults = probeCdpTargetTabs(SITE_TARGETS, cdpTargetSummary, {
+  const probeTargets = [...SITE_TARGETS, ...PLANNING_ADMIN_TARGETS];
+  const cdpTargetResults = probeCdpTargetTabs(probeTargets, cdpTargetSummary, {
     profileMismatch: cdpBrowserIsAmbiguous,
     attachFailed: cdpTargetsLookWrong,
   });

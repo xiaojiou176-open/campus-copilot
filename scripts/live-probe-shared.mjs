@@ -33,6 +33,16 @@ export const SITE_TARGETS = [
   ['openai', 'https://platform.openai.com'],
   ['gemini', 'https://aistudio.google.com'],
 ];
+export const PLANNING_ADMIN_TARGETS = [
+  ['myplan_plan', 'https://myplan.uw.edu/plan/#/sp26'],
+  ['myplan_audit', 'https://myplan.uw.edu/audit/#/degree'],
+  ['myuw_accounts', 'https://my.uw.edu/accounts/'],
+  ['myuw_profile', 'https://my.uw.edu/profile/'],
+  ['finaid', 'https://sdb.admin.uw.edu/sisStudents/uwnetid/finaidstatus.aspx'],
+  ['tuition', 'https://sdb.admin.uw.edu/sisStudents/uwnetid/tuition.aspx'],
+  ['transcript', 'https://sdb.admin.uw.edu/sisStudents/uwnetid/untranscript.aspx'],
+  ['timeschedule_cse', 'https://www.washington.edu/students/timeschd/pub/SPR2026/cse.html'],
+];
 
 function normalizeAttachMode(value) {
   const normalized = String(value ?? '').trim().toLowerCase();
@@ -1115,10 +1125,13 @@ export function summarizeLiveProbe(parsedProbe) {
   };
 
   const campusSites = ['canvas', 'gradescope', 'edstem', 'myuw'];
+  const planningAdminSites = PLANNING_ADMIN_TARGETS.map(([name]) => name);
   const providerSites = ['openai', 'gemini'];
   const campus = Object.fromEntries(campusSites.map((name) => [name, mapResult(name)]));
+  const planningAdmin = Object.fromEntries(planningAdminSites.map((name) => [name, mapResult(name)]));
   const providersWeb = Object.fromEntries(providerSites.map((name) => [name, mapResult(name)]));
   const campusResults = results.filter((entry) => campusSites.includes(entry?.name));
+  const planningAdminResults = results.filter((entry) => planningAdminSites.includes(entry?.name));
   const evidenceResults = results.filter((entry) => entry?.evidence);
   const resolveAuthStateFromEntry = (entry) =>
     entry && ('authenticated' in entry || 'authBoundary' in entry)
@@ -1141,6 +1154,8 @@ export function summarizeLiveProbe(parsedProbe) {
     profileMismatchSites: results.filter((entry) => resolveAuthStateFromEntry(entry).authBoundary === 'profile_mismatch').map((entry) => entry.name),
     campus,
     campusNextSteps: Object.fromEntries(campusSites.map((name) => [name, campus[name].nextStep])),
+    planningAdmin,
+    planningAdminNextSteps: Object.fromEntries(planningAdminSites.map((name) => [name, planningAdmin[name].nextStep])),
     providersWeb,
     campusAuthenticatedAll: campusSites.every((name) => campus[name].authenticated === true),
     campusAuthenticatedSites: campusResults.filter((entry) => resolveAuthStateFromEntry(entry).authenticated === true).map((entry) => entry.name),
@@ -1149,6 +1164,21 @@ export function summarizeLiveProbe(parsedProbe) {
     campusLoggedOutSites: campusResults.filter((entry) => resolveAuthStateFromEntry(entry).authBoundary === 'logged_out').map((entry) => entry.name),
     campusNotOpenSites: campusResults.filter((entry) => resolveAuthStateFromEntry(entry).authBoundary === 'not_open').map((entry) => entry.name),
     attachFailedSites: campusResults.filter((entry) => resolveAuthStateFromEntry(entry).authBoundary === 'attach_failed').map((entry) => entry.name),
+    planningAdminAuthenticatedSites: planningAdminResults
+      .filter((entry) => resolveAuthStateFromEntry(entry).authenticated === true)
+      .map((entry) => entry.name),
+    planningAdminSessionResumableSites: planningAdminResults
+      .filter((entry) => resolveAuthStateFromEntry(entry).authBoundary === 'session_resumable')
+      .map((entry) => entry.name),
+    planningAdminMfaRequiredSites: planningAdminResults
+      .filter((entry) => resolveAuthStateFromEntry(entry).authBoundary === 'mfa_required')
+      .map((entry) => entry.name),
+    planningAdminLoggedOutSites: planningAdminResults
+      .filter((entry) => resolveAuthStateFromEntry(entry).authBoundary === 'logged_out')
+      .map((entry) => entry.name),
+    planningAdminNotOpenSites: planningAdminResults
+      .filter((entry) => resolveAuthStateFromEntry(entry).authBoundary === 'not_open')
+      .map((entry) => entry.name),
     evidenceCoverage: {
       sitesWithEvidence: evidenceResults.map((entry) => entry.name),
       consoleEnabled: Boolean(parsedProbe?.evidenceCapture?.console),
