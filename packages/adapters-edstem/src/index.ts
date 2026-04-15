@@ -866,11 +866,15 @@ function normalizeResource(rawResource: EdStemRawResource): Resource | undefined
   }
 
   const extension = rawResource.extension ? decodeHtmlText(rawResource.extension) : undefined;
+  const releasedAt = rawResource.release_at ?? undefined;
+  const updatedAt = rawResource.updated_at ?? rawResource.created_at ?? rawResource.release_at ?? undefined;
   const detailParts = [
     getEdStemResourceActionLabel(rawResource),
     extension ? extension.replace(/^\./, '').toUpperCase() : undefined,
     formatFileSize(rawResource.size),
     rawResource.staff_only ? 'Staff only' : undefined,
+    releasedAt ? `Released: ${releasedAt}` : undefined,
+    rawResource.updated_at ? `Updated: ${updatedAt}` : undefined,
   ].filter(Boolean);
 
   const downloadUrl = buildEdStemResourceDownloadUrl(rawResource);
@@ -893,9 +897,9 @@ function normalizeResource(rawResource: EdStemRawResource): Resource | undefined
     detail: detailParts.length > 0 ? detailParts.join(' · ') : undefined,
     fileExtension: extension,
     sizeBytes: rawResource.size ?? undefined,
-    releasedAt: rawResource.release_at ?? undefined,
+    releasedAt,
     createdAt: rawResource.created_at ?? rawResource.release_at ?? undefined,
-    updatedAt: rawResource.updated_at ?? rawResource.created_at ?? rawResource.release_at ?? undefined,
+    updatedAt,
   });
 }
 

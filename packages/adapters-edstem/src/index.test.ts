@@ -629,7 +629,8 @@ describe('EdStemApiClient', () => {
           fileExtension: '.pdf',
           sizeBytes: 2280609,
           summary: 'redacted-category',
-          detail: 'Download file · PDF · 2.2 MB',
+          detail:
+            'Download file · PDF · 2.2 MB · Released: 2026-03-24T04:28:00+11:00 · Updated: 2026-03-25T04:14:09.468649+11:00',
           downloadUrl: 'https://us.edstem.org/api/resources/101887/download/redacted-resource.pdf?dl=1',
         }),
         expect.objectContaining({
@@ -639,7 +640,7 @@ describe('EdStemApiClient', () => {
             label: 'redacted-category',
             memberCount: 2,
           },
-          detail: 'Download file · PDF · 451 KB',
+          detail: 'Download file · PDF · 451 KB · Released: 2026-03-16T00:00:00+11:00',
         }),
       ]);
       expect(result.outcome).toBe('success');

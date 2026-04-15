@@ -216,7 +216,12 @@ describe('background site dispatch', () => {
       );
       expect(result.snapshot.events?.[0]?.detail).toContain('WF 11:30-12:20');
       expect(result.snapshot.events?.[0]?.detail).toContain('Wang,Matt');
+      expect(result.snapshot.events?.[0]?.detail).toContain('89 seats available');
       expect(result.snapshot.events?.[0]?.detail).toContain('161/250 enrolled');
+      expect(result.snapshot.events?.[0]?.detail).toContain('LC section');
+      expect(result.snapshot.events?.[0]?.detail).toContain('4 credits');
+      expect(result.snapshot.events?.[0]?.detail).toContain('Reqs: NSc,RSN');
+      expect(result.snapshot.events?.[0]?.detail).toContain('Textbooks listed');
     }
 
     const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
@@ -226,13 +231,20 @@ describe('background site dispatch', () => {
         runtimePosture: 'public_course_offerings_planning_lane_with_sln_detail',
       }),
     );
-    expect(storedPlanning[0]?.currentTruth).toContain('meeting, location, and enrollment proof');
+    expect(storedPlanning[0]?.currentTruth).toContain('seat-availability');
+    expect(storedPlanning[0]?.currentTruth).toContain('section-type / credit / requirement-tag proof');
     expect(storedPlanning[0]?.exactBlockers.map((blocker) => blocker.id)).not.toContain('dom_sln_detail_fallback');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('Detail corroboration: CSE 121 A');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('COMP PROGRAMMING I');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Open');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('89 seats available');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('WF 11:30-12:20');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('GUG 220');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('161/250 enrolled');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('LC section');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('4 credits');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Reqs: NSc,RSN');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Textbooks listed');
   });
 
   it('falls back to EdStem dashboard DOM when path config is missing but the active tab still exposes course cards', async () => {

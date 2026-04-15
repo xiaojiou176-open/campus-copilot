@@ -1211,6 +1211,12 @@ function extractLatestCanvasConversationMessage(
   return rawConversationDetail?.messages?.at(-1);
 }
 
+function extractInitialCanvasConversationMessage(
+  rawConversationDetail: CanvasRawConversationDetail | undefined,
+): CanvasRawConversationMessage | undefined {
+  return rawConversationDetail?.messages?.[0];
+}
+
 function buildCanvasAttachmentHint(attachments: unknown): string | undefined {
   if (!Array.isArray(attachments)) {
     return undefined;
@@ -1261,12 +1267,17 @@ function buildCanvasMessageSummary(
   rawConversation: CanvasRawConversation,
   rawConversationDetail?: CanvasRawConversationDetail,
 ): string | undefined {
+  const initialMessage = extractInitialCanvasConversationMessage(rawConversationDetail);
   const latestMessage = extractLatestCanvasConversationMessage(rawConversationDetail);
+  const initialBody = stripCanvasHtml(initialMessage?.body ?? undefined);
   const detailBody = stripCanvasHtml(latestMessage?.body ?? undefined);
   const attachmentHint = buildCanvasAttachmentHint(latestMessage?.attachments);
   const threadHint = buildCanvasThreadHint(rawConversationDetail);
   const fallbackSummary = rawConversation.last_message?.trim() || undefined;
-  const detailSummary = [detailBody, attachmentHint, threadHint].filter(Boolean).join(' · ');
+  const startHint =
+    threadHint && initialBody && detailBody && initialBody !== detailBody ? `Started: ${initialBody}` : undefined;
+  const latestHint = detailBody ? (startHint ? `Latest: ${detailBody}` : detailBody) : undefined;
+  const detailSummary = [startHint, latestHint, attachmentHint, threadHint].filter(Boolean).join(' · ');
 
   if (detailSummary) {
     return detailSummary;
