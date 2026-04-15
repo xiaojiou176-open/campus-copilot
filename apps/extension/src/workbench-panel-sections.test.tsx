@@ -586,6 +586,83 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Available actions: Download graded copy · Submission history · Request regrade (Please select a question.)');
   });
 
+  it('shows course authority narrative and breakdown on merged cluster cards', () => {
+    const markup = renderToStaticMarkup(
+      <WorkbenchOperationsSections
+        text={getUiText('en')}
+        uiLanguage="en"
+        surface="sidepanel"
+        planningSubstrates={[]}
+        courseClusters={[
+          {
+            id: 'cluster:course:cse312',
+            canonicalCourseKey: 'sp26:cse-312',
+            displayTitle: 'CSE 312',
+            authoritySurface: 'course-sites',
+            authorityEntityKey: 'course-sites:course:cse312:26sp',
+            authorityResourceType: 'course_page',
+            authorityNarrative:
+              'Course identity stays on the course website while Canvas keeps the execution lane and Gradescope keeps the assessment lane.',
+            authorityBreakdown: [
+              {
+                role: 'course_identity',
+                surface: 'course-sites',
+                entityKey: 'course-sites:course:cse312:26sp',
+                resourceType: 'course_page',
+                label: 'CSE 312',
+                reason: 'Course website is the canonical course identity surface.',
+              },
+              {
+                role: 'course_delivery',
+                surface: 'canvas',
+                entityKey: 'canvas:course:cse312',
+                resourceType: 'course',
+                label: 'CSE 312',
+                reason: 'Canvas still owns module and assignment delivery.',
+              },
+              {
+                role: 'assessment_runtime',
+                surface: 'gradescope',
+                entityKey: 'gradescope:course:cse312',
+                resourceType: 'assignment_row',
+                label: 'CSE 312',
+                reason: 'Gradescope still owns grading and rubric truth.',
+              },
+            ],
+            confidenceBand: 'high',
+            confidenceScore: 0.92,
+            needsReview: false,
+            relatedSites: ['canvas', 'gradescope', 'course-sites'],
+            memberEntityKeys: ['canvas:course:cse312', 'gradescope:course:cse312', 'course-sites:course:cse312:26sp'],
+            members: [],
+            evidenceBundle: [],
+            summary: 'Course website now leads the course identity merge.',
+            createdAt: '2026-04-14T15:00:00.000Z',
+            updatedAt: '2026-04-14T15:00:00.000Z',
+          },
+        ]}
+        workItemClusters={[]}
+        administrativeSummaries={[]}
+        currentResources={[]}
+        currentAssignments={[]}
+        currentAnnouncements={[]}
+        currentMessages={[]}
+        currentEvents={[]}
+        orderedSiteStatus={[]}
+        syncFeedback={{}}
+        onSyncSite={async () => {}}
+        onExport={async () => {}}
+        latestSyncRun={undefined}
+        recentChangeEvents={[]}
+      />,
+    );
+
+    expect(markup).toContain('Course identity stays on the course website while Canvas keeps the execution lane and Gradescope keeps the assessment lane.');
+    expect(markup).toContain('course identity:</strong> Authority: course-sites · course page - Course website is the canonical course identity surface.');
+    expect(markup).toContain('course delivery:</strong> Authority: canvas · course - Canvas still owns module and assignment delivery.');
+    expect(markup).toContain('assessment runtime:</strong> Authority: gradescope · assignment row - Gradescope still owns grading and rubric truth.');
+  });
+
   it('shows local review decision controls for cluster matches instead of leaving possible matches read-only', () => {
     const markup = renderToStaticMarkup(
       <WorkbenchOperationsSections

@@ -267,6 +267,34 @@ const baseInput = {
       title: 'CSE 312',
       summary: 'Course website now leads the course identity merge.',
       authoritySource: 'course-sites:course_page',
+      authorityNarrative:
+        'Course identity stays on the course website while Canvas keeps the execution lane and Gradescope keeps the assessment lane.',
+      authorityBreakdown: [
+        {
+          role: 'course_identity',
+          surface: 'course-sites',
+          entityKey: 'course-sites:course:cse312:26sp',
+          resourceType: 'course_page',
+          label: 'CSE 312',
+          reason: 'Course identity stays on the course website.',
+        },
+        {
+          role: 'course_delivery',
+          surface: 'canvas',
+          entityKey: 'canvas:course:cse312',
+          resourceType: 'course',
+          label: 'CSE 312',
+          reason: 'Canvas keeps the execution lane.',
+        },
+        {
+          role: 'assessment_runtime',
+          surface: 'gradescope',
+          entityKey: 'gradescope:course:cse312',
+          resourceType: 'assignment_row',
+          label: 'CSE 312',
+          reason: 'Gradescope keeps the assessment lane.',
+        },
+      ],
       matchConfidence: 'high' as const,
       relatedSites: ['canvas', 'gradescope', 'course-sites'],
       needsReview: false,
@@ -278,6 +306,25 @@ const baseInput = {
       title: 'Homework 5',
       summary: 'Assignment merge still needs human confirmation.',
       authoritySource: 'course-sites:assignment_row',
+      authorityNarrative: 'Course site keeps the assignment spec while Canvas still reflects the submission state.',
+      authorityBreakdown: [
+        {
+          role: 'assignment_spec',
+          surface: 'course-sites',
+          entityKey: 'course-sites:assignment:hw5',
+          resourceType: 'assignment_row',
+          label: 'Homework 5',
+          reason: 'Course site owns the assignment spec.',
+        },
+        {
+          role: 'submission_state',
+          surface: 'canvas',
+          entityKey: 'canvas:assignment:hw5',
+          resourceType: 'assignment',
+          label: 'Homework 5',
+          reason: 'Canvas still owns the submission state.',
+        },
+      ],
       matchConfidence: 'medium' as const,
       relatedSites: ['canvas', 'course-sites'],
       workType: 'assignment',
@@ -413,6 +460,9 @@ describe('exporter package', () => {
     expect(artifact.content).toContain('module Week 1 (assignment)');
     expect(artifact.content).toContain('authority course-sites · course page');
     expect(artifact.content).toContain('authority course-sites · assignment row');
+    expect(artifact.content).toContain('authority narrative Course identity stays on the course website while Canvas keeps the execution lane and Gradescope keeps the assessment lane.');
+    expect(artifact.content).toContain('course identity: course-sites · course page - Course identity stays on the course website.');
+    expect(artifact.content).toContain('assessment runtime: gradescope · assignment row - Gradescope keeps the assessment lane.');
   });
 
   it('treats locally reviewed cluster decisions as resolved export statuses instead of open review blockers', () => {
@@ -445,6 +495,8 @@ describe('exporter package', () => {
             title: 'CSE 312',
             summary: 'Course website merge was accepted locally.',
             authoritySource: 'course-sites:course_page',
+            authorityNarrative:
+              'Course website merge was accepted after confirming the course identity lives on the course site.',
             matchConfidence: 'medium' as const,
             relatedSites: ['canvas', 'course-sites'],
             needsReview: true,
@@ -457,6 +509,8 @@ describe('exporter package', () => {
             title: 'Homework 5',
             summary: 'This cluster was dismissed locally because it is not the same assignment.',
             authoritySource: 'course-sites:assignment_row',
+            authorityNarrative:
+              'Course site and Canvas were reviewed together, but this row stayed dismissed because the assignment identities diverged.',
             matchConfidence: 'medium' as const,
             relatedSites: ['canvas', 'course-sites'],
             workType: 'assignment',
@@ -471,6 +525,9 @@ describe('exporter package', () => {
 
     expect(artifact.content).toContain('CSE 312 (accepted locally; medium; authority course-sites · course page)');
     expect(artifact.content).toContain('Homework 5 (assignment; dismissed locally; medium; authority course-sites · assignment row)');
+    expect(artifact.content).toContain(
+      'authority narrative Course website merge was accepted after confirming the course identity lives on the course site.',
+    );
     expect(artifact.content).not.toContain('possible match');
   });
 

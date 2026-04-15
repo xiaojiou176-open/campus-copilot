@@ -198,7 +198,10 @@ export interface ExportInput {
     authorityNarrative?: string;
     authorityBreakdown?: Array<{
       role: string;
-      authoritySource: string;
+      surface: string;
+      entityKey: string;
+      resourceType: string;
+      label: string;
       reason: string;
     }>;
     matchConfidence: ExportMatchConfidence;
@@ -214,7 +217,10 @@ export interface ExportInput {
     authorityNarrative?: string;
     authorityBreakdown?: Array<{
       role: string;
-      authoritySource: string;
+      surface: string;
+      entityKey: string;
+      resourceType: string;
+      label: string;
       reason: string;
     }>;
     matchConfidence: ExportMatchConfidence;
@@ -1353,6 +1359,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
 
   for (const cluster of dataset.courseClusters) {
     const disposition = getClusterDisposition(cluster);
+    const detailParts = [
+      `Authority: ${cluster.authoritySource}`,
+      cluster.authorityNarrative ? `Narrative: ${cluster.authorityNarrative}` : '',
+      ...formatAuthorityBreakdownLines(cluster.authorityBreakdown),
+    ].filter(Boolean);
     rows.push({
       ...sharedFields,
       kind: 'course_cluster',
@@ -1374,7 +1385,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       outcome: '',
       changeCount: '',
       summary: cluster.summary,
-      detail: `Authority: ${cluster.authoritySource}`,
+      detail: detailParts.join(' | '),
       url: '',
       relation: 'course_cluster',
     });
@@ -1382,6 +1393,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
 
   for (const cluster of dataset.workItemClusters) {
     const disposition = getClusterDisposition(cluster);
+    const detailParts = [
+      `Authority: ${cluster.authoritySource}`,
+      cluster.authorityNarrative ? `Narrative: ${cluster.authorityNarrative}` : '',
+      ...formatAuthorityBreakdownLines(cluster.authorityBreakdown),
+    ].filter(Boolean);
     rows.push({
       ...sharedFields,
       kind: 'work_item_cluster',
@@ -1403,7 +1419,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       outcome: '',
       changeCount: '',
       summary: cluster.summary,
-      detail: `Authority: ${cluster.authoritySource}`,
+      detail: detailParts.join(' | '),
       url: '',
       relation: cluster.workType,
     });
@@ -1560,6 +1576,30 @@ function formatAssignmentReviewAnnotationLabel(input: {
 
 function formatAuthoritySource(value: string) {
   return value.replace(/_/g, ' ').replace(/:/g, ' · ');
+}
+
+function formatAuthorityRole(value: string) {
+  return value.replace(/_/g, ' ');
+}
+
+function formatAuthorityBreakdownLines(
+  breakdown:
+    | Array<{
+        role: string;
+        surface: string;
+        resourceType: string;
+        reason: string;
+      }>
+    | undefined,
+) {
+  if (!breakdown || breakdown.length === 0) {
+    return [];
+  }
+
+  return breakdown.map((facet) => {
+    const reason = facet.reason ? ` - ${facet.reason}` : '';
+    return `${formatAuthorityRole(facet.role)}: ${formatAuthoritySource(`${facet.surface}:${facet.resourceType}`)}${reason}`;
+  });
 }
 
 function renderMarkdown(dataset: ExportDataset) {
@@ -1744,7 +1784,11 @@ function renderMarkdown(dataset: ExportDataset) {
       'Course Clusters',
       dataset.courseClusters.map((cluster) => {
         const flag = formatClusterDisposition(cluster);
-        return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}`;
+        const narrative = cluster.authorityNarrative ? ` - authority narrative ${cluster.authorityNarrative}` : '';
+        const breakdown = formatAuthorityBreakdownLines(cluster.authorityBreakdown)
+          .map((line) => `\n  - ${line}`)
+          .join('');
+        return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}${narrative}${breakdown}`;
       }),
     ),
   );
@@ -1755,7 +1799,11 @@ function renderMarkdown(dataset: ExportDataset) {
       dataset.workItemClusters.map((cluster) => {
         const due = cluster.dueAt ? ` - due ${cluster.dueAt}` : '';
         const flag = formatClusterDisposition(cluster);
-        return `- ${cluster.title} (${cluster.workType}; ${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)})${due} - ${cluster.summary}`;
+        const narrative = cluster.authorityNarrative ? ` - authority narrative ${cluster.authorityNarrative}` : '';
+        const breakdown = formatAuthorityBreakdownLines(cluster.authorityBreakdown)
+          .map((line) => `\n  - ${line}`)
+          .join('');
+        return `- ${cluster.title} (${cluster.workType}; ${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)})${due} - ${cluster.summary}${narrative}${breakdown}`;
       }),
     ),
   );
