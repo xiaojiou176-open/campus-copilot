@@ -314,7 +314,7 @@ const baseInput = {
       title: 'Homework 5',
       summary: 'Assignment merge still needs human confirmation.',
       authoritySource: 'course-sites:assignment_row',
-      authorityNarrative: 'Course site keeps the assignment spec while Canvas still reflects the submission state.',
+      authorityNarrative: 'course-sites owns the assignment spec and time anchor while Canvas still reflects the submission state.',
       authorityBreakdown: [
         {
           role: 'assignment_spec',
@@ -323,6 +323,14 @@ const baseInput = {
           resourceType: 'assignment_row',
           label: 'Homework 5',
           reason: 'Course site owns the assignment spec.',
+        },
+        {
+          role: 'schedule_signal',
+          surface: 'course-sites',
+          entityKey: 'course-sites:assignment:hw5',
+          resourceType: 'assignment_row',
+          label: 'Homework 5',
+          reason: 'Course site also carries the due-date anchor.',
         },
         {
           role: 'submission_state',
@@ -483,6 +491,9 @@ describe('exporter package', () => {
       'boundary map identity[title/code/term/link]=course-sites · delivery[modules/assignments/announcements/runtime]=canvas · discussion[threads/replies/lesson-entry]=edstem · assessment[submissions/scores/review]=gradescope',
     );
     expect(artifact.content).toContain(
+      'surface coverage course-sites=>identity[title/code/term/link] · canvas=>delivery[modules/assignments/announcements/runtime] · edstem=>discussion[threads/replies/lesson-entry] · gradescope=>assessment[submissions/scores/review]',
+    );
+    expect(artifact.content).toContain(
       'course identity: course-sites · course page · fields title/code/term/link - Course identity stays on the course website.',
     );
     expect(artifact.content).toContain(
@@ -492,7 +503,10 @@ describe('exporter package', () => {
       'assessment runtime: gradescope · assignment row · fields submissions/scores/review - Gradescope keeps the assessment lane.',
     );
     expect(artifact.content).toContain(
-      'boundary map spec[title/spec/link]=course-sites · submission[status/submission]=canvas · feedback[score/rubric/comment/annotation]=gradescope',
+      'boundary map spec[title/spec/link]=course-sites · schedule[dueAt/startAt/endAt]=course-sites · submission[status/submission]=canvas · feedback[score/rubric/comment/annotation]=gradescope',
+    );
+    expect(artifact.content).toContain(
+      'surface coverage course-sites=>spec[title/spec/link] + schedule[dueAt/startAt/endAt] · canvas=>submission[status/submission] · gradescope=>feedback[score/rubric/comment/annotation]',
     );
   });
 

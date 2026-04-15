@@ -1360,9 +1360,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
   for (const cluster of dataset.courseClusters) {
     const disposition = getClusterDisposition(cluster);
     const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
+    const surfaceCoverageMap = formatAuthoritySurfaceCoverageMap(cluster.authorityBreakdown);
     const detailParts = [
       `Authority: ${cluster.authoritySource}`,
       boundaryMap ? `Boundary map: ${boundaryMap}` : '',
+      surfaceCoverageMap ? `Surface coverage: ${surfaceCoverageMap}` : '',
       cluster.authorityNarrative ? `Narrative: ${cluster.authorityNarrative}` : '',
       ...formatAuthorityBreakdownLines(cluster.authorityBreakdown),
     ].filter(Boolean);
@@ -1396,9 +1398,11 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
   for (const cluster of dataset.workItemClusters) {
     const disposition = getClusterDisposition(cluster);
     const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
+    const surfaceCoverageMap = formatAuthoritySurfaceCoverageMap(cluster.authorityBreakdown);
     const detailParts = [
       `Authority: ${cluster.authoritySource}`,
       boundaryMap ? `Boundary map: ${boundaryMap}` : '',
+      surfaceCoverageMap ? `Surface coverage: ${surfaceCoverageMap}` : '',
       cluster.authorityNarrative ? `Narrative: ${cluster.authorityNarrative}` : '',
       ...formatAuthorityBreakdownLines(cluster.authorityBreakdown),
     ].filter(Boolean);
@@ -1664,6 +1668,44 @@ function formatAuthorityBoundaryMap(
     .join(' · ');
 }
 
+function formatAuthoritySurfaceCoverageMap(
+  breakdown:
+    | Array<{
+        role: string;
+        surface: string;
+        resourceType?: string;
+      }>
+    | undefined,
+) {
+  if (!breakdown || breakdown.length === 0) {
+    return undefined;
+  }
+
+  const grouped = new Map<
+    string,
+    Array<{
+      role: string;
+      resourceType?: string;
+    }>
+  >();
+
+  for (const facet of breakdown) {
+    grouped.set(facet.surface, [...(grouped.get(facet.surface) ?? []), { role: facet.role, resourceType: facet.resourceType }]);
+  }
+
+  return [...grouped.entries()]
+    .map(([surface, facets]) => {
+      const segments = facets.map((facet) =>
+        `${formatAuthorityBoundaryKey(facet.role)}[${getAuthorityFieldMapTokens({
+          role: facet.role,
+          resourceType: facet.resourceType,
+        }).join('/')}]`,
+      );
+      return `${surface}=>${segments.join(' + ')}`;
+    })
+    .join(' · ');
+}
+
 function formatAuthorityBreakdownLines(
   breakdown:
     | Array<{
@@ -1870,11 +1912,13 @@ function renderMarkdown(dataset: ExportDataset) {
         const flag = formatClusterDisposition(cluster);
         const narrative = cluster.authorityNarrative ? ` - authority narrative ${cluster.authorityNarrative}` : '';
         const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
+        const surfaceCoverageMap = formatAuthoritySurfaceCoverageMap(cluster.authorityBreakdown);
         const breakdown = formatAuthorityBreakdownLines(cluster.authorityBreakdown)
           .map((line) => `\n  - ${line}`)
           .join('');
         const boundary = boundaryMap ? ` - boundary map ${boundaryMap}` : '';
-        return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}${boundary}${narrative}${breakdown}`;
+        const surfaceCoverage = surfaceCoverageMap ? ` - surface coverage ${surfaceCoverageMap}` : '';
+        return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}${boundary}${surfaceCoverage}${narrative}${breakdown}`;
       }),
     ),
   );
@@ -1887,11 +1931,13 @@ function renderMarkdown(dataset: ExportDataset) {
         const flag = formatClusterDisposition(cluster);
         const narrative = cluster.authorityNarrative ? ` - authority narrative ${cluster.authorityNarrative}` : '';
         const boundaryMap = formatAuthorityBoundaryMap(cluster.authorityBreakdown);
+        const surfaceCoverageMap = formatAuthoritySurfaceCoverageMap(cluster.authorityBreakdown);
         const breakdown = formatAuthorityBreakdownLines(cluster.authorityBreakdown)
           .map((line) => `\n  - ${line}`)
           .join('');
         const boundary = boundaryMap ? ` - boundary map ${boundaryMap}` : '';
-        return `- ${cluster.title} (${cluster.workType}; ${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)})${due} - ${cluster.summary}${boundary}${narrative}${breakdown}`;
+        const surfaceCoverage = surfaceCoverageMap ? ` - surface coverage ${surfaceCoverageMap}` : '';
+        return `- ${cluster.title} (${cluster.workType}; ${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)})${due} - ${cluster.summary}${boundary}${surfaceCoverage}${narrative}${breakdown}`;
       }),
     ),
   );

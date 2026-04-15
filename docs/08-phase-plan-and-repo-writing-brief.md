@@ -29,6 +29,7 @@ When extending the repo, keep this order:
 - use [`site-capability-matrix.md`](site-capability-matrix.md) when you need the public capability snapshot
 - use [`verification-matrix.md`](verification-matrix.md) for verification lanes
 - use [`integration-boundaries.md`](integration-boundaries.md) for external boundary honesty
+- keep public docs limited to product, proof, and boundary anchors; use [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md) and [`../examples/README.md`](../examples/README.md) for deeper builder routing instead of re-growing the front door
 
 ## Current Reality
 

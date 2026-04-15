@@ -343,6 +343,7 @@ describe('CanvasApiClient', () => {
             courseId: 'canvas:course:42',
             resourceKind: 'embed',
             title: 'Panopto recording',
+            detail: 'Recording · Week 1 · Source: Panopto',
             resourceModule: {
               key: 'canvas:module:42:7001',
               label: 'Week 1',
@@ -423,7 +424,7 @@ describe('CanvasApiClient', () => {
             courseId: 'canvas:course:42',
             resourceKind: 'embed',
             title: 'Lecture capture 3',
-            detail: 'Canvas media · video · Updated: 2026-03-24T11:00:00-07:00',
+            detail: 'Canvas media · video · Source: Canvas media library · Updated: 2026-03-24T11:00:00-07:00',
           }),
         ]),
       );

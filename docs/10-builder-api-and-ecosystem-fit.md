@@ -1,12 +1,12 @@
 # Integration API And Ecosystem Fit
 
-This brief is the integration second layer, not the product front door.
+This brief is the integration appendix, not the product front door.
 
 Read it after [`../README.md`](../README.md) and the product docs are already clear.
 
 It answers one narrow question:
 
-> What is already real for builders today, what is still preview-grade, and what still belongs to later packaging or owner-side distribution?
+> What can a builder honestly use today, what is still preview-grade, and what still belongs to later packaging or owner-side distribution?
 
 ## Current Truth
 
@@ -49,16 +49,19 @@ If you want the shortest contract read-back, use [`api/openapi.yaml`](api/openap
 
 ## Fast Consumer Routes
 
-Open the first file that matches your control surface instead of reverse-engineering the whole repo:
+Open the first router that matches your control surface instead of reverse-engineering the whole repo:
 
 | Need | Open this first |
 | :-- | :-- |
-| general toolbox chooser | [`../examples/toolbox-chooser.md`](../examples/toolbox-chooser.md) |
+| general builder router | [`../examples/README.md`](../examples/README.md) |
+| toolbox chooser | [`../examples/toolbox-chooser.md`](../examples/toolbox-chooser.md) |
+| API contract | [`api/openapi.yaml`](api/openapi.yaml) |
 | Codex / Claude MCP setup | [`../examples/integrations/README.md`](../examples/integrations/README.md) |
 | stdio MCP examples | [`../examples/mcp/README.md`](../examples/mcp/README.md) |
-| plugin-grade repo bundles | [`../examples/integrations/plugin-bundles.md`](../examples/integrations/plugin-bundles.md) |
-| skill-first consumption | [`../skills/README.md`](../skills/README.md) |
 | repo-side publication truth | [`../DISTRIBUTION.md`](../DISTRIBUTION.md) |
+
+Deeper preview packets still exist, but they stay behind those routers:
+[`../examples/integrations/plugin-bundles.md`](../examples/integrations/plugin-bundles.md) and [`../skills/README.md`](../skills/README.md).
 
 ## Scope Split
 
@@ -76,7 +79,7 @@ Open the first file that matches your control surface instead of reverse-enginee
 
 ## Planning/Admin Expansion Reminder
 
-The integration layer can talk about read-only expansion, but it must keep maturity honest:
+The integration layer can mention read-only expansion, but it must keep maturity honest:
 
 - `MyPlan` and `Time Schedule` now have partial repo-side read-only lanes
 - `DARS`, `DawgPath`, and class-search-only `ctcLink` are still narrower and must not be described as first-class shipped site support

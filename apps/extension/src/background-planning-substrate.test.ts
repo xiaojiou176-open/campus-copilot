@@ -155,6 +155,7 @@ describe('background planning substrate capture', () => {
     expect(record.requirementGroupCount).toBe(0);
     expect(record.degreeProgressSummary).toContain('not exposed');
     expect(record.transferPlanningSummary).toContain('Transfer pathway reviewed');
+    expect(record.transferPlanningSummary).toContain('Program exploration: Informatics B.S. (major) - Backup planning path for HCI-heavy study plans.');
     expect(record.terms[0]).toMatchObject({
       termCode: 'sp26',
       termLabel: 'Spring 2026',
@@ -163,6 +164,8 @@ describe('background planning substrate capture', () => {
       scheduleOptionCount: 1,
     });
     expect(record.terms[0]?.summary).toContain('draft plan.');
+    expect(record.terms[0]?.summary).toContain('Backup path: MATH 300 Mathematical Reasoning.');
+    expect(record.terms[0]?.summary).toContain('Schedule options: Balanced load (CSE 421, CSE 331).');
     expect(record.terms[1]).toMatchObject({
       termCode: 'su26',
       termLabel: 'Summer 2026',
@@ -170,6 +173,7 @@ describe('background planning substrate capture', () => {
       backupCourseCount: 0,
       scheduleOptionCount: 1,
     });
+    expect(record.terms[1]?.summary).toContain('Schedule options: Summer focus (INFO 340).');
   });
 
   it('merges a DARS audit page into an existing planning substrate', () => {

@@ -753,6 +753,15 @@ function buildEdStemSummary(input: {
   return prefix || input.fallbackTitle;
 }
 
+function buildEdStemReplySummary(content: string | undefined, replyToCommentId?: string) {
+  const summary = stripDiscussionHtml(content);
+  if (!summary) {
+    return undefined;
+  }
+
+  return replyToCommentId ? `Reply to comment ${replyToCommentId} · ${summary}` : summary;
+}
+
 function hasVisibleRoleBadge(markup: string, className: string) {
   return new RegExp(
     `class="${className}"(?![^>]*display:\\s*none)[^>]*>[\\s\\S]*?url-segment-role`,
@@ -1420,7 +1429,11 @@ function parseDirectThreadMessages(pageHtml: string, pageUrl: string): Message[]
     const commentId = replyMatch.groups?.commentId;
     const createdAt = replyMatch.groups?.createdAt;
     const content = replyMatch.groups?.content;
-    const summary = stripDiscussionHtml(content);
+    const replyToCommentId =
+      replyMatch.groups?.replyTo ??
+      replyMatch[0].match(/class="[^"]*discuss-replying-to[^"]*"[^>]*href="[^"]*comment=(?<replyTo>\d+)"/i)?.groups
+        ?.replyTo;
+    const summary = buildEdStemReplySummary(content, replyToCommentId);
     if (!commentId || !summary) {
       continue;
     }
