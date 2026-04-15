@@ -255,6 +255,18 @@ function getResourceActionLabel(
   resource: OperationsSectionProps['currentResources'][number],
   text: OperationsSectionProps['text'],
 ) {
+  if (resource.site === 'edstem') {
+    if (resource.source.resourceType === 'lesson_slide') {
+      return text.currentResources.openSlide;
+    }
+    if (resource.source.resourceType === 'lesson' || resource.source.resourceType === 'lesson_detail') {
+      return text.currentResources.openLesson;
+    }
+    if (resource.resourceKind === 'file' && resource.downloadUrl) {
+      return text.currentResources.downloadFile;
+    }
+  }
+
   switch (resource.resourceKind) {
     case 'link':
       return text.currentResources.openLink;

@@ -198,6 +198,7 @@ export interface ExportInput {
     matchConfidence: ExportMatchConfidence;
     relatedSites: string[];
     needsReview?: boolean;
+    reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
   }>;
   workItemClusters?: Array<{
     id: string;
@@ -211,6 +212,7 @@ export interface ExportInput {
     dueAt?: string;
     status?: string;
     needsReview?: boolean;
+    reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
   }>;
   administrativeSummaries?: Array<{
     id: string;
@@ -529,6 +531,49 @@ function hasAdministrativeCarrierPlaceholders(
   return summaries.some((summary) => summary.laneStatus === 'carrier_not_landed' || summary.id.endsWith(':blocker'));
 }
 
+function isPendingClusterReview(input: {
+  needsReview?: boolean;
+  reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
+}) {
+  if (!input.needsReview) {
+    return false;
+  }
+  return input.reviewDecision !== 'accepted' && input.reviewDecision !== 'dismissed';
+}
+
+function getClusterDisposition(input: {
+  needsReview?: boolean;
+  reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
+}) {
+  if (input.reviewDecision === 'accepted') {
+    return 'accepted_local';
+  }
+  if (input.reviewDecision === 'dismissed') {
+    return 'dismissed_local';
+  }
+  if (isPendingClusterReview(input)) {
+    return 'possible_match';
+  }
+  return 'merged';
+}
+
+function formatClusterDisposition(input: {
+  needsReview?: boolean;
+  reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
+}) {
+  const disposition = getClusterDisposition(input);
+  if (disposition === 'accepted_local') {
+    return 'accepted locally';
+  }
+  if (disposition === 'dismissed_local') {
+    return 'dismissed locally';
+  }
+  if (disposition === 'possible_match') {
+    return 'possible match';
+  }
+  return 'merged';
+}
+
 function inferMatchConfidence(input: {
   scope: ExportScopeMetadata;
   normalized: NormalizedExportInput;
@@ -536,8 +581,8 @@ function inferMatchConfidence(input: {
   const reviewSignalsPresent =
     (input.normalized.mergeHealth?.possibleMatchCount ?? 0) > 0 ||
     (input.normalized.mergeHealth?.unresolvedCount ?? 0) > 0 ||
-    input.normalized.courseClusters.some((cluster) => cluster.needsReview) ||
-    input.normalized.workItemClusters.some((cluster) => cluster.needsReview);
+    input.normalized.courseClusters.some((cluster) => isPendingClusterReview(cluster)) ||
+    input.normalized.workItemClusters.some((cluster) => isPendingClusterReview(cluster));
 
   if (input.scope.resourceFamily === 'cluster_merge_review') {
     if (
@@ -1290,6 +1335,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
   }
 
   for (const cluster of dataset.courseClusters) {
+    const disposition = getClusterDisposition(cluster);
     rows.push({
       ...sharedFields,
       kind: 'course_cluster',
@@ -1297,7 +1343,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       title: cluster.title,
       courseId: cluster.id,
       assignmentId: '',
-      status: cluster.needsReview ? 'possible_match' : 'merged',
+      status: disposition,
       occurredAt: '',
       dueAt: '',
       startAt: '',
@@ -1307,7 +1353,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       importance: '',
       dateKey: '',
       reasons: cluster.matchConfidence,
-      blockedBy: cluster.needsReview ? 'review' : '',
+      blockedBy: isPendingClusterReview(cluster) ? 'review' : '',
       outcome: '',
       changeCount: '',
       summary: cluster.summary,
@@ -1318,6 +1364,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
   }
 
   for (const cluster of dataset.workItemClusters) {
+    const disposition = getClusterDisposition(cluster);
     rows.push({
       ...sharedFields,
       kind: 'work_item_cluster',
@@ -1325,7 +1372,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       title: cluster.title,
       courseId: cluster.courseClusterId ?? '',
       assignmentId: cluster.id,
-      status: cluster.status ?? cluster.workType,
+      status: disposition === 'merged' ? cluster.status ?? cluster.workType : disposition,
       occurredAt: '',
       dueAt: formatOptionalString(cluster.dueAt),
       startAt: '',
@@ -1335,7 +1382,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       importance: '',
       dateKey: '',
       reasons: cluster.matchConfidence,
-      blockedBy: cluster.needsReview ? 'review' : '',
+      blockedBy: isPendingClusterReview(cluster) ? 'review' : '',
       outcome: '',
       changeCount: '',
       summary: cluster.summary,
@@ -1657,7 +1704,7 @@ function renderMarkdown(dataset: ExportDataset) {
     renderMarkdownSection(
       'Course Clusters',
       dataset.courseClusters.map((cluster) => {
-        const flag = cluster.needsReview ? 'possible match' : 'merged';
+        const flag = formatClusterDisposition(cluster);
         return `- ${cluster.title} (${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)}) - ${cluster.summary}`;
       }),
     ),
@@ -1668,7 +1715,7 @@ function renderMarkdown(dataset: ExportDataset) {
       'Work-Item Clusters',
       dataset.workItemClusters.map((cluster) => {
         const due = cluster.dueAt ? ` - due ${cluster.dueAt}` : '';
-        const flag = cluster.needsReview ? 'possible match' : 'merged';
+        const flag = formatClusterDisposition(cluster);
         return `- ${cluster.title} (${cluster.workType}; ${flag}; ${cluster.matchConfidence}; authority ${formatAuthoritySource(cluster.authoritySource)})${due} - ${cluster.summary}`;
       }),
     ),

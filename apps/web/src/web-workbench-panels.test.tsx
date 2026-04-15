@@ -272,7 +272,7 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Module: Week 1 · assignment');
     expect(html).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
     expect(html).toContain('ZIP · A. Using - Spring 2026 · Download file');
-    expect(html).toContain('Open link');
+    expect(html).toContain('Open slide');
     expect(html).toContain('href="https://edstem.org/us/courses/96846/lessons/162340/slides/954014"');
   });
 

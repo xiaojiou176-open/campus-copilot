@@ -41,6 +41,16 @@ const WORK_ITEM_AUTHORITY_PRIORITY: Record<ClusterSurface, number> = {
   myplan: 60,
 };
 
+function isClusterReviewPending(input: {
+  needsReview: boolean;
+  reviewDecision?: 'accepted' | 'review_later' | 'dismissed';
+}) {
+  if (!input.needsReview) {
+    return false;
+  }
+  return input.reviewDecision !== 'accepted' && input.reviewDecision !== 'dismissed';
+}
+
 const TUITION_PATTERN = /\b(tuition|payment|billing|bill|fee|fees|account)\b/i;
 const COURSE_CODE_PATTERN = /\b([A-Z]{2,5})\s*([0-9]{2,3}[A-Z]?)\b/;
 
@@ -792,7 +802,7 @@ export async function getMergeHealthSummary(db: CampusCopilotDB = campusCopilotD
   ]);
 
   const authorityConflictCount = [...courseClusters, ...workItemClusters].filter((cluster) => {
-    if (!cluster.needsReview || cluster.relatedSites.length < 2) {
+    if (!isClusterReviewPending(cluster) || cluster.relatedSites.length < 2) {
       return false;
     }
 
@@ -819,10 +829,9 @@ export async function getMergeHealthSummary(db: CampusCopilotDB = campusCopilotD
 
   return MergeHealthSummarySchema.parse({
     mergedCount: [...courseClusters, ...workItemClusters].filter((cluster) => cluster.confidenceBand !== 'low').length,
-    possibleMatchCount: [...courseClusters, ...workItemClusters].filter((cluster) => cluster.needsReview).length,
+    possibleMatchCount: [...courseClusters, ...workItemClusters].filter((cluster) => isClusterReviewPending(cluster)).length,
     unresolvedCount: [...courseClusters, ...workItemClusters].filter(
-      (cluster) =>
-        cluster.needsReview && cluster.reviewDecision !== 'accepted' && cluster.reviewDecision !== 'dismissed',
+      (cluster) => isClusterReviewPending(cluster),
     ).length,
     authorityConflictCount,
   });

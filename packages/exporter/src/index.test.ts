@@ -414,6 +414,65 @@ describe('exporter package', () => {
     expect(artifact.content).toContain('authority course-sites · assignment row');
   });
 
+  it('treats locally reviewed cluster decisions as resolved export statuses instead of open review blockers', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'markdown',
+      input: {
+        ...baseInput,
+        resources: [],
+        assignments: [],
+        announcements: [],
+        messages: [],
+        grades: [],
+        events: [],
+        alerts: [],
+        timelineEntries: [],
+        focusQueue: [],
+        weeklyLoad: [],
+        syncRuns: [],
+        changeEvents: [],
+        mergeHealth: {
+          mergedCount: 2,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+        courseClusters: [
+          {
+            id: 'cluster:course:cse312',
+            title: 'CSE 312',
+            summary: 'Course website merge was accepted locally.',
+            authoritySource: 'course-sites:course_page',
+            matchConfidence: 'medium' as const,
+            relatedSites: ['canvas', 'course-sites'],
+            needsReview: true,
+            reviewDecision: 'accepted' as const,
+          },
+        ],
+        workItemClusters: [
+          {
+            id: 'cluster:work:cse312:hw5',
+            title: 'Homework 5',
+            summary: 'This cluster was dismissed locally because it is not the same assignment.',
+            authoritySource: 'course-sites:assignment_row',
+            matchConfidence: 'medium' as const,
+            relatedSites: ['canvas', 'course-sites'],
+            workType: 'assignment',
+            dueAt: '2026-03-26T23:59:00-07:00',
+            status: 'todo',
+            needsReview: true,
+            reviewDecision: 'dismissed' as const,
+          },
+        ],
+      },
+    });
+
+    expect(artifact.content).toContain('CSE 312 (accepted locally; medium; authority course-sites · course page)');
+    expect(artifact.content).toContain('Homework 5 (assignment; dismissed locally; medium; authority course-sites · assignment row)');
+    expect(artifact.content).not.toContain('possible match');
+  });
+
   it('builds weekly load as csv rows', () => {
     const artifact = createExportArtifact({
       preset: 'weekly_load',

@@ -161,6 +161,7 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
       matchConfidence: cluster.confidenceBand,
       relatedSites: cluster.relatedSites,
       needsReview: cluster.needsReview,
+      reviewDecision: cluster.reviewDecision,
     })),
     workItemClusters: (presentation?.workItemClusters ?? args.workItemClusters ?? []).map((cluster) => ({
       id: cluster.id,
@@ -174,6 +175,7 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
       dueAt: cluster.dueAt,
       status: cluster.status,
       needsReview: cluster.needsReview,
+      reviewDecision: cluster.reviewDecision,
     })),
     administrativeSummaries: (presentation?.administrativeSummaries ?? args.administrativeSummaries ?? []).map((summary) => ({
       id: summary.id,

@@ -267,7 +267,10 @@ type UiText = {
     none: string;
     releasedAt: (value: string) => string;
     openDownload: string;
+    downloadFile: string;
     openLink: string;
+    openLesson: string;
+    openSlide: string;
     openMaterial: string;
   };
   discussionHighlights: {
@@ -814,7 +817,10 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       none: 'No study materials are visible in the current filter.',
       releasedAt: (value) => `Released ${value}`,
       openDownload: 'Open download',
+      downloadFile: 'Download file',
       openLink: 'Open link',
+      openLesson: 'Open lesson',
+      openSlide: 'Open slide',
       openMaterial: 'Open material',
     },
     discussionHighlights: {
@@ -1430,7 +1436,10 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       none: '当前筛选下还没有可见的学习资料。',
       releasedAt: (value) => `发布于 ${value}`,
       openDownload: '打开下载链接',
+      downloadFile: '下载文件',
       openLink: '打开链接',
+      openLesson: '打开课程页',
+      openSlide: '打开课件页',
       openMaterial: '打开资料',
     },
     discussionHighlights: {

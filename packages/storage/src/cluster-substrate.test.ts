@@ -340,7 +340,7 @@ describe('cluster substrate', () => {
     expect(acceptedCluster?.needsReview).toBe(true);
     expect(acceptedCluster?.reviewDecision).toBe('accepted');
     expect(acceptedCluster?.reviewDecidedAt).toBeTruthy();
-    expect(mergeHealth.possibleMatchCount).toBe(1);
+    expect(mergeHealth.possibleMatchCount).toBe(0);
     expect(mergeHealth.unresolvedCount).toBe(0);
   });
 

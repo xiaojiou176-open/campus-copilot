@@ -33,8 +33,25 @@ function formatCountLabel(value: number, singular: string, plural: string) {
   return `${value} ${value === 1 ? singular : plural}`;
 }
 
-export function getResourceActionLabel(resourceKind: 'file' | 'link' | 'embed' | 'other') {
-  switch (resourceKind) {
+export function getResourceActionLabel(input: {
+  site?: string;
+  resourceKind: 'file' | 'link' | 'embed' | 'other';
+  downloadUrl?: string;
+  source?: { resourceType?: string };
+}) {
+  if (input.site === 'edstem') {
+    if (input.source?.resourceType === 'lesson_slide') {
+      return 'Open slide';
+    }
+    if (input.source?.resourceType === 'lesson' || input.source?.resourceType === 'lesson_detail') {
+      return 'Open lesson';
+    }
+    if (input.resourceKind === 'file' && input.downloadUrl) {
+      return 'Download file';
+    }
+  }
+
+  switch (input.resourceKind) {
     case 'link':
       return 'Open link';
     case 'embed':

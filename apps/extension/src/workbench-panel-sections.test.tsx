@@ -407,8 +407,8 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Module: Week 1 · assignment');
     expect(markup).toContain('Download file · PDF · 452 KB');
     expect(markup).toContain('Slide 1 · document · completed · Lesson state: scheduled');
-    expect(markup).toContain('Open download');
-    expect(markup).toContain('Open link');
+    expect(markup).toContain('Download file');
+    expect(markup).toContain('Open slide');
     expect(markup).toContain('https://us.edstem.org/api/resources/1/download/week-8-review-sheet.pdf?dl=1');
     expect(markup).toContain('https://us.edstem.org/courses/11/lessons/162340/slides/954014');
     expect(markup).toContain('Notice Signals');
@@ -468,7 +468,7 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Study Materials');
     expect(markup).toContain('lesson');
     expect(markup).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
-    expect(markup).toContain('Open link');
+    expect(markup).toContain('Open lesson');
   });
 
   it('marks Canvas module, group, and recording carriers with semantic badges', () => {

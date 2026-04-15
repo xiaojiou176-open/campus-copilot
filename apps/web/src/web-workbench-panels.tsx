@@ -917,7 +917,12 @@ export function WebWorkbenchPanels(props: {
                 {getResourceHref(resource) ? (
                   <p className="meta">
                     <a className="resource-link" href={getResourceHref(resource)} rel="noreferrer" target="_blank">
-                      {getResourceActionLabel(resource.resourceKind)}
+                      {getResourceActionLabel({
+                        site: resource.site,
+                        resourceKind: resource.resourceKind,
+                        downloadUrl: resource.downloadUrl,
+                        source: resource.source,
+                      })}
                     </a>
                   </p>
                 ) : null}
