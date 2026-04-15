@@ -557,6 +557,66 @@ describe('CanvasApiClient', () => {
     }
   });
 
+  it('uses the feedback attachment hint when submission comments have no body text', async () => {
+    const client = new CanvasApiClient(
+      okExecutor({
+        [CANVAS_COURSES_PATH]: [
+          {
+            id: 42,
+            name: 'CSE 142',
+            course_code: 'CSE 142',
+            html_url: 'https://canvas.example.edu/courses/42',
+          },
+        ],
+        ...canvasDepthResourcePayloads(42),
+        [canvasSubmissionFeedbackPath(42, [10])]: [
+          {
+            assignment_id: 10,
+            submission_comments: [
+              {
+                comment: '   ',
+                attachments: [{ display_name: 'rubric-feedback.pdf' }],
+              },
+            ],
+          },
+        ],
+        '/api/v1/courses/42/assignments?include[]=submission&order_by=due_at&per_page=100': [
+          {
+            id: 10,
+            course_id: 42,
+            name: 'Homework 3',
+            html_url: 'https://canvas.example.edu/courses/42/assignments/10',
+            due_at: '2026-03-26T23:59:00-07:00',
+            points_possible: 25,
+            submission: {
+              workflow_state: 'submitted',
+              submitted_at: '2026-03-24T08:15:00-07:00',
+              score: 24,
+            },
+          },
+        ],
+        '/api/v1/announcements?per_page=100&context_codes%5B%5D=course_42': [],
+        '/api/v1/conversations?scope=inbox&per_page=100': [],
+        '/api/v1/calendar_events?all_events=true&per_page=100&context_codes%5B%5D=course_42': [],
+      }),
+    );
+
+    const adapter = createCanvasAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://canvas.example.edu/courses/42',
+      site: 'canvas',
+      now: '2026-03-24T18:00:00-07:00',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.assignments?.[0]).toMatchObject({
+        title: 'Homework 3',
+        detail: 'Attachment: rubric-feedback.pdf',
+      });
+    }
+  });
+
   it('uses the detail attachment hint even when the latest message body is empty', async () => {
     const client = new CanvasApiClient(
       okExecutor({

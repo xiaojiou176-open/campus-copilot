@@ -901,7 +901,13 @@ function buildCanvasAssignmentSummary(rawAssignment: CanvasRawAssignment) {
 
 function buildCanvasAssignmentDetail(rawSubmission: CanvasRawSubmission | undefined) {
   const comments = [
-    ...(rawSubmission?.submission_comments ?? []).map((comment) => stripCanvasHtml(comment.comment ?? undefined)),
+    ...(rawSubmission?.submission_comments ?? []).flatMap((comment) => {
+      const attachmentHint =
+        comment && typeof comment === 'object' && 'attachments' in comment
+          ? buildCanvasAttachmentHint(comment.attachments)
+          : undefined;
+      return [stripCanvasHtml(comment.comment ?? undefined), attachmentHint];
+    }),
     stripCanvasHtml(rawSubmission?.submission_html_comments ?? undefined),
     ...Object.values(rawSubmission?.rubric_assessment ?? {}).flatMap((entry) => {
       if (!entry || typeof entry !== 'object') {
@@ -1023,17 +1029,30 @@ function extractLatestCanvasConversationMessage(
   return rawConversationDetail?.messages?.at(-1);
 }
 
-function buildCanvasMessageAttachmentHint(
-  attachments: CanvasRawConversationAttachment[] | undefined,
-): string | undefined {
-  const attachmentCount = attachments?.length ?? 0;
+function buildCanvasAttachmentHint(attachments: unknown): string | undefined {
+  if (!Array.isArray(attachments)) {
+    return undefined;
+  }
+
+  const attachmentCount = attachments.length;
   if (attachmentCount === 0) {
     return undefined;
   }
 
   if (attachmentCount === 1) {
-    const firstAttachment = attachments?.[0];
-    const attachmentName = firstAttachment?.display_name?.trim() || firstAttachment?.filename?.trim();
+    const firstAttachment = attachments[0];
+    const attachmentName =
+      firstAttachment &&
+      typeof firstAttachment === 'object' &&
+      !Array.isArray(firstAttachment) &&
+      (
+        ('display_name' in firstAttachment && typeof firstAttachment.display_name === 'string'
+          ? firstAttachment.display_name.trim()
+          : undefined) ||
+        ('filename' in firstAttachment && typeof firstAttachment.filename === 'string'
+          ? firstAttachment.filename.trim()
+          : undefined)
+      );
     return attachmentName ? `Attachment: ${attachmentName}` : 'Includes 1 attachment';
   }
 
@@ -1062,7 +1081,7 @@ function buildCanvasMessageSummary(
 ): string | undefined {
   const latestMessage = extractLatestCanvasConversationMessage(rawConversationDetail);
   const detailBody = stripCanvasHtml(latestMessage?.body ?? undefined);
-  const attachmentHint = buildCanvasMessageAttachmentHint(latestMessage?.attachments);
+  const attachmentHint = buildCanvasAttachmentHint(latestMessage?.attachments);
   const threadHint = buildCanvasThreadHint(rawConversationDetail);
   const fallbackSummary = rawConversation.last_message?.trim() || undefined;
   const detailSummary = [detailBody, attachmentHint, threadHint].filter(Boolean).join(' · ');
