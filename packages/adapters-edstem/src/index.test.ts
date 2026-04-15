@@ -562,6 +562,11 @@ describe('EdStemApiClient', () => {
         },
       });
       expect(result.snapshot.messages?.[0]?.summary).toContain('redacted-text');
+      expect(result.snapshot.messages?.[0]?.summary).toContain('4 replies');
+      expect(result.snapshot.messages?.[0]?.summary).toContain('3 nested');
+      expect(result.snapshot.messages?.[1]?.summary).toContain('Top-level reply');
+      expect(result.snapshot.messages?.[2]?.summary).toContain('Nested reply');
+      expect(result.snapshot.messages?.[3]?.summary).toContain('Nested reply');
       expect(result.snapshot.messages?.[4]).toMatchObject({
         source: {
           resourceType: 'reply',
@@ -569,6 +574,7 @@ describe('EdStemApiClient', () => {
         url: 'https://edstem.org/us/courses/855/discussion/709033?comment=1654435',
       });
       expect(result.snapshot.messages?.[4]?.summary).toContain('Reply to comment 1651940');
+      expect(result.snapshot.messages?.[4]?.summary).toContain('Nested reply');
       expect(result.snapshot.messages?.[4]?.summary).not.toContain('<');
       expect(result.health.code).toBe('partial_success');
     }

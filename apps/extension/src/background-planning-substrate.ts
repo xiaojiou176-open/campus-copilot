@@ -19,6 +19,7 @@ type MyPlanBootstrapTermSummary = {
   termLabel: string;
   planStatus?: 'draft' | 'saved' | 'submitted';
   plannedCourseCount: number;
+  plannedCourseSummaries: string[];
   backupCourseCount: number;
   scheduleOptionCount: number;
   backupCourseSummaries: string[];
@@ -149,6 +150,9 @@ function buildBootstrapPlanningSummary(pageHtml: string): MyPlanBootstrapPlannin
         code: readNonEmptyString(course, 'code'),
         title: readNonEmptyString(course, 'title'),
       }));
+      const plannedCourseSummaries = plannedCourses
+        .map((course) => [course.code, course.title].filter(Boolean).join(' ').trim())
+        .filter(Boolean);
       const plannedCourseCodeById = new Map<string, string>();
       for (const course of plannedCourses) {
         if (!course.id) {
@@ -181,6 +185,7 @@ function buildBootstrapPlanningSummary(pageHtml: string): MyPlanBootstrapPlannin
         termLabel,
         planStatus: normalizedPlanStatus,
         plannedCourseCount: plannedCourses.length,
+        plannedCourseSummaries,
         backupCourseCount: backupCourseSummaries.length,
         scheduleOptionCount: scheduleOptionSummaries.length,
         backupCourseSummaries,
@@ -220,6 +225,7 @@ function buildPlanningTermSummary(
   term: Pick<
     MyPlanBootstrapTermSummary,
     | 'plannedCourseCount'
+    | 'plannedCourseSummaries'
     | 'backupCourseCount'
     | 'scheduleOptionCount'
     | 'planStatus'
@@ -229,6 +235,7 @@ function buildPlanningTermSummary(
   options?: {
     visiblePlannedCourseCount?: number;
     issuesSummary?: string;
+    futureTermPathSummary?: string;
   },
 ) {
   const parts = [];
@@ -238,6 +245,11 @@ function buildPlanningTermSummary(
   parts.push(
     `${term.plannedCourseCount} planned course(s), ${term.backupCourseCount} backup option(s), ${term.scheduleOptionCount} schedule option(s).`,
   );
+  if (term.plannedCourseSummaries.length > 0) {
+    parts.push(
+      `Planned path: ${term.plannedCourseSummaries.slice(0, 2).join('; ')}${term.plannedCourseSummaries.length > 2 ? '; ...' : '.'}`,
+    );
+  }
   if (term.backupCourseSummaries.length > 0) {
     parts.push(`Backup path: ${term.backupCourseSummaries.slice(0, 2).join('; ')}${term.backupCourseSummaries.length > 2 ? '; ...' : '.'}`);
   }
@@ -255,7 +267,35 @@ function buildPlanningTermSummary(
   } else if (options?.issuesSummary) {
     parts.push(options.issuesSummary);
   }
+  if (options?.futureTermPathSummary) {
+    parts.push(options.futureTermPathSummary);
+  }
   return parts.join(' ').trim();
+}
+
+function buildFutureTermPathSummary(
+  terms: MyPlanBootstrapPlanningSummary['terms'],
+  currentTerm: Pick<MyPlanBootstrapTermSummary, 'termCode' | 'termLabel'>,
+) {
+  const currentIndex = terms.findIndex((term) => termSummariesMatch(term, currentTerm));
+  if (currentIndex < 0) {
+    return undefined;
+  }
+
+  const futureTerms = terms
+    .slice(currentIndex + 1)
+    .filter((term) => term.plannedCourseSummaries.length > 0);
+  if (futureTerms.length === 0) {
+    return undefined;
+  }
+
+  const visibleFutureTerms = futureTerms.slice(0, 2).map((term) => {
+    const plannedPath = term.plannedCourseSummaries.slice(0, 2).join(', ');
+    return `${term.termLabel} -> ${plannedPath}${term.plannedCourseSummaries.length > 2 ? ', ...' : ''}`;
+  });
+  const lead = futureTerms.length === 1 ? 'Next term path' : 'Future term path';
+
+  return `${lead}: ${visibleFutureTerms.join('; ')}${futureTerms.length > 2 ? '; ...' : '.'}`;
 }
 
 function mergeBootstrapTerms(
@@ -276,6 +316,9 @@ function mergeBootstrapTerms(
   let nextTerms: PlanningSubstrateOwner['terms'] = [...bootstrapTerms];
   if (visibleTerm) {
     const matchedBootstrap = bootstrapSummary.terms.find((term) => termSummariesMatch(term, visibleTerm));
+    const futureTermPathSummary = matchedBootstrap
+      ? buildFutureTermPathSummary(bootstrapSummary.terms, matchedBootstrap)
+      : undefined;
     const enrichedVisibleTerm = matchedBootstrap
       ? {
           ...visibleTerm,
@@ -285,6 +328,7 @@ function mergeBootstrapTerms(
           summary: buildPlanningTermSummary(matchedBootstrap, {
             visiblePlannedCourseCount: visibleTerm.plannedCourseCount,
             issuesSummary: visibleIssuesSummary,
+            futureTermPathSummary,
           }),
         }
       : visibleTerm;

@@ -708,6 +708,7 @@ describe('GradescopeApiClient', () => {
       expect(result.snapshot.assignments?.[0]?.actionHints).toEqual([
         'Download graded copy',
         'Submission history (1 submission on record)',
+        'Request regrade (window closed)',
       ]);
       expect(result.snapshot.grades?.[0]).toMatchObject({
         id: 'gradescope:grade:380090124',
@@ -1197,11 +1198,12 @@ describe('GradescopeApiClient', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.snapshot.assignments?.[0]?.detail).toContain(
-        'Actions: Download graded copy | Submission history (1 submission on record)',
+        'Actions: Download graded copy | Submission history (1 submission on record) | Request regrade (window closed)',
       );
       expect(result.snapshot.assignments?.[0]?.actionHints).toEqual([
         'Download graded copy',
         'Submission history (1 submission on record)',
+        'Request regrade (window closed)',
       ]);
     }
   });

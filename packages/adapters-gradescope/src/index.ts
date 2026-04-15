@@ -111,6 +111,7 @@ const GradescopeSubmissionViewerAssignmentSchema = z
     id: z.union([z.number(), z.string()]).optional(),
     title: z.string().optional(),
     total_points: NumericLikeSchema,
+    regrade_requests_open: z.boolean().optional(),
   })
   .passthrough();
 
@@ -869,7 +870,7 @@ function buildGradescopeQuestionBreakdownDetail(detail: GradescopeSubmissionDeta
 
 function parseGradescopeSubmissionActions(
   pageHtml: string | undefined,
-  viewerProps?: Pick<GradescopeSubmissionViewerProps, 'past_submissions' | 'paths'>,
+  viewerProps?: Pick<GradescopeSubmissionViewerProps, 'assignment' | 'past_submissions' | 'paths'>,
 ) {
   if (!pageHtml && !viewerProps) {
     return [];
@@ -896,6 +897,11 @@ function parseGradescopeSubmissionActions(
   if (regradeLabel) {
     const normalized = regradeLabel.replace(/^Request Regrade\.?\s*/i, '').trim();
     actionHints.push(normalized ? `Request regrade (${normalized})` : 'Request regrade');
+  } else if (
+    viewerProps?.paths?.regrade_requests_path &&
+    viewerProps.assignment.regrade_requests_open === false
+  ) {
+    actionHints.push('Request regrade (window closed)');
   } else if (pageHtml && />\s*Request Regrade\s*</i.test(pageHtml)) {
     const disabled = /Request Regrade[\s\S]*?aria-disabled="true"/i.test(pageHtml);
     actionHints.push(disabled ? 'Request regrade (disabled)' : 'Request regrade');

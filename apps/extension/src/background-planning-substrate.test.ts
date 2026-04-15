@@ -164,8 +164,10 @@ describe('background planning substrate capture', () => {
       scheduleOptionCount: 1,
     });
     expect(record.terms[0]?.summary).toContain('draft plan.');
+    expect(record.terms[0]?.summary).toContain('Planned path: CSE 421 Introduction to Algorithms; CSE 331 Software Design and Implementation.');
     expect(record.terms[0]?.summary).toContain('Backup path: MATH 300 Mathematical Reasoning.');
     expect(record.terms[0]?.summary).toContain('Schedule options: Balanced load (CSE 421, CSE 331).');
+    expect(record.terms[0]?.summary).toContain('Next term path: Summer 2026 -> INFO 340 Client-Side Development.');
     expect(record.terms[1]).toMatchObject({
       termCode: 'su26',
       termLabel: 'Summer 2026',
@@ -173,6 +175,7 @@ describe('background planning substrate capture', () => {
       backupCourseCount: 0,
       scheduleOptionCount: 1,
     });
+    expect(record.terms[1]?.summary).toContain('Planned path: INFO 340 Client-Side Development.');
     expect(record.terms[1]?.summary).toContain('Schedule options: Summer focus (INFO 340).');
   });
 

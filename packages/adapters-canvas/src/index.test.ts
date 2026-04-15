@@ -761,7 +761,7 @@ describe('CanvasApiClient', () => {
     if (result.ok) {
       expect(result.snapshot.messages?.[0]).toMatchObject({
         title: 'Lab handout',
-        summary: 'Attachment: lab-3.pdf',
+        summary: 'See latest attachment. · Attachment: lab-3.pdf',
         unread: false,
       });
     }
@@ -825,6 +825,73 @@ describe('CanvasApiClient', () => {
         summary:
           'Started: Initial scheduling question. · Latest: Can we move the milestone review? · 3-message thread',
         unread: false,
+      });
+    }
+  });
+
+  it('keeps thread progression truth when the latest reply is attachment-only', async () => {
+    const client = new CanvasApiClient(
+      okExecutor({
+        [CANVAS_COURSES_PATH]: [
+          {
+            id: 42,
+            name: 'CSE 142',
+            course_code: 'CSE 142',
+            html_url: 'https://canvas.example.edu/courses/42',
+          },
+        ],
+        ...canvasDepthResourcePayloads(42),
+        '/api/v1/courses/42/assignments?include[]=submission&order_by=due_at&per_page=100': [],
+        '/api/v1/announcements?per_page=100&context_codes%5B%5D=course_42': [],
+        '/api/v1/conversations?scope=inbox&per_page=100': [
+          {
+            id: 409,
+            subject: 'Lab handout follow-up',
+            last_message: 'See latest attachment.',
+            last_message_at: '2026-03-24T15:30:00-07:00',
+            workflow_state: 'unread',
+            context_code: 'course_42',
+            html_url: 'https://canvas.example.edu/conversations/409',
+          },
+        ],
+        '/api/v1/conversations/409': {
+          id: 409,
+          subject: 'Lab handout follow-up',
+          last_message: 'See latest attachment.',
+          last_message_at: '2026-03-24T15:30:00-07:00',
+          workflow_state: 'unread',
+          context_code: 'course_42',
+          html_url: 'https://canvas.example.edu/conversations/409',
+          message_count: 2,
+          messages: [
+            {
+              body: '<p>Where can I find the updated lab handout?</p>',
+              attachments: [],
+            },
+            {
+              body: '   ',
+              attachments: [{ display_name: 'lab-3.pdf' }],
+            },
+          ],
+        },
+        '/api/v1/calendar_events?all_events=true&per_page=100&context_codes%5B%5D=course_42': [],
+      }),
+    );
+
+    const adapter = createCanvasAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://canvas.example.edu/courses/42',
+      site: 'canvas',
+      now: '2026-03-24T18:00:00-07:00',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.messages?.[0]).toMatchObject({
+        title: 'Lab handout follow-up',
+        summary:
+          'Started: Where can I find the updated lab handout? · Latest: See latest attachment. · Attachment: lab-3.pdf · 2-message thread',
+        unread: true,
       });
     }
   });

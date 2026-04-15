@@ -753,13 +753,64 @@ function buildEdStemSummary(input: {
   return prefix || input.fallbackTitle;
 }
 
-function buildEdStemReplySummary(content: string | undefined, replyToCommentId?: string) {
+function parseEdStemCommentDepths(pageHtml: string) {
+  const depths = new Map<string, number>();
+  const stack: string[] = [];
+
+  for (const match of pageHtml.matchAll(/<div\b(?<attrs>[^>]*)>|<\/div>/gi)) {
+    if (match[0].startsWith('</div')) {
+      stack.pop();
+      continue;
+    }
+
+    const attrs = match.groups?.attrs ?? '';
+    const classValue = attrs.match(/\bclass="(?<class>[^"]*)"/i)?.groups?.class ?? '';
+    const classTokens = classValue.split(/\s+/).filter(Boolean);
+    const commentId = attrs.match(/\bdata-comment-id="(?<commentId>\d+)"/i)?.groups?.commentId;
+
+    if (classTokens.includes('discuss-comment') && commentId) {
+      const depth = Math.max(
+        0,
+        stack.filter((marker) => marker === 'comment').length - 1,
+      );
+      depths.set(commentId, depth);
+    }
+
+    stack.push(classTokens.includes('comment') ? 'comment' : 'other');
+  }
+
+  return depths;
+}
+
+function buildEdStemThreadStructureSummary(
+  summary: string | undefined,
+  replyDepths: Iterable<number>,
+) {
+  const depths = Array.from(replyDepths);
+  if (depths.length === 0) {
+    return summary;
+  }
+
+  const topLevelReplies = depths.filter((depth) => depth === 0).length;
+  const nestedReplies = depths.length - topLevelReplies;
+  const structureParts = [
+    `${depths.length} ${depths.length === 1 ? 'reply' : 'replies'}`,
+    nestedReplies > 0 ? `${nestedReplies} nested` : undefined,
+  ].filter(Boolean);
+
+  return [summary, structureParts.join(' · ')].filter(Boolean).join(' · ');
+}
+
+function buildEdStemReplySummary(content: string | undefined, replyToCommentId?: string, depth = 0) {
   const summary = stripDiscussionHtml(content);
   if (!summary) {
     return undefined;
   }
 
-  return replyToCommentId ? `Reply to comment ${replyToCommentId} · ${summary}` : summary;
+  const structureLabel = depth > 0 ? 'Nested reply' : 'Top-level reply';
+  const replyTarget = replyToCommentId ? `Reply to comment ${replyToCommentId}` : undefined;
+
+  return [replyTarget, structureLabel, summary].filter(Boolean).join(' · ');
 }
 
 function hasVisibleRoleBadge(markup: string, className: string) {
@@ -1389,11 +1440,15 @@ function parseDirectThreadMessages(pageHtml: string, pageUrl: string): Message[]
   const threadCreatedAt = pageHtml.match(
     /<a[^>]+href="\/us\/courses\/\d+\/discussion\/\d+"[^>]*>[\s\S]*?<time datetime="(?<createdAt>[^"]+)"/i,
   )?.groups?.createdAt;
-  const threadSummary = buildEdStemSummary({
-    content: threadContent,
-    category,
-    fallbackTitle: title ?? `EdStem thread ${threadId}`,
-  });
+  const commentDepths = parseEdStemCommentDepths(pageHtml);
+  const threadSummary = buildEdStemThreadStructureSummary(
+    buildEdStemSummary({
+      content: threadContent,
+      category,
+      fallbackTitle: title ?? `EdStem thread ${threadId}`,
+    }),
+    commentDepths.values(),
+  );
 
   if (!title && !threadSummary) {
     return undefined;
@@ -1433,12 +1488,15 @@ function parseDirectThreadMessages(pageHtml: string, pageUrl: string): Message[]
     const commentId = replyMatch.groups?.commentId;
     const createdAt = replyMatch.groups?.createdAt;
     const content = replyMatch.groups?.content;
+    if (!commentId) {
+      continue;
+    }
     const replyToCommentId =
       replyMatch.groups?.replyTo ??
       replyMatch[0].match(/class="[^"]*discuss-replying-to[^"]*"[^>]*href="[^"]*comment=(?<replyTo>\d+)"/i)?.groups
         ?.replyTo;
-    const summary = buildEdStemReplySummary(content, replyToCommentId);
-    if (!commentId || !summary) {
+    const summary = buildEdStemReplySummary(content, replyToCommentId, commentDepths.get(commentId) ?? 0);
+    if (!summary) {
       continue;
     }
 

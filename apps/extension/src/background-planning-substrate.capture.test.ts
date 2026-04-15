@@ -282,8 +282,13 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
     expect(stored?.transferPlanningSummary).toContain(
       'Program exploration: Informatics B.S. (major) - Backup planning path for HCI-heavy study plans.',
     );
+    expect(stored?.terms[0]?.summary).toContain(
+      'Planned path: CSE 421 Introduction to Algorithms; CSE 331 Software Design and Implementation.',
+    );
     expect(stored?.terms[0]?.summary).toContain('Backup path: MATH 300 Mathematical Reasoning.');
     expect(stored?.terms[0]?.summary).toContain('Schedule options: Balanced load (CSE 421, CSE 331).');
+    expect(stored?.terms[0]?.summary).toContain('Next term path: Summer 2026 -> INFO 340 Client-Side Development.');
+    expect(stored?.terms[1]?.summary).toContain('Planned path: INFO 340 Client-Side Development.');
     expect(stored?.terms[1]?.summary).toContain('Schedule options: Summer focus (INFO 340).');
   });
 });

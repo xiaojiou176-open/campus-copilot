@@ -1273,10 +1273,13 @@ function buildCanvasMessageSummary(
   const detailBody = stripCanvasHtml(latestMessage?.body ?? undefined);
   const attachmentHint = buildCanvasAttachmentHint(latestMessage?.attachments);
   const threadHint = buildCanvasThreadHint(rawConversationDetail);
-  const fallbackSummary = rawConversation.last_message?.trim() || undefined;
+  const fallbackSummary = stripCanvasHtml(rawConversation.last_message ?? undefined);
+  const latestPreview = detailBody ?? fallbackSummary;
   const startHint =
-    threadHint && initialBody && detailBody && initialBody !== detailBody ? `Started: ${initialBody}` : undefined;
-  const latestHint = detailBody ? (startHint ? `Latest: ${detailBody}` : detailBody) : undefined;
+    threadHint && initialBody && latestPreview && initialBody !== latestPreview
+      ? `Started: ${initialBody}`
+      : undefined;
+  const latestHint = latestPreview ? (startHint ? `Latest: ${latestPreview}` : latestPreview) : undefined;
   const detailSummary = [startHint, latestHint, attachmentHint, threadHint].filter(Boolean).join(' · ');
 
   if (detailSummary) {
