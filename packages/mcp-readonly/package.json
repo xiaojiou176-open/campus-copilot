@@ -5,13 +5,13 @@
   "description": "Read-only site-scoped MCP sidecars for Campus Copilot snapshots.",
   "license": "MIT",
   "keywords": ["campus-copilot", "mcp", "read-only", "sidecar", "snapshot"],
-  "homepage": "https://github.com/xiaojiou176-open/campus-copilot/tree/main/packages/mcp-readonly",
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/mcp-readonly",
   "bugs": {
-    "url": "https://github.com/xiaojiou176-open/campus-copilot/issues"
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/campus-copilot.git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
     "directory": "packages/mcp-readonly"
   },
   "publishConfig": {

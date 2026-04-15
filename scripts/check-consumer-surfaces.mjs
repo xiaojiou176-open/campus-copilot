@@ -57,7 +57,7 @@ const packageReadmeExpectations = [
       '../../examples/integrations/plugin-bundles.md',
       '../../examples/provider-runtime-switchyard.ts',
       '../../docs/10-builder-api-and-ecosystem-fit.md',
-      '../../docs/14-public-distribution-scoreboard.md',
+      '../../DISTRIBUTION.md',
       'pnpm proof:public',
     ],
   },

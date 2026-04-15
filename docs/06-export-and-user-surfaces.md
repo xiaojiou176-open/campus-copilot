@@ -146,5 +146,5 @@ not “another generic sidebar assistant.”
 
 - Product boundary: [`01-product-prd.md`](01-product-prd.md)
 - Runtime chain: [`02-system-architecture.md`](02-system-architecture.md)
-- Locked implementation choices: [`09-implementation-decisions.md`](09-implementation-decisions.md)
-- Wave 1B contract freeze ledger: [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md)
+- Current capability snapshot: [`site-capability-matrix.md`](site-capability-matrix.md)
+- Repo-writing split: [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md)

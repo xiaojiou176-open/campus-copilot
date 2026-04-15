@@ -5,13 +5,13 @@
   "description": "Read-only CLI for Campus Copilot snapshot and local BFF workflows.",
   "license": "MIT",
   "keywords": ["campus-copilot", "cli", "local-first", "read-only", "mcp"],
-  "homepage": "https://github.com/xiaojiou176-open/campus-copilot/tree/main/packages/cli",
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/cli",
   "bugs": {
-    "url": "https://github.com/xiaojiou176-open/campus-copilot/issues"
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/campus-copilot.git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
     "directory": "packages/cli"
   },
   "publishConfig": {

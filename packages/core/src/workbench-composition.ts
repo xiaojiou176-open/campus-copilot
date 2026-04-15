@@ -158,6 +158,12 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
       title: cluster.displayTitle,
       summary: cluster.summary,
       authoritySource: `${cluster.authoritySurface}:${cluster.authorityResourceType}`,
+      authorityNarrative: cluster.authorityNarrative,
+      authorityBreakdown: cluster.authorityBreakdown?.map((entry) => ({
+        role: entry.role,
+        authoritySource: `${entry.surface}:${entry.resourceType}`,
+        reason: entry.reason,
+      })),
       matchConfidence: cluster.confidenceBand,
       relatedSites: cluster.relatedSites,
       needsReview: cluster.needsReview,
@@ -168,6 +174,12 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
       title: cluster.title,
       summary: cluster.summary,
       authoritySource: `${cluster.authoritySurface}:${cluster.authorityResourceType}`,
+      authorityNarrative: cluster.authorityNarrative,
+      authorityBreakdown: cluster.authorityBreakdown?.map((entry) => ({
+        role: entry.role,
+        authoritySource: `${entry.surface}:${entry.resourceType}`,
+        reason: entry.reason,
+      })),
       matchConfidence: cluster.confidenceBand,
       relatedSites: cluster.relatedSites,
       workType: cluster.workType,
@@ -188,6 +200,7 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
       aiDefault: summary.aiDefault,
       authoritySource: summary.authoritySource,
       nextAction: summary.nextAction,
+      exactBlockers: summary.exactBlockers,
     })),
     mergeHealth: presentation?.mergeHealth ?? args.mergeHealth,
   };

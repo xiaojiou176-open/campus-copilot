@@ -5,13 +5,13 @@
   "description": "Read-only Campus provider/runtime seam helpers, including local Switchyard bridging.",
   "license": "MIT",
   "keywords": ["campus-copilot", "provider-runtime", "switchyard", "read-only", "compat"],
-  "homepage": "https://github.com/xiaojiou176-open/campus-copilot/tree/main/packages/provider-runtime",
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/provider-runtime",
   "bugs": {
-    "url": "https://github.com/xiaojiou176-open/campus-copilot/issues"
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/campus-copilot.git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
     "directory": "packages/provider-runtime"
   },
   "publishConfig": {

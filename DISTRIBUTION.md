@@ -22,13 +22,10 @@ All distribution surfaces still inherit the same academic safety contract:
 | If you need... | Open this | Why |
 | :-- | :-- | :-- |
 | the product front door | [`README.md`](README.md) | start with the product story, not the shipping ledger |
-| the canonical state ledger | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) | this is the SSOT for `public-ready`, `registry candidate`, `registry submitted`, `registry blocked`, and `not officially listed` |
-| the owner-only action queue | [`docs/15-publication-submission-packet.md`](docs/15-publication-submission-packet.md) | use this only when the question becomes "what does the owner click next?" |
-| the packet inventory | [`docs/16-distribution-preflight-packets.md`](docs/16-distribution-preflight-packets.md) | use this when you want the exact repo-owned packet files and validation commands |
+| the builder/public integration surface | [`INTEGRATIONS.md`](INTEGRATIONS.md) | use this when the question is about MCP / SDK / CLI / bundle routing |
 | the academic safety contract | [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md) | use this before describing any integration or distribution surface as broader than a read-only study/workspace path |
-| browser store last mile | [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) | the Chrome lane has its own packet and owner-only dashboard work |
-| the skill catalog and submit packet | [`skills/README.md`](skills/README.md), [`skills/catalog.json`](skills/catalog.json), [`skills/clawhub-submission.packet.json`](skills/clawhub-submission.packet.json) | use these when the question becomes "which public skill surfaces are already machine-readable and what exact publish packet leaves the repo later?" |
-| skill / container / MCP packet details | [`docs/skill-publication-prep.md`](docs/skill-publication-prep.md), [`docs/container-publication-prep.md`](docs/container-publication-prep.md), [`docs/mcp-registry-submission-prep.md`](docs/mcp-registry-submission-prep.md) | keep each surface-specific packet narrow |
+| browser store last mile | this file | the Chrome lane stays an owner-side dashboard step after repo-local proof |
+| the skill catalog and submit packet | [`skills/README.md`](skills/README.md), [`skills/catalog.json`](skills/catalog.json), [`skills/clawhub-submission.packet.json`](skills/clawhub-submission.packet.json) | use these when the question becomes "which public skill surfaces are already machine-readable?" |
 
 ## Current Truthful Labels
 
@@ -48,13 +45,18 @@ These labels are the vocabulary for the rest of the distribution docs:
 | Surface | Current truthful state | First proof | Read next |
 | :-- | :-- | :-- | :-- |
 | Main repository + Pages | public and GitHub Pages-backed | open the repo and homepage | [`README.md`](README.md) |
-| `@campus-copilot/mcp-server` stdio route | `public-ready (repo-local)` + `registry listed for v0.1.0` + `current main ahead of the published artifact` | `pnpm --filter @campus-copilot/mcp-server start --help` | [`docs/mcp-registry-submission-prep.md`](docs/mcp-registry-submission-prep.md) |
-| Docker / container path | `container-ready (repo-local)` + `GHCR pushed` + `visibility still internal` | `docker build -t campus-copilot-api:local .`, `docker compose -f compose.yaml up -d campus-copilot-api`, then `pnpm smoke:docker:api` | [`docs/container-publication-prep.md`](docs/container-publication-prep.md) |
-| Browser extension | `build-ready product surface` | `pnpm --filter @campus-copilot/extension build` | [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) |
-| CLI / sidecars / provider-runtime / site APIs | `public-ready (repo-local)` or `registry candidate` | `pnpm proof:public` | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) |
-| SDK / workspace-sdk / site-sdk | `public-ready (repo-local)` + `registry candidate` | `pnpm proof:public` | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) |
-| Public skill pack | `public-ready (repo-local)` + `6 live ClawHub listings` + `2 rate-limited remainder` | `pnpm check:skill-catalog` | [`docs/skill-publication-prep.md`](docs/skill-publication-prep.md) |
+| `@campus-copilot/mcp-server` stdio route | `public-ready (repo-local)` | `pnpm --filter @campus-copilot/mcp-server start --help` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
+| Docker / container path | `container-ready (repo-local)` | `docker build -t campus-copilot-api:local .`, `docker compose -f compose.yaml up -d campus-copilot-api`, then `pnpm smoke:docker:api` | this file |
+| Browser extension | `build-ready product surface` | `pnpm --filter @campus-copilot/extension build` | this file |
+| CLI / sidecars / provider-runtime / site APIs | `public-ready (repo-local)` or `registry candidate` | `pnpm proof:public` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
+| SDK / workspace-sdk / site-sdk | `public-ready (repo-local)` + `registry candidate` | `pnpm proof:public` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
+| Public skill pack | `public-ready (repo-local)` | `pnpm check:skill-catalog` | [`skills/README.md`](skills/README.md) |
 | Codex / Claude / OpenClaw bundles | `plugin-grade repo bundle` + `not officially listed` | `pnpm proof:public` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
+
+Repo-owned packet anchors that remain tracked and public-safe:
+
+- `packages/mcp-server/registry-submission.packet.json`
+- `skills/clawhub-submission.packet.json`
 
 ## Chrome Web Store Lane
 
@@ -62,7 +64,7 @@ Use the extension lane like a stage-gate, not like a vague "maybe ready" claim:
 
 - `build-ready`: `pnpm --filter @campus-copilot/extension build`
 - `asset-ready`: icons, screenshots, and privacy/support assets are already tracked in the repo
-- `packet-ready`: [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) exists and stays truthful
+- `packet-ready`: the repo can build the extension surface and package its public assets truthfully
 - `owner-only later`: the final Chrome Web Store dashboard upload, metadata fields, and submit click
 
 ## Owner-Only Later Bucket
@@ -70,7 +72,6 @@ Use the extension lane like a stage-gate, not like a vague "maybe ready" claim:
 These do **not** block repo-side readiness:
 
 - future package publication under owner credentials for the non-registry package lanes
-- refreshed MCP Registry `.mcpb` bundle + metadata publish so the public listing matches current `main`
 - official marketplace or directory submission
 - Chrome Web Store dashboard submission
 - container visibility/public read-back for `ghcr.io/xiaojiou176-open/campus-copilot-api`

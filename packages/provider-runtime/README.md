@@ -72,4 +72,4 @@ curl http://127.0.0.1:8787/api/providers/status
 - [`../../skills/switchyard-runtime-check/SKILL.md`](../../skills/switchyard-runtime-check/SKILL.md)
 - [`../../docs/05-ai-provider-and-runtime.md`](../../docs/05-ai-provider-and-runtime.md)
 - [`../../docs/10-builder-api-and-ecosystem-fit.md`](../../docs/10-builder-api-and-ecosystem-fit.md)
-- [`../../docs/14-public-distribution-scoreboard.md`](../../docs/14-public-distribution-scoreboard.md)
+- [`../../DISTRIBUTION.md`](../../DISTRIBUTION.md)

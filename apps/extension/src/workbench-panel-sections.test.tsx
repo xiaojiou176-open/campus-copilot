@@ -552,7 +552,7 @@ describe('workbench operations sections', () => {
             source: { site: 'gradescope', resourceId: '7244652', resourceType: 'assignment' },
             title: 'Concept Check 30',
             status: 'graded',
-            summary: 'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations]',
+            summary: 'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations on page 3]',
             detail: 'Actions: Download graded copy | Submission history | Request regrade (Please select a question.)',
             actionHints: ['Download graded copy', 'Submission history', 'Request regrade (Please select a question.)'],
             reviewSummary: {
@@ -582,7 +582,7 @@ describe('workbench operations sections', () => {
       />,
     );
 
-    expect(markup).toContain('Question breakdown: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations]');
+    expect(markup).toContain('Question breakdown: Q2.1 redacted-question-title 3 / 9 (Needs work) [3 annotations on page 3]');
     expect(markup).toContain('Available actions: Download graded copy · Submission history · Request regrade (Please select a question.)');
   });
 

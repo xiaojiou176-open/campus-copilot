@@ -5,13 +5,13 @@
   "description": "Read-only per-site snapshot helpers for Campus Copilot builder workflows.",
   "license": "MIT",
   "keywords": ["campus-copilot", "site-sdk", "local-first", "read-only", "snapshot"],
-  "homepage": "https://github.com/xiaojiou176-open/campus-copilot/tree/main/packages/site-sdk",
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/site-sdk",
   "bugs": {
-    "url": "https://github.com/xiaojiou176-open/campus-copilot/issues"
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/campus-copilot.git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
     "directory": "packages/site-sdk"
   },
   "publishConfig": {

@@ -347,6 +347,26 @@ function formatResourceContextSummary(
   return parts.length > 0 ? parts.join(' · ') : undefined;
 }
 
+function formatAssignmentAnnotationLabel(input: {
+  count?: number;
+  pageNumbers?: number[];
+}) {
+  if (input.count === undefined) {
+    return undefined;
+  }
+
+  const countText = `${input.count} annotation${input.count === 1 ? '' : 's'}`;
+  if (!input.pageNumbers || input.pageNumbers.length === 0) {
+    return ` [${countText}]`;
+  }
+
+  const pageText =
+    input.pageNumbers.length === 1
+      ? `page ${input.pageNumbers[0]}`
+      : `pages ${input.pageNumbers.join(', ')}`;
+  return ` [${countText} on ${pageText}]`;
+}
+
 function getAssignmentReviewSummary(assignment: OperationsSectionProps['currentAssignments'][number]) {
   const questions = assignment.reviewSummary?.questions ?? [];
   if (questions.length === 0) {
@@ -363,10 +383,10 @@ function getAssignmentReviewSummary(assignment: OperationsSectionProps['currentA
       question.evaluationCommentCount !== undefined
         ? ` [${question.evaluationCommentCount} comment${question.evaluationCommentCount === 1 ? '' : 's'}]`
         : '';
-    const annotations =
-      question.annotationCount !== undefined
-        ? ` [${question.annotationCount} annotation${question.annotationCount === 1 ? '' : 's'}]`
-        : '';
+    const annotations = formatAssignmentAnnotationLabel({
+      count: question.annotationCount,
+      pageNumbers: question.annotationPages,
+    });
     return `${question.label}${score}${rubric}${comments}${annotations}`;
   });
   const remaining = questions.length - visible.length;
@@ -382,7 +402,13 @@ function getAssignmentActionSummary(assignment: OperationsSectionProps['currentA
 }
 
 function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
-  return summary.laneStatus === 'carrier_not_landed' ? 'capture needed' : 'summary ready';
+  if (summary.laneStatus === 'carrier_not_landed') {
+    return 'capture needed';
+  }
+  if (summary.laneStatus === 'standalone_detail_runtime_lane') {
+    return 'detail-runtime lane';
+  }
+  return 'summary ready';
 }
 
 function getAdministrativeDetailRuntimeLabel(
@@ -391,6 +417,9 @@ function getAdministrativeDetailRuntimeLabel(
 ) {
   if (summary.detailRuntimeStatus === 'blocked_missing_carrier') {
     return uiLanguage === 'zh-CN' ? 'detail runtime 缺 carrier' : 'detail runtime blocked';
+  }
+  if (summary.detailRuntimeStatus === 'review_ready') {
+    return uiLanguage === 'zh-CN' ? 'detail runtime 可复核' : 'detail runtime review-ready';
   }
   if (summary.detailRuntimeStatus === 'pending') {
     return uiLanguage === 'zh-CN' ? 'detail runtime 待提升' : 'detail runtime pending';
@@ -1698,6 +1727,13 @@ export function WorkbenchOperationsSections({
                   </div>
                 </div>
                 <p>{summary.summary}</p>
+                {summary.detailRuntimeNote ? <p className="surface__meta">{summary.detailRuntimeNote}</p> : null}
+                {summary.exactBlockers.length ? (
+                  <p className="surface__meta">
+                    {uiLanguage === 'zh-CN' ? 'Exact blockers' : 'Exact blockers'}:{' '}
+                    {summary.exactBlockers.slice(0, 2).map((blocker) => blocker.id).join(' · ')}
+                  </p>
+                ) : null}
                 <p className="surface__meta">
                   {summary.authoritySource}
                   {summary.nextAction ? ` · ${summary.nextAction}` : ''}

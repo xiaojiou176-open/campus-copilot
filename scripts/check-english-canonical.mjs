@@ -17,12 +17,9 @@ const files = [
   'SECURITY.md',
   'CODE_OF_CONDUCT.md',
   'docs/README.md',
-  'docs/09-implementation-decisions.md',
   'docs/live-validation-runbook.md',
   'docs/verification-matrix.md',
-  'docs/github-surface-checklist.md',
   'docs/integration-boundaries.md',
-  'docs/diagnostics-and-logging.md',
 ];
 
 const cjkPattern = /[\u3400-\u9FFF]/;

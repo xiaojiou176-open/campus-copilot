@@ -10,11 +10,11 @@ Use this page when the question is:
 | :-- | :-- |
 | Codex / Claude / Claude Desktop MCP config | [`examples/integrations/README.md`](examples/integrations/README.md) |
 | Plugin-grade bundle overview | [`examples/integrations/plugin-bundles.md`](examples/integrations/plugin-bundles.md) |
-| Public skills | [`skills/README.md`](skills/README.md), [`skills/catalog.json`](skills/catalog.json), [`docs/skill-publication-prep.md`](docs/skill-publication-prep.md) |
+| Public skills | [`skills/README.md`](skills/README.md), [`skills/catalog.json`](skills/catalog.json) |
 | OpenClaw-style local runtime route | [`examples/openclaw-readonly.md`](examples/openclaw-readonly.md) |
 | Local containerized HTTP edge | [`DISTRIBUTION.md`](DISTRIBUTION.md) |
-| Browser-extension store last mile | [`docs/chrome-web-store-submission-packet.md`](docs/chrome-web-store-submission-packet.md) |
-| Package/public publication truth | [`docs/14-public-distribution-scoreboard.md`](docs/14-public-distribution-scoreboard.md) |
+| Browser-extension store last mile | [`DISTRIBUTION.md`](DISTRIBUTION.md) |
+| Package/public publication truth | [`DISTRIBUTION.md`](DISTRIBUTION.md) |
 
 ## Current Truth
 

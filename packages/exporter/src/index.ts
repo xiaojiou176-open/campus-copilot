@@ -195,6 +195,12 @@ export interface ExportInput {
     title: string;
     summary: string;
     authoritySource: string;
+    authorityNarrative?: string;
+    authorityBreakdown?: Array<{
+      role: string;
+      authoritySource: string;
+      reason: string;
+    }>;
     matchConfidence: ExportMatchConfidence;
     relatedSites: string[];
     needsReview?: boolean;
@@ -205,6 +211,12 @@ export interface ExportInput {
     title: string;
     summary: string;
     authoritySource: string;
+    authorityNarrative?: string;
+    authorityBreakdown?: Array<{
+      role: string;
+      authoritySource: string;
+      reason: string;
+    }>;
     matchConfidence: ExportMatchConfidence;
     relatedSites: string[];
     workType: string;
@@ -217,14 +229,19 @@ export interface ExportInput {
   administrativeSummaries?: Array<{
     id: string;
     family: string;
-    laneStatus?: 'landed_summary_lane' | 'carrier_not_landed';
-    detailRuntimeStatus?: 'pending' | 'blocked_missing_carrier';
+    laneStatus?: 'landed_summary_lane' | 'standalone_detail_runtime_lane' | 'carrier_not_landed';
+    detailRuntimeStatus?: 'review_ready' | 'pending' | 'blocked_missing_carrier';
     title: string;
     summary: string;
     importance: string;
     aiDefault: string;
     authoritySource: string;
     nextAction?: string;
+    exactBlockers?: Array<{
+      id: string;
+      summary: string;
+      whyItStopsPromotion: string;
+    }>;
   }>;
   mergeHealth?: {
     mergedCount: number;
@@ -1521,6 +1538,26 @@ function renderMarkdownSection(title: string, lines: string[]) {
   return `## ${title}\n${lines.join('\n')}\n`;
 }
 
+function formatAssignmentReviewAnnotationLabel(input: {
+  count?: number;
+  pageNumbers?: number[];
+}) {
+  if (input.count === undefined) {
+    return undefined;
+  }
+
+  const countText = `${input.count} annotation${input.count === 1 ? '' : 's'}`;
+  if (!input.pageNumbers || input.pageNumbers.length === 0) {
+    return ` [${countText}]`;
+  }
+
+  const pageText =
+    input.pageNumbers.length === 1
+      ? `page ${input.pageNumbers[0]}`
+      : `pages ${input.pageNumbers.join(', ')}`;
+  return ` [${countText} on ${pageText}]`;
+}
+
 function formatAuthoritySource(value: string) {
   return value.replace(/_/g, ' ').replace(/:/g, ' · ');
 }
@@ -1592,8 +1629,10 @@ function renderMarkdown(dataset: ExportDataset) {
                 const rubric = question.rubricLabels.length > 0 ? ` (${question.rubricLabels.join(', ')})` : '';
                 const comments =
                   question.evaluationCommentCount !== undefined ? ` [${question.evaluationCommentCount} comment${question.evaluationCommentCount === 1 ? '' : 's'}]` : '';
-                const annotations =
-                  question.annotationCount !== undefined ? ` [${question.annotationCount} annotation${question.annotationCount === 1 ? '' : 's'}]` : '';
+                const annotations = formatAssignmentReviewAnnotationLabel({
+                  count: question.annotationCount,
+                  pageNumbers: question.annotationPages,
+                });
                 return `${question.label}${score}${rubric}${comments}${annotations}`;
               })
               .join('; ')}`

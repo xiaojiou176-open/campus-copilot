@@ -5,15 +5,13 @@ import { readSkillCatalog } from './check-skill-catalog.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fromRepoRoot = (relativePath) => path.join(repoRoot, relativePath);
-const packetPath = 'docs/skill-publication-prep.md';
+const packetPath = 'skills/clawhub-submission.packet.json';
 
 const linkedFiles = new Map([
-  ['README.md', 'docs/skill-publication-prep.md'],
-  ['DISTRIBUTION.md', 'docs/skill-publication-prep.md'],
-  ['INTEGRATIONS.md', 'docs/skill-publication-prep.md'],
-  ['skills/README.md', '../docs/skill-publication-prep.md'],
-  ['docs/14-public-distribution-scoreboard.md', 'skill-publication-prep.md'],
-  ['docs/15-publication-submission-packet.md', 'skill-publication-prep.md'],
+  ['README.md', 'skills/README.md'],
+  ['DISTRIBUTION.md', 'skills/clawhub-submission.packet.json'],
+  ['INTEGRATIONS.md', 'skills/catalog.json'],
+  ['skills/README.md', 'clawhub-submission.packet.json'],
 ]);
 
 export function validateSkillPublicationSurface(catalog = readSkillCatalog()) {
@@ -27,13 +25,10 @@ export function validateSkillPublicationSurface(catalog = readSkillCatalog()) {
   const packet = readFileSync(fromRepoRoot(packetPath), 'utf8');
 
   const packetSnippets = [
-    'skills/catalog.json',
-    'manifestless Claude-style bundle layout',
-    'clawhub skill publish',
-    'clawhub sync --all',
-    'openclaw.plugin.json',
-    '/.well-known/glama.json',
-    'invented `manifest.yaml`',
+    'manifestless-claude-layout',
+    'not an upstream marketplace manifest',
+    'repo-owned-clawhub-skill-submission-packet',
+    '"scope": "read-only"',
   ];
 
   for (const snippet of packetSnippets) {

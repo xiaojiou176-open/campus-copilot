@@ -5,10 +5,10 @@
   "description": "Read-only MCP server for the local Campus Copilot BFF and imported workspace snapshots.",
   "author": {
     "name": "xiaojiou176-open",
-    "url": "https://github.com/xiaojiou176-open/campus-copilot"
+    "url": "https://github.com/xiaojiou176-open/OpenCampus"
   },
-  "homepage": "https://github.com/xiaojiou176-open/campus-copilot",
-  "support": "https://github.com/xiaojiou176-open/campus-copilot/issues",
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus",
+  "support": "https://github.com/xiaojiou176-open/OpenCampus/issues",
   "server": {
     "type": "node",
     "entry_point": "dist/bin.mjs",
@@ -36,6 +36,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/campus-copilot"
+    "url": "https://github.com/xiaojiou176-open/OpenCampus"
   }
 }

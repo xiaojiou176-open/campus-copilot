@@ -225,7 +225,7 @@ serialTest('mcp-server preregistry metadata stays aligned with package.json', ()
   const bundleManifest = JSON.parse(readFileSync('packages/mcp-server/mcpb.manifest.json', 'utf8'));
   const metadata = JSON.parse(readFileSync('packages/mcp-server/server.json', 'utf8'));
   const packet = JSON.parse(readFileSync('packages/mcp-server/registry-submission.packet.json', 'utf8'));
-  const expectedBundleUrl = `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
+  const expectedBundleUrl = `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
 
   assert.equal(pkg.mcpName, 'io.github.xiaojiou176-open/campus-copilot-mcp');
   assert.equal(bundleManifest.version, pkg.version);

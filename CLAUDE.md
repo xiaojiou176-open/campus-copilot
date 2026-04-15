@@ -31,7 +31,7 @@ It is not a generic chatbot shell, and it is not a high-permission automation pr
 - Do not reintroduce `self-hosted`, `shared-pool`, or equivalent private runner assumptions as the current default for public CI.
 - Keep provider-dependent, live-session, manual, or external-system checks out of the default required PR gate.
 - Treat any secrets, live, or external lane as manual-only and environment-dependent unless the repository formally promotes it.
-- Do not claim that platform-side GitHub settings are repo-proven facts unless they are recorded in [`docs/github-surface-checklist.md`](docs/github-surface-checklist.md).
+- Do not claim that platform-side GitHub settings are repo-proven facts unless they are fresh-checked in the current turn.
 
 ## Product And Data Boundaries
 

@@ -273,7 +273,7 @@ Wave 6 now has its repo-local docs, examples, and package metadata lined up clea
 
 If you want the fastest first-hop chooser before you commit to one of those surfaces, start with [`../examples/toolbox-chooser.md`](../examples/toolbox-chooser.md).
 If you want the current plugin-grade repo bundle router for Codex / Claude Code / OpenClaw-style consumers, start with [`../examples/integrations/plugin-bundles.md`](../examples/integrations/plugin-bundles.md).
-If you want the exact public-ready vs registry-blocked ledger behind those same surfaces, read [`14-public-distribution-scoreboard.md`](14-public-distribution-scoreboard.md).
+If you want the current repo-side publication truth behind those same surfaces, read [`../DISTRIBUTION.md`](../DISTRIBUTION.md).
 
 Current MCP tools stay narrow and truthful:
 
@@ -427,7 +427,7 @@ What it does **not** prove:
 ## Canonical Cross-References
 
 - Public landing page: [`../README.md`](../README.md)
-- Wave 1B contract freeze ledger: [`11-wave1-contract-freeze-gap-matrix.md`](11-wave1-contract-freeze-gap-matrix.md)
+- Public capability snapshot: [`site-capability-matrix.md`](site-capability-matrix.md)
 - AI/runtime boundary: [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md)
 - Export and product surfaces: [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
-- Implementation decisions: [`09-implementation-decisions.md`](09-implementation-decisions.md)
+- Security and privacy brief: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)

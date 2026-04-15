@@ -13,7 +13,7 @@ pnpm --filter @campus-copilot/mcp-server start
 ## If the host supports MCP Bundles
 
 - registry name: `io.github.xiaojiou176-open/campus-copilot-mcp`
-- release asset: `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v0.1.0/campus-copilot-mcp-0.1.0.mcpb`
+- release asset: `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v0.1.0/campus-copilot-mcp-0.1.0.mcpb`
 
 ## Minimum handoff to the agent
 

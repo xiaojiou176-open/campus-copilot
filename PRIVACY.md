@@ -53,7 +53,7 @@ The next planned academic expansion lane is read-only only:
 
 Red-zone surfaces such as `Register.UW`, `Notify.UW`, seat-watch flows, or registration-related polling remain outside the product path.
 
-See [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md) for the full contract.
+See [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md) for the full contract, and [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md) for the slimmer public summary.
 
 ## Sensitive Data Rules
 
@@ -73,4 +73,4 @@ They do **not** count as a repository leak unless they enter tracked files, reac
 - [`SECURITY.md`](SECURITY.md)
 - [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md)
 - [`docs/integration-boundaries.md`](docs/integration-boundaries.md)
-- [`docs/live-validation-runbook.md`](docs/live-validation-runbook.md)
+- [`docs/verification-matrix.md`](docs/verification-matrix.md)

@@ -4,7 +4,7 @@ These examples are the repo-local proof pack for the Wave 6 read-only toolbox.
 
 If you are still deciding which surface to use before you copy any JSON or code, start with [`toolbox-chooser.md`](toolbox-chooser.md).
 If you want the shortest router for the current plugin-grade repo bundles, jump to [`integrations/plugin-bundles.md`](integrations/plugin-bundles.md).
-If you want the exact registry/public-ready blockers behind those same surfaces, pair it with [`../docs/14-public-distribution-scoreboard.md`](../docs/14-public-distribution-scoreboard.md).
+If you want the exact repo-side publication truth behind those same surfaces, pair it with [`../DISTRIBUTION.md`](../DISTRIBUTION.md).
 
 ## Quick routing matrix
 

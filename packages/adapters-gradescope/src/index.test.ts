@@ -802,7 +802,7 @@ describe('GradescopeApiClient', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.snapshot.assignments?.[0]?.summary).toBe(
-        'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations]; Q3.2 redacted-question-title 1.5 / 3 [1 annotation]; Q3.3 redacted-question-title 3 / 3 [1 annotation]',
+        'Graded 7.5 / 15 · Q2.1 redacted-question-title 3 / 9 [3 annotations on page 3]; Q3.2 redacted-question-title 1.5 / 3 [1 annotation on page 5]; Q3.3 redacted-question-title 3 / 3 [1 annotation on page 5]',
       );
       expect(result.snapshot.assignments?.[0]?.detail).toBe(
         'Q2.1 redacted-question-title · 3 / 9 · Annotations: redacted-annotation-1 | redacted-annotation-2 | +1 more (page 3); Q3.2 redacted-question-title · 1.5 / 3 · Annotations: redacted-annotation-link (page 5); Q3.3 redacted-question-title · 3 / 3 · Annotations: redacted-annotation-5 (page 5)',
@@ -913,7 +913,7 @@ describe('GradescopeApiClient', () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.snapshot.assignments?.[0]?.summary).toContain('[3 annotations]');
+      expect(result.snapshot.assignments?.[0]?.summary).toContain('[3 annotations on page 3]');
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Annotations: redacted-annotation-1 | redacted-annotation-2 | +1 more (page 3)');
       expect(result.snapshot.assignments?.[0]?.detail).toContain('Annotations: redacted-annotation-link (page 5)');
     }

@@ -30,20 +30,6 @@ const docRules = [
     ],
   },
   {
-    path: 'docs/09-implementation-decisions.md',
-    forbidden: [
-      /localhost:9222/i,
-      /code-scanning/i,
-      /branch protection/i,
-      /\b7\b.*courses/i,
-      /\b118\b.*assignments/i,
-      /\b69\b.*assignments/i,
-      /\b30\b.*threads/i,
-      /\b3\b.*announcements/i,
-      /READY/,
-    ],
-  },
-  {
     path: 'docs/live-validation-runbook.md',
     forbidden: [
       /vulnerability alerts/i,

@@ -11,7 +11,7 @@ Use it when you need a fast answer to:
 
 This file is not a live-proof ledger.
 For manual browser/session evidence, use [`live-validation-runbook.md`](live-validation-runbook.md).
-For the exhaustive current-vs-selective-vs-later map, use [`13-site-depth-exhaustive-ledger.md`](13-site-depth-exhaustive-ledger.md).
+For deeper per-site classification, keep the detailed ledger in local maintainer materials instead of the public docs front door.
 
 Current shipped truth is still the four-site workspace.
 The read-only expansion registry below tracks partial repo-side adoption separately so it does not get confused with full shipped support.
@@ -127,4 +127,4 @@ This table freezes the current “what do we do with the deeper asks?” answer.
 - If code changes materially alter a row above, update this file in the same change.
 - If a claim depends on a real logged-in browser session, keep that claim in the manual live lane and not in required CI wording.
 - Treat the `Next deep gap` column as **next-phase engineering only**, not as evidence that the deeper capability is already in current shipped scope.
-- Treat [`13-site-depth-exhaustive-ledger.md`](13-site-depth-exhaustive-ledger.md) as the detailed ledger when a short row here is not enough.
+- Keep the detailed per-site depth ledger in local maintainer materials when a short row here is not enough.

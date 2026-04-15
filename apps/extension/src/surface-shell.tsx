@@ -799,6 +799,11 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       <span className="surface__assistant-trust-chip">{assistantReceiptSummary}</span>
                     </div>
                     <div className="surface__actions surface__actions--wrap">
+                      {planningCaptureContext ? (
+                        <button className="surface__button surface__button--secondary" onClick={() => void handleCapturePlanningSubstrate()} type="button">
+                          {text.quickActions.capturePlanningSubstrate(planningCaptureContext.label)}
+                        </button>
+                      ) : null}
                       <button className="surface__button" onClick={() => enterExportMode()} type="button">
                         {modeCopy.assistant.openExport}
                       </button>

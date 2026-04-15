@@ -5,13 +5,13 @@
   "description": "Read-only workspace derivation helpers for Campus Copilot imported snapshots.",
   "license": "MIT",
   "keywords": ["campus-copilot", "workspace-sdk", "local-first", "read-only", "snapshot"],
-  "homepage": "https://github.com/xiaojiou176-open/campus-copilot/tree/main/packages/workspace-sdk",
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/workspace-sdk",
   "bugs": {
-    "url": "https://github.com/xiaojiou176-open/campus-copilot/issues"
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/campus-copilot.git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
     "directory": "packages/workspace-sdk"
   },
   "publishConfig": {

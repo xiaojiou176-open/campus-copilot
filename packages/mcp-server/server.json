@@ -4,7 +4,7 @@
   "title": "Campus Copilot MCP",
   "description": "Read-only MCP server for the local Campus Copilot BFF and imported workspace snapshots.",
   "repository": {
-    "url": "https://github.com/xiaojiou176-open/campus-copilot",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus",
     "source": "github",
     "subfolder": "packages/mcp-server"
   },
@@ -12,7 +12,7 @@
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/xiaojiou176-open/campus-copilot/releases/download/v0.1.1/campus-copilot-mcp-0.1.1.mcpb",
+      "identifier": "https://github.com/xiaojiou176-open/OpenCampus/releases/download/v0.1.1/campus-copilot-mcp-0.1.1.mcpb",
       "version": "0.1.1",
       "fileSha256": "381a1bdf42cf83cd832039b6e1df7fa20f08f8ea2a6eb92329f64cde7bb61814",
       "transport": {

@@ -8,8 +8,7 @@ Machine-readable pack index:
 
 - [`skills/catalog.json`](catalog.json)
 - [`clawhub-submission.packet.json`](clawhub-submission.packet.json)
-- [`../docs/skill-publication-prep.md`](../docs/skill-publication-prep.md)
-- [`../docs/16-distribution-preflight-packets.md`](../docs/16-distribution-preflight-packets.md)
+- [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
 
 Version semantics:
 
@@ -33,7 +32,7 @@ File-based skill ecosystem note:
 
 - OpenHands and OpenCode style consumers usually discover `SKILL.md` files from their own skill roots.
 - This repo keeps the public pack under `skills/` plus `skills/catalog.json`, so the truthful state is still a repo-owned bundle index instead of a hosted registry claim.
-- The repo also ships `clawhub-submission.packet.json` plus `../docs/16-distribution-preflight-packets.md` so owner-side ClawHub submission later does not need a fake marketplace manifest.
+- The repo also ships `clawhub-submission.packet.json` plus [`../DISTRIBUTION.md`](../DISTRIBUTION.md) so owner-side ClawHub submission later does not need a fake marketplace manifest.
 - The ClawHub/OpenClaw-facing repo artifact is [`clawhub-submission.packet.json`](clawhub-submission.packet.json), which mirrors official publish inputs without pretending to be an upstream marketplace manifest.
 
 - `read-only-workspace-analysis`: inspect an exported workspace snapshot and summarize the current decision surface
@@ -97,7 +96,7 @@ Use these when you want the fastest plain-language proof of what a successful pu
 - Do not present these skills as official marketplace plugins or write-capable automations.
 - Do not use these skills as a wrapper for protected academic workflows such as registration automation.
 - Do not confuse `skills/catalog.json` with OpenClaw's native `openclaw.plugin.json`; the catalog is a repo-owned bundle index, not an upstream marketplace manifest or native plugin manifest.
-- Keep the current bundle story on the manifestless Claude-style layout described in `../docs/16-distribution-preflight-packets.md` instead of inventing a vendor-only manifest.
+- Keep the current bundle story on the manifestless Claude-style layout described in [`../DISTRIBUTION.md`](../DISTRIBUTION.md) instead of inventing a vendor-only manifest.
 - Do not confuse `clawhub-submission.packet.json` with a vendor-required manifest either; it is a repo-owned packet because the official docs in this wave did not expose a stable marketplace manifest schema for plain skill uploads.
 
 ## What These Skills Are Not

@@ -357,22 +357,31 @@ bash scripts/api-healthcheck.sh
 
 当任务命中下面这些场景时，先读对应 skill，再动手：
 
-- `.agents/skills/correct-profile-live-closure/SKILL.md`
-  - 适用：`Canvas / Gradescope / EdStem / MyUW` 的 live/browser/session 推进
-- `.agents/skills/browser-context-boundaries/SKILL.md`
-  - 适用：区分“自持浏览器 DOM 自动化”和“用户当前真实会话”，避免 GUI 越界
-- `.agents/skills/live-profile-drift-audit/SKILL.md`
-  - 适用：`.chrome-debug-profile`、`Profile 13`、support summary、tests、runbook 的 drift 审计
-- `.agents/skills/runtime-resource-hygiene/SKILL.md`
-  - 适用：browser/profile/tab hygiene、cross-repo listener collision、clone lifecycle、runtime cleanup ownership
-- `.agents/skills/resource-hygiene-and-browser-lane-discipline/SKILL.md`
-  - 适用：`.runtime-cache/`、`~/.cache/campus-copilot/`、legacy browser roots、真实 Chrome profile 契约、GitHub-hosted CI 边界的统一治理
-- `.agents/skills/live-runtime-diagnostics-ladder/SKILL.md`
-  - 适用：`cleanup:runtime / preflight:live / probe:live / diagnose:live / smoke:* / support:bundle` 这条 live 诊断梯子，以及环境型 blocked 的分账
-- `.agents/skills/live-stop-rule-gate/SKILL.md`
-  - 适用：给 live 线下 `KEEP_GOING_REPO_LOCAL / REPO_LOCAL_DONE_EXTERNAL_REMAINING / LIVE_READY_BUT_OPTIONAL_PROVIDER_WEB_PENDING / NOT_READY_TO_CLAIM` 做最终裁决
-- `.agents/skills/selective-gap-proof-capture/SKILL.md`
-  - 适用：`EdStem reply/resources`、`Gradescope rubric/question detail` 这类 `external-proof-first` selective gap 的最小 live proof / redacted fixture 取证
+- 全局 canonical 优先：
+  - `~/.codex/skills/l1-skill-governance/modules/conversation-distillation/SKILL.md`
+    - 适用：archive-to-skill / conversation distillation / repo-vs-global skill 判级
+  - `~/.codex/skills/l1-repo-truth-ledger-closeout/SKILL.md`
+    - 适用：repo truth / closeout / 四本账 verdict
+  - `~/.codex/skills/l1-academic-content-authorization-boundaries/SKILL.md`
+    - 适用：课程内容读取/导出/AI 可读边界、两层授权、metadata/detail/file/submission 分层
+  - `~/.codex/skills/l1-public-surface/SKILL.md`
+    - 适用：README / docs front door / public wording / metadata parity / truthful positioning
+- `.agents/skills/l1-docs-vision-gap-matrix/SKILL.md`
+  - 适用：docs contract、current-vs-gap matrix、public docs 最小面与 internal contracts 回 `.agents/`
+- `.agents/skills/l1-student-surface-contract/SKILL.md`
+  - 适用：student-facing IA、extension/web 主次、`Assistant / Export / Settings`、命名层级
+- `.agents/skills/l1-campus-live-routing/SKILL.md`
+  - 适用：任何 repo-local live/browser/session/profile/runtime/stop-rule/resource triage 的统一入口
+  - 它会继续路由到：
+    - `l1-correct-profile-live-closure`
+    - `l1-live-profile-drift-audit`
+    - `l1-live-runtime-diagnostics-ladder`
+    - `l1-live-stop-rule-gate`
+    - `l2-real-session-adapter-triage`
+- `.agents/skills/l1-browser-context-boundaries/SKILL.md`
+  - 适用：区分“自持浏览器 DOM 自动化”和“用户当前真实会话”，避免 GUI 越界；这是 same-name overlay，保持 direct entry
+- `.agents/skills/l1-runtime-resource-hygiene/SKILL.md`
+  - 适用：browser/profile/tab hygiene、cross-repo listener collision、clone lifecycle、`.runtime-cache/`、`~/.cache/campus-copilot/`、legacy browser roots、真实 Chrome profile 契约、GitHub-hosted CI 边界；这是 same-name overlay，保持 direct entry
 
 ## 阅读顺序
 
@@ -383,4 +392,4 @@ bash scripts/api-healthcheck.sh
 3. `docs/03-domain-schema.md`
 4. `docs/04-adapter-spec.md`
 5. `docs/08-phase-plan-and-repo-writing-brief.md`
-6. `docs/09-implementation-decisions.md`
+6. `docs/07-security-privacy-compliance.md`
