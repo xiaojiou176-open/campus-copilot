@@ -128,6 +128,10 @@ function getLaneBadgeLabel(site: Site, text: WorkbenchPanelsProps['text']) {
   return isAdministrativeSite(site) ? text.groupedView.administrativeBadge : text.groupedView.academicBadge;
 }
 
+function getPlanningSourceBadgeLabel(source: DecisionSectionProps['planningSubstrates'][number]['source']) {
+  return source === 'time-schedule' ? SITE_LABELS['time-schedule'] : 'MyPlan';
+}
+
 function getWeeklyLoadTone(entry: DecisionSectionProps['weeklyLoad'][number]) {
   if ((entry.overdueCount ?? 0) > 0 || entry.totalScore >= 200) {
     return 'critical';
@@ -354,6 +358,10 @@ function getResourceActionLabel(
   resource: OperationsSectionProps['currentResources'][number],
   text: OperationsSectionProps['text'],
 ) {
+  if (resource.site === 'gradescope' && resource.source.resourceType === 'regrade_requests') {
+    return text.currentResources.openRegradeHub;
+  }
+
   if (resource.site === 'edstem') {
     if (resource.source.resourceType === 'lesson_slide') {
       return text.currentResources.openSlide;
@@ -381,6 +389,10 @@ function getResourceHref(resource: OperationsSectionProps['currentResources'][nu
 }
 
 function getResourceSemanticLabel(resource: OperationsSectionProps['currentResources'][number]) {
+  if (resource.site === 'gradescope' && resource.source.resourceType === 'regrade_requests') {
+    return 'regrade hub';
+  }
+
   if (resource.site === 'canvas') {
     switch (resource.source.resourceType) {
       case 'group':
@@ -1532,7 +1544,9 @@ export function WorkbenchDecisionSections({
                 <strong>{latestPlanningSubstrate.planLabel}</strong>
                 <div className="surface__pill-row">
                   <span className="surface__badge surface__badge--success">{text.groupedView.academicBadge}</span>
-                  <span className="surface__badge surface__badge--neutral">MyPlan</span>
+                  <span className="surface__badge surface__badge--neutral">
+                    {getPlanningSourceBadgeLabel(latestPlanningSubstrate.source)}
+                  </span>
                   <span className="surface__badge surface__badge--neutral">{text.planningPulse.readOnlyBadge}</span>
                 </div>
               </div>

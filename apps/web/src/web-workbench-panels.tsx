@@ -47,6 +47,10 @@ function getResourceSemanticLabel(resource: {
   summary?: string;
   source?: { resourceType?: string };
 }) {
+  if (resource.site === 'gradescope' && resource.source?.resourceType === 'regrade_requests') {
+    return 'regrade hub';
+  }
+
   if (resource.site === 'canvas') {
     switch (resource.source?.resourceType) {
       case 'group':
@@ -598,14 +602,14 @@ export function WebWorkbenchPanels(props: {
         <p className="eyebrow">Academic lane</p>
         <h2>Planning Pulse</h2>
         <p>
-          A read-only summary of the shared MyPlan substrate, kept in the same decision lane as focus and load without
+          A read-only summary of the latest shared planning substrate, kept in the same decision lane as focus and load without
           pretending this workspace can register for you.
         </p>
         <div className="stack">
           <ReadyStateBlock
             ready={props.workbenchReady}
             hasItems={Boolean(latestPlanningSubstrate)}
-            emptyState={<p>No shared MyPlan planning summary is visible yet.</p>}
+            emptyState={<p>No shared planning summary is visible yet.</p>}
           >
             {latestPlanningSubstrate ? (
               <article className="item">
@@ -613,7 +617,7 @@ export function WebWorkbenchPanels(props: {
                   <strong>{latestPlanningSubstrate.planLabel}</strong>
                   <div className="badge-row">
                     <span className="badge badge-success">Academic</span>
-                    <span className="badge">MyPlan</span>
+                    <span className="badge">{latestPlanningSubstrate.source === 'time-schedule' ? 'Time Schedule' : 'MyPlan'}</span>
                     <span className="badge">Read-only</span>
                   </div>
                 </div>

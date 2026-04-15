@@ -545,22 +545,32 @@ export function cleanupRepoNamedTempResidues(policy) {
 
 export function cleanupRuntimeArtifacts(policy) {
   const closeoutMode = policy.runtimeCleanupMode === 'closeout';
+  if (closeoutMode) {
+    return {
+      removedTopLevelDebugFiles: [],
+      removedSupportBundles: [],
+      removedRawEntries: [],
+      removedTempEntries: [],
+      removedBrowserEvidenceEntries: [],
+      removedLiveTraceEntries: [],
+      removedLiveFixtureEntries: [],
+      removedBrowserIdentityEntries: [],
+      removedCoverageArtifacts: [],
+      removedCloseoutEntries: removeDirectoryChildren(policy.runtimeCacheRoot),
+    };
+  }
+
   return {
     removedTopLevelDebugFiles: removeTopLevelRuntimeDebugFiles(policy.runtimeCacheRoot),
-    removedSupportBundles: trimSupportBundles(policy.runtimeCacheRoot, closeoutMode ? 0 : policy.supportBundleRetentionCount),
+    removedSupportBundles: trimSupportBundles(policy.runtimeCacheRoot, policy.supportBundleRetentionCount),
     removedRawEntries: removeDirectoryChildren(policy.runtimeRawRoot),
-    removedTempEntries: closeoutMode
-      ? removeDirectoryChildren(policy.runtimeTempRoot)
-      : pruneDirectoryChildrenByAge(policy.runtimeTempRoot, policy.runtimeTempTtlHours),
-    removedBrowserEvidenceEntries: closeoutMode
-      ? removeDirectoryChildren(policy.runtimeBrowserEvidenceRoot)
-      : pruneDirectoryChildrenByAge(policy.runtimeBrowserEvidenceRoot, policy.runtimeEvidenceTtlHours),
-    removedLiveTraceEntries: closeoutMode
-      ? removeDirectoryChildren(policy.runtimeLiveTraceRoot)
-      : pruneDirectoryChildrenByAge(policy.runtimeLiveTraceRoot, policy.runtimeEvidenceTtlHours),
-    removedLiveFixtureEntries: closeoutMode ? removeDirectoryChildren(policy.runtimeLiveFixturesRoot) : [],
-    removedBrowserIdentityEntries: closeoutMode ? removeDirectoryChildren(policy.runtimeBrowserIdentityRoot) : [],
+    removedTempEntries: pruneDirectoryChildrenByAge(policy.runtimeTempRoot, policy.runtimeTempTtlHours),
+    removedBrowserEvidenceEntries: pruneDirectoryChildrenByAge(policy.runtimeBrowserEvidenceRoot, policy.runtimeEvidenceTtlHours),
+    removedLiveTraceEntries: pruneDirectoryChildrenByAge(policy.runtimeLiveTraceRoot, policy.runtimeEvidenceTtlHours),
+    removedLiveFixtureEntries: [],
+    removedBrowserIdentityEntries: [],
     removedCoverageArtifacts: trimCoverageArtifacts(policy.runtimeCoverageRoot),
+    removedCloseoutEntries: [],
   };
 }
 

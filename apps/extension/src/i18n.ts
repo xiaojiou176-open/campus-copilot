@@ -267,6 +267,7 @@ type UiText = {
     none: string;
     releasedAt: (value: string) => string;
     openDownload: string;
+    openRegradeHub: string;
     downloadFile: string;
     openLink: string;
     openLesson: string;
@@ -686,8 +687,8 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     planningPulse: {
       title: 'Planning Pulse',
       description:
-        'This keeps the latest MyPlan planning snapshot in the decision workspace so term load, backups, and planning gaps stay visible without implying registration automation.',
-      none: 'No shared MyPlan planning snapshot is visible yet.',
+        'This keeps the latest shared planning snapshot in the decision workspace so term load, backups, and planning gaps stay visible without implying registration automation.',
+      none: 'No shared planning snapshot is visible yet.',
       readOnlyBadge: 'Read-only',
       summary: ({ termCount, plannedCourseCount, backupCourseCount, scheduleOptionCount }) =>
         `${termCount} term(s) · ${plannedCourseCount} planned course(s) · ${backupCourseCount} backup course(s) · ${scheduleOptionCount} schedule option(s)`,
@@ -817,6 +818,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       none: 'No study materials are visible in the current filter.',
       releasedAt: (value) => `Released ${value}`,
       openDownload: 'Open download',
+      openRegradeHub: 'Open regrade hub',
       downloadFile: 'Download file',
       openLink: 'Open link',
       openLesson: 'Open lesson',
@@ -1305,8 +1307,8 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     planningPulse: {
       title: '计划脉冲',
       description:
-        '这里把最新的 MyPlan 规划快照放进决策工作台，让学期负荷、备选课和规划缺口持续可见，但不把它包装成注册自动化。',
-      none: '当前还没有可见的共享 MyPlan 规划快照。',
+        '这里把最新的共享规划快照放进决策工作台，让学期负荷、备选课和规划缺口持续可见，但不把它包装成注册自动化。',
+      none: '当前还没有可见的共享规划快照。',
       readOnlyBadge: '只读',
       summary: ({ termCount, plannedCourseCount, backupCourseCount, scheduleOptionCount }) =>
         `${termCount} 个学期 · ${plannedCourseCount} 门计划课程 · ${backupCourseCount} 门备选课程 · ${scheduleOptionCount} 个排课选项`,
@@ -1436,6 +1438,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       none: '当前筛选下还没有可见的学习资料。',
       releasedAt: (value) => `发布于 ${value}`,
       openDownload: '打开下载链接',
+      openRegradeHub: '打开复议队列',
       downloadFile: '下载文件',
       openLink: '打开链接',
       openLesson: '打开课程页',

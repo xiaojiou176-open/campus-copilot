@@ -252,6 +252,72 @@ describe('workbench decision sections', () => {
     expect(markup).not.toContain('48 小时内截止');
     expect(markup).not.toContain('近期有新的讨论更新');
   });
+
+  it('shows the true planning source badge when the latest substrate came from Time Schedule', () => {
+    const markup = renderToStaticMarkup(
+      <WorkbenchDecisionSections
+        text={getUiText('en')}
+        uiLanguage="en"
+        surface="sidepanel"
+        focusQueue={[]}
+        planningSubstrates={[
+          {
+            id: 'myplan:plan:1',
+            source: 'myplan',
+            fit: 'derived_planning_substrate',
+            readOnly: true,
+            capturedAt: '2026-04-01T00:00:00.000Z',
+            lastUpdatedAt: '2026-04-01T03:00:00.000Z',
+            planId: 'plan-1',
+            planLabel: 'Allen School planning draft',
+            termCount: 3,
+            plannedCourseCount: 9,
+            backupCourseCount: 2,
+            scheduleOptionCount: 4,
+            requirementGroupCount: 5,
+            programExplorationCount: 1,
+            exactBlockers: [],
+            hardDeferredMoves: [],
+            terms: [],
+          },
+          {
+            id: 'time-schedule:planning:1',
+            source: 'time-schedule',
+            fit: 'derived_planning_substrate',
+            readOnly: true,
+            capturedAt: '2026-04-01T04:00:00.000Z',
+            lastUpdatedAt: '2026-04-01T05:00:00.000Z',
+            planId: 'timeschedule-1',
+            planLabel: 'Time Schedule · Spring 2026',
+            termCount: 1,
+            plannedCourseCount: 2,
+            backupCourseCount: 0,
+            scheduleOptionCount: 1,
+            requirementGroupCount: 0,
+            programExplorationCount: 0,
+            exactBlockers: [],
+            hardDeferredMoves: [],
+            terms: [],
+          },
+        ]}
+        weeklyLoad={[]}
+        priorityAlerts={[]}
+        criticalAlerts={[]}
+        highAlerts={[]}
+        mediumAlerts={[]}
+        currentRecentUpdates={undefined}
+        onExport={async () => {}}
+        onTogglePin={async () => {}}
+        onSnooze={async () => {}}
+        onDismiss={async () => {}}
+        onNote={async () => {}}
+      />,
+    );
+
+    expect(markup).toContain('Time Schedule · Spring 2026');
+    expect(markup).toContain('<span class="surface__badge surface__badge--neutral">Time Schedule</span>');
+    expect(markup).not.toContain('<span class="surface__badge surface__badge--neutral">MyPlan</span>');
+  });
 });
 
 describe('workbench operations sections', () => {
@@ -415,7 +481,7 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Spring quarter tuition is due.');
     expect(markup).toContain('Administrative lane');
     expect(markup).toContain('Planning Pulse stays in the academic/planning lane');
-    expect(markup).toContain('detail runtime pending');
+    expect(markup).toContain('No landed administrative summaries are visible in the shared workspace view yet.');
     expect(markup).toContain('Manual-only campus boundary');
     expect(markup).toContain('Not supported in the current product path');
     expect(markup).toContain('Register.UW automation not supported');
@@ -469,6 +535,46 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('lesson');
     expect(markup).toContain('Lesson · attempted · Closed Due: Wed April 8th, 11:59pm');
     expect(markup).toContain('Open lesson');
+  });
+
+  it('marks Gradescope regrade hub resources as a queue instead of a generic download', () => {
+    const markup = renderToStaticMarkup(
+      <WorkbenchOperationsSections
+        text={getUiText('en')}
+        uiLanguage="en"
+        surface="sidepanel"
+        planningSubstrates={[]}
+        currentResources={[
+          {
+            id: 'gradescope:resource:1211108:regrade_requests',
+            kind: 'resource',
+            site: 'gradescope',
+            source: { site: 'gradescope', resourceId: '1211108:regrade_requests', resourceType: 'regrade_requests' },
+            courseId: 'gradescope:course:1211108',
+            resourceKind: 'other',
+            title: 'Regrade requests',
+            summary: 'No submitted regrade requests yet.',
+            detail: 'Course-level regrade hub is currently empty. Columns: Question · Assignment · Requested · Status.',
+            url: 'https://www.gradescope.com/courses/1211108/regrade_requests',
+          },
+        ]}
+        currentAssignments={[]}
+        currentAnnouncements={[]}
+        currentMessages={[]}
+        currentEvents={[]}
+        orderedSiteStatus={[]}
+        syncFeedback={{}}
+        onSyncSite={async () => {}}
+        onExport={async () => {}}
+        latestSyncRun={undefined}
+        recentChangeEvents={[]}
+      />,
+    );
+
+    expect(markup).toContain('Regrade requests');
+    expect(markup).toContain('regrade hub');
+    expect(markup).toContain('Open regrade hub');
+    expect(markup).toContain('https://www.gradescope.com/courses/1211108/regrade_requests');
   });
 
   it('marks Canvas module, group, and recording carriers with semantic badges', () => {
