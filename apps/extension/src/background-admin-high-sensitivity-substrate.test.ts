@@ -33,12 +33,12 @@ const accountsHtml = `
 const profileHtml = `
   <html><head><title>Profile - MyUW</title></head><body>
     <h2>Name &amp; Pronouns</h2>
-    <h3>Preferred Name</h3><div>Terry Yu</div>
+    <h3>Preferred Name</h3><div>Example Student</div>
     <h3>Pronouns</h3><div>He/him/his</div>
     <h3>Local Address</h3><div>Redacted address</div>
     <h2>Email Addresses</h2><div>redacted@example.invalid</div>
-    <h3>Emergency Contact 1</h3><div>Person One</div>
-    <h3>Emergency Contact 2</h3><div>Person Two</div>
+    <h3>Emergency Contact 1</h3><div>Emergency Contact A</div>
+    <h3>Emergency Contact 2</h3><div>Emergency Contact B</div>
   </body></html>
 `;
 
@@ -120,7 +120,7 @@ describe('background admin high-sensitivity substrate', () => {
     expect(records[0]?.family).toBe('profile');
     expect(records[0]?.summary).toContain('preferred-name support');
     expect(records[0]?.summary).toContain('2 emergency contact record');
-    expect(records[0]?.summary).not.toContain('Terry Yu');
+    expect(records[0]?.summary).not.toContain('Example Student');
     expect(records[0]?.summary).not.toContain('redacted@example.invalid');
   });
 

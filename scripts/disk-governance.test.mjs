@@ -223,6 +223,8 @@ test('cleanup:runtime removes repo-named temp residues across configured temp ro
     mkdirSync(join(sandbox.repo, '.runtime-cache/browser-evidence/stale-evidence'), { recursive: true });
     mkdirSync(join(sandbox.repo, '.runtime-cache/live-traces/fresh-trace'), { recursive: true });
     mkdirSync(join(sandbox.repo, '.runtime-cache/live-traces/stale-trace'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/raw'), { recursive: true });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/raw/submission.raw.html'), '<html>raw</html>', { encoding: 'utf8' });
 
     const tmpOne = join(sandbox.root, 'tmp-one');
     const tmpTwo = join(sandbox.root, 'tmp-two');
@@ -288,6 +290,7 @@ test('cleanup:runtime removes repo-named temp residues across configured temp ro
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/browser-evidence/fresh-evidence')), true);
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/live-traces/stale-trace')), false);
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/live-traces/fresh-trace')), true);
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/raw/submission.raw.html')), false);
     assert.equal(
       existsSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-03-30T00-00-00.000Z.json')),
       false,
@@ -305,6 +308,51 @@ test('cleanup:runtime removes repo-named temp residues across configured temp ro
     assert.equal(existsSync(join(externalCacheHome, 'browser/browser-cache-kept')), true);
     const legacyClone = payload.legacyBrowserRoots.find((entry) => entry.label === 'clone_profile13');
     assert.equal(legacyClone?.cleanupCandidate, false);
+  } finally {
+    sandbox.cleanup();
+  }
+});
+
+test('cleanup:runtime closeout mode removes fresh sensitive runtime residue without touching browser roots', () => {
+  const sandbox = createSandbox();
+
+  try {
+    mkdirSync(join(sandbox.repo, '.runtime-cache/raw'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/temp/fresh-temp'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/browser-evidence/fresh-evidence'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/live-traces/fresh-trace'), { recursive: true });
+    mkdirSync(join(sandbox.repo, '.runtime-cache/coverage'), { recursive: true });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/raw/regrade.raw.html'), '<html>raw</html>', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-15T00-00-00.000Z.json'), '{}', {
+      encoding: 'utf8',
+    });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/coverage/coverage-summary.json'), '{}', { encoding: 'utf8' });
+
+    const externalCacheHome = join(sandbox.home, '.cache/campus-copilot');
+    mkdirSync(join(externalCacheHome, 'browser/chrome-user-data/Profile 1'), { recursive: true });
+    writeFileSync(join(externalCacheHome, 'browser/chrome-user-data/Local State'), '{}', { encoding: 'utf8' });
+
+    const payload = runCleanupRuntime({
+      cwd: sandbox.repo,
+      env: {
+        HOME: sandbox.home,
+        CAMPUS_COPILOT_REPO_ROOT: sandbox.repo,
+        CAMPUS_COPILOT_CACHE_HOME: externalCacheHome,
+        CAMPUS_COPILOT_RUNTIME_CLEAN_LEVEL: 'closeout',
+      },
+    });
+
+    assert.equal(payload.policy.runtimeCleanupMode, 'closeout');
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/raw/regrade.raw.html')), false);
+    assert.equal(
+      existsSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-15T00-00-00.000Z.json')),
+      false,
+    );
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/temp/fresh-temp')), false);
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/browser-evidence/fresh-evidence')), false);
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/live-traces/fresh-trace')), false);
+    assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/coverage/coverage-summary.json')), true);
+    assert.equal(existsSync(join(externalCacheHome, 'browser/chrome-user-data/Profile 1')), true);
   } finally {
     sandbox.cleanup();
   }

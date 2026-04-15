@@ -824,6 +824,9 @@ describe('exporter package', () => {
 
     expect(artifact.packaging.authorizationLevel).toBe('confirm_required');
     expect(artifact.packaging.aiAllowed).toBe(false);
+    const myuwCarrier = artifact.packaging.provenance.find((entry) => entry.label === 'MyUW student-status carrier');
+    expect(myuwCarrier?.detail).toContain('statement-backed tuition surfaces stay review-first');
+    expect(myuwCarrier?.detail).not.toContain('promotion still pending');
     expect(
       artifact.packaging.provenance.some((entry) =>
         entry.detail?.includes('their presence does not mean every family has a summary-ready lane yet'),

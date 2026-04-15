@@ -701,7 +701,8 @@ function buildDefaultProvenance(input: {
       entries.push({
         sourceType: 'session_interface',
         label: 'MyUW student-status carrier',
-        detail: 'Notice and schedule signals can promote into the decision desk while transcript, finaid, and account detail stay at the review-first summary level with detail/runtime promotion still pending.',
+        detail:
+          'Notice and schedule signals can promote into the decision desk while transcript, finaid, accounts, profile, and statement-backed tuition surfaces stay review-first, export-first, and AI-blocked by default.',
         readOnly: true,
       });
       break;

@@ -24,7 +24,7 @@ test('redact-live-adapter-fixture keeps campus URLs but strips foreign absolute 
               id: 8759224,
               user_id: 8759224,
               email: 'student@example.edu',
-              name: 'Terry Yu',
+              name: 'Example Student',
             },
           ],
           ownerships: [

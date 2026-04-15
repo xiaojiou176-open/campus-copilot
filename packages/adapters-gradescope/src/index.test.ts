@@ -1236,6 +1236,37 @@ describe('GradescopeApiClient', () => {
     }
   });
 
+  it('surfaces an empty course-level regrade hub as a read-only resource carrier', async () => {
+    const client = new GradescopeApiClient(
+      okExecutor({
+        '/internal/assignments': readJsonFixture('/course-internal-assignments.json'),
+        '/internal/grades': readJsonFixture('/course-internal-grades.json'),
+      }),
+      paths,
+    );
+
+    const adapter = createGradescopeAdapter(client);
+    const result = await adapter.sync({
+      url: 'https://www.gradescope.com/courses/1211108/regrade_requests',
+      site: 'gradescope',
+      now: '2026-04-15T08:00:00-07:00',
+      pageHtml: readFixture('regrade-requests-empty.html'),
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.snapshot.resources).toEqual([
+        expect.objectContaining({
+          id: 'gradescope:resource:1211108:regrade_requests',
+          courseId: 'gradescope:course:1211108',
+          title: 'Regrade requests',
+          summary: 'No submitted regrade requests yet.',
+          detail: 'Course-level regrade hub is currently empty. Columns: Question · Assignment · Requested · Status.',
+        }),
+      ]);
+    }
+  });
+
   it('parses rubric labels from a state-backed multi-question submission fixture', async () => {
     const client = new GradescopeApiClient(
       okExecutor({

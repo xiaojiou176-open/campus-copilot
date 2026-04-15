@@ -373,6 +373,15 @@ function trimCoverageArtifacts(runtimeCoverageRoot) {
   return removed;
 }
 
+function removeDirectoryChildren(rootPath, options = {}) {
+  const removed = [];
+  for (const entry of listManagedEntries(rootPath, options)) {
+    removed.push({ path: entry.path, sizeKb: entry.sizeKb });
+    removePath(entry.path);
+  }
+  return removed;
+}
+
 function pruneDirectoryChildrenByAge(rootPath, ttlHours, nowMs = Date.now(), options = {}) {
   const removed = [];
   const ttlMs = ttlHours * 60 * 60 * 1000;
@@ -471,6 +480,8 @@ export function resolveCacheGovernancePolicy(env = process.env, options = {}) {
     runtimeBrowserEvidenceRoot: join(repoRoot, '.runtime-cache', 'browser-evidence'),
     runtimeLiveTraceRoot: join(repoRoot, '.runtime-cache', 'live-traces'),
     runtimeCoverageRoot: join(repoRoot, '.runtime-cache', 'coverage'),
+    runtimeRawRoot: join(repoRoot, '.runtime-cache', 'raw'),
+    runtimeCleanupMode: env.CAMPUS_COPILOT_RUNTIME_CLEAN_LEVEL?.trim().toLowerCase() === 'closeout' ? 'closeout' : 'standard',
     externalCacheTtlHours: parsePositiveInt(env.CAMPUS_COPILOT_CACHE_TTL_HOURS, DEFAULT_EXTERNAL_CACHE_TTL_HOURS),
     externalCacheMaxMb: parsePositiveInt(env.CAMPUS_COPILOT_CACHE_MAX_MB, DEFAULT_EXTERNAL_CACHE_MAX_MB),
     runtimeTempTtlHours: parsePositiveInt(env.CAMPUS_COPILOT_RUNTIME_TEMP_TTL_HOURS, DEFAULT_RUNTIME_TEMP_TTL_HOURS),
@@ -492,6 +503,7 @@ export function summarizeCachePolicy(policy) {
     browserProfileDirectory: policy.browserProfileDirectory,
     browserProfileDisplayName: policy.browserProfileDisplayName,
     browserCdpPort: policy.browserCdpPort,
+    runtimeCleanupMode: policy.runtimeCleanupMode,
     browserInstanceStatePath: policy.browserInstanceStatePath,
     browserSessionStatePath: policy.browserSessionStatePath,
     sourceChromeRoot: policy.sourceChromeRoot,
@@ -528,12 +540,20 @@ export function cleanupRepoNamedTempResidues(policy) {
 }
 
 export function cleanupRuntimeArtifacts(policy) {
+  const closeoutMode = policy.runtimeCleanupMode === 'closeout';
   return {
     removedTopLevelDebugFiles: removeTopLevelRuntimeDebugFiles(policy.runtimeCacheRoot),
-    removedSupportBundles: trimSupportBundles(policy.runtimeCacheRoot, policy.supportBundleRetentionCount),
-    removedTempEntries: pruneDirectoryChildrenByAge(policy.runtimeTempRoot, policy.runtimeTempTtlHours),
-    removedBrowserEvidenceEntries: pruneDirectoryChildrenByAge(policy.runtimeBrowserEvidenceRoot, policy.runtimeEvidenceTtlHours),
-    removedLiveTraceEntries: pruneDirectoryChildrenByAge(policy.runtimeLiveTraceRoot, policy.runtimeEvidenceTtlHours),
+    removedSupportBundles: trimSupportBundles(policy.runtimeCacheRoot, closeoutMode ? 0 : policy.supportBundleRetentionCount),
+    removedRawEntries: removeDirectoryChildren(policy.runtimeRawRoot),
+    removedTempEntries: closeoutMode
+      ? removeDirectoryChildren(policy.runtimeTempRoot)
+      : pruneDirectoryChildrenByAge(policy.runtimeTempRoot, policy.runtimeTempTtlHours),
+    removedBrowserEvidenceEntries: closeoutMode
+      ? removeDirectoryChildren(policy.runtimeBrowserEvidenceRoot)
+      : pruneDirectoryChildrenByAge(policy.runtimeBrowserEvidenceRoot, policy.runtimeEvidenceTtlHours),
+    removedLiveTraceEntries: closeoutMode
+      ? removeDirectoryChildren(policy.runtimeLiveTraceRoot)
+      : pruneDirectoryChildrenByAge(policy.runtimeLiveTraceRoot, policy.runtimeEvidenceTtlHours),
     removedCoverageArtifacts: trimCoverageArtifacts(policy.runtimeCoverageRoot),
   };
 }

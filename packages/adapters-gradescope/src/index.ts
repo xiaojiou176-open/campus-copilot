@@ -15,11 +15,13 @@ import {
   CourseSchema,
   GradeSchema,
   HealthStatusSchema,
+  ResourceSchema,
   type Assignment,
   type AssignmentStatus,
   type Course,
   type Grade,
   type HealthStatus,
+  type Resource,
 } from '@campus-copilot/schema';
 import { z } from 'zod';
 
@@ -1147,6 +1149,45 @@ function parseGradescopeAssignmentPageDetail(pageHtml: string | undefined, pageU
   } satisfies GradescopeSubmissionDetail;
 }
 
+function parseGradescopeRegradeRequestsResource(pageHtml: string | undefined, pageUrl: string) {
+  const match = pageUrl.match(/\/courses\/(?<courseId>\d+)\/regrade_requests(?:[?#].*)?$/);
+  if (!pageHtml || !match?.groups?.courseId) {
+    return undefined;
+  }
+
+  const headers = Array.from(pageHtml.matchAll(/<th[^>]*scope="col"[^>]*>(?<label>[\s\S]*?)<\/th>/gi))
+    .map((headerMatch) => stripHtml(headerMatch.groups?.label))
+    .filter((label): label is string => Boolean(label));
+  const hasEmptyTable = /<tbody>\s*<\/tbody>/i.test(pageHtml);
+  const hasBlankState = /blankState/i.test(pageHtml);
+
+  if (!hasEmptyTable && !hasBlankState) {
+    return undefined;
+  }
+
+  const courseId = match.groups.courseId;
+  const url = `https://www.gradescope.com/courses/${courseId}/regrade_requests`;
+  const columnDetail = headers.length > 0 ? `Columns: ${headers.join(' · ')}.` : undefined;
+
+  return ResourceSchema.parse({
+    id: `gradescope:resource:${courseId}:regrade_requests`,
+    kind: 'resource',
+    site: 'gradescope',
+    source: {
+      site: 'gradescope',
+      resourceId: `${courseId}:regrade_requests`,
+      resourceType: 'regrade_requests',
+      url,
+    },
+    url,
+    courseId: `gradescope:course:${courseId}`,
+    resourceKind: 'other',
+    title: 'Regrade requests',
+    summary: 'No submitted regrade requests yet.',
+    detail: ['Course-level regrade hub is currently empty.', columnDetail].filter(Boolean).join(' '),
+  });
+}
+
 function enrichAssignmentWithSubmissionDetail(assignment: Assignment, detail: GradescopeSubmissionDetail) {
   const detailSummary = buildGradescopeQuestionBreakdownSummary(detail);
   const fullDetail = buildGradescopeQuestionBreakdownDetail(detail);
@@ -1404,6 +1445,7 @@ export interface GradescopeSnapshot extends SiteSnapshot {
   assignments?: Assignment[];
   grades?: Grade[];
   courses?: Course[];
+  resources?: Resource[];
 }
 export type GradescopeSyncResult =
   | (SiteSyncSuccess & {
@@ -1750,6 +1792,25 @@ class GradescopeGradesDomCollector implements ResourceCollector<Grade> {
   }
 }
 
+class GradescopeRegradeRequestsDomCollector implements ResourceCollector<Resource> {
+  readonly name = 'GradescopeRegradeRequestsDomCollector';
+  readonly resource = 'resources';
+  readonly mode = 'dom' as const;
+  readonly priority = 10;
+
+  async supports(ctx: AdapterContext) {
+    return ctx.site === 'gradescope' && /\/courses\/\d+\/regrade_requests(?:[?#].*)?$/.test(ctx.url) && Boolean(ctx.pageHtml);
+  }
+
+  async collect(ctx: AdapterContext) {
+    const resource = parseGradescopeRegradeRequestsResource(ctx.pageHtml, ctx.url);
+    if (!resource) {
+      throw new GradescopeApiError('unsupported_context', 'Gradescope regrade-requests page is unavailable.');
+    }
+    return [resource];
+  }
+}
+
 function buildGradescopeFailure(
   outcome: Exclude<GradescopeSyncOutcome, 'success' | 'partial_success'>,
   errorReason: string,
@@ -1837,6 +1898,11 @@ export class GradescopeAdapter implements SiteAdapter {
           modes: ['private_api', 'dom'],
           preferredMode: 'private_api',
         },
+        resources: {
+          supported: ctx.site === 'gradescope',
+          modes: ['dom'],
+          preferredMode: 'dom',
+        },
       },
     };
   }
@@ -1867,10 +1933,13 @@ export class GradescopeAdapter implements SiteAdapter {
       ];
       const coursesPipeline = await runCollectorPipeline(ctx, coursesCollectors);
       attemptsByResource.courses = coursesPipeline.attempts;
+      const resourcesPipeline = await runCollectorPipeline(ctx, [new GradescopeRegradeRequestsDomCollector()]);
+      attemptsByResource.resources = resourcesPipeline.attempts;
 
       const assignments = assignmentsPipeline.ok ? z.array(AssignmentSchema).parse(assignmentsPipeline.items) : undefined;
       const grades = gradesPipeline.ok ? z.array(GradeSchema).parse(gradesPipeline.items) : undefined;
       const courses = coursesPipeline.ok ? z.array(CourseSchema).parse(coursesPipeline.items) : undefined;
+      const resources = resourcesPipeline.ok ? z.array(ResourceSchema).parse(resourcesPipeline.items) : undefined;
       const privateAssignments =
         assignmentsPipeline.ok && assignmentsPipeline.winningMode === 'private_api' ? assignments : undefined;
       const privateGrades = gradesPipeline.ok && gradesPipeline.winningMode === 'private_api' ? grades : undefined;
@@ -1909,6 +1978,7 @@ export class GradescopeAdapter implements SiteAdapter {
         outcome,
         snapshot: {
           courses: resolvedCourses,
+          resources,
           assignments,
           grades,
         },
