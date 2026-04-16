@@ -359,6 +359,80 @@ const baseInput = {
   ],
 };
 
+const planningInput = {
+  generatedAt,
+  viewTitle: 'Planning board',
+  scope: {
+    site: 'myplan' as const,
+  },
+  planningSubstrates: [
+    {
+      id: 'myplan:planning-substrate:live',
+      source: 'myplan' as const,
+      fit: 'derived_planning_substrate' as const,
+      readOnly: true as const,
+      capturedAt: '2026-04-10T08:00:00.000Z',
+      lastUpdatedAt: '2026-04-10T09:30:00.000Z',
+      planId: 'myplan-live',
+      planLabel: 'Allen School planning draft',
+      termCount: 3,
+      plannedCourseCount: 9,
+      backupCourseCount: 2,
+      scheduleOptionCount: 4,
+      requirementGroupCount: 5,
+      programExplorationCount: 1,
+      degreeProgressSummary: 'Core degree requirements still need one systems elective.',
+      transferPlanningSummary: 'Transfer equivalency review remains manual.',
+      currentStage: 'partial_shared_landing',
+      runtimePosture: 'comparison_oriented_planning_substrate',
+      currentTruth: 'Planning Pulse is now visible as a read-only summary lane.',
+      exactBlockers: [
+        {
+          id: 'shared_planning_substrate_contract',
+          class: 'repo-owned blocker' as const,
+          summary: 'Shared planning promotion still needs a source-aware merge.',
+          whyItStopsPromotion: 'The adapter proof exists, but export parity still needs to stay aligned.',
+        },
+      ],
+      terms: [
+        {
+          termCode: '2026-sp',
+          termLabel: 'Spring 2026',
+          plannedCourseCount: 3,
+          backupCourseCount: 1,
+          scheduleOptionCount: 2,
+        },
+      ],
+    },
+    {
+      id: 'time-schedule:planning-substrate:spring-2026',
+      source: 'time-schedule' as const,
+      fit: 'derived_planning_substrate' as const,
+      readOnly: true as const,
+      capturedAt: '2026-04-10T09:00:00.000Z',
+      planId: 'timeschedule-spring-2026',
+      planLabel: 'Time Schedule · Spring 2026',
+      termCount: 1,
+      plannedCourseCount: 2,
+      backupCourseCount: 0,
+      scheduleOptionCount: 1,
+      requirementGroupCount: 0,
+      programExplorationCount: 0,
+      currentTruth: 'Time Schedule stays a public planning carrier.',
+      exactBlockers: [],
+      terms: [
+        {
+          termCode: '2026-sp',
+          termLabel: 'Spring 2026',
+          plannedCourseCount: 2,
+          backupCourseCount: 0,
+          scheduleOptionCount: 1,
+        },
+      ],
+    },
+  ],
+};
+
 describe('exporter package', () => {
   it('builds weekly assignments as human-readable markdown', () => {
     const artifact = createExportArtifact({
@@ -516,8 +590,60 @@ describe('exporter package', () => {
     expect(artifact.content).toContain(',resourceGroupLabel,resourceGroupCount,resourceModuleLabel,resourceModuleItemType,');
     expect(artifact.content).toContain('Submitted draft is already in Canvas.');
     expect(artifact.content).toContain('Q1 1 / 1 · Correct; Q2 0 / 1 · Incorrect');
+    expect(artifact.content).toContain('Actions: Download graded copy | Submission history');
+    expect(artifact.content).toContain('Question breakdown: Q1 1 / 1 (Correct) [1 annotation on page 3]');
     expect(artifact.content).toContain('Homework');
     expect(artifact.content).toContain('Week 1');
+  });
+
+  it('includes planning substrate data in current-view json artifacts', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'json',
+      input: planningInput,
+    });
+
+    expect(artifact.packaging.provenance.some((entry) => entry.label === 'Planning Pulse shared lane')).toBe(true);
+    expect(artifact.content).toContain('"planningSubstrates": 2');
+    expect(artifact.content).toContain('"planLabel": "Allen School planning draft"');
+    expect(artifact.content).toContain('"currentTruth": "Planning Pulse is now visible as a read-only summary lane."');
+    expect(artifact.content).toContain('"planLabel": "Time Schedule · Spring 2026"');
+  });
+
+  it('exports the latest planning pulse body in current-view csv artifacts', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'csv',
+      input: planningInput,
+    });
+
+    expect(artifact.content).toContain('planning_substrate,myplan,current_view,myplan,,workspace_snapshot');
+    expect(artifact.content).toContain('Allen School planning draft');
+    expect(artifact.content).toContain('Current stage: partial shared landing');
+    expect(artifact.content).toContain('Runtime posture: comparison oriented planning substrate');
+    expect(artifact.content).toContain('Degree progress: Core degree requirements still need one systems elective.');
+    expect(artifact.content).toContain('Transfer planning: Transfer equivalency review remains manual.');
+    expect(artifact.content).toContain('Exact blockers: shared_planning_substrate_contract');
+    expect(artifact.content).toContain('Terms: Spring 2026: 3 planned · 1 backup · 2 option(s)');
+    expect(artifact.content).not.toContain('Time Schedule · Spring 2026');
+  });
+
+  it('exports the latest planning pulse body in current-view markdown artifacts', () => {
+    const artifact = createExportArtifact({
+      preset: 'current_view',
+      format: 'markdown',
+      input: planningInput,
+    });
+
+    expect(artifact.content).toContain('## Planning Pulse');
+    expect(artifact.content).toContain('Allen School planning draft (MyPlan; 3 term(s) · 9 planned course(s) · 2 backup course(s) · 4 schedule option(s); requirement groups 5; exploration paths 1; current stage partial shared landing; runtime posture comparison oriented planning substrate)');
+    expect(artifact.content).toContain('captured 2026-04-10T08:00:00.000Z; updated 2026-04-10T09:30:00.000Z');
+    expect(artifact.content).toContain('Planning Pulse is now visible as a read-only summary lane.');
+    expect(artifact.content).toContain('degree progress Core degree requirements still need one systems elective.');
+    expect(artifact.content).toContain('transfer planning Transfer equivalency review remains manual.');
+    expect(artifact.content).toContain('exact blockers shared_planning_substrate_contract');
+    expect(artifact.content).toContain('term Spring 2026: 3 planned · 1 backup · 2 option(s)');
+    expect(artifact.content).not.toContain('Time Schedule · Spring 2026');
   });
 
   it('labels regrade hubs and lesson resources with semantic labels in markdown', () => {

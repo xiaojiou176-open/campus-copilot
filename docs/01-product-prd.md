@@ -100,4 +100,4 @@ The academic expansion lane has an extra safety rule:
 - Current capability snapshot: [`site-capability-matrix.md`](site-capability-matrix.md)
 - Validation boundaries: [`verification-matrix.md`](verification-matrix.md)
 - Integration risk classes: [`integration-boundaries.md`](integration-boundaries.md)
-- Academic expansion and safety contract: [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)
+- Public safety summary: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)

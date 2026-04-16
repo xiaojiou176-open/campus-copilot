@@ -46,7 +46,7 @@ Campus Copilot stays:
 - a read-only context provider
 - a repo-public bundle/router for integrations
 
-Every integration surface also inherits the academic safety contract in [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md):
+Every integration surface also inherits the same public safety boundary summarized in [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md):
 
 - no `Register.UW` / `Notify.UW` automation
 - no registration-related polling or seat watching

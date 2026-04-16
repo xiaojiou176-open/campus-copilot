@@ -7,7 +7,7 @@ Use it together with:
 - [`README.md`](README.md)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - [`SECURITY.md`](SECURITY.md)
-- [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md)
+- [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md)
 - [`docs/verification-matrix.md`](docs/verification-matrix.md)
 - [`docs/integration-boundaries.md`](docs/integration-boundaries.md)
 

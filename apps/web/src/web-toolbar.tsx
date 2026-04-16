@@ -30,7 +30,7 @@ type WebToolbarProps = WebToolbarBaseProps & {
   onExportChangeJournal: () => void;
 };
 
-type WebOrientationHeaderProps = Pick<WebToolbarProps, 'ready' | 'now'>;
+type WebOrientationHeaderProps = Pick<WebToolbarProps, 'ready' | 'now' | 'populatedSiteCount' | 'unseenUpdateCount' | 'topSyncRun'>;
 
 type WebToolbarControlsProps = Pick<
   WebToolbarProps,
@@ -56,9 +56,9 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
     <section className="support-grid" aria-label="Workspace trust and diagnostics">
       <article className="support-card support-card--trust">
         <p className="eyebrow">Review before AI</p>
-        <h2>What this workspace can prove</h2>
+        <h2>What this desk can prove</h2>
         <p className="support-copy">
-          Start with the facts already on the desk. This summary shows what the current slice can really prove before
+          Start with the facts already on the desk. This summary shows what the current slice can actually prove before
           you export it or ask AI to explain it.
         </p>
         <div className="support-list support-list--compact" role="list" aria-label="Trust summary rules">
@@ -72,17 +72,17 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
           </div>
           <div className="support-rule" role="listitem">
             <strong>Review before forward motion</strong>
-            <span>Scope, receipts, and export posture stay visible before the explanation layer or export buttons take over.</span>
+            <span>Scope, receipts, and export posture stay visible before the explanation layer takes over.</span>
           </div>
         </div>
       </article>
 
       <article className="support-card support-card--diagnostics">
         <p className="eyebrow">Receipts on deck</p>
-        <h2>Diagnostics and receipts</h2>
+        <h2>Receipts and diagnostics</h2>
         <p className="support-copy">
-          This layer only reports what the imported workspace can currently prove, so the detailed export review
-          below never has to pretend it knows more than the receipts.
+          This layer only reports what the imported workspace can currently prove, so the review below never has to
+          pretend it knows more than the receipts.
         </p>
         <div className="support-metrics" role="list" aria-label="Workspace diagnostics">
           <div className="support-metric" role="listitem">
@@ -100,7 +100,7 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
         </div>
         <p className="support-note support-note--receipt">
           {props.topSyncRun
-            ? `Latest stored sync receipt: ${props.siteLabels[props.topSyncRun.site]} · ${props.topSyncRun.outcome} · ${formatRelativeTime(props.topSyncRun.completedAt)}.`
+            ? `Latest stored receipt: ${props.siteLabels[props.topSyncRun.site]} · ${props.topSyncRun.outcome} · ${formatRelativeTime(props.topSyncRun.completedAt)}.`
             : 'No stored sync receipt is visible yet. Import a current-view snapshot first to populate diagnostics and change receipts.'}
         </p>
       </article>
@@ -115,18 +115,28 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
         <p className="eyebrow">Start here</p>
         <h1>Student decision workspace</h1>
         <p className="lede">
-          One local workspace where academic work and administrative signals stay grouped on the same decision desk.
-        </p>
-        <p className="hero-support">
-          Start with the next-up work and weekly load first. Trust review, export, and cited AI stay close by, but they
-          follow the visible facts instead of replacing them.
+          One local desk for academic work, administrative signals, and the next decision.
         </p>
       </div>
       <div className="hero-card hero-card--orientation">
         <p>Workspace truth</p>
         <strong>{props.ready ? 'Shared storage/read-model loaded' : 'Bootstrapping local workspace'}</strong>
+        <div className="hero-card-grid" role="list" aria-label="Workspace glance">
+          <div className="hero-card-cell" role="listitem">
+            <span className="hero-card-label">Sites with data</span>
+            <strong>{props.populatedSiteCount}</strong>
+          </div>
+          <div className="hero-card-cell" role="listitem">
+            <span className="hero-card-label">Unseen updates</span>
+            <strong>{props.unseenUpdateCount}</strong>
+          </div>
+          <div className="hero-card-cell" role="listitem">
+            <span className="hero-card-label">Latest receipt</span>
+            <strong>{props.topSyncRun ? formatRelativeTime(props.topSyncRun.completedAt) : 'Waiting'}</strong>
+          </div>
+        </div>
         <span>Last refresh {formatRelativeTime(props.now)}</span>
-        <span className="hero-card-note">Read-only, review-first, and grounded in the same schema/export contract.</span>
+        <span className="hero-card-note">Read-only, review-first, same schema/export contract.</span>
       </div>
     </section>
   );
@@ -142,8 +152,7 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
               Load / Import
             </p>
             <p className="toolbar-group-copy">
-              Load or refresh the desk after you have your bearings. These controls support the workbench instead of
-              taking over the first fold.
+              Load or refresh only after the main desk is in focus.
             </p>
           </div>
           <div className="toolbar-row toolbar-row--actions">
@@ -172,8 +181,7 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
               Filter / Export
             </p>
             <p className="toolbar-group-copy">
-              Filter and export after the decision lane has shown the slice you want. Trust review stays nearby, but it
-              no longer has to take over the first screen.
+              Filter and export only after the decision lane has already shown the slice you want.
             </p>
           </div>
           <div className="toolbar-row toolbar-row-fields">
@@ -214,15 +222,20 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
             <button type="button" className="secondary-button secondary-button--strong" onClick={props.onExportCurrentView}>
               Export current view
             </button>
-            <button type="button" className="quiet-button" onClick={props.onExportFocusQueue}>
-              Export focus queue
-            </button>
-            <button type="button" className="quiet-button" onClick={props.onExportWeeklyLoad}>
-              Export weekly load
-            </button>
-            <button type="button" className="quiet-button" onClick={props.onExportChangeJournal}>
-              Export change journal
-            </button>
+            <details className="toolbar-disclosure">
+              <summary>More export presets</summary>
+              <div className="toolbar-disclosure-actions">
+                <button type="button" className="quiet-button" onClick={props.onExportFocusQueue}>
+                  Export focus queue
+                </button>
+                <button type="button" className="quiet-button" onClick={props.onExportWeeklyLoad}>
+                  Export weekly load
+                </button>
+                <button type="button" className="quiet-button" onClick={props.onExportChangeJournal}>
+                  Export change journal
+                </button>
+              </div>
+            </details>
           </div>
         </section>
       </div>
@@ -236,7 +249,13 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
 export function WebToolbar(props: WebToolbarProps) {
   return (
     <>
-      <WebOrientationHeader ready={props.ready} now={props.now} />
+      <WebOrientationHeader
+        ready={props.ready}
+        now={props.now}
+        populatedSiteCount={props.populatedSiteCount}
+        unseenUpdateCount={props.unseenUpdateCount}
+        topSyncRun={props.topSyncRun}
+      />
       <WebToolbarControls {...props} />
     </>
   );

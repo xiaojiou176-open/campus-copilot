@@ -28,7 +28,7 @@ It does **not** make the repo:
 - a hosted SDK platform
 - a write-capable campus operator runtime
 
-All integration-facing surfaces here still inherit the academic safety contract in [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md):
+All integration-facing surfaces here still inherit the same public safety boundary summarized in [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md):
 
 - no registration automation
 - no `Register.UW` / `Notify.UW` product path

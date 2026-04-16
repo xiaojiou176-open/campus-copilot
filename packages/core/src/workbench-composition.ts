@@ -61,6 +61,7 @@ export interface BuildWorkbenchExportInputArgs {
   events: Event[];
   alerts: Alert[];
   recentUpdates?: RecentUpdatesFeed;
+  planningSubstrates?: WorkbenchView['planningSubstrates'];
   focusQueue: FocusQueueItem[];
   weeklyLoad: WeeklyLoadEntry[];
   syncRuns: SyncRun[];
@@ -131,7 +132,6 @@ function buildDefaultViewTitle(preset: ExportPreset, filters: WorkbenchFilter) {
 
 export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): ExportInput {
   const presentation = args.presentation;
-
   return {
     generatedAt: args.generatedAt,
     viewTitle: presentation?.viewTitle ?? buildDefaultViewTitle(args.preset, args.filters),
@@ -149,6 +149,7 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
     events: args.events,
     alerts: presentation?.alerts ?? args.alerts,
     timelineEntries: presentation?.recentUpdates ?? args.recentUpdates?.items ?? [],
+    planningSubstrates: args.planningSubstrates ?? [],
     focusQueue: presentation?.focusQueue ?? args.focusQueue,
     weeklyLoad: presentation?.weeklyLoad ?? args.weeklyLoad,
     syncRuns: args.syncRuns,

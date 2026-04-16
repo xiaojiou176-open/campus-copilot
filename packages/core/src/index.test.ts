@@ -45,6 +45,26 @@ describe('core contracts', () => {
         items: [],
         unseenCount: 0,
       },
+      planningSubstrates: [
+        {
+          id: 'myplan:student-plan',
+          source: 'myplan',
+          fit: 'derived_planning_substrate',
+          readOnly: true,
+          capturedAt: '2026-04-10T08:00:00.000Z',
+          planId: 'student-plan',
+          planLabel: 'Student Plan',
+          termCount: 2,
+          plannedCourseCount: 6,
+          backupCourseCount: 1,
+          scheduleOptionCount: 3,
+          requirementGroupCount: 4,
+          programExplorationCount: 2,
+          exactBlockers: [],
+          hardDeferredMoves: [],
+          terms: [],
+        },
+      ],
       focusQueue: [],
       weeklyLoad: [],
       syncRuns: [],
@@ -60,6 +80,12 @@ describe('core contracts', () => {
       site: 'canvas',
     });
     expect(input.authorization).toBeUndefined();
+    expect(input.planningSubstrates).toEqual([
+      expect.objectContaining({
+        id: 'myplan:student-plan',
+        planLabel: 'Student Plan',
+      }),
+    ]);
   });
 
   it('builds a shared AI proxy request on the existing route/body contract', () => {

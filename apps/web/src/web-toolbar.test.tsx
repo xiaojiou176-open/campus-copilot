@@ -49,23 +49,23 @@ describe('web toolbar and support rail', () => {
     );
 
     expect(html).toContain('Student decision workspace');
-    expect(html).toContain('academic work and administrative signals stay grouped on the same decision desk');
+    expect(html).toContain('academic work, administrative signals, and the next decision');
     expect(html).toContain('Workspace truth');
     expect(html).toContain('Load / Import');
     expect(html).toContain('Filter / Export');
     expect(html).not.toContain('Trust summary');
-    expect(html).not.toContain('Diagnostics and receipts');
+    expect(html).not.toContain('Receipts and diagnostics');
   });
 
   it('renders a supporting trust summary and diagnostics receipts without overclaiming live state', () => {
     const html = renderToStaticMarkup(createElement(WebSupportRail, toolbarProps));
 
-    expect(html).toContain('What this workspace can prove');
-    expect(html).toContain('Diagnostics and receipts');
+    expect(html).toContain('What this desk can prove');
+    expect(html).toContain('Receipts and diagnostics');
     expect(html).toContain('Imported sites with data');
     expect(html).toContain('Tracked entities');
     expect(html).toContain('Unseen updates');
-    expect(html).toContain('Latest stored sync receipt: Canvas');
+    expect(html).toContain('Latest stored receipt: Canvas');
     expect(html).toContain('Start with the facts already on the desk.');
     expect(html).toContain('Registration-related and red-zone routes stay outside this product surface.');
   });

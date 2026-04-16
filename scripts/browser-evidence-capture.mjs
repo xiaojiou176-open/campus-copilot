@@ -5,7 +5,10 @@ import { pathToFileURL } from 'node:url';
 import { chromium } from '@playwright/test';
 import { getCacheGovernancePolicy, getChromeProcessList, getRepoBrowserRootStatus } from './lib/cache-governance.mjs';
 import {
+  buildCdpTargetSummary,
   collectChromeDebugCandidateUrls,
+  findBestRequestedUrlMatch,
+  getRequestedUrlMatchScore,
   getChromeProfileRequirement,
   normalizeCdpConnectUrl,
   parsePositiveInt,
@@ -76,6 +79,75 @@ export function shouldNavigateRequestedPage(input) {
   return current !== requested;
 }
 
+export function selectRequestedPageTarget(targets, requestedUrl) {
+  if (!Array.isArray(targets)) {
+    return undefined;
+  }
+
+  const pageTargets = targets.filter((entry) => entry?.type === 'page');
+  return findBestRequestedUrlMatch(
+    pageTargets,
+    requestedUrl,
+    (entry) => entry?.url ?? '',
+    (entry) => entry?.title ?? '',
+  );
+}
+
+export function shouldFinalizeFallbackMatch(input) {
+  if (!input.matchedTarget?.url) {
+    return false;
+  }
+
+  const score = getRequestedUrlMatchScore(input.matchedTarget.url, input.requestedUrl);
+  if (score <= 0) {
+    return false;
+  }
+
+  if (!input.navigationAttempted) {
+    return true;
+  }
+
+  // After we explicitly ask Chrome to open a target page, a generic same-host
+  // fallback is still too weak to count as evidence. Accept exact, redirect,
+  // or special-path matches only.
+  return score !== 2;
+}
+
+async function fetchJson(endpoint, init = undefined) {
+  try {
+    const response = await fetch(endpoint, init);
+    const body = await response.text();
+    let parsed;
+    try {
+      parsed = JSON.parse(body);
+    } catch {
+      parsed = undefined;
+    }
+
+    return {
+      ok: response.ok,
+      statusCode: response.status,
+      parsed,
+      body,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+async function openRequestedPageTarget(cdpUrl, requestedUrl) {
+  const endpoint = new URL(`/json/new?${encodeURIComponent(requestedUrl)}`, normalizeCdpConnectUrl(cdpUrl));
+  return fetchJson(endpoint, { method: 'PUT' });
+}
+
+async function listPageTargets(cdpUrl) {
+  const endpoint = new URL('/json/list', normalizeCdpConnectUrl(cdpUrl));
+  return fetchJson(endpoint);
+}
+
 function resolveOutputDir(rootDir, runId) {
   const configured = process.env.BROWSER_EVIDENCE_OUTPUT_DIR?.trim();
   if (configured) {
@@ -142,7 +214,7 @@ function attachEvidenceListeners(page, state, pendingRequests) {
 }
 
 async function resolveContext(sessionConfig) {
-  const rawChromeProcessList = '';
+  const rawChromeProcessList = getChromeProcessList();
   const candidateUrls = collectChromeDebugCandidateUrls(rawChromeProcessList, sessionConfig);
   const cdpCandidates = Array.from(new Set([...sessionConfig.cdpCandidateUrls, ...candidateUrls]));
 
@@ -167,6 +239,138 @@ async function resolveContext(sessionConfig) {
   }
 
   throw new Error('browser_attach_missing_repo_instance');
+}
+
+async function captureViaTargetSummaryFallback({
+  cdpCandidates,
+  requestedUrl,
+  flags,
+  waitMs,
+  rootDir,
+  runId,
+  sessionConfig,
+  outputDir,
+  state,
+}) {
+  for (const candidate of cdpCandidates) {
+    const initialTargets = await listPageTargets(candidate);
+    if (!initialTargets.ok || !Array.isArray(initialTargets.parsed)) {
+      continue;
+    }
+
+    let targets = initialTargets.parsed;
+    let matchingTarget = selectRequestedPageTarget(targets, requestedUrl);
+    const navigationAttempted =
+      !matchingTarget ||
+      shouldNavigateRequestedPage({
+        currentUrl: matchingTarget.url,
+        requestedUrl,
+        reload: flags.reload === 'true',
+      });
+    let openedFreshTarget = false;
+
+    if (navigationAttempted) {
+      const openResult = await openRequestedPageTarget(candidate, requestedUrl);
+      if (openResult.ok) {
+        openedFreshTarget = true;
+        await new Promise((resolve) => {
+          setTimeout(resolve, waitMs);
+        });
+        const refreshedTargets = await listPageTargets(candidate);
+        if (refreshedTargets.ok && Array.isArray(refreshedTargets.parsed)) {
+          targets = refreshedTargets.parsed;
+          matchingTarget = selectRequestedPageTarget(targets, requestedUrl);
+        }
+      }
+    }
+
+    if (
+      !shouldFinalizeFallbackMatch({
+        matchedTarget: matchingTarget,
+        requestedUrl,
+        navigationAttempted,
+      })
+    ) {
+      continue;
+    }
+
+    state.finalUrl = matchingTarget?.url ?? '';
+    state.title = matchingTarget?.title ?? '';
+
+    const summary = summarizeBrowserEvidence(state);
+    const har = buildHarLikeArchive(state);
+    const harPath = join(outputDir, 'network.har.json');
+    const summaryPath = join(outputDir, 'summary.json');
+    const targetSummary = buildCdpTargetSummary(targets);
+
+    writeFileSync(harPath, JSON.stringify(har, null, 2), 'utf8');
+    writeFileSync(
+      summaryPath,
+      JSON.stringify(
+        {
+          runId,
+          mode: 'page_target_http_after_attach_failure',
+          cdpUrl: candidate,
+          session: {
+            requestedProfileLabel: sessionConfig.requestedProfileLabel,
+            userDataDirLabel: sessionConfig.userDataDirLabel,
+            profileDirectory: sessionConfig.profileDirectory,
+          },
+          artifacts: {
+            tracePath: null,
+            harPath: relative(rootDir, harPath),
+          },
+          openedFreshTarget,
+          targetSummary,
+          matchedTarget:
+            matchingTarget && typeof matchingTarget === 'object'
+              ? {
+                  id: matchingTarget.id ?? null,
+                  title: matchingTarget.title ?? '',
+                  url: matchingTarget.url ?? '',
+                }
+              : null,
+          summary,
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    console.log(
+      JSON.stringify(
+        {
+          status: 'ok',
+          runId,
+          mode: 'page_target_http_after_attach_failure',
+          cdpUrl: candidate,
+          outputDir: relative(rootDir, outputDir),
+          artifacts: {
+            tracePath: null,
+            harPath: relative(rootDir, harPath),
+            summaryPath: relative(rootDir, summaryPath),
+          },
+          openedFreshTarget,
+          targetSummary,
+          matchedTarget:
+            matchingTarget && typeof matchingTarget === 'object'
+              ? {
+                  id: matchingTarget.id ?? null,
+                  title: matchingTarget.title ?? '',
+                  url: matchingTarget.url ?? '',
+                }
+              : null,
+          summary,
+        },
+        null,
+        2,
+      ),
+    );
+    return true;
+  }
+
+  return false;
 }
 
 async function captureEvidence() {
@@ -239,13 +443,46 @@ async function captureEvidence() {
     requestedUrl,
   });
 
-  const { browser, context, mode, cdpUrl } = await resolveContext(sessionConfig);
+  const rawChromeProcessList = getChromeProcessList();
+  const cdpCandidates = Array.from(
+    new Set([
+      ...sessionConfig.cdpCandidateUrls,
+      ...collectChromeDebugCandidateUrls(rawChromeProcessList, sessionConfig),
+    ]),
+  );
+  let browser;
+  let context;
+  let mode;
+  let cdpUrl;
   const tracePath = join(outputDir, 'trace.zip');
   const harPath = join(outputDir, 'network.har.json');
   const summaryPath = join(outputDir, 'summary.json');
   const pendingRequests = new Map();
 
   try {
+    try {
+      ({ browser, context, mode, cdpUrl } = await resolveContext(sessionConfig));
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'browser_attach_missing_repo_instance' &&
+        (await captureViaTargetSummaryFallback({
+          cdpCandidates,
+          requestedUrl,
+          flags,
+          waitMs,
+          rootDir,
+          runId,
+          sessionConfig,
+          outputDir,
+          state,
+        }))
+      ) {
+        return;
+      }
+      throw error;
+    }
+
     if (typeof context.tracing?.start === 'function') {
       await context.tracing.start({
         screenshots: true,
@@ -356,7 +593,7 @@ async function captureEvidence() {
     );
     process.exit(2);
   } finally {
-    await context.close().catch(() => {});
+    await context?.close().catch(() => {});
     if (browser) {
       await browser.close().catch(() => {});
     }

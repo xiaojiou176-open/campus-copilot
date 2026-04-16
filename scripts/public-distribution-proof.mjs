@@ -49,11 +49,32 @@ const commands = [
   { command: 'pnpm', args: ['smoke:docker:api'] },
 ];
 
+function buildSanitizedChildEnv(overrides = {}) {
+  const env = {
+    ...process.env,
+    ...overrides,
+  };
+
+  const noisyLifecycleKeys = [
+    'npm_config_npm_globalconfig',
+    'npm_config_verify_deps_before_run',
+    'npm_config__jsr_registry',
+    'npm_config_store_dir',
+  ];
+
+  for (const key of noisyLifecycleKeys) {
+    delete env[key];
+  }
+
+  return env;
+}
+
 for (const { command, args, cwd } of commands) {
   const result = spawnSync(command, args, {
     cwd: cwd ?? process.cwd(),
     encoding: 'utf8',
     stdio: 'inherit',
+    env: buildSanitizedChildEnv(),
   });
 
   if (result.status !== 0) {

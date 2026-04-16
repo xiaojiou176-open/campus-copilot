@@ -191,8 +191,7 @@ export function AskAiPanel(props: {
                   {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
                   {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
                 </p>
-                <p className="surface__meta">{trustSnapshot}</p>
-                <p className="surface__meta">{text.askAi.manualOnlyBadge}</p>
+                <p className="surface__meta">{trustSnapshot} · {text.askAi.manualOnlyBadge}</p>
               </div>
               <span className={`surface__badge surface__badge--${selectedProviderReady ? 'success' : 'warning'}`}>
                 {selectedProviderReady ? text.meta.ready : text.meta.notReady}
@@ -270,8 +269,8 @@ export function AskAiPanel(props: {
                 <h3>{text.askAi.questionBox}</h3>
                 <p className="surface__meta">
                   {uiLanguage === 'zh-CN'
-                    ? '先看上面的策略、证据与边界，再基于眼前这张工作台发问。这个提问框现在明确排在可信证据之后。'
-                    : 'Review the visible evidence and boundary notes first, then ask from the current workspace. The composer now sits after the trust-first support lane.'}
+                    ? '先看上面的证据和边界，再基于这张工作台发问。'
+                    : 'Review the evidence and boundary notes first, then ask from the current workspace.'}
                 </p>
               </div>
               <span className="surface__badge surface__badge--neutral">{selectedProviderLabel}</span>

@@ -255,7 +255,7 @@ describe('ai runtime contracts', () => {
       actionLabel: 'Registration automation stays off',
       manualOnlyNote: 'Open the original site if you need to continue manually.',
       docsLabel: 'Academic Safety Contract',
-      docsPath: '/docs/17-academic-expansion-and-safety-contract.md',
+      docsPath: '/docs/07-security-privacy-compliance.md',
       ctaDisabled: true,
       manualPathOnly: true,
     });

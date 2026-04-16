@@ -4,11 +4,47 @@ import {
   buildSiteOverview,
   buildWorkspaceSummary,
   createWorkspaceExport,
+  deriveWorkspaceState,
   parseWorkspaceSnapshot,
 } from './index';
 
 const RAW_SNAPSHOT = JSON.stringify({
   generatedAt: '2026-04-03T09:00:00-07:00',
+  planningSubstrates: [
+    {
+      id: 'myplan:student-plan',
+      source: 'myplan',
+      fit: 'derived_planning_substrate',
+      readOnly: true,
+      capturedAt: '2026-04-03T08:30:00-07:00',
+      lastUpdatedAt: '2026-04-03T08:45:00-07:00',
+      planId: 'student-plan',
+      planLabel: 'Student Plan',
+      currentStage: 'partial_shared_landing',
+      runtimePosture: 'comparison_oriented_planning_substrate',
+      currentTruth: 'Planning Pulse already carries review-first MyPlan context.',
+      termCount: 1,
+      plannedCourseCount: 3,
+      backupCourseCount: 1,
+      scheduleOptionCount: 2,
+      requirementGroupCount: 2,
+      programExplorationCount: 0,
+      degreeProgressSummary: '90 of 180 credits planned or completed.',
+      transferPlanningSummary: 'Transfer review is still pending.',
+      exactBlockers: [],
+      hardDeferredMoves: ['registration handoff'],
+      terms: [
+        {
+          termCode: '2026-spring',
+          termLabel: 'Spring 2026',
+          plannedCourseCount: 3,
+          backupCourseCount: 1,
+          scheduleOptionCount: 2,
+          summary: 'Core major classes stay on track.',
+        },
+      ],
+    },
+  ],
   resources: [
     {
       id: 'edstem:resource:guide-1',
@@ -106,6 +142,7 @@ describe('workspace sdk', () => {
     const summary = await buildWorkspaceSummary(snapshot);
 
     expect(summary.generatedAt).toBe('2026-04-03T09:00:00-07:00');
+    expect(snapshot.planningSubstrates?.[0]?.planLabel).toBe('Student Plan');
     expect(summary.siteCounts.find((entry) => entry.site === 'edstem')?.resources).toBe(1);
     expect(summary.siteCounts.find((entry) => entry.site === 'canvas')?.assignments).toBe(1);
     expect(summary.focusQueueTop.length).toBeGreaterThan(0);
@@ -125,6 +162,7 @@ describe('workspace sdk', () => {
     'creates exporter artifacts and AI-ready messages from the same snapshot',
     async () => {
       const snapshot = parseWorkspaceSnapshot(RAW_SNAPSHOT);
+      const derived = await deriveWorkspaceState(snapshot);
       const artifact = await createWorkspaceExport(snapshot, {
         preset: 'current_view',
         format: 'markdown',
@@ -137,6 +175,9 @@ describe('workspace sdk', () => {
 
       expect(artifact.filename).toContain('current-view');
       expect(artifact.content).toContain('Focus Queue');
+      expect(derived.workbenchView.planningSubstrates[0]?.planLabel).toBe('Student Plan');
+      expect(artifact.content).toContain('Student Plan');
+      expect(artifact.content).toContain('90 of 180 credits planned or completed.');
       expect(messages[0]?.role).toBe('system');
       expect(messages[1]?.content).toContain('Structured tool results');
     },

@@ -9,7 +9,7 @@
     radial-gradient(circle at bottom right, rgba(168, 98, 42, 0.025), transparent 26%),
     linear-gradient(180deg, #f8f6f1 0%, #f4f0e8 100%);
   --surface-border: #e2ddd6;
-  --surface-display: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  --surface-display: Geist, "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
   --surface-panel: rgba(251, 250, 246, 0.96);
   --surface-panel-strong: #fbfaf6;
   --surface-panel-muted: rgba(245, 242, 235, 0.92);
@@ -83,6 +83,15 @@ textarea {
   display: grid;
   gap: 14px;
   margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 14px 16px;
+  border: 1px solid rgba(226, 221, 214, 0.9);
+  border-radius: 20px;
+  background: rgba(248, 246, 241, 0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 28px rgba(39, 72, 61, 0.08);
 }
 
 .surface__mode-bar-actions {
@@ -113,6 +122,7 @@ textarea {
   border-radius: 999px;
   border: 1px solid var(--surface-border);
   background: rgba(241, 238, 229, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
 .surface__title--compact {
@@ -290,16 +300,19 @@ textarea {
   color: var(--surface-title);
   padding: 8px 12px;
   cursor: pointer;
+  font-weight: 600;
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
-    background-color 160ms ease;
+    background-color 160ms ease,
+    transform 160ms ease;
 }
 
 .surface__chip--active {
-  background: var(--surface-accent-soft);
-  border-color: rgba(31, 93, 75, 0.22);
+  background: rgba(31, 93, 75, 0.16);
+  border-color: rgba(31, 93, 75, 0.28);
   color: var(--surface-accent-strong);
+  box-shadow: 0 6px 14px rgba(31, 93, 75, 0.12);
 }
 
 .surface__toggle {
@@ -345,7 +358,7 @@ textarea {
     linear-gradient(180deg, rgba(251, 250, 246, 0.99), rgba(241, 238, 229, 0.96)),
     radial-gradient(circle at top left, rgba(31, 93, 75, 0.08), transparent 44%);
   border-color: rgba(31, 93, 75, 0.16);
-  box-shadow: var(--surface-shadow-sm);
+  box-shadow: 0 18px 34px rgba(39, 72, 61, 0.08);
 }
 
 .surface__panel--diagnostics {
@@ -366,6 +379,46 @@ textarea {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 16px;
+}
+
+.surface__companion-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 4px 0 2px;
+}
+
+.surface__companion-cell {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(39, 72, 61, 0.1);
+  background: rgba(247, 245, 239, 0.92);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.surface__companion-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--surface-muted-soft);
+}
+
+.surface__companion-value {
+  color: var(--surface-title);
+  font-size: 0.96rem;
+  line-height: 1.28;
+  font-weight: 700;
+}
+
+.surface__companion-detail {
+  margin: 0;
+  color: var(--surface-copy);
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
 .surface__assistant-stage {
@@ -406,6 +459,7 @@ textarea {
 .surface--sidepanel .surface__mode-bar {
   gap: 10px;
   margin-bottom: 14px;
+  padding: 12px 14px;
 }
 
 .surface--sidepanel .surface__panel {
@@ -414,6 +468,10 @@ textarea {
 
 .surface--sidepanel .surface__assistant-stage {
   gap: 12px;
+}
+
+.surface--sidepanel .surface__companion-grid {
+  grid-template-columns: 1fr;
 }
 
 .surface--sidepanel .surface__assistant-trust-strip {
@@ -433,7 +491,15 @@ textarea {
 }
 
 .surface--sidepanel .surface__ask-ai-flow--compact {
-  grid-template-columns: minmax(0, 1.34fr) minmax(168px, 0.46fr);
+  grid-template-columns: 1fr;
+}
+
+.surface--sidepanel .surface__ask-ai-shell {
+  order: 1;
+}
+
+.surface--sidepanel .surface__ask-ai-sidebar--supporting {
+  order: 2;
 }
 
 .surface--sidepanel .surface__question-card,
@@ -442,6 +508,11 @@ textarea {
 .surface--sidepanel .surface__status-card,
 .surface--sidepanel .surface__advanced-settings {
   padding: 12px 14px;
+}
+
+.surface--sidepanel .surface__status-intro--supporting {
+  background: rgba(247, 245, 239, 0.84);
+  border-style: dashed;
 }
 
 .surface--sidepanel .surface__advanced-settings-summary {
@@ -462,7 +533,7 @@ textarea {
 .surface__panel h2 {
   font-size: 1.12rem;
   font-family: var(--surface-display);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.01em;
 }
 
@@ -593,7 +664,7 @@ textarea {
   display: grid;
   gap: 16px;
   margin-top: 22px;
-  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.94fr);
   align-items: start;
 }
 

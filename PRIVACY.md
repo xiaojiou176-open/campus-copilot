@@ -53,7 +53,7 @@ The next planned academic expansion lane is read-only only:
 
 Red-zone surfaces such as `Register.UW`, `Notify.UW`, seat-watch flows, or registration-related polling remain outside the product path.
 
-See [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md) for the full contract, and [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md) for the slimmer public summary.
+See [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md) for the public safety summary.
 
 ## Sensitive Data Rules
 

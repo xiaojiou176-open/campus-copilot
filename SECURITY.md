@@ -32,7 +32,7 @@ Some supported capabilities still rely on deeper integration surfaces such as:
 Those surfaces may be necessary, but they must never be described as low-risk or permanently stable just because they currently work.
 
 Use [`docs/integration-boundaries.md`](docs/integration-boundaries.md) for the canonical registry of those boundaries.
-Use [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md) when the question becomes “is this planned expansion or distribution surface still inside the academic safety contract?”.
+Use [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md) when the question becomes “is this planned expansion or distribution surface still inside the public academic safety boundary?”.
 
 ## How To Report A Security Issue
 
@@ -83,7 +83,7 @@ Treat secret scanning like two different airport checkpoints:
 Current closeout rules:
 
 - `gitleaks` and `trufflehog` required lanes should scan the reachable git history or the clean CI checkout
-- ignored local-only materials such as `.env` or `.agents/Conversations` do not count as repository leaks by themselves
+- ignored local-only materials such as `.env` or local maintenance archives do not count as repository leaks by themselves
 - those ignored materials become repository blockers immediately if they move into tracked files, reachable history, screenshots, support bundles, workflow logs, or published docs
 - use `pnpm check:secret-leaks` when you want the repository's truthful local leak gate without treating ignored local-only materials as public-repo findings
 

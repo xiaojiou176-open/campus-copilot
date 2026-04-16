@@ -35,7 +35,6 @@ const requiredFiles = [
   'skills/current-view-triage/SKILL.md',
   'skills/openclaw-readonly-consumer/SKILL.md',
   'skills/site-overview-audit/SKILL.md',
-  'docs/17-academic-expansion-and-safety-contract.md',
   'packages/mcp-server/mcpb.manifest.json',
   'docs/assets/hero-workbench-overview.svg',
   'docs/assets/social-preview-source.svg',
@@ -140,7 +139,7 @@ if (existsSync('README.md')) {
     'pnpm proof:public',
     'INTEGRATIONS.md',
     'DISTRIBUTION.md',
-    'docs/17-academic-expansion-and-safety-contract.md',
+    'docs/07-security-privacy-compliance.md',
     'docs/10-builder-api-and-ecosystem-fit.md',
     'docs/api/openapi.yaml',
   ];
@@ -238,9 +237,9 @@ if (existsSync('skills/README.md')) {
 }
 
 const rootContractExpectations = [
-  ['PRIVACY.md', ['docs/17-academic-expansion-and-safety-contract.md', '`Register.UW`', '`Notify.UW`']],
-  ['INTEGRATIONS.md', ['docs/17-academic-expansion-and-safety-contract.md', 'read-only', 'protected academic workflows']],
-  ['DISTRIBUTION.md', ['docs/17-academic-expansion-and-safety-contract.md', 'no registration automation']],
+  ['PRIVACY.md', ['docs/07-security-privacy-compliance.md', '`Register.UW`', '`Notify.UW`']],
+  ['INTEGRATIONS.md', ['docs/07-security-privacy-compliance.md', 'read-only', 'protected academic workflows']],
+  ['DISTRIBUTION.md', ['docs/07-security-privacy-compliance.md', 'no registration automation']],
   ['SECURITY.md', ['`Register.UW`', '`Notify.UW`', 'raw course files']],
   ['CLAUDE.md', ['`Register.UW` / `Notify.UW`', 'raw course files']],
 ];
@@ -259,14 +258,14 @@ for (const [path, snippets] of rootContractExpectations) {
   }
 }
 
-if (existsSync('docs/17-academic-expansion-and-safety-contract.md')) {
-  const academicSafety = readFileSync('docs/17-academic-expansion-and-safety-contract.md', 'utf8');
+if (existsSync('docs/07-security-privacy-compliance.md')) {
+  const academicSafety = readFileSync('docs/07-security-privacy-compliance.md', 'utf8');
   const requiredAcademicSafetySnippets = [
     '`MyPlan`',
     '`DARS`',
     '`Time Schedule`',
     '`DawgPath`',
-    '`ctcLink class search`',
+    'class-search-only `ctcLink`',
     '`Register.UW`',
     '`Notify.UW`',
     'default-disabled',

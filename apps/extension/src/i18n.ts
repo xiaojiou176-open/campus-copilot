@@ -602,7 +602,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       sidepanelEyebrow: 'Campus Copilot Sidepanel',
       sidepanelTitle: 'Academic workbench',
       sidepanelDescription:
-        'This is not an empty chat box. It keeps academic work and administrative signals on one desk first, then helps you see what is happening today, what is blocked, and what changed recently.',
+        'Keep today\'s academic work, administrative signals, and trust state on one desk before you ask, export, or go deeper.',
       popupEyebrow: 'Campus Copilot Popup',
       popupTitle: 'Quick pulse',
       popupDescription:
@@ -610,7 +610,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       optionsEyebrow: 'Campus Copilot Options',
       optionsTitle: 'Settings and trust center',
       optionsDescription:
-        'This page should explain what the product can read, what AI may analyze, and which local runtime is active without turning into a mini workbench.',
+        'Check what the product may read, what AI may analyze, and which local runtime is active without turning this page into a second desk.',
     },
     meta: {
       noSyncYet: 'No sync yet',
@@ -677,7 +677,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     nextUp: {
       title: 'Next Up',
       description: 'This turns the top-ranked focus item into a plain-English answer before you scroll into the full queue.',
-      none: 'No focus item is ranked first yet. Sync a site or pin something important to create a next step.',
+      none: 'Nothing is ranked first yet. Sync a site or pin one important item to create the next step.',
       whyFirst: 'Why this is first',
       dueLabel: 'Due',
       noteLabel: 'Local note',
@@ -1224,13 +1224,13 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     hero: {
       sidepanelEyebrow: 'Campus Copilot 侧边栏',
       sidepanelTitle: '学习工作台',
-      sidepanelDescription: '这里不是空聊天框，而是先把学业任务和行政信号放到同一张桌面上，再帮你看清今天有什么、哪里卡住了、哪些变化还没看。',
+      sidepanelDescription: '先把今天的学业任务、行政信号和 trust 状态放到同一张桌面上，再决定要不要提问、导出或继续下钻。',
       popupEyebrow: 'Campus Copilot 弹窗',
       popupTitle: '快速体温计',
       popupDescription: 'Popup 保持轻量，负责给你一个很快的体温计：有没有同步、有没有高优先级数字、要不要立刻打开主工作台。',
       optionsEyebrow: 'Campus Copilot 设置',
       optionsTitle: '设置与信任中心',
-      optionsDescription: '这页要讲清产品能读什么、AI 能分析什么、当前连的是哪条本地 runtime，而不是再变成一块迷你工作台。',
+      optionsDescription: '先看清产品能读什么、AI 能分析什么、当前连的是哪条本地 runtime，不把这页做成第二张桌面。',
     },
     meta: {
       noSyncYet: '还没有同步',

@@ -99,6 +99,7 @@ function normalizeImportedSnapshot(candidate: unknown): ImportedWorkbenchSnapsho
   if (parsed.data && typeof parsed.data === 'object') {
     return {
       generatedAt: parsed.generatedAt ?? parsed.data.generatedAt ?? new Date().toISOString(),
+      planningSubstrates: parsed.data.planningSubstrates ?? [],
       resources: parsed.data.resources,
       assignments: parsed.data.assignments,
       announcements: parsed.data.announcements,
@@ -112,6 +113,7 @@ function normalizeImportedSnapshot(candidate: unknown): ImportedWorkbenchSnapsho
 
   return {
     generatedAt: parsed.generatedAt ?? new Date().toISOString(),
+    planningSubstrates: parsed.planningSubstrates ?? [],
     resources: parsed.resources,
     assignments: parsed.assignments,
     announcements: parsed.announcements,
@@ -265,6 +267,7 @@ export async function createWorkspaceExport(
     input: {
       generatedAt: derived.now,
       viewTitle: `Workspace export (${derived.filters.site})`,
+      planningSubstrates: derived.workbenchView.planningSubstrates,
       resources: derived.workbenchView.resources,
       assignments: derived.workbenchView.assignments,
       announcements: derived.workbenchView.announcements,

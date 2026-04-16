@@ -116,7 +116,7 @@ docker run --rm -p 8787:8787 campus-copilot-api:local
 
 Use the same academic safety contract here as everywhere else:
 
-- [`../../docs/17-academic-expansion-and-safety-contract.md`](../../docs/17-academic-expansion-and-safety-contract.md)
+- [`../../docs/07-security-privacy-compliance.md`](../../docs/07-security-privacy-compliance.md)
 
 ## See also
 

@@ -15,8 +15,8 @@ The public story stays the same as the main README:
 
 - **I want the student-facing product first**: [`../README.md`](../README.md), then [`01-product-prd.md`](01-product-prd.md), then [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
 - **I want the four-site substrate**: [`02-system-architecture.md`](02-system-architecture.md), then [`03-domain-schema.md`](03-domain-schema.md), then [`04-adapter-spec.md`](04-adapter-spec.md)
-- **I want repo-local proof that the story is real**: [`verification-matrix.md`](verification-matrix.md), then [`site-capability-matrix.md`](site-capability-matrix.md), then [`storefront-assets.md`](storefront-assets.md)
-- **I want the exact safety and boundary posture**: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md), then [`integration-boundaries.md`](integration-boundaries.md), then [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)
+- **I want repo-local proof that the story is real**: [`site-capability-matrix.md`](site-capability-matrix.md), then [`storefront-assets.md`](storefront-assets.md), then [`verification-matrix.md`](verification-matrix.md) if I need the deeper maintainer-facing verification registry
+- **I want the exact safety and boundary posture**: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md), then [`integration-boundaries.md`](integration-boundaries.md), then [`../PRIVACY.md`](../PRIVACY.md)
 - **I want the integration/API surface after the product shape is clear**: [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`../examples/README.md`](../examples/README.md)
 - **I want distribution or store routes**: [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
 
@@ -27,18 +27,18 @@ If you only want one sane reading path, use this order:
 1. [`../README.md`](../README.md)
 2. [`01-product-prd.md`](01-product-prd.md)
 3. [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
-4. [`verification-matrix.md`](verification-matrix.md)
-5. [`site-capability-matrix.md`](site-capability-matrix.md)
-6. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
+4. [`site-capability-matrix.md`](site-capability-matrix.md)
+5. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
+6. [`verification-matrix.md`](verification-matrix.md) only after the public product/boundary story is already clear
 
 ## Proof And Launch Lane
 
 Use this route when you need stable repo-local proof without turning the docs hub into a launch control room:
 
-1. [`verification-matrix.md`](verification-matrix.md)
-2. [`site-capability-matrix.md`](site-capability-matrix.md)
-3. [`storefront-assets.md`](storefront-assets.md)
-4. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
+1. [`site-capability-matrix.md`](site-capability-matrix.md)
+2. [`storefront-assets.md`](storefront-assets.md)
+3. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
+4. [`verification-matrix.md`](verification-matrix.md) for the deeper maintainer/operator verification registry
 5. [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
 
 Keep the split honest:
@@ -67,7 +67,6 @@ The shortest public-safe docs set is built around:
 - [`04-adapter-spec.md`](04-adapter-spec.md)
 - [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
 - [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
-- [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)
 - [`api/openapi.yaml`](api/openapi.yaml)
 
 Supporting routes that stay useful but clearly secondary:

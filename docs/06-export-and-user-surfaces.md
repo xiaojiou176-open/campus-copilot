@@ -115,6 +115,7 @@ The current-view export and the cited AI payload should carry the same decision-
 - current filtered entities
 - `Focus Queue`
 - `Weekly Load`
+- the latest `Planning Pulse` body from the shared planning substrate lane
 - recent change events
 - recent sync receipts
 - change journal
@@ -123,6 +124,7 @@ The decision-layer presets should stay aligned with the workbench itself:
 
 - focus queue export should preserve score, reasons, and local note context instead of re-deriving them in the exporter
 - weekly load export should preserve planning-oriented summaries from the derived storage read model
+- current-view export should preserve the latest `Planning Pulse` card body, not just mention MyPlan / Time Schedule carriers in provenance
 - change journal export should preserve sync-run receipts and change events as the formal “what changed?” export path
 - course panorama export should preserve course clusters, course-website evidence, and work-item rollups without pretending that raw course pages are AI-ready
 - administrative snapshot export should stay review-first and carry stronger AI caution for DARS / tuition-style summaries

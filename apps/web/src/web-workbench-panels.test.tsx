@@ -657,6 +657,68 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Available actions: Download graded copy · Submission history · Request regrade (Please select a question.)');
   });
 
+  it('shows course-sites spec witness strings on current task cards', () => {
+    const html = renderToStaticMarkup(
+      createElement(WebWorkbenchPanels, {
+        workbenchReady: true,
+        todaySnapshot: {
+          totalAssignments: 1,
+          dueSoonAssignments: 1,
+          recentUpdates: 0,
+          newGrades: 0,
+          riskAlerts: 0,
+          syncedSites: 1,
+        },
+        recentUpdates: { unseenCount: 0, items: [] },
+        currentViewExport: undefined,
+        importedEnvelope: undefined,
+        focusQueue: [],
+        planningSubstrates: [],
+        weeklyLoad: [],
+        courseClusters: [],
+        workItemClusters: [],
+        administrativeSummaries: [],
+        mergeHealth: {
+          mergedCount: 0,
+          possibleMatchCount: 0,
+          unresolvedCount: 0,
+          authorityConflictCount: 0,
+        },
+        currentAssignments: [
+          {
+            id: 'course-sites:assignment:cse312-pset1',
+            site: 'course-sites',
+            title: 'Pset 1',
+            status: 'unknown',
+            summary: 'Spec witness: PDF spec · HTML spec · LaTeX template. Released April 1.',
+            detail: 'Spec columns: Pset (pdf) · Pset (html) · Latex template.',
+            actionHints: ['Open PDF spec', 'Open HTML spec', 'Open LaTeX template'],
+            dueAt: '2026-04-08T23:59:00-07:00',
+          },
+        ],
+        currentMessages: [],
+        currentResources: [],
+        currentAnnouncements: [],
+        currentEvents: [],
+        recentChangeEvents: [],
+        countsBySite: [],
+        topSyncRun: undefined,
+        siteLabels: {
+          canvas: 'Canvas',
+          gradescope: 'Gradescope',
+          edstem: 'EdStem',
+          myuw: 'MyUW',
+          'time-schedule': 'Time Schedule',
+          'course-sites': 'Course Websites',
+        },
+      }),
+    );
+
+    expect(html).toContain('Spec witness: PDF spec · HTML spec · LaTeX template. Released April 1.');
+    expect(html).toContain('Spec columns: Pset (pdf) · Pset (html) · Latex template.');
+    expect(html).toContain('Available actions: Open PDF spec · Open HTML spec · Open LaTeX template');
+  });
+
   it('shows authority details for merged course and work-item clusters', () => {
     const html = renderToStaticMarkup(
       createElement(WebWorkbenchPanels, {

@@ -22,6 +22,7 @@ EOF
 fi
 
 cd "$EXTENSION_DIR"
+unset NO_COLOR
 if [[ "${EXTENSION_SMOKE_SKIP_BUILD:-0}" != "1" ]]; then
   EXTENSION_SMOKE_PORT="${EXTENSION_SMOKE_PORT}" pnpm build
 fi

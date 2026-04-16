@@ -295,6 +295,14 @@ test('classifyFromExistingTab maps known login redirect hosts into deterministic
     classifyFromExistingTab('https://accounts.google.com/signin/v2/identifier', 'Sign in - Google Accounts'),
     { authenticated: false, authBoundary: 'logged_out' },
   );
+  assert.deepEqual(
+    classifyFromExistingTab(
+      'https://www.washington.edu/students/timeschd/pub/SPR2026/cse.html',
+      'COMPUTER SCIENCE & ENGINEERING',
+      { site: 'timeschedule_cse' },
+    ),
+    { authenticated: true, authBoundary: 'authenticated' },
+  );
 });
 
 test('buildProbeNextStep emits Duo-specific guidance for login_required pages at Duo', async () => {
@@ -386,6 +394,14 @@ test('classifyPage treats Duo prompt and session expiry pages as login_required 
 });
 
 test('classifyPage recognizes review-first planning/admin detail pages as authenticated surfaces', () => {
+  assert.equal(
+    classifyPage(
+      'https://myplan.uw.edu/plan/#/sp26',
+      'Spring 2026 - MyPlan',
+      '',
+    ),
+    'likely_authenticated',
+  );
   assert.equal(
     classifyPage(
       'https://myplan.uw.edu/audit/#/degree',

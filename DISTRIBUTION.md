@@ -23,7 +23,7 @@ All distribution surfaces still inherit the same academic safety contract:
 | :-- | :-- | :-- |
 | the product front door | [`README.md`](README.md) | start with the product story, not the shipping ledger |
 | the builder/public integration surface | [`INTEGRATIONS.md`](INTEGRATIONS.md) | use this when the question is about MCP / SDK / CLI / bundle routing |
-| the academic safety contract | [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md) | use this before describing any integration or distribution surface as broader than a read-only study/workspace path |
+| the academic safety boundary | [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md) | use this before describing any integration or distribution surface as broader than a read-only study/workspace path |
 | browser store last mile | this file | the Chrome lane stays an owner-side dashboard step after repo-local proof |
 | the skill catalog and submit packet | [`skills/README.md`](skills/README.md), [`skills/catalog.json`](skills/catalog.json), [`skills/clawhub-submission.packet.json`](skills/clawhub-submission.packet.json) | use these when the question becomes "which public skill surfaces are already machine-readable?" |
 
