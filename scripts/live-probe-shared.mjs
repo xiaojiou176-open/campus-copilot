@@ -698,6 +698,20 @@ function pageLooksExplicitLoggedOut(finalUrl, title, bodyPreview = '') {
   );
 }
 
+function pageLooksKnownPublicReady(site, finalUrl, title, bodyPreview = '') {
+  const lowered = `${finalUrl} ${title} ${bodyPreview}`.toLowerCase();
+
+  if (
+    site === 'timeschedule_cse' &&
+    lowered.includes('washington.edu/students/timeschd/pub/') &&
+    lowered.includes('computer science')
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 export function determineAuthState({ site, classification, finalUrl, title, bodyPreview = '' }) {
   if (classification === 'profile_mismatch') {
     return buildAuthState(false, 'profile_mismatch');
@@ -731,6 +745,9 @@ export function determineAuthState({ site, classification, finalUrl, title, body
   }
   if (pageLooksSessionResumable(site, finalUrl, title, bodyPreview)) {
     return buildAuthState(false, 'session_resumable');
+  }
+  if (pageLooksKnownPublicReady(site, finalUrl, title, bodyPreview)) {
+    return buildAuthState(true, 'authenticated');
   }
   if (pageLooksExplicitLoggedOut(finalUrl, title, bodyPreview)) {
     return buildAuthState(false, 'logged_out');

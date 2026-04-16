@@ -59,5 +59,5 @@ Use these guardrails for later work:
 5. treat repo-public builder packaging and launch/publication work as later or owner/platform-facing unless the repo explicitly promotes them into stable public contract
 
 Detailed owner-side release queues, submission packets, and mutable publication
-choreography should live in local maintainership packets such as
-`.agents/Plans/`, not in the committed docs front door.
+choreography should live in local maintainership packets outside the committed
+docs front door.

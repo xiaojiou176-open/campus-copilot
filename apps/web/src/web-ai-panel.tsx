@@ -68,9 +68,9 @@ export function WebAiPanel(props: {
           <span className="badge">explanation layer</span>
         </div>
         <p className="meta">
-          Review scope, packaging, and trust notes in Auth &amp; Export Management first. This panel stays in a
-          supporting role: ask from the visible workspace first, then open the deeper policy and runtime notes only
-          when you actually need them.
+          Review scope, packaging, and trust notes in the desk review drawer first. This panel stays in a supporting
+          role: ask from the visible workspace first, then open the deeper policy and runtime notes only when you
+          actually need them.
         </p>
       </div>
 

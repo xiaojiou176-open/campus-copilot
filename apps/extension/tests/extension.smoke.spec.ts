@@ -437,19 +437,24 @@ async function assertOptionsTrustCenter(page: Page) {
   const authorizationHeading = page.getByRole('heading', { name: 'Trust center' }).last();
   const authorizationPanel = authorizationHeading.locator('xpath=ancestor::article[1]');
   const configurationActionsHeading = page.getByRole('heading', { name: 'Configuration actions' });
-  await expect(authorizationPanel.getByText('Keep read/export separate from AI analysis')).toBeVisible();
-  await authorizationPanel.locator('summary').filter({ hasText: 'Open detailed site and rule controls' }).click();
+  await expect(
+    authorizationPanel.getByText('Keep read/export separate from AI analysis so “readable” never silently becomes “AI-readable”.'),
+  ).toBeVisible();
+  await authorizationPanel.locator('summary').filter({ hasText: 'Open authorization reviews and rule controls' }).click();
+  await expect(authorizationPanel.getByText('Current trust posture')).toBeVisible();
+  await expect(authorizationPanel.locator('summary').filter({ hasText: 'Site boundary reviews' })).toBeVisible();
+  await expect(
+    authorizationPanel.locator('summary').filter({ hasText: 'Protected families and course AI confirmations' }),
+  ).toBeVisible();
+  await expect(configurationActionsHeading).toBeVisible();
+}
+
+async function expandOptionsRuleEditor(page: Page) {
+  const authorizationHeading = page.getByRole('heading', { name: 'Trust center' }).last();
+  const authorizationPanel = authorizationHeading.locator('xpath=ancestor::article[1]');
   await authorizationPanel.locator('summary').filter({ hasText: 'Detailed authorization controls' }).click();
   await expect(authorizationPanel.locator('label').filter({ hasText: 'All sites · Read & export' })).toBeVisible();
   await expect(authorizationPanel.locator('label').filter({ hasText: 'All sites · AI analysis' })).toBeVisible();
-  await expect(authorizationPanel.getByText('Site AI policy overlays')).toBeVisible();
-  await expect(authorizationPanel.locator('summary').filter({ hasText: 'Course-level AI confirmations' })).toBeVisible();
-  await expect(configurationActionsHeading).toBeVisible();
-  const authorizationBox = await authorizationPanel.boundingBox();
-  const configurationActionsBox = await configurationActionsHeading.boundingBox();
-  expect(authorizationBox).not.toBeNull();
-  expect(configurationActionsBox).not.toBeNull();
-  expect(authorizationBox!.y).toBeLessThan(configurationActionsBox!.y);
 }
 
 async function seedTechnicalConfig(
@@ -615,9 +620,10 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByRole('tab', { name: 'Assistant' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Export' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Settings' })).toBeVisible();
-  await expect(page.getByText('Structured facts only')).toBeVisible();
+  await expect(page.getByText('Read-only desk')).toBeVisible();
+  await expect(page.getByText('Desk snapshot')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ask AI about this workspace' })).toBeVisible();
-  await expect(page.getByText('No local companion/BFF is currently reachable.').first()).toBeVisible();
+  await expect(page.getByText('No local AI route is ready yet.').first()).toBeVisible();
   await expandDetailedWorkspace(page, 'Show detailed workspace');
   await expect(page.getByRole('heading', { name: 'Diagnostics' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Next Up' })).toBeVisible();
@@ -647,12 +653,14 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   await gotoSmokePage(page, baseURL, '/options.html');
   await assertOptionsTrustCenter(page);
   await maybeCaptureSmokeScreenshot(page, 'extension-options-trust-center');
+  await expandOptionsRuleEditor(page);
   await page.getByLabel('All sites · AI analysis').selectOption('allowed');
   await page.getByRole('button', { name: 'Save configuration' }).click();
   await expect(page.getByText('Configuration saved.')).toBeVisible();
 
   await gotoSmokePage(page, baseURL, '/options.html');
   await assertOptionsTrustCenter(page);
+  await expandOptionsRuleEditor(page);
   await expect(page.getByLabel('All sites · AI analysis')).toHaveValue('allowed');
 
   await seedTechnicalConfig(page, {
@@ -801,7 +809,7 @@ test('keeps ai gated until the current scope is explicitly allowed', async ({ pa
     askAiPanel.locator('article.surface__status-card--success article.surface__evidence-card').nth(2).getByText('MARKDOWN', { exact: true }),
   ).toBeVisible();
   const questionField = page.getByLabel('Question');
-  await expect(page.locator('.surface__workspace-detail summary').filter({ hasText: 'Review the current workspace slice first' })).toBeVisible();
+  await expect(page.locator('.surface__workspace-detail summary').filter({ hasText: 'Review this slice first' })).toBeVisible();
   await expandDetailedWorkspace(page, 'Show detailed workspace');
   const canvasFilterChip = page.locator('.surface__toolbar').getByRole('button', { name: 'Canvas', exact: true });
   await canvasFilterChip.click();
@@ -825,7 +833,7 @@ test('asks ai after the current workspace envelope is explicitly allowed', async
   });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
-  await expandDetailedWorkspace(page, 'Review the current workspace slice first');
+  await expandDetailedWorkspace(page, 'Review this slice first');
   const canvasFilterChip = page.locator('.surface__toolbar').getByRole('button', { name: 'Canvas', exact: true });
   await canvasFilterChip.click();
   await page.getByLabel('Question').fill('What should I pay attention to right now?');
@@ -875,6 +883,7 @@ test('shows provider not ready when selected provider is unavailable in bff stat
 test('switches to Chinese UI and shows partial-success plus site-filter behavior', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
   await page.getByLabel('Interface language').selectOption('zh-CN');
+  await page.locator('summary').filter({ hasText: '高级工作台控制项' }).click();
   await page.locator('summary').filter({ hasText: '高级连接覆盖设置' }).click();
   await page.getByLabel('本地 AI 服务地址').fill('');
   await page.getByRole('button', { name: '保存配置' }).click();

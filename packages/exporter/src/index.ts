@@ -190,6 +190,42 @@ export interface ExportInput {
   weeklyLoad?: WeeklyLoadExportEntry[];
   syncRuns?: SyncRunExportEntry[];
   changeEvents?: ChangeEventExportEntry[];
+  planningSubstrates?: Array<{
+    id: string;
+    source: 'myplan' | 'time-schedule';
+    fit: 'derived_planning_substrate';
+    readOnly: true;
+    capturedAt: string;
+    planId: string;
+    planLabel: string;
+    lastUpdatedAt?: string;
+    termCount: number;
+    plannedCourseCount: number;
+    backupCourseCount: number;
+    scheduleOptionCount: number;
+    requirementGroupCount: number;
+    programExplorationCount: number;
+    degreeProgressSummary?: string;
+    transferPlanningSummary?: string;
+    currentStage?: string;
+    runtimePosture?: string;
+    currentTruth?: string;
+    exactBlockers?: Array<{
+      id: string;
+      class: 'repo-owned blocker' | 'GitHub-owned blocker' | 'external-only blocker' | 'owner-manual later';
+      summary: string;
+      whyItStopsPromotion: string;
+    }>;
+    hardDeferredMoves?: string[];
+    terms: Array<{
+      termCode: string;
+      termLabel: string;
+      plannedCourseCount: number;
+      backupCourseCount: number;
+      scheduleOptionCount: number;
+      summary?: string;
+    }>;
+  }>;
   courseClusters?: Array<{
     id: string;
     title: string;
@@ -287,6 +323,7 @@ interface NormalizedExportInput {
   weeklyLoad: WeeklyLoadExportEntry[];
   syncRuns: SyncRunExportEntry[];
   changeEvents: ChangeEventExportEntry[];
+  planningSubstrates: NonNullable<ExportInput['planningSubstrates']>;
   courseClusters: NonNullable<ExportInput['courseClusters']>;
   workItemClusters: NonNullable<ExportInput['workItemClusters']>;
   administrativeSummaries: NonNullable<ExportInput['administrativeSummaries']>;
@@ -381,6 +418,7 @@ function normalizeInput(input: ExportInput): NormalizedExportInput {
     weeklyLoad: [...(input.weeklyLoad ?? [])],
     syncRuns: [...(input.syncRuns ?? [])],
     changeEvents: [...(input.changeEvents ?? [])],
+    planningSubstrates: [...(input.planningSubstrates ?? [])],
     courseClusters: [...(input.courseClusters ?? [])],
     workItemClusters: [...(input.workItemClusters ?? [])],
     administrativeSummaries: [...(input.administrativeSummaries ?? [])],
@@ -674,6 +712,16 @@ function buildDefaultProvenance(input: {
     });
   }
 
+  if (input.normalized.planningSubstrates.length > 0) {
+    entries.push({
+      sourceType: 'derived_read_model',
+      label: 'Planning Pulse shared lane',
+      detail:
+        'The current view export now includes the latest read-only planning substrate card body instead of only mentioning MyPlan or Time Schedule carriers in provenance.',
+      readOnly: true,
+    });
+  }
+
   switch (input.scope.site) {
     case 'canvas':
       entries.push({
@@ -837,6 +885,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         weeklyLoad: [],
         syncRuns: [],
         changeEvents: [],
+        planningSubstrates: [],
         courseClusters: [],
         workItemClusters: [],
         administrativeSummaries: [],
@@ -856,6 +905,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         weeklyLoad: [],
         syncRuns: [],
         changeEvents: [],
+        planningSubstrates: [],
         courseClusters: [],
         workItemClusters: [],
         administrativeSummaries: [],
@@ -875,6 +925,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         weeklyLoad: [],
         syncRuns: [],
         changeEvents: [],
+        planningSubstrates: [],
         courseClusters: [],
         workItemClusters: [],
         administrativeSummaries: [],
@@ -894,6 +945,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         weeklyLoad: [],
         syncRuns: [],
         changeEvents: [],
+        planningSubstrates: [],
         courseClusters: [],
         workItemClusters: [],
         administrativeSummaries: [],
@@ -912,6 +964,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         focusQueue: [],
         syncRuns: [],
         changeEvents: [],
+        planningSubstrates: [],
         courseClusters: [],
         workItemClusters: [],
         administrativeSummaries: [],
@@ -929,6 +982,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         timelineEntries: [],
         focusQueue: [],
         weeklyLoad: [],
+        planningSubstrates: [],
         courseClusters: [],
         workItemClusters: [],
         administrativeSummaries: [],
@@ -946,6 +1000,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         weeklyLoad: [],
         syncRuns: [],
         changeEvents: [],
+        planningSubstrates: [],
         courseClusters: input.courseClusters,
         workItemClusters: input.workItemClusters,
         administrativeSummaries: [],
@@ -966,6 +1021,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         weeklyLoad: [],
         syncRuns: [],
         changeEvents: [],
+        planningSubstrates: [],
         courseClusters: [],
         workItemClusters: [],
         administrativeSummaries: input.administrativeSummaries,
@@ -986,6 +1042,7 @@ function buildPresetDataset(preset: ExportPreset, input: NormalizedExportInput):
         weeklyLoad: [],
         syncRuns: [],
         changeEvents: [],
+        planningSubstrates: [],
         courseClusters: input.courseClusters,
         workItemClusters: input.workItemClusters,
         administrativeSummaries: input.administrativeSummaries,
@@ -1012,6 +1069,102 @@ function formatOptionalNumber(value: number | undefined) {
 
 function formatOptionalString(value: string | undefined) {
   return value ?? '';
+}
+
+function formatAssignmentReviewSummaryForExport(
+  reviewSummary: ExportDataset['assignments'][number]['reviewSummary'],
+) {
+  if (!reviewSummary) {
+    return '';
+  }
+
+  return reviewSummary.questions
+    .map((question) => {
+      const score =
+        question.score !== undefined || question.maxScore !== undefined
+          ? ` ${question.score ?? '-'} / ${question.maxScore ?? '-'}`
+          : '';
+      const rubric = question.rubricLabels.length > 0 ? ` (${question.rubricLabels.join(', ')})` : '';
+      const comments =
+        question.evaluationCommentCount !== undefined
+          ? ` [${question.evaluationCommentCount} comment${question.evaluationCommentCount === 1 ? '' : 's'}]`
+          : '';
+      const annotations = formatAssignmentReviewAnnotationLabel({
+        count: question.annotationCount,
+        pageNumbers: question.annotationPages,
+      });
+      return `${question.label}${score}${rubric}${comments}${annotations}`;
+    })
+    .join('; ');
+}
+
+function formatAssignmentCsvDetail(assignment: ExportDataset['assignments'][number]) {
+  return [
+    assignment.detail,
+    assignment.actionHints?.length ? `Actions: ${assignment.actionHints.join(' | ')}` : '',
+    assignment.reviewSummary ? `Question breakdown: ${formatAssignmentReviewSummaryForExport(assignment.reviewSummary)}` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+function formatPlanningSourceLabel(source: ExportDataset['planningSubstrates'][number]['source']) {
+  return source === 'time-schedule' ? 'Time Schedule' : 'MyPlan';
+}
+
+function formatPlanningRuntimeValue(value: string | undefined) {
+  return value ? value.replace(/_/g, ' ') : undefined;
+}
+
+function getPlanningSubstrateSortKey(entry: ExportDataset['planningSubstrates'][number]) {
+  return entry.lastUpdatedAt ?? entry.capturedAt;
+}
+
+function getLatestPlanningSubstrate(
+  planningSubstrates: ExportDataset['planningSubstrates'],
+) {
+  return [...planningSubstrates].sort((left, right) =>
+    getPlanningSubstrateSortKey(right).localeCompare(getPlanningSubstrateSortKey(left)),
+  )[0];
+}
+
+function formatPlanningSubstrateCounts(entry: ExportDataset['planningSubstrates'][number]) {
+  return `${entry.termCount} term(s) · ${entry.plannedCourseCount} planned course(s) · ${entry.backupCourseCount} backup course(s) · ${entry.scheduleOptionCount} schedule option(s)`;
+}
+
+function formatPlanningSubstrateTermSummary(
+  term: ExportDataset['planningSubstrates'][number]['terms'][number],
+) {
+  return `${term.termLabel}: ${term.plannedCourseCount} planned · ${term.backupCourseCount} backup · ${term.scheduleOptionCount} option(s)`;
+}
+
+function formatPlanningSubstrateBlockerIds(
+  blockers: ExportDataset['planningSubstrates'][number]['exactBlockers'],
+) {
+  return (blockers ?? []).map((blocker) => blocker.id).join(' · ');
+}
+
+function formatPlanningSubstrateDetailParts(
+  entry: ExportDataset['planningSubstrates'][number],
+) {
+  return [
+    `Source: ${formatPlanningSourceLabel(entry.source)}`,
+    'Read-only: true',
+    `Captured: ${entry.capturedAt}`,
+    entry.lastUpdatedAt ? `Updated: ${entry.lastUpdatedAt}` : '',
+    `Counts: ${formatPlanningSubstrateCounts(entry)}`,
+    `Requirement groups: ${entry.requirementGroupCount}`,
+    `Exploration paths: ${entry.programExplorationCount}`,
+    entry.currentStage ? `Current stage: ${formatPlanningRuntimeValue(entry.currentStage)}` : '',
+    entry.runtimePosture ? `Runtime posture: ${formatPlanningRuntimeValue(entry.runtimePosture)}` : '',
+    entry.currentTruth ? `Current truth: ${entry.currentTruth}` : '',
+    entry.degreeProgressSummary ? `Degree progress: ${entry.degreeProgressSummary}` : '',
+    entry.transferPlanningSummary ? `Transfer planning: ${entry.transferPlanningSummary}` : '',
+    entry.exactBlockers?.length ? `Exact blockers: ${formatPlanningSubstrateBlockerIds(entry.exactBlockers)}` : '',
+    entry.terms.length > 0
+      ? `Terms: ${entry.terms.map((term) => formatPlanningSubstrateTermSummary(term)).join(' | ')}`
+      : '',
+  ].filter(Boolean);
 }
 
 function getExportResourceSemanticLabel(resource: ExportDataset['resources'][number]) {
@@ -1099,7 +1252,7 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
       outcome: '',
       changeCount: '',
       summary: formatOptionalString(assignment.summary),
-      detail: formatOptionalString(assignment.detail),
+      detail: formatOptionalString(formatAssignmentCsvDetail(assignment)),
       url: formatOptionalString(assignment.url),
     });
   }
@@ -1324,6 +1477,37 @@ function buildCsvRows(dataset: ExportDataset): CsvRow[] {
     });
   }
 
+  const latestPlanningSubstrate = getLatestPlanningSubstrate(dataset.planningSubstrates);
+  if (latestPlanningSubstrate) {
+    rows.push({
+      ...sharedFields,
+      kind: 'planning_substrate',
+      site: latestPlanningSubstrate.source,
+      title: latestPlanningSubstrate.planLabel,
+      courseId: latestPlanningSubstrate.planId,
+      assignmentId: latestPlanningSubstrate.id,
+      status: formatPlanningRuntimeValue(latestPlanningSubstrate.currentStage) ?? 'read_only',
+      occurredAt: latestPlanningSubstrate.capturedAt,
+      dueAt: '',
+      startAt: '',
+      endAt: formatOptionalString(latestPlanningSubstrate.lastUpdatedAt),
+      score: '',
+      maxScore: '',
+      importance: '',
+      dateKey: '',
+      reasons: formatPlanningSourceLabel(latestPlanningSubstrate.source),
+      blockedBy: formatPlanningSubstrateBlockerIds(latestPlanningSubstrate.exactBlockers),
+      outcome: formatPlanningRuntimeValue(latestPlanningSubstrate.runtimePosture) ?? '',
+      changeCount: '',
+      summary: latestPlanningSubstrate.currentTruth
+        ? `${formatPlanningSubstrateCounts(latestPlanningSubstrate)} · ${latestPlanningSubstrate.currentTruth}`
+        : formatPlanningSubstrateCounts(latestPlanningSubstrate),
+      detail: formatPlanningSubstrateDetailParts(latestPlanningSubstrate).join(' | '),
+      url: '',
+      relation: latestPlanningSubstrate.source,
+    });
+  }
+
   for (const run of dataset.syncRuns) {
     rows.push({
       ...sharedFields,
@@ -1518,6 +1702,7 @@ function renderJson(dataset: ExportDataset) {
         weeklyLoad: dataset.weeklyLoad.length,
         syncRuns: dataset.syncRuns.length,
         changeEvents: dataset.changeEvents.length,
+        planningSubstrates: dataset.planningSubstrates.length,
         courseClusters: dataset.courseClusters.length,
         workItemClusters: dataset.workItemClusters.length,
         administrativeSummaries: dataset.administrativeSummaries.length,
@@ -1870,22 +2055,7 @@ function renderMarkdown(dataset: ExportDataset) {
         const summary = assignment.summary ? ` - ${assignment.summary}` : '';
         const fullDetail = assignment.detail ? ` - detail ${assignment.detail}` : '';
         const reviewSummary = assignment.reviewSummary
-          ? ` - review ${assignment.reviewSummary.questions
-              .map((question) => {
-                const score =
-                  question.score !== undefined || question.maxScore !== undefined
-                    ? ` ${question.score ?? '-'} / ${question.maxScore ?? '-'}`
-                    : '';
-                const rubric = question.rubricLabels.length > 0 ? ` (${question.rubricLabels.join(', ')})` : '';
-                const comments =
-                  question.evaluationCommentCount !== undefined ? ` [${question.evaluationCommentCount} comment${question.evaluationCommentCount === 1 ? '' : 's'}]` : '';
-                const annotations = formatAssignmentReviewAnnotationLabel({
-                  count: question.annotationCount,
-                  pageNumbers: question.annotationPages,
-                });
-                return `${question.label}${score}${rubric}${comments}${annotations}`;
-              })
-              .join('; ')}`
+          ? ` - review ${formatAssignmentReviewSummaryForExport(assignment.reviewSummary)}`
           : '';
         const actionHints =
           assignment.actionHints && assignment.actionHints.length > 0 ? ` - actions ${assignment.actionHints.join(' | ')}` : '';
@@ -1960,6 +2130,42 @@ function renderMarkdown(dataset: ExportDataset) {
         const summary = entry.summary ? ` - ${entry.summary}` : '';
         return `- ${entry.dateKey}: assignments=${entry.assignmentCount}, events=${entry.eventCount ?? 0}, dueSoon=${entry.dueSoonCount ?? 0}, overdue=${entry.overdueCount ?? 0}, pinned=${entry.pinnedCount ?? 0}, totalScore=${entry.totalScore ?? 0}${summary}`;
       }),
+    ),
+  );
+
+  const latestPlanningSubstrate = getLatestPlanningSubstrate(dataset.planningSubstrates);
+  sections.push(
+    renderMarkdownSection(
+      'Planning Pulse',
+      latestPlanningSubstrate
+        ? [
+            (() => {
+              const stage = latestPlanningSubstrate.currentStage
+                ? `; current stage ${formatPlanningRuntimeValue(latestPlanningSubstrate.currentStage)}`
+                : '';
+              const posture = latestPlanningSubstrate.runtimePosture
+                ? `; runtime posture ${formatPlanningRuntimeValue(latestPlanningSubstrate.runtimePosture)}`
+                : '';
+              const updatedAt = latestPlanningSubstrate.lastUpdatedAt
+                ? `; updated ${latestPlanningSubstrate.lastUpdatedAt}`
+                : '';
+              const truth = latestPlanningSubstrate.currentTruth ? ` - ${latestPlanningSubstrate.currentTruth}` : '';
+              const degreeProgress = latestPlanningSubstrate.degreeProgressSummary
+                ? ` - degree progress ${latestPlanningSubstrate.degreeProgressSummary}`
+                : '';
+              const transferPlanning = latestPlanningSubstrate.transferPlanningSummary
+                ? ` - transfer planning ${latestPlanningSubstrate.transferPlanningSummary}`
+                : '';
+              const blockers = latestPlanningSubstrate.exactBlockers?.length
+                ? ` - exact blockers ${formatPlanningSubstrateBlockerIds(latestPlanningSubstrate.exactBlockers)}`
+                : '';
+              const terms = latestPlanningSubstrate.terms
+                .map((term) => `\n  - term ${formatPlanningSubstrateTermSummary(term)}`)
+                .join('');
+              return `- ${latestPlanningSubstrate.planLabel} (${formatPlanningSourceLabel(latestPlanningSubstrate.source)}; ${formatPlanningSubstrateCounts(latestPlanningSubstrate)}; requirement groups ${latestPlanningSubstrate.requirementGroupCount}; exploration paths ${latestPlanningSubstrate.programExplorationCount}${stage}${posture}) - captured ${latestPlanningSubstrate.capturedAt}${updatedAt}${truth}${degreeProgress}${transferPlanning}${blockers}${terms}`;
+            })(),
+          ]
+        : [],
     ),
   );
 

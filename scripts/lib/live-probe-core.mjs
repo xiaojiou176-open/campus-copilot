@@ -296,6 +296,7 @@ export function classifyPage(finalUrl = '', title = '', bodyPreview = '') {
     lowered.includes('tuition charge statement') ||
     lowered.includes('unofficial transcript') ||
     lowered.includes('audit your degree - myplan') ||
+    (parsedHostname === 'myplan.uw.edu' && parsedPathname.startsWith('/plan') && lowered.includes('- myplan')) ||
     lowered.includes('myplan planning') ||
     lowered.includes('your courses') ||
     lowered.includes('sign out') ||

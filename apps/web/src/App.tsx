@@ -106,6 +106,7 @@ export function buildWebCurrentViewArtifact(args: BuildWebCurrentViewArtifactArg
         events: args.events,
         alerts: args.alerts,
         recentUpdates: args.recentUpdates,
+        planningSubstrates: args.planningSubstrates,
         focusQueue: args.focusQueue,
         weeklyLoad: args.weeklyLoad,
         syncRuns: args.syncRuns,
@@ -309,6 +310,7 @@ export function App() {
             events: currentEvents,
             alerts: currentAlerts,
             recentUpdates,
+            planningSubstrates,
             focusQueue,
             weeklyLoad,
             syncRuns: latestSyncRuns,
@@ -333,6 +335,7 @@ export function App() {
               events: currentEvents,
               alerts: currentAlerts,
               recentUpdates,
+              planningSubstrates,
               focusQueue,
               weeklyLoad,
               syncRuns: latestSyncRuns,
@@ -576,6 +579,9 @@ export function App() {
           <WebOrientationHeader
             ready={ready}
             now={now}
+            populatedSiteCount={populatedSiteCount}
+            unseenUpdateCount={recentUpdates?.unseenCount ?? 0}
+            topSyncRun={topSyncRun}
           />
         </div>
 

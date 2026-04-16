@@ -60,15 +60,14 @@ for (const rule of docRules) {
 
 const requiredMentions = [
   ['README.md', 'docs/api/openapi.yaml'],
-  ['README.md', 'docs/17-academic-expansion-and-safety-contract.md'],
+  ['README.md', 'docs/07-security-privacy-compliance.md'],
   ['docs/README.md', 'api/openapi.yaml'],
-  ['docs/README.md', '17-academic-expansion-and-safety-contract.md'],
   ['docs/10-builder-api-and-ecosystem-fit.md', 'api/openapi.yaml'],
-  ['PRIVACY.md', 'docs/17-academic-expansion-and-safety-contract.md'],
-  ['INTEGRATIONS.md', 'docs/17-academic-expansion-and-safety-contract.md'],
-  ['DISTRIBUTION.md', 'docs/17-academic-expansion-and-safety-contract.md'],
-  ['SECURITY.md', 'docs/17-academic-expansion-and-safety-contract.md'],
-  ['CLAUDE.md', 'docs/17-academic-expansion-and-safety-contract.md'],
+  ['PRIVACY.md', 'docs/07-security-privacy-compliance.md'],
+  ['INTEGRATIONS.md', 'docs/07-security-privacy-compliance.md'],
+  ['DISTRIBUTION.md', 'docs/07-security-privacy-compliance.md'],
+  ['SECURITY.md', 'docs/07-security-privacy-compliance.md'],
+  ['CLAUDE.md', 'docs/07-security-privacy-compliance.md'],
 ];
 
 const requiredContractSnippets = [

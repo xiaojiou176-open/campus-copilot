@@ -63,4 +63,4 @@ Those items may become broader later, but they should not be described as implem
 - Security posture: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
 - Capability buckets: [`site-capability-matrix.md`](site-capability-matrix.md)
 - Repo-writing split: [`08-phase-plan-and-repo-writing-brief.md`](08-phase-plan-and-repo-writing-brief.md)
-- Academic expansion contract: [`17-academic-expansion-and-safety-contract.md`](17-academic-expansion-and-safety-contract.md)
+- Public safety summary: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)

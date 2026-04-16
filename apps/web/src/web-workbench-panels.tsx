@@ -701,7 +701,13 @@ export function WebWorkbenchPanels(props: {
         </article>
       </section>
 
-      <section className="panel panel--supporting">
+      <details className="advanced-settings advanced-settings--subdued advanced-settings--drawer">
+        <summary>
+          Deep review drawer
+          <span className="badge badge-neutral">{deepReviewSectionCount} blocks</span>
+        </summary>
+        <div className="stack">
+      <section className="panel panel--supporting panel--review-desk">
         <p className="eyebrow">Trust center</p>
         <div className="badge-row">
           <span className="badge badge-neutral">Trust summary and export review</span>
@@ -710,7 +716,7 @@ export function WebWorkbenchPanels(props: {
         <h2>Auth &amp; Export Management</h2>
         <p>
           Review the current scope, policy envelope, provenance, and site overlay before exporting or asking AI.
-          This lane stays read-only and works like a review desk, not a preset wall.
+          This lane stays read-only and works like a quieter review desk, not a second product shell.
         </p>
         <div className="ai-explanation-strip" aria-label="Auth and export management">
           <article className="guidance-card">
@@ -775,13 +781,6 @@ export function WebWorkbenchPanels(props: {
           </p>
         ) : null}
       </section>
-
-      <details className="advanced-settings advanced-settings--subdued advanced-settings--drawer">
-        <summary>
-          Deep review drawer
-          <span className="badge badge-neutral">{deepReviewSectionCount} blocks</span>
-        </summary>
-        <div className="stack">
       <p className="meta">
         Open this quieter review drawer only when you need assignment, discussion, material, admin, and imported-count
         detail beyond the first overview and decision lane.

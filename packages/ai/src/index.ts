@@ -214,7 +214,7 @@ export const AcademicRedZoneUiGuardSchema = z
     actionLabel: z.literal('Registration automation stays off'),
     manualOnlyNote: z.literal('Open the original site if you need to continue manually.'),
     docsLabel: z.literal('Academic Safety Contract'),
-    docsPath: z.literal('/docs/17-academic-expansion-and-safety-contract.md'),
+    docsPath: z.literal('/docs/07-security-privacy-compliance.md'),
     manualUrl: z.string().url().optional(),
     ctaDisabled: z.literal(true),
     manualPathOnly: z.literal(true),
@@ -412,7 +412,7 @@ const ACADEMIC_RED_ZONE_HARD_STOP_COPY = {
   docsLabel: 'Academic Safety Contract',
 } as const;
 
-const ACADEMIC_RED_ZONE_DOC_PATH = '/docs/17-academic-expansion-and-safety-contract.md' as const;
+const ACADEMIC_RED_ZONE_DOC_PATH = '/docs/07-security-privacy-compliance.md' as const;
 
 const ACADEMIC_RED_ZONE_SURFACE_LABELS: Record<AcademicRedZoneSurface, string> = {
   'register-uw': 'Register.UW',

@@ -20,7 +20,7 @@ describe('academic safety guards', () => {
       actionLabel: 'Registration automation stays off',
       manualNote: RED_ZONE_HARD_STOP_MANUAL_NOTE,
       docsLabel: RED_ZONE_HARD_STOP_DOC_LABEL,
-      docsPath: '/docs/17-academic-expansion-and-safety-contract.md',
+      docsPath: '/docs/07-security-privacy-compliance.md',
       manualUrl: 'https://register.uw.edu/',
       ctaDisabled: true,
       manualPathOnly: true,
@@ -60,7 +60,7 @@ describe('academic safety guards', () => {
         primaryHardStop: {
           surface: 'register-uw',
           surfaceLabel: 'Register.UW',
-          docsPath: '/docs/17-academic-expansion-and-safety-contract.md',
+          docsPath: '/docs/07-security-privacy-compliance.md',
           ctaDisabled: true,
           manualPathOnly: true,
         },

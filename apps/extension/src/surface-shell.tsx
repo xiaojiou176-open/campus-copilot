@@ -707,6 +707,11 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     `${text.metrics.dueWithin48Hours} ${todaySnapshot?.dueSoonAssignments ?? 0}`,
     `${text.metrics.unseenUpdates} ${currentRecentUpdates?.unseenCount ?? 0}`,
   ].join(' · ');
+  const assistantSignalSummary = [
+    `${text.metrics.openAssignments} ${todaySnapshot?.totalAssignments ?? 0}`,
+    `${text.metrics.unseenUpdates} ${currentRecentUpdates?.unseenCount ?? 0}`,
+    `${text.askAi.structuredInputLabels.priorityAlerts} ${currentAlerts.length}`,
+  ].join(' · ');
   const assistantReadinessSummary = activeBffBaseUrl
     ? surfaceView.diagnostics.healthy
       ? text.diagnostics.readyToContinue
@@ -757,9 +762,9 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   ))}
                 </div>
                 <div className="surface__mode-context">
-                  <p className="surface__meta">
-                    {bffStatusLabel} · {authorizationStatusLabel}
-                  </p>
+                  <span className="surface__badge surface__badge--neutral">
+                    {uiLanguage === 'zh-CN' ? '只读桌面' : 'Read-only desk'}
+                  </span>
                   <button className="surface__button surface__button--ghost" onClick={() => void handleCycleLanguagePreference()} type="button">
                     {config.uiLanguage === 'auto' ? 'Auto' : config.uiLanguage === 'en' ? 'EN' : '中文'}
                   </button>
@@ -775,7 +780,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       <div>
                         <p className="surface__meta-label">{modeCopy.assistant.currentContext}</p>
                         <strong>{currentContextLabel}</strong>
-                        <p className="surface__meta">{assistantFactSummary}</p>
                       </div>
                       <div className="surface__hero-statuses">
                         <span className={`surface__badge surface__badge--${activeBffBaseUrl ? 'success' : 'warning'}`}>
@@ -784,6 +788,29 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                         <span className={`surface__badge surface__badge--${authorizationStatusVariant}`}>{authorizationStatusLabel}</span>
                       </div>
                     </div>
+                    <div className="surface__companion-grid" role="list" aria-label={modeCopy.assistant.visibleFacts}>
+                      <article className="surface__companion-cell" role="listitem">
+                        <p className="surface__companion-label">
+                          {uiLanguage === 'zh-CN' ? '当前页面' : 'Current page'}
+                        </p>
+                        <strong className="surface__companion-value">{currentContextLabel}</strong>
+                        <p className="surface__companion-detail">{assistantFactSummary}</p>
+                      </article>
+                      <article className="surface__companion-cell" role="listitem">
+                        <p className="surface__companion-label">{modeCopy.assistant.activeConnection}</p>
+                        <strong className="surface__companion-value">
+                          {activeBffBaseUrl ? bffStatusLabel : modeCopy.connection.none}
+                        </strong>
+                        <p className="surface__companion-detail">{assistantReadinessSummary}</p>
+                      </article>
+                      <article className="surface__companion-cell" role="listitem">
+                        <p className="surface__companion-label">{modeCopy.assistant.visibleFacts}</p>
+                        <strong className="surface__companion-value">
+                          {uiLanguage === 'zh-CN' ? '今日桌面摘要' : 'Desk snapshot'}
+                        </strong>
+                        <p className="surface__companion-detail">{assistantSignalSummary}</p>
+                      </article>
+                    </div>
                     <p className="surface__item-lead">{primaryFocusItem ? primaryFocusItem.title : text.nextUp.none}</p>
                     {primaryFocusItem?.summary ? <p>{primaryFocusItem.summary}</p> : null}
                     <p className="surface__meta">
@@ -791,10 +818,8 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       {currentRecentUpdates?.unseenCount ?? 0} · {text.askAi.structuredInputLabels.priorityAlerts}{' '}
                       {currentAlerts.length}
                     </p>
-                    <p className="surface__meta">{assistantReadinessSummary}</p>
                     <div className="surface__assistant-trust-strip" role="list" aria-label={modeCopy.authorization.title}>
                       <span className="surface__assistant-trust-chip surface__assistant-trust-chip--success">{modeCopy.assistant.readOnly}</span>
-                      <span className="surface__assistant-trust-chip">{modeCopy.assistant.structuredOnly}</span>
                       <span className="surface__assistant-trust-chip">{modeCopy.assistant.manualOnly}</span>
                       <span className="surface__assistant-trust-chip">{assistantReceiptSummary}</span>
                     </div>
@@ -815,6 +840,82 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     {exportFeedback ? <p className="surface__feedback">{exportFeedback}</p> : null}
                   </article>
                 </div>
+
+                <Suspense fallback={panelLoadingFallback}>
+                  <details
+                    className="surface__workspace-detail"
+                    onToggle={(event) => setWorkspaceDetailsOpen((event.currentTarget as HTMLDetailsElement).open)}
+                    open={workspaceDetailsOpen}
+                  >
+                    <summary className="surface__workspace-detail-summary">
+                      <span className="surface__workspace-detail-copy">
+                        <strong>{uiLanguage === 'zh-CN' ? '先看这一屏的事实' : 'Review this slice first'}</strong>
+                        <span>
+                          {uiLanguage === 'zh-CN'
+                            ? '先确认这一屏的事实、提醒和导出范围，再决定要不要让 AI 解释。'
+                            : 'Check the visible facts, alerts, and export scope before deciding whether AI needs to explain them.'}
+                        </span>
+                      </span>
+                      <span className="surface__workspace-detail-actions">
+                        <span className="surface__badge surface__badge--neutral">{`Focus ${focusQueue.length}`}</span>
+                        <span className="surface__badge surface__badge--neutral">
+                          {uiLanguage === 'zh-CN'
+                            ? `更新 ${currentRecentUpdates?.items.length ?? 0}`
+                            : `Updates ${currentRecentUpdates?.items.length ?? 0}`}
+                        </span>
+                        <span className="surface__workspace-detail-toggle">
+                          {workspaceDetailsOpen ? modeCopy.assistant.hideWorkspace : modeCopy.assistant.showWorkspace}
+                        </span>
+                      </span>
+                    </summary>
+                    <Suspense fallback={panelLoadingFallback}>
+                      <LazyWorkbenchPanels
+                        surface={surface}
+                        copy={copy}
+                        text={text}
+                        uiLanguage={uiLanguage}
+                        selectedFormatLabel={selectedFormatLabel}
+                        filters={filters}
+                        setFilters={setFilters}
+                        todaySnapshot={todaySnapshot}
+                        currentRecentUpdates={currentRecentUpdates}
+                        syncFeedback={syncFeedback}
+                        exportFeedback={exportFeedback}
+                        currentSiteSelection={surfaceView.currentSiteSelection}
+                        onSyncSite={handleSiteSync}
+                        onExport={handleExport}
+                        onOpenConfiguration={() => setSidepanelMode('settings')}
+                        onMarkVisibleUpdatesSeen={handleMarkVisibleUpdatesSeen}
+                        onExportDiagnostics={handleExportDiagnostics}
+                        diagnostics={surfaceView.diagnostics}
+                        focusQueue={focusQueue}
+                        planningSubstrates={planningSubstrates}
+                        weeklyLoad={weeklyLoad}
+                        courseClusters={courseClusters}
+                        workItemClusters={workItemClusters}
+                        administrativeSummaries={administrativeSummaries}
+                        mergeHealth={mergeHealth}
+                        priorityAlerts={priorityAlerts}
+                        criticalAlerts={surfaceView.criticalAlerts}
+                        highAlerts={surfaceView.highAlerts}
+                        mediumAlerts={surfaceView.mediumAlerts}
+                        currentResources={currentResources}
+                        currentAnnouncements={currentAnnouncements}
+                        currentAssignments={currentAssignments}
+                        currentMessages={currentMessages}
+                        currentEvents={currentEvents}
+                        orderedSiteStatus={surfaceView.orderedSiteStatus}
+                        recentChangeEvents={recentChangeEvents}
+                        latestSyncRun={surfaceView.latestSyncRun}
+                        lastSuccessfulSync={surfaceView.lastSuccessfulSync}
+                        onTogglePin={handleTogglePin}
+                        onSnooze={handleSnooze}
+                        onDismiss={handleDismiss}
+                        onNote={handleNote}
+                      />
+                    </Suspense>
+                  </details>
+                </Suspense>
 
                 <Suspense fallback={panelLoadingFallback}>
                   <LazyAskAiContainer
@@ -841,80 +942,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     onOpenConfiguration={() => setSidepanelMode('settings')}
                   />
                 </Suspense>
-
-                <details
-                  className="surface__workspace-detail"
-                  onToggle={(event) => setWorkspaceDetailsOpen((event.currentTarget as HTMLDetailsElement).open)}
-                  open={workspaceDetailsOpen}
-                >
-                  <summary className="surface__workspace-detail-summary">
-                    <span className="surface__workspace-detail-copy">
-                      <strong>{uiLanguage === 'zh-CN' ? '先审核当前工作台切片' : 'Review the current workspace slice first'}</strong>
-                      <span>
-                        {uiLanguage === 'zh-CN'
-                          ? '先看清这页当前有哪些结构化事实、告警和导出边界，再决定是否需要 AI 解释。'
-                          : 'Confirm the visible facts, alerts, and export boundary for this page before deciding whether AI needs to explain it.'}
-                      </span>
-                    </span>
-                    <span className="surface__workspace-detail-actions">
-                      <span className="surface__badge surface__badge--neutral">{`Focus ${focusQueue.length}`}</span>
-                      <span className="surface__badge surface__badge--neutral">
-                        {uiLanguage === 'zh-CN'
-                          ? `更新 ${currentRecentUpdates?.items.length ?? 0}`
-                          : `Updates ${currentRecentUpdates?.items.length ?? 0}`}
-                      </span>
-                      <span className="surface__workspace-detail-toggle">
-                        {workspaceDetailsOpen ? modeCopy.assistant.hideWorkspace : modeCopy.assistant.showWorkspace}
-                      </span>
-                    </span>
-                  </summary>
-                  <Suspense fallback={panelLoadingFallback}>
-                    <LazyWorkbenchPanels
-                      surface={surface}
-                      copy={copy}
-                      text={text}
-                      uiLanguage={uiLanguage}
-                      selectedFormatLabel={selectedFormatLabel}
-                      filters={filters}
-                      setFilters={setFilters}
-                      todaySnapshot={todaySnapshot}
-                      currentRecentUpdates={currentRecentUpdates}
-                      syncFeedback={syncFeedback}
-                      exportFeedback={exportFeedback}
-                      currentSiteSelection={surfaceView.currentSiteSelection}
-                      onSyncSite={handleSiteSync}
-                      onExport={handleExport}
-                      onOpenConfiguration={() => setSidepanelMode('settings')}
-                      onMarkVisibleUpdatesSeen={handleMarkVisibleUpdatesSeen}
-                      onExportDiagnostics={handleExportDiagnostics}
-                      diagnostics={surfaceView.diagnostics}
-                      focusQueue={focusQueue}
-                      planningSubstrates={planningSubstrates}
-                      weeklyLoad={weeklyLoad}
-                      courseClusters={courseClusters}
-                      workItemClusters={workItemClusters}
-                      administrativeSummaries={administrativeSummaries}
-                      mergeHealth={mergeHealth}
-                      priorityAlerts={priorityAlerts}
-                      criticalAlerts={surfaceView.criticalAlerts}
-                      highAlerts={surfaceView.highAlerts}
-                      mediumAlerts={surfaceView.mediumAlerts}
-                      currentResources={currentResources}
-                      currentAnnouncements={currentAnnouncements}
-                      currentAssignments={currentAssignments}
-                      currentMessages={currentMessages}
-                      currentEvents={currentEvents}
-                      orderedSiteStatus={surfaceView.orderedSiteStatus}
-                      recentChangeEvents={recentChangeEvents}
-                      latestSyncRun={surfaceView.latestSyncRun}
-                      lastSuccessfulSync={surfaceView.lastSuccessfulSync}
-                      onTogglePin={handleTogglePin}
-                      onSnooze={handleSnooze}
-                      onDismiss={handleDismiss}
-                      onNote={handleNote}
-                      />
-                  </Suspense>
-                </details>
               </>
             ) : sidepanelMode === 'export' ? (
               <Suspense fallback={panelLoadingFallback}>

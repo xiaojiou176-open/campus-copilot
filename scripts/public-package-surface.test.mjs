@@ -53,24 +53,48 @@ function resolvePackageManagerCommand(binaryName) {
 
 const pnpmCommand = resolvePackageManagerCommand('pnpm');
 const npmCommand = resolvePackageManagerCommand('npm');
+const npmConfigSandboxDir = mkdtempSync(join(tmpdir(), 'campus-copilot-npm-config-'));
+const sandboxedNpmUserConfig = join(npmConfigSandboxDir, 'user.npmrc');
+const sandboxedNpmGlobalConfig = join(npmConfigSandboxDir, 'global.npmrc');
+writeFileSync(sandboxedNpmUserConfig, '', 'utf8');
+writeFileSync(sandboxedNpmGlobalConfig, '', 'utf8');
+
+function buildSanitizedChildEnv(overrides = {}) {
+  const env = {
+    ...process.env,
+    ...overrides,
+  };
+
+  const noisyLifecycleKeys = [
+    'npm_config_npm_globalconfig',
+    'npm_config_verify_deps_before_run',
+    'npm_config__jsr_registry',
+    'npm_config_store_dir',
+  ];
+
+  for (const key of noisyLifecycleKeys) {
+    delete env[key];
+  }
+
+  env.npm_config_userconfig = sandboxedNpmUserConfig;
+  env.npm_config_globalconfig = sandboxedNpmGlobalConfig;
+  env.NPM_CONFIG_USERCONFIG = sandboxedNpmUserConfig;
+  env.NPM_CONFIG_GLOBALCONFIG = sandboxedNpmGlobalConfig;
+
+  return env;
+}
 
 function execPnpm(args, options = {}) {
   return execFileSync(pnpmCommand.command, [...pnpmCommand.prefixArgs, ...args], {
     ...options,
-    env: {
-      ...process.env,
-      ...options.env,
-    },
+    env: buildSanitizedChildEnv(options.env),
   });
 }
 
 function execNpm(args, options = {}) {
   return execFileSync(npmCommand.command, [...npmCommand.prefixArgs, ...args], {
     ...options,
-    env: {
-      ...process.env,
-      ...options.env,
-    },
+    env: buildSanitizedChildEnv(options.env),
   });
 }
 

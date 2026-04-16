@@ -17,7 +17,7 @@ test('shows the standalone workbench and exports the current view', async ({ pag
   }
   await expect(page.getByRole('heading', { name: 'Student decision workspace' })).toBeVisible();
   await expect(
-    page.getByText('One local workspace where academic work and administrative signals stay grouped on the same decision desk.'),
+    page.getByText('One local desk for academic work, administrative signals, and the next decision.'),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Focus Queue' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Weekly Load' })).toBeVisible();
@@ -25,7 +25,7 @@ test('shows the standalone workbench and exports the current view', async ({ pag
   const orientationHeading = page.getByRole('heading', { name: 'Student decision workspace' });
   const focusQueueHeading = page.getByRole('heading', { name: 'Focus Queue' });
   const weeklyLoadHeading = page.getByRole('heading', { name: 'Weekly Load' });
-  const trustSummaryHeading = page.getByRole('heading', { name: 'What this workspace can prove' });
+  const trustSummaryHeading = page.getByRole('heading', { name: 'What this desk can prove' });
   const askAiHeading = page.getByRole('heading', { name: 'Ask AI about this workspace' });
   const loadImportLabel = page.getByText('Load / Import', { exact: true });
   const planningPulseHeading = page.getByRole('heading', { name: 'Planning Pulse' });

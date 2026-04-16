@@ -13,6 +13,7 @@ import type {
   CourseCluster,
   FocusQueueItem,
   MergeHealthSummary,
+  PlanningSubstrateOwner,
   RecentUpdatesFeed,
   SyncRun,
   WeeklyLoadEntry,
@@ -55,6 +56,7 @@ type BuildWorkbenchExportInputArgs = {
   events: Event[];
   alerts: Alert[];
   recentUpdates?: RecentUpdatesFeed;
+  planningSubstrates?: PlanningSubstrateOwner[];
   focusQueue: FocusQueueItem[];
   weeklyLoad: WeeklyLoadEntry[];
   syncRuns: SyncRun[];
@@ -104,6 +106,7 @@ export function buildWorkbenchExportInput(args: BuildWorkbenchExportInputArgs): 
     events: args.events,
     alerts: args.alerts,
     recentUpdates: args.recentUpdates,
+    planningSubstrates: args.planningSubstrates ?? [],
     focusQueue: args.focusQueue,
     weeklyLoad: args.weeklyLoad,
     syncRuns: args.syncRuns,

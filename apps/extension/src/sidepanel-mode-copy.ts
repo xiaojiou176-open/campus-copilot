@@ -26,7 +26,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
       },
       assistant: {
         title: '这页的校园伴随助手',
-        description: '先看清这页已经导入的结构化事实、当前 readiness，以及学业/行政两条线各自冒出来的重点，再决定是提问、导出，还是检查设置。',
+        description: '先看这页已经落地的事实、当前 readiness，以及学业/行政两条线各自冒出来的重点，再决定是提问、导出，还是检查设置。',
         currentContext: '当前上下文',
         visibleFacts: '当前可见事实',
         activeConnection: '当前 readiness',
@@ -38,8 +38,8 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
         readOnly: '只读',
         structuredOnly: '仅基于结构化事实',
         manualOnly: '红区动作仍需你手动完成',
-        trustSummary: '当前只会继续使用这页已经导入或可见的结构化事实，并把学业与行政信号放在同一张桌面上分组看，不会把 popup/sidepanel 伪装成完整工作台。',
-        noConnection: '还没有发现可用的本地 companion/BFF。',
+        trustSummary: '当前只基于这页已经导入或可见的结构化事实继续工作，并把学业与行政信号放在同一张桌面上分组看。',
+        noConnection: '本地 AI 路线还没就绪。',
       },
       export: {
         title: '结构化导出模式',
@@ -160,7 +160,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
     assistant: {
       title: 'Your campus companion for this page',
       description:
-        'Start with the structured facts already in view, check readiness, and notice what is surfacing as academic work versus administrative signals before you ask, export, or review settings.',
+        'Start with the facts already on this page, check readiness, and notice what is surfacing as academic work versus administrative signals before you ask, export, or review settings.',
       currentContext: 'Current context',
       visibleFacts: 'Visible facts',
       activeConnection: 'Current readiness',
@@ -173,8 +173,8 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
       structuredOnly: 'Structured facts only',
       manualOnly: 'Manual-only red zones stay with you',
       trustSummary:
-        'Campus Copilot stays grounded in the structured facts already imported or visible for this page, with academic and administrative signals grouped on one desk instead of pretending the sidepanel is the full desk.',
-      noConnection: 'No local companion/BFF is currently reachable.',
+        'Campus Copilot stays grounded in the structured facts already imported or visible for this page, with academic and administrative signals grouped on one desk.',
+      noConnection: 'No local AI route is ready yet.',
     },
     export: {
       title: 'Structured export mode',

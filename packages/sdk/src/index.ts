@@ -36,7 +36,12 @@ import {
   type Resource,
   type Site,
 } from '@campus-copilot/schema';
-import type { ChangeEvent, ImportedWorkbenchSnapshot, SyncRun } from '@campus-copilot/storage';
+import {
+  PlanningSubstrateOwnerSchema,
+  type ChangeEvent,
+  type ImportedWorkbenchSnapshot,
+  type SyncRun,
+} from '@campus-copilot/storage';
 export type { ImportedWorkbenchSnapshot } from '@campus-copilot/storage';
 
 export const SnapshotSiteSchema = z.enum(['all', 'canvas', 'gradescope', 'edstem', 'myuw', 'time-schedule', 'course-sites']);
@@ -118,6 +123,7 @@ export type CampusChatResponse = z.infer<typeof CampusChatResponseSchema> & {
 const ImportedWorkbenchSnapshotSchema = z
   .object({
     generatedAt: IsoDateTimeSchema,
+    planningSubstrates: z.array(PlanningSubstrateOwnerSchema).optional(),
     resources: z.array(ResourceSchema).optional(),
     assignments: z.array(AssignmentSchema).optional(),
     announcements: z.array(AnnouncementSchema).optional(),
@@ -161,6 +167,7 @@ function normalizeImportedWorkbenchSnapshot(
 ): ImportedWorkbenchSnapshot {
   return ImportedWorkbenchSnapshotSchema.parse({
     generatedAt: input.generatedAt ?? new Date().toISOString(),
+    planningSubstrates: input.planningSubstrates ?? [],
     resources: input.resources ?? [],
     assignments: input.assignments ?? [],
     announcements: input.announcements ?? [],
@@ -188,6 +195,7 @@ export function parseImportedWorkbenchSnapshot(raw: string): ImportedWorkbenchSn
   if (parsed.data && typeof parsed.data === 'object' && !Array.isArray(parsed.data)) {
     return normalizeImportedWorkbenchSnapshot({
       generatedAt: parsed.generatedAt ?? parsed.data.generatedAt,
+      planningSubstrates: parsed.data.planningSubstrates,
       resources: parsed.data.resources,
       assignments: parsed.data.assignments,
       announcements: parsed.data.announcements,
@@ -201,6 +209,7 @@ export function parseImportedWorkbenchSnapshot(raw: string): ImportedWorkbenchSn
 
   return normalizeImportedWorkbenchSnapshot({
     generatedAt: parsed.generatedAt,
+    planningSubstrates: parsed.planningSubstrates,
     resources: parsed.resources,
     assignments: parsed.assignments,
     announcements: parsed.announcements,
@@ -254,6 +263,7 @@ export function buildExportInputFromSnapshot(
   return {
     generatedAt: snapshot.generatedAt,
     viewTitle: `Campus Copilot snapshot (${siteLabel})`,
+    planningSubstrates: snapshot.planningSubstrates ?? [],
     resources: filterBySite(snapshot.resources, site),
     assignments: filterBySite(snapshot.assignments, site),
     announcements: filterBySite(snapshot.announcements, site),

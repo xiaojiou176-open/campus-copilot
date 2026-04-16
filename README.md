@@ -4,7 +4,7 @@
 
 > An academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
 
-[Docs](docs/README.md) · [Quickstart](#quickstart) · [Integrations](INTEGRATIONS.md) · [Distribution](DISTRIBUTION.md) · [Privacy](PRIVACY.md) · [Product Brief](docs/01-product-prd.md) · [Academic Safety](docs/17-academic-expansion-and-safety-contract.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Verification Matrix](docs/verification-matrix.md) · [Contributing](CONTRIBUTING.md) · [AI Collaboration](CLAUDE.md) · [Security](SECURITY.md) · [License](LICENSE)
+[Docs](docs/README.md) · [Quickstart](#quickstart) · [Integrations](INTEGRATIONS.md) · [Distribution](DISTRIBUTION.md) · [Privacy](PRIVACY.md) · [Product Brief](docs/01-product-prd.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [License](LICENSE)
 
 ![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
 
@@ -53,7 +53,8 @@ See:
 
 - [`docs/01-product-prd.md`](docs/01-product-prd.md)
 - [`docs/06-export-and-user-surfaces.md`](docs/06-export-and-user-surfaces.md)
-- [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md)
+- [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md)
+- [`PRIVACY.md`](PRIVACY.md)
 
 ## What Changes After The First Sync
 
@@ -97,8 +98,9 @@ The honest split is:
 Use this route when you want receipts after the product story is clear.
 
 1. Start with [`docs/storefront-assets.md`](docs/storefront-assets.md).
-2. Continue with [`docs/verification-matrix.md`](docs/verification-matrix.md).
-3. Use [`DISTRIBUTION.md`](DISTRIBUTION.md) only for owner-side launch or listing truth, not as the main product explanation.
+2. Continue with [`docs/site-capability-matrix.md`](docs/site-capability-matrix.md) for the public capability snapshot.
+3. Use [`docs/verification-matrix.md`](docs/verification-matrix.md) only when you want the deeper maintainer-facing verification registry after the product/proof story is already clear.
+4. Use [`DISTRIBUTION.md`](DISTRIBUTION.md) only for owner-side launch or listing truth, not as the main product explanation.
 
 If you need the deeper appendix afterward, these receipts still exist without taking over the front door:
 
@@ -193,4 +195,4 @@ For the detailed public-safe wording and current boundary split, continue with:
 - [`PRIVACY.md`](PRIVACY.md)
 - [`INTEGRATIONS.md`](INTEGRATIONS.md)
 - [`DISTRIBUTION.md`](DISTRIBUTION.md)
-- [`docs/17-academic-expansion-and-safety-contract.md`](docs/17-academic-expansion-and-safety-contract.md)
+- [`docs/07-security-privacy-compliance.md`](docs/07-security-privacy-compliance.md)

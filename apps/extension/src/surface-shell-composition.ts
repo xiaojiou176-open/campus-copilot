@@ -97,6 +97,7 @@ export function buildSurfaceExportArtifact(input: {
       events: selectPresetRecords(preset, state.currentEvents, state.workbenchEvents),
       alerts: preset === 'current_view' ? state.currentAlerts : state.priorityAlerts,
       recentUpdates: state.currentRecentUpdates,
+      planningSubstrates: state.planningSubstrates,
       focusQueue: state.focusQueue,
       weeklyLoad: state.weeklyLoad,
       syncRuns: state.latestSyncRuns,

@@ -48,6 +48,7 @@ Allowed next-lane targets are:
 - `Time Schedule`
 - `DawgPath`
 - class-search-only `ctcLink`
+- `ctcLink class search`
 
 Red-zone surfaces remain:
 
@@ -84,6 +85,8 @@ The default AI path must not consume:
 - raw DARS / transcript / financial-aid / tuition / account detail
 
 Any future advanced file-analysis lane would require separate opt-in, separate UX, and separate review before it could be promoted into formal scope.
+
+That lane must stay `default-disabled` until a narrower promotion contract explicitly raises it.
 
 High-sensitivity administrative records stay even tighter:
 

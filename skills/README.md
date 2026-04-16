@@ -53,7 +53,7 @@ They also inherit the same academic safety contract as the rest of the repo:
 - no use of another person's credentials or records
 - no default AI ingestion of raw course files or instructor-authored materials
 
-See [`../docs/17-academic-expansion-and-safety-contract.md`](../docs/17-academic-expansion-and-safety-contract.md).
+See [`../docs/07-security-privacy-compliance.md`](../docs/07-security-privacy-compliance.md).
 
 ## Consumer routing
 

@@ -700,7 +700,27 @@ export function writeBrowserInstanceState(browserHome, payload) {
 }
 
 export function readBrowserInstanceState(browserHome) {
-  return readJsonIfPresent(join(browserHome, 'instance.json'));
+  const state = readJsonIfPresent(join(browserHome, 'instance.json'));
+  if (!state) {
+    return undefined;
+  }
+
+  if (state.pid && !isPidRunning(state.pid)) {
+    return {
+      ...state,
+      status: 'stale_dead_process',
+      pidAlive: false,
+    };
+  }
+
+  if (state.pid) {
+    return {
+      ...state,
+      pidAlive: true,
+    };
+  }
+
+  return state;
 }
 
 export function writeBrowserSessionState(browserHome, payload) {

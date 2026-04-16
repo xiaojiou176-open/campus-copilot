@@ -96,7 +96,7 @@ describe('web ai panel guardrails', () => {
     expect(html).toContain('What AI can see');
     expect(html).toContain('What AI cannot do');
     expect(html).toContain('Boundary and evidence first');
-    expect(html).toContain('Review scope, packaging, and trust notes in Auth &amp; Export Management first.');
+    expect(html).toContain('Review scope, packaging, and trust notes in the desk review drawer first.');
     expect(html).toContain('Manual-only guardrail');
     expect(html).toContain('The current workbench slice, focus queue, weekly load, planning pulse, and exported current view');
     expect(html).toContain('Cited answer zone');
