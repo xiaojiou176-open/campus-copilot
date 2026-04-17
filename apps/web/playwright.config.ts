@@ -2,6 +2,8 @@ import { defineConfig } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 
 const webRoot = fileURLToPath(new URL('.', import.meta.url));
+const sanitizedEnv = { ...process.env };
+delete sanitizedEnv.NO_COLOR;
 
 export default defineConfig({
   testDir: './tests',
@@ -15,5 +17,6 @@ export default defineConfig({
     timeout: 120000,
     reuseExistingServer: false,
     cwd: webRoot,
+    env: sanitizedEnv,
   },
 });

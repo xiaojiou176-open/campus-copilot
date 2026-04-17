@@ -68,21 +68,12 @@ export function WebAiPanel(props: {
           <span className="badge">explanation layer</span>
         </div>
         <p className="meta">
-          Review scope, packaging, and trust notes in the desk review drawer first. This panel stays in a supporting
-          role: ask from the visible workspace first, then open the deeper policy and runtime notes only when you
+          Review scope, sharing notes, and trust cues in the desk review drawer first. This panel stays in a supporting
+          role: ask from the visible workspace first, then open the deeper trust and connection notes only when you
           actually need them.
         </p>
       </div>
 
-      <div className="ai-panel-summary-strip" aria-label="Boundary and evidence first">
-        <span className="badge">Boundary and evidence first</span>
-        <span className={`badge ${currentAiBlocked ? 'badge-warning' : 'badge-success'}`}>
-          {currentPackaging
-            ? `AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
-            : 'No live policy envelope yet'}
-        </span>
-        <span className="badge">Read-only posture</span>
-      </div>
       {props.importedEnvelope ? (
         <p className="meta">
           Imported snapshot envelope: {props.importedEnvelope.title ?? 'Untitled artifact'} ·{' '}
@@ -97,7 +88,7 @@ export function WebAiPanel(props: {
       ) : null}
 
       <details className="advanced-settings advanced-settings--subdued">
-        <summary>Boundary, policy, and provenance</summary>
+        <summary>Trust, boundaries, and sources</summary>
         <div className="ai-structured ai-structured--advanced">
           <div>
             <p className="meta-title">Boundary and evidence first</p>
@@ -127,15 +118,15 @@ export function WebAiPanel(props: {
           </div>
 
           <div>
-            <p className="meta-title">Current packaging and overlay</p>
+            <p className="meta-title">Current review envelope</p>
           </div>
           <div className="ai-explanation-strip" aria-label="Current export and policy envelope">
             <article className={`guidance-card ${currentAiBlocked ? 'guidance-card--warning' : ''}`}>
-              <p className="meta-title">Layered policy</p>
+              <p className="meta-title">Sharing boundary</p>
               <strong>
                 {currentPackaging
                   ? `Read/export ${currentPackaging.authorizationLevel} · AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
-                  : 'No live policy envelope yet'}
+                  : 'No current review envelope yet'}
               </strong>
               <p>
                 {currentPackaging
@@ -336,14 +327,14 @@ export function WebAiPanel(props: {
       </details>
 
       <details className="advanced-settings">
-        <summary>Advanced/runtime settings</summary>
+        <summary>Advanced connection settings</summary>
         <p className="meta">
-          These controls stay available for targeted opt-ins and runtime debugging, but they are not
+          These controls stay available for targeted opt-ins and connection debugging, but they are not
           the main path of this surface.
         </p>
         <div className="ai-controls">
           <label>
-            BFF base URL
+            Local AI service URL
             <input value={props.aiBaseUrl} onChange={(event) => props.onAiBaseUrlChange(event.target.value)} />
           </label>
           <label>
@@ -363,7 +354,7 @@ export function WebAiPanel(props: {
           {props.provider === 'switchyard' ? (
             <>
               <label>
-                Switchyard runtime provider
+                Switchyard provider
                 <select
                   value={props.switchyardProvider}
                   onChange={(event) => props.onSwitchyardProviderChange(event.target.value as SwitchyardRuntimeProvider)}

@@ -51,7 +51,7 @@ describe('ui language resolution', () => {
     const en = getUiText('en');
     const zh = getUiText('zh-CN');
 
-    expect(en.groupedView.heading).toBe('One sorter, two ways to read it');
+    expect(en.groupedView.heading).toBe('One desk, two ways to read it');
     expect(en.groupedView.academicBadge).toBe('Academic');
     expect(zh.groupedView.heading).toBe('同一个排序器，两种阅读方式');
     expect(zh.groupedView.administrativeBadge).toBe('行政');

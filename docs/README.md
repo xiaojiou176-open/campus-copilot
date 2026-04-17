@@ -9,13 +9,13 @@ Treat it like airport signs, not a second maintainer dashboard:
 - only then go into proof, builder, or owner-side distribution routes
 
 The public story stays the same as the main README:
-**OpenCampus is the public-facing product name, and Campus Copilot is the current flagship decision workspace inside it.**
+**Campus Copilot is the flagship decision workspace, and OpenCampus is the family name above it.**
 
 ## Start Here By Intent
 
 - **I want the student-facing product first**: [`../README.md`](../README.md), then [`01-product-prd.md`](01-product-prd.md), then [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
-- **I want the four-site substrate**: [`02-system-architecture.md`](02-system-architecture.md), then [`03-domain-schema.md`](03-domain-schema.md), then [`04-adapter-spec.md`](04-adapter-spec.md)
-- **I want repo-local proof that the story is real**: [`site-capability-matrix.md`](site-capability-matrix.md), then [`storefront-assets.md`](storefront-assets.md), then [`verification-matrix.md`](verification-matrix.md) if I need the deeper maintainer-facing verification registry
+- **I want to understand how the four-site desk is built**: [`02-system-architecture.md`](02-system-architecture.md), then [`03-domain-schema.md`](03-domain-schema.md), then [`04-adapter-spec.md`](04-adapter-spec.md)
+- **I want repo-local proof that the story is real**: [`site-capability-matrix.md`](site-capability-matrix.md), then [`verification-matrix.md`](verification-matrix.md) if I need the deeper maintainer-facing verification registry, then [`storefront-assets.md`](storefront-assets.md) only if I need the narrower proof appendix
 - **I want the exact safety and boundary posture**: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md), then [`integration-boundaries.md`](integration-boundaries.md), then [`../PRIVACY.md`](../PRIVACY.md)
 - **I want the integration/API surface after the product shape is clear**: [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`../examples/README.md`](../examples/README.md)
 - **I want distribution or store routes**: [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
@@ -36,9 +36,9 @@ If you only want one sane reading path, use this order:
 Use this route when you need stable repo-local proof without turning the docs hub into a launch control room:
 
 1. [`site-capability-matrix.md`](site-capability-matrix.md)
-2. [`storefront-assets.md`](storefront-assets.md)
-3. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
-4. [`verification-matrix.md`](verification-matrix.md) for the deeper maintainer/operator verification registry
+2. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
+3. [`verification-matrix.md`](verification-matrix.md) for the deeper maintainer/operator verification registry
+4. [`storefront-assets.md`](storefront-assets.md) as the narrower proof appendix
 5. [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
 
 Keep the split honest:

@@ -4,6 +4,9 @@
 
 > 这份设计系统不是“做得更像 AI 产品”的说明书。  
 > 它是把 Campus Copilot 统一成 **local-first academic decision workspace** 的施工总图。
+>
+> 如果你只想先读一份短版施工规范，先读：
+> [`DESIGN.md`](./DESIGN.md)
 
 ## Design Direction
 

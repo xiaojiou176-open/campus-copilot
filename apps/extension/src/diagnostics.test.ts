@@ -19,16 +19,16 @@ const siteLabels = {
 describe('diagnostics helpers', () => {
   it('formats provider-specific reasons and UI errors', () => {
     expect(formatProviderReason('configured')).toBe('configured');
-    expect(formatProviderReason('configured_local_runtime')).toBe('configured local runtime');
+    expect(formatProviderReason('configured_local_runtime')).toBe('local route ready');
     expect(formatProviderReason('missing_api_key')).toBe('missing API key');
-    expect(formatProviderReason('missing_runtime_url')).toBe('missing runtime url');
+    expect(formatProviderReason('missing_runtime_url')).toBe('missing local route URL');
     expect(formatProviderReason('configured', 'zh-CN')).toBe('已配置');
-    expect(formatProviderReason('configured_local_runtime', 'zh-CN')).toBe('本地运行时已配置');
+    expect(formatProviderReason('configured_local_runtime', 'zh-CN')).toBe('本地 AI 路线已就绪');
     expect(formatProviderReason('missing_api_key', 'zh-CN')).toBe('缺少 API key');
-    expect(formatProviderReason('missing_runtime_url', 'zh-CN')).toBe('缺少运行时地址');
-    expect(formatProviderStatusError('missing_bff_base_url')).toBe('BFF base URL is not configured yet');
-    expect(formatProviderStatusError('provider_status_fetch_failed')).toBe('provider status fetch failed');
-    expect(formatProviderStatusError('missing_bff_base_url', 'zh-CN')).toBe('还没有配置 BFF 地址');
+    expect(formatProviderReason('missing_runtime_url', 'zh-CN')).toBe('缺少本地路线地址');
+    expect(formatProviderStatusError('missing_bff_base_url')).toBe('Local AI service URL is not configured yet');
+    expect(formatProviderStatusError('provider_status_fetch_failed')).toBe('AI route status fetch failed');
+    expect(formatProviderStatusError('missing_bff_base_url', 'zh-CN')).toBe('还没有配置本地 AI 服务地址');
   });
 
   it('builds blockers and next actions from runtime state', () => {
@@ -53,10 +53,10 @@ describe('diagnostics helpers', () => {
     });
 
     expect(summary.healthy).toBe(false);
-    expect(summary.blockers).toContain('BFF base URL is not configured');
+    expect(summary.blockers).toContain('Local AI service URL is not configured');
     expect(summary.blockers).toContain('Provider not ready: OpenAI, Gemini');
     expect(summary.blockers).toContain('Sites still missing live prerequisites: Canvas, MyUW');
-    expect(summary.blockers).toContain('BFF provider status fetch failed');
+    expect(summary.blockers).toContain('Local AI route status fetch failed');
     expect(summary.nextActions.some((item) => item.includes('API key'))).toBe(true);
   });
 

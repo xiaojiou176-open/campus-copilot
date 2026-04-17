@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Source-first public monorepo for the Campus Copilot local-first academic decision workspace and its read-only builder preview surfaces.",
+  "description": "Source-first public monorepo for Campus Copilot, the flagship local-first academic decision workspace inside the OpenCampus family.",
   "license": "MIT",
   "homepage": "https://xiaojiou176-open.github.io/OpenCampus/",
   "repository": {

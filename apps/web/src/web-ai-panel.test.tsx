@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { WebAiPanel } from './web-ai-panel';
 
 describe('web ai panel guardrails', () => {
-  it('renders guardrails first and keeps runtime controls under advanced settings', () => {
+  it('renders guardrails first and keeps AI-route controls under advanced settings', () => {
     const html = renderToStaticMarkup(
       createElement(WebAiPanel, {
         provider: 'gemini',
@@ -87,8 +87,8 @@ describe('web ai panel guardrails', () => {
       }),
     );
 
-    expect(html).toContain('Current packaging and overlay');
-    expect(html).toContain('Layered policy');
+    expect(html).toContain('Current review envelope');
+    expect(html).toContain('Sharing boundary');
     expect(html).toContain('Site policy overlay');
     expect(html).toContain('Allowed structured families: assignments, announcements, grades, calendar, resource metadata.');
     expect(html).toContain('Ask AI stays blocked on the web surface until the current export envelope carries Layer 2 approval.');
@@ -96,16 +96,16 @@ describe('web ai panel guardrails', () => {
     expect(html).toContain('What AI can see');
     expect(html).toContain('What AI cannot do');
     expect(html).toContain('Boundary and evidence first');
-    expect(html).toContain('Review scope, packaging, and trust notes in the desk review drawer first.');
+    expect(html).toContain('Review scope, sharing notes, and trust cues in the desk review drawer first.');
     expect(html).toContain('Manual-only guardrail');
     expect(html).toContain('The current workbench slice, focus queue, weekly load, planning pulse, and exported current view');
     expect(html).toContain('Cited answer zone');
     expect(html).toContain('Waiting for a cited answer');
     expect(html).toContain('Advanced settings and opt-ins');
-    expect(html).toContain('These controls stay available for targeted opt-ins and runtime debugging, but they are not the main path of this surface.');
+    expect(html).toContain('These controls stay available for targeted opt-ins and connection debugging, but they are not the main path of this surface.');
     expect(html).toContain('Advanced material analysis');
     expect(html).toContain('default off');
-    expect(html).toContain('BFF base URL');
+    expect(html).toContain('Local AI service URL');
     expect(html).toContain('Provider');
     expect(html).toContain('Model');
     expect(html).toContain('disabled=""');

@@ -707,11 +707,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     `${text.metrics.dueWithin48Hours} ${todaySnapshot?.dueSoonAssignments ?? 0}`,
     `${text.metrics.unseenUpdates} ${currentRecentUpdates?.unseenCount ?? 0}`,
   ].join(' · ');
-  const assistantSignalSummary = [
-    `${text.metrics.openAssignments} ${todaySnapshot?.totalAssignments ?? 0}`,
-    `${text.metrics.unseenUpdates} ${currentRecentUpdates?.unseenCount ?? 0}`,
-    `${text.askAi.structuredInputLabels.priorityAlerts} ${currentAlerts.length}`,
-  ].join(' · ');
   const assistantReadinessSummary = activeBffBaseUrl
     ? surfaceView.diagnostics.healthy
       ? text.diagnostics.readyToContinue
@@ -727,8 +722,16 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     blockedAuthorizationCount > 0 ? 'warning' : confirmRequiredAuthorizationCount > 0 ? 'neutral' : 'success';
   const authorizationStatusLabel =
     uiLanguage === 'zh-CN'
-      ? `授权 ${confirmRequiredAuthorizationCount} 待确认 · ${blockedAuthorizationCount} 受阻`
-      : `Auth ${confirmRequiredAuthorizationCount} confirm · ${blockedAuthorizationCount} blocked`;
+      ? blockedAuthorizationCount > 0
+        ? `${blockedAuthorizationCount} 项受阻`
+        : confirmRequiredAuthorizationCount > 0
+          ? `${confirmRequiredAuthorizationCount} 项待确认`
+          : '当前无信任阻碍'
+      : blockedAuthorizationCount > 0
+        ? `${blockedAuthorizationCount} blocked`
+        : confirmRequiredAuthorizationCount > 0
+          ? `${confirmRequiredAuthorizationCount} need review`
+          : 'No trust blockers';
   function enterExportMode(
     nextSite: ExportScopeSite = surfaceView.currentSiteSelection ?? (filters.site === 'all' ? 'all' : filters.site),
   ) {
@@ -781,18 +784,21 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                         <p className="surface__meta-label">{modeCopy.assistant.currentContext}</p>
                         <strong>{currentContextLabel}</strong>
                       </div>
-                      <div className="surface__hero-statuses">
-                        <span className={`surface__badge surface__badge--${activeBffBaseUrl ? 'success' : 'warning'}`}>
-                          {bffStatusLabel}
-                        </span>
-                        <span className={`surface__badge surface__badge--${authorizationStatusVariant}`}>{authorizationStatusLabel}</span>
-                      </div>
+                    <p className="surface__hero-status-line">
+                      <span className={`surface__hero-status-token surface__hero-status-token--${activeBffBaseUrl ? 'success' : 'warning'}`}>
+                        {bffStatusLabel}
+                      </span>
+                      <span className="surface__hero-status-separator" aria-hidden="true">
+                        ·
+                      </span>
+                      <span className={`surface__hero-status-token surface__hero-status-token--${authorizationStatusVariant}`}>
+                        {authorizationStatusLabel}
+                      </span>
+                    </p>
                     </div>
                     <div className="surface__companion-grid" role="list" aria-label={modeCopy.assistant.visibleFacts}>
                       <article className="surface__companion-cell" role="listitem">
-                        <p className="surface__companion-label">
-                          {uiLanguage === 'zh-CN' ? '当前页面' : 'Current page'}
-                        </p>
+                        <p className="surface__companion-label">{modeCopy.assistant.visibleFacts}</p>
                         <strong className="surface__companion-value">{currentContextLabel}</strong>
                         <p className="surface__companion-detail">{assistantFactSummary}</p>
                       </article>
@@ -803,13 +809,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                         </strong>
                         <p className="surface__companion-detail">{assistantReadinessSummary}</p>
                       </article>
-                      <article className="surface__companion-cell" role="listitem">
-                        <p className="surface__companion-label">{modeCopy.assistant.visibleFacts}</p>
-                        <strong className="surface__companion-value">
-                          {uiLanguage === 'zh-CN' ? '今日桌面摘要' : 'Desk snapshot'}
-                        </strong>
-                        <p className="surface__companion-detail">{assistantSignalSummary}</p>
-                      </article>
                     </div>
                     <p className="surface__item-lead">{primaryFocusItem ? primaryFocusItem.title : text.nextUp.none}</p>
                     {primaryFocusItem?.summary ? <p>{primaryFocusItem.summary}</p> : null}
@@ -819,7 +818,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       {currentAlerts.length}
                     </p>
                     <div className="surface__assistant-trust-strip" role="list" aria-label={modeCopy.authorization.title}>
-                      <span className="surface__assistant-trust-chip surface__assistant-trust-chip--success">{modeCopy.assistant.readOnly}</span>
                       <span className="surface__assistant-trust-chip">{modeCopy.assistant.manualOnly}</span>
                       <span className="surface__assistant-trust-chip">{assistantReceiptSummary}</span>
                     </div>
@@ -829,11 +827,11 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                           {text.quickActions.capturePlanningSubstrate(planningCaptureContext.label)}
                         </button>
                       ) : null}
-                      <button className="surface__button" onClick={() => enterExportMode()} type="button">
-                        {modeCopy.assistant.openExport}
+                      <button className="surface__button" onClick={() => setWorkspaceDetailsOpen((current) => !current)} type="button">
+                        {workspaceDetailsOpen ? modeCopy.assistant.hideWorkspace : modeCopy.assistant.showWorkspace}
                       </button>
-                      <button className="surface__button surface__button--secondary" onClick={() => setSidepanelMode('settings')} type="button">
-                        {modeCopy.assistant.openSettings}
+                      <button className="surface__button surface__button--secondary" onClick={() => enterExportMode()} type="button">
+                        {modeCopy.assistant.openExport}
                       </button>
                     </div>
                     {syncFeedback.message ? <p className="surface__feedback">{syncFeedback.message}</p> : null}

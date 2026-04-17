@@ -432,6 +432,18 @@ async function expandDetailedWorkspace(page: Page, label: string) {
   }
 }
 
+async function expandDiagnosticsWorkspace(page: Page, title: string) {
+  const details = page.locator('.surface__diagnostics-detail');
+  if ((await details.getAttribute('open')) !== null) {
+    return;
+  }
+
+  const trigger = details.locator('summary').filter({ hasText: title });
+  if (await trigger.isVisible()) {
+    await trigger.click();
+  }
+}
+
 async function assertOptionsTrustCenter(page: Page) {
   await expect(page.getByRole('heading', { name: 'Connection and boundary summary' })).toBeVisible();
   const authorizationHeading = page.getByRole('heading', { name: 'Trust center' }).last();
@@ -614,20 +626,21 @@ async function seedTechnicalConfig(
 test('opens the built sidepanel and shows four site status cards', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
 
-  await expect(page.getByRole('heading', { name: 'Your campus companion for this page' }).first()).toBeVisible({
+  await expect(page.getByRole('heading', { name: 'Your desk for this page' }).first()).toBeVisible({
     timeout: 10000,
   });
   await expect(page.getByRole('tab', { name: 'Assistant' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Export' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Settings' })).toBeVisible();
   await expect(page.getByText('Read-only desk')).toBeVisible();
-  await expect(page.getByText('Desk snapshot')).toBeVisible();
+  await expect(page.getByText('Desk status').first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ask AI about this workspace' })).toBeVisible();
-  await expect(page.getByText('No local AI route is ready yet.').first()).toBeVisible();
-  await expandDetailedWorkspace(page, 'Show detailed workspace');
-  await expect(page.getByRole('heading', { name: 'Diagnostics' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Next Up' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Trust Summary' })).toBeVisible();
+  await expect(page.getByText("AI connection isn't ready yet.").first()).toBeVisible();
+  await expandDetailedWorkspace(page, 'Review this slice');
+  await expandDiagnosticsWorkspace(page, 'System check');
+  await expect(page.locator('.surface__diagnostics-detail').getByText('System check').first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Start here' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Desk status' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Focus Queue' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Weekly Load' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Change Journal' })).toBeVisible();
@@ -670,7 +683,7 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
-  await expandDetailedWorkspace(page, 'Show detailed workspace');
+  await expandDetailedWorkspace(page, 'Review this slice');
   await page.getByRole('button', { name: 'Sync EdStem' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'EdStem sync succeeded' })).toBeVisible();
   await page.evaluate(async () => {
@@ -733,7 +746,7 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
     });
   });
   await page.reload();
-  await expandDetailedWorkspace(page, 'Show detailed workspace');
+  await expandDetailedWorkspace(page, 'Review this slice');
   const siteStatusPanel = page.locator('article.surface__panel').filter({
     has: page.getByRole('heading', { name: 'Site Status' }),
   });
@@ -748,7 +761,7 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   ).toBeVisible();
 
   await page.getByRole('button', { name: 'EdStem', exact: true }).first().click();
-  await page.getByRole('button', { name: 'Export this page' }).click();
+  await page.getByRole('button', { name: 'Open export' }).first().click();
   const exportReviewPanel = page.locator('article.surface__panel').filter({
     has: page.getByText('Review & export'),
   });
@@ -810,7 +823,7 @@ test('keeps ai gated until the current scope is explicitly allowed', async ({ pa
   ).toBeVisible();
   const questionField = page.getByLabel('Question');
   await expect(page.locator('.surface__workspace-detail summary').filter({ hasText: 'Review this slice first' })).toBeVisible();
-  await expandDetailedWorkspace(page, 'Show detailed workspace');
+  await expandDetailedWorkspace(page, 'Review this slice');
   const canvasFilterChip = page.locator('.surface__toolbar').getByRole('button', { name: 'Canvas', exact: true });
   await canvasFilterChip.click();
   await expect(canvasFilterChip).toHaveClass(/surface__chip--active/);
@@ -866,13 +879,13 @@ test('shows provider not ready when selected provider is unavailable in bff stat
   });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
-  await page.locator('summary').filter({ hasText: 'Advanced runtime settings' }).click();
+  await page.locator('summary').filter({ hasText: 'Advanced AI settings' }).click();
   await expect(page.getByLabel('Provider')).toBeVisible();
   await page.getByLabel('Provider').selectOption('gemini');
   await page.getByLabel('Question').fill('What changed recently?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
-  await expect(page.getByText('Gemini is not ready in the BFF yet.')).toBeVisible();
+  await expect(page.getByText("Gemini is not ready in the local AI route yet.")).toBeVisible();
   const geminiStatusCard = page
     .locator('article.surface__status-card')
     .filter({ has: page.locator('strong', { hasText: /^Gemini$/ }) });
@@ -896,13 +909,15 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
     .locator('article.surface__status-card--success article.surface__evidence-card')
     .first();
 
-  await expect(page.getByRole('heading', { name: '这页的校园伴随助手' }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: '这一页的学习桌面' }).first()).toBeVisible();
   await chineseAskAiPanel.locator('summary').filter({ hasText: '策略审核与可见证据' }).click();
   await expect(chineseAskAiPanel.getByRole('heading', { name: 'AI 当前能看见什么' })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText('今日快照', { exact: true })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText(/待办作业 \d+ · 48 小时内截止 \d+ · 新成绩 \d+/)).toBeVisible();
-  await expandDetailedWorkspace(page, '展开详细工作台');
-  await expect(page.getByText('被环境或运行时阻塞')).toBeVisible();
+  await expandDetailedWorkspace(page, '查看这一屏');
+  await expandDiagnosticsWorkspace(page, '诊断');
+  await expect(page.locator('.surface__diagnostics-detail').getByText('诊断').first()).toBeVisible();
+  await expect(page.locator('.surface__diagnostics-detail').getByText('被环境或运行时阻塞').first()).toBeVisible();
   await expect(page.getByRole('heading', { name: '现在先做什么' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '可信度摘要' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '专注队列' })).toBeVisible();

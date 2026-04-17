@@ -71,6 +71,41 @@ function humanizeMachineCode(value: string) {
     .replace(/\b\w/g, (match) => match.toUpperCase());
 }
 
+export function humanizeUiSummary(value: string | undefined, locale: ResolvedUiLanguage) {
+  if (!value) {
+    return value;
+  }
+
+  let next = value;
+
+  if (locale === 'en') {
+    next = next.replace(
+      /Latest transcript lane currently appears as a review-first summary and stays export-first\./gi,
+      'Transcript is currently available as a review summary.',
+    );
+    next = next.replace(
+      /Review-ready summary stays export-first until a stronger transcript detail lane is promoted\./gi,
+      'This stays a review summary for now.',
+    );
+    next = next.replace(/No truthful transcript runtime carrier is landed yet\./gi, 'Transcript details are not available yet.');
+    next = next.replace(/No truthful financial-aid runtime carrier is landed yet\./gi, 'Financial aid details are not available yet.');
+    next = next.replace(/No truthful accounts runtime carrier is landed yet\./gi, 'Account details are not available yet.');
+    next = next.replace(/No truthful tuition-detail runtime carrier is landed yet\./gi, 'Billing details are not available yet.');
+    next = next.replace(/No truthful profile runtime carrier is landed yet\./gi, 'Profile details are not available yet.');
+    next = next.replace(/Historical-record detail remains blocked until a lawful summary carrier is proven\./gi, 'You can review the current summary for now.');
+    next = next.replace(/Aid detail remains blocked pending a lawful summary-first carrier\./gi, 'You can review the current summary for now.');
+    next = next.replace(/Account-state detail remains blocked pending a lawful summary-first carrier\./gi, 'You can review the current summary for now.');
+    next = next.replace(/Billing-statement detail remains blocked until a lawful summary-first carrier is proven\./gi, 'You can review the current summary for now.');
+    next = next.replace(/Personal-profile detail remains blocked until a lawful summary-first carrier is proven\./gi, 'You can review the current summary for now.');
+    next = next.replace(/lawful summary(?:-first)? carrier/gi, 'trusted summary');
+    next = next.replace(/runtime carrier/gi, 'details');
+    next = next.replace(/shared planning substrate/gi, 'planning snapshot');
+    next = next.replace(/\blanded\b/gi, 'available');
+  }
+
+  return next;
+}
+
 function isStale(lastSyncedAt: string | undefined, nowIso: string) {
   if (!lastSyncedAt) {
     return false;

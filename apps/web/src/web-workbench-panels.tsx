@@ -19,6 +19,7 @@ import type {
 } from '@campus-copilot/storage';
 import type { ImportedArtifactEnvelope } from './import-export-snapshot';
 import { LoadingStatValue, ReadyStateBlock, formatDateTime, formatWeeklyLoadSummary, getResourceActionLabel } from './web-view-helpers';
+import { humanizeUiSummary } from '../../extension/src/surface-shell-view-helpers';
 
 const ADMINISTRATIVE_SITES = new Set<Site>(['myuw', 'time-schedule']);
 
@@ -323,23 +324,23 @@ function getAssignmentActionSummary(assignment: { actionHints?: string[] }) {
 
 function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
   if (summary.laneStatus === 'carrier_not_landed') {
-    return 'capture needed';
+    return 'Needs capture';
   }
   if (summary.laneStatus === 'standalone_detail_runtime_lane') {
-    return 'detail-runtime lane';
+    return 'Details ready';
   }
   return 'summary ready';
 }
 
 function getAdministrativeDetailRuntimeLabel(summary: AdministrativeSummary) {
   if (summary.detailRuntimeStatus === 'blocked_missing_carrier') {
-    return 'detail runtime blocked';
+    return 'Details blocked';
   }
   if (summary.detailRuntimeStatus === 'review_ready') {
-    return 'detail runtime review-ready';
+    return 'Review ready';
   }
   if (summary.detailRuntimeStatus === 'pending') {
-    return 'detail runtime pending';
+    return 'Details coming next';
   }
   return undefined;
 }
@@ -526,7 +527,7 @@ export function WebWorkbenchPanels(props: {
       <section className="split-grid split-grid--primary">
         <article className="panel panel--decision">
           <h2>Focus Queue</h2>
-          <p>Decision-first ranking on the shared read-model.</p>
+          <p>What needs attention first.</p>
           <div className="stack">
             <ReadyStateBlock
               ready={props.workbenchReady}
@@ -555,7 +556,7 @@ export function WebWorkbenchPanels(props: {
 
         <article className="panel panel--decision">
           <h2>Weekly Load</h2>
-          <p>Planning view computed from the same normalized entities.</p>
+          <p>A seven-day view of what is getting heavy.</p>
           <div className="stack">
             <ReadyStateBlock
               ready={props.workbenchReady}
@@ -602,8 +603,7 @@ export function WebWorkbenchPanels(props: {
         <p className="eyebrow">Academic lane</p>
         <h2>Planning Pulse</h2>
         <p>
-          A read-only summary of the latest shared planning substrate, kept in the same decision lane as focus and load without
-          pretending this workspace can register for you.
+          A read-only planning snapshot that keeps term load and backups visible without pretending this desk can register for you.
         </p>
         <div className="stack">
           <ReadyStateBlock
@@ -634,7 +634,7 @@ export function WebWorkbenchPanels(props: {
                   <p className="meta">
                     Current stage: {formatPlanningRuntimeValue(latestPlanningSubstrate.currentStage)}
                     {latestPlanningSubstrate.runtimePosture
-                      ? ` · Runtime posture: ${formatPlanningRuntimeValue(latestPlanningSubstrate.runtimePosture)}`
+                      ? ` · Planning posture: ${formatPlanningRuntimeValue(latestPlanningSubstrate.runtimePosture)}`
                       : ''}
                   </p>
                 ) : null}
@@ -672,6 +672,90 @@ export function WebWorkbenchPanels(props: {
         </div>
       </section>
 
+      <details className="advanced-settings advanced-settings--subdued advanced-settings--drawer">
+        <summary>
+          More review details
+          <span className="badge badge-neutral">{deepReviewSectionCount} blocks</span>
+        </summary>
+        <div className="stack">
+      <section className="panel panel--supporting panel--review-desk">
+        <p className="eyebrow">Trust center</p>
+        <div className="badge-row">
+          <span className="badge badge-neutral">Trust summary and export review</span>
+          <span className="badge badge-warning">Visible before AI and export</span>
+        </div>
+        <h2>Trust and sharing</h2>
+        <p>
+          Review the current scope, sharing boundary, provenance, and site rules before exporting or asking AI.
+          This lane stays read-only and works like a quieter review desk, not a second product shell.
+        </p>
+        <div className="ai-explanation-strip" aria-label="Auth and export management">
+          <article className="guidance-card">
+            <p className="meta-title">Review scope</p>
+            <strong>{formatScopeLine(currentScope)}</strong>
+            <p>
+              {props.importedEnvelope
+                ? `Imported snapshot: ${props.importedEnvelope.title ?? 'Untitled artifact'} · ${formatScopeLine(importedScope)} · generated ${formatDateTime(
+                    props.importedEnvelope.generatedAt,
+                  )}.`
+                : 'No imported envelope is overriding the current local read-model view, so this review lane is reading the live web workbench slice.'}
+            </p>
+          </article>
+          <article className={`guidance-card ${currentPackaging?.aiAllowed ? '' : 'guidance-card--warning'}`}>
+            <p className="meta-title">Sharing boundary</p>
+            <strong>
+              {currentPackaging
+                ? `Read/export ${currentPackaging.authorizationLevel} · AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
+                : 'No live export envelope yet'}
+            </strong>
+            <p>
+              {currentPackaging
+                ? `Risk ${currentPackaging.riskLabel} · match ${currentPackaging.matchConfidence} · provenance ${currentPackaging.provenance.length}. ${
+                    currentPackaging.aiAllowed
+                      ? 'Layer 2 is currently visible for this slice.'
+                      : 'Layer 2 is still blocked, so AI must stay behind the trust desk.'
+                  }`
+                : 'Load a shared workbench slice before treating this web surface as export-ready.'}
+            </p>
+          </article>
+          <article className="guidance-card">
+            <p className="meta-title">Source and imported receipt</p>
+            <strong>{importedPackaging ? 'Imported envelope retained' : 'Using current workbench packaging'}</strong>
+            <p>{formatProvenance()}</p>
+          </article>
+          <article className="guidance-card">
+            <p className="meta-title">Site rules for this slice</p>
+            <strong>{currentOverlay ? currentOverlay.siteLabel : 'Multi-site or unloaded view'}</strong>
+            <p>
+              {currentOverlay
+                ? `Allowed: ${currentOverlay.allowedFamilies.join(', ')}. Export-first: ${
+                    currentOverlay.exportOnlyFamilies.join(', ') || 'none'
+                  }. Forbidden AI objects: ${currentOverlay.forbiddenAiObjects.join(', ') || 'none'}. `
+                : 'Choose a site-scoped slice to review the active site overlay and carrier honesty notes. '}
+              {reviewReadyFamilies.length > 0
+                ? `Review-ready summaries: ${reviewReadyFamilies.join(', ')}. `
+                : 'No review-ready administrative summary families are visible in this slice. '}
+              {exportFirstFamilies.length > 0
+                ? `Export-first families in this view: ${exportFirstFamilies.join(', ')}. `
+                : 'No site-scoped export-first families are visible in this slice yet. '}
+              {props.planningSubstrates.length > 0
+                ? `Planning snapshots: ${props.planningSubstrates.length} read-only view(s).`
+                : 'No planning snapshot is visible in this slice.'}
+            </p>
+          </article>
+        </div>
+        {importedPackaging ? (
+          <p className="meta">
+            Imported envelope keeps its own posture: read/export {importedPackaging.authorizationLevel} · AI{' '}
+            {importedPackaging.aiAllowed ? 'allowed' : 'blocked'} · risk {importedPackaging.riskLabel} · match{' '}
+            {importedPackaging.matchConfidence}.
+          </p>
+        ) : null}
+      </section>
+      <p className="meta">
+        Open this quieter review drawer only when you need assignment, discussion, material, admin, and imported-count
+        detail beyond the first overview and decision lane.
+      </p>
       <section className="split-grid split-grid--secondary split-grid--lane-band">
         <article className="panel panel--lane-summary">
           <p className="eyebrow">Grouped student view</p>
@@ -700,91 +784,6 @@ export function WebWorkbenchPanels(props: {
           <p className="meta">{administrativeScheduleCount} schedule context item(s)</p>
         </article>
       </section>
-
-      <details className="advanced-settings advanced-settings--subdued advanced-settings--drawer">
-        <summary>
-          Deep review drawer
-          <span className="badge badge-neutral">{deepReviewSectionCount} blocks</span>
-        </summary>
-        <div className="stack">
-      <section className="panel panel--supporting panel--review-desk">
-        <p className="eyebrow">Trust center</p>
-        <div className="badge-row">
-          <span className="badge badge-neutral">Trust summary and export review</span>
-          <span className="badge badge-warning">Visible before AI and export</span>
-        </div>
-        <h2>Auth &amp; Export Management</h2>
-        <p>
-          Review the current scope, policy envelope, provenance, and site overlay before exporting or asking AI.
-          This lane stays read-only and works like a quieter review desk, not a second product shell.
-        </p>
-        <div className="ai-explanation-strip" aria-label="Auth and export management">
-          <article className="guidance-card">
-            <p className="meta-title">Review scope</p>
-            <strong>{formatScopeLine(currentScope)}</strong>
-            <p>
-              {props.importedEnvelope
-                ? `Imported snapshot: ${props.importedEnvelope.title ?? 'Untitled artifact'} · ${formatScopeLine(importedScope)} · generated ${formatDateTime(
-                    props.importedEnvelope.generatedAt,
-                  )}.`
-                : 'No imported envelope is overriding the current local read-model view, so this review lane is reading the live web workbench slice.'}
-            </p>
-          </article>
-          <article className={`guidance-card ${currentPackaging?.aiAllowed ? '' : 'guidance-card--warning'}`}>
-            <p className="meta-title">Current policy envelope</p>
-            <strong>
-              {currentPackaging
-                ? `Read/export ${currentPackaging.authorizationLevel} · AI ${currentPackaging.aiAllowed ? 'allowed' : 'blocked'}`
-                : 'No live export envelope yet'}
-            </strong>
-            <p>
-              {currentPackaging
-                ? `Risk ${currentPackaging.riskLabel} · match ${currentPackaging.matchConfidence} · provenance ${currentPackaging.provenance.length}. ${
-                    currentPackaging.aiAllowed
-                      ? 'Layer 2 is currently visible for this slice.'
-                      : 'Layer 2 is still blocked, so AI must stay behind the trust desk.'
-                  }`
-                : 'Load a shared workbench slice before treating this web surface as export-ready.'}
-            </p>
-          </article>
-          <article className="guidance-card">
-            <p className="meta-title">Provenance and imported receipt</p>
-            <strong>{importedPackaging ? 'Imported envelope retained' : 'Using current workbench packaging'}</strong>
-            <p>{formatProvenance()}</p>
-          </article>
-          <article className="guidance-card">
-            <p className="meta-title">Site policy overlay and review honesty</p>
-            <strong>{currentOverlay ? currentOverlay.siteLabel : 'Multi-site or unloaded view'}</strong>
-            <p>
-              {currentOverlay
-                ? `Allowed: ${currentOverlay.allowedFamilies.join(', ')}. Export-first: ${
-                    currentOverlay.exportOnlyFamilies.join(', ') || 'none'
-                  }. Forbidden AI objects: ${currentOverlay.forbiddenAiObjects.join(', ') || 'none'}. `
-                : 'Choose a site-scoped slice to review the active site overlay and carrier honesty notes. '}
-              {reviewReadyFamilies.length > 0
-                ? `Review-ready summaries: ${reviewReadyFamilies.join(', ')}. `
-                : 'No review-ready administrative summary families are visible in this slice. '}
-              {exportFirstFamilies.length > 0
-                ? `Export-first families in this view: ${exportFirstFamilies.join(', ')}. `
-                : 'No site-scoped export-first families are visible in this slice yet. '}
-              {props.planningSubstrates.length > 0
-                ? `Planning substrate(s): ${props.planningSubstrates.length} read-only lane(s).`
-                : 'No planning substrate is visible in this slice.'}
-            </p>
-          </article>
-        </div>
-        {importedPackaging ? (
-          <p className="meta">
-            Imported envelope keeps its own posture: read/export {importedPackaging.authorizationLevel} · AI{' '}
-            {importedPackaging.aiAllowed ? 'allowed' : 'blocked'} · risk {importedPackaging.riskLabel} · match{' '}
-            {importedPackaging.matchConfidence}.
-          </p>
-        ) : null}
-      </section>
-      <p className="meta">
-        Open this quieter review drawer only when you need assignment, discussion, material, admin, and imported-count
-        detail beyond the first overview and decision lane.
-      </p>
       <section className="split-grid split-grid--primary">
         <article className="panel">
           <h2>Merge Health</h2>
@@ -952,8 +951,8 @@ export function WebWorkbenchPanels(props: {
                     <span className="badge">{summary.importance}</span>
                   </div>
                 </div>
-                <p>{summary.summary}</p>
-                {summary.detailRuntimeNote ? <p className="meta">{summary.detailRuntimeNote}</p> : null}
+                <p>{humanizeUiSummary(summary.summary, 'en')}</p>
+                {summary.detailRuntimeNote ? <p className="meta">{humanizeUiSummary(summary.detailRuntimeNote, 'en')}</p> : null}
                 {summary.exactBlockers.length > 0 ? (
                   <p className="meta">
                     Exact blockers: {summary.exactBlockers.slice(0, 2).map((blocker) => blocker.id).join(' · ')}

@@ -7,10 +7,10 @@
     "dev": "vite --host 127.0.0.1 --port 4275",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4275",
-    "preview:test": "vite preview --host 127.0.0.1 --port 4275 --strictPort",
+    "preview:test": "unset NO_COLOR; vite preview --host 127.0.0.1 --port 4275 --strictPort",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --config vitest.config.ts",
-    "test:interaction": "pnpm build && playwright test -c playwright.config.ts"
+    "test:interaction": "unset NO_COLOR; pnpm build && playwright test -c playwright.config.ts"
   },
   "dependencies": {
     "@campus-copilot/ai": "workspace:*",

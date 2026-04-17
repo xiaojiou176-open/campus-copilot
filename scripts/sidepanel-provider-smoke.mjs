@@ -357,27 +357,41 @@ async function seedPublicScreenshotData(page) {
 async function capturePublicProofScreenshot(page, path) {
   await page.addStyleTag({
     content: `
-      .surface__card,
       #public-proof-snapshot {
         max-width: 1240px !important;
         padding: 28px !important;
+        margin: 24px auto !important;
+        display: grid !important;
+        gap: 22px !important;
+        border: 1px solid rgba(226, 221, 214, 0.92) !important;
+        border-radius: 24px !important;
+        background: rgba(251, 250, 246, 0.98) !important;
+        box-shadow: 0 18px 40px rgba(39, 72, 61, 0.08) !important;
       }
-      .surface__copy {
-        max-width: 860px !important;
-        font-size: 1.05rem !important;
+      #public-proof-snapshot .surface__mode-bar {
+        position: static !important;
+        margin-bottom: 0 !important;
       }
-      .surface__hero-meta {
-        min-width: 220px !important;
+      #public-proof-snapshot .surface__card {
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
       }
-      .surface__grid--split {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      #public-proof-snapshot .surface__assistant-stage {
+        gap: 0 !important;
       }
-      .surface__panel p,
-      .surface__panel li {
-        font-size: 0.98rem !important;
+      #public-proof-snapshot .surface__panel--companion {
+        min-height: auto !important;
       }
-      .surface__metric-value {
-        font-size: 2.3rem !important;
+      #public-proof-snapshot .surface__workspace-detail,
+      #public-proof-snapshot .surface__diagnostics-detail,
+      #public-proof-snapshot .surface__panel:not(.surface__panel--companion),
+      #public-proof-snapshot .surface__copy,
+      #public-proof-snapshot .surface__feedback {
+        display: none !important;
       }
     `,
   });
@@ -385,48 +399,16 @@ async function capturePublicProofScreenshot(page, path) {
   await page.evaluate(() => {
     document.getElementById('public-proof-snapshot')?.remove();
 
-    const sourceCard = document.querySelector('.surface__card');
-    const hero = sourceCard?.querySelector('.surface__hero');
-    const stats = sourceCard?.querySelector('.surface__grid--stats');
-    const firstSplit = sourceCard?.querySelector('.surface__grid--split');
+    const snapshot = document.createElement('section');
+    snapshot.id = 'public-proof-snapshot';
+    const sourceModeBar = document.querySelector('.surface__mode-bar');
+    const sourceCompanion = document.querySelector('.surface__assistant-stage');
 
-    if (!sourceCard || !hero || !stats || !firstSplit) {
+    if (!sourceModeBar || !sourceCompanion) {
       throw new Error('public_proof_capture_blocks_missing');
     }
 
-    const snapshot = document.createElement('section');
-    snapshot.id = 'public-proof-snapshot';
-    snapshot.className = 'surface__card';
-    snapshot.style.margin = '24px auto';
-    snapshot.style.display = 'grid';
-    snapshot.style.gap = '22px';
-
-    snapshot.append(hero.cloneNode(true), stats.cloneNode(true), firstSplit.cloneNode(true));
-
-    const heroCopy = snapshot.querySelector('.surface__copy');
-    if (heroCopy) {
-      heroCopy.textContent = 'One desk for deadlines, updates, site status, and AI explanations.';
-    }
-
-    const heroMeta = snapshot.querySelector('.surface__hero-meta');
-    heroMeta?.lastElementChild?.remove();
-
-    const panelHeadingMap = new Map(
-      Array.from(snapshot.querySelectorAll('.surface__panel')).map((panel) => [
-        panel.querySelector('h2')?.textContent?.trim(),
-        panel,
-      ]),
-    );
-
-    const nextUpDescription = panelHeadingMap.get('Next Up')?.querySelector('p');
-    if (nextUpDescription) {
-      nextUpDescription.textContent = 'The top-ranked next step, with the reason it surfaced first.';
-    }
-
-    const trustSummaryDescription = panelHeadingMap.get('Trust Summary')?.querySelector('p');
-    if (trustSummaryDescription) {
-      trustSummaryDescription.textContent = 'A quick read on sync confidence, blockers, and unseen work.';
-    }
+    snapshot.append(sourceModeBar.cloneNode(true), sourceCompanion.cloneNode(true));
 
     document.body.append(snapshot);
   });
@@ -509,14 +491,15 @@ async function collectFailureEvidence() {
 }
 
 function buildChromeMocks() {
-  return ({ baseUrl, bffBaseUrl, defaultProvider, defaultModel, uiLanguage, browserLanguage }) => {
+  return ({ baseUrl, bffBaseUrl, defaultProvider, defaultModel, uiLanguage, browserLanguage, screenshotMode }) => {
     const CONFIG_KEY = 'campusCopilotConfig';
+    const seededBffBaseUrl = screenshotMode === 'public-proof' ? undefined : bffBaseUrl;
     const defaultConfig = {
         [CONFIG_KEY]: {
           defaultExportFormat: 'markdown',
           uiLanguage,
           ai: {
-            bffBaseUrl,
+            bffBaseUrl: seededBffBaseUrl,
             defaultProvider,
           models: {
             openai: defaultProvider === 'openai' ? defaultModel : 'gpt-4.1-mini',
@@ -725,6 +708,7 @@ try {
     defaultModel,
     uiLanguage,
     browserLanguage,
+    screenshotMode,
   });
 
   await page.goto(sidepanelUrl);

@@ -1,7 +1,40 @@
 import { defineConfig } from 'wxt';
 
+function workspaceManualChunks(id: string) {
+  if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+    return 'react-vendor';
+  }
+
+  if (id.includes('/packages/storage/')) {
+    return 'storage-substrate';
+  }
+
+  if (id.includes('/packages/ai/')) {
+    return 'ai-runtime';
+  }
+
+  return undefined;
+}
+
 export default defineConfig({
   srcDir: '.',
+  hooks: {
+    'vite:build:extendConfig': (entrypoints, viteConfig) => {
+      const hasBackground = entrypoints.some((entrypoint) => entrypoint.type === 'background');
+      if (hasBackground) {
+        return;
+      }
+
+      viteConfig.build ??= {};
+      viteConfig.build.rollupOptions ??= {};
+      const output =
+        Array.isArray(viteConfig.build.rollupOptions.output) || viteConfig.build.rollupOptions.output == null
+          ? {}
+          : viteConfig.build.rollupOptions.output;
+      output.manualChunks = workspaceManualChunks;
+      viteConfig.build.rollupOptions.output = output;
+    },
+  },
   manifest: {
     name: 'Campus Copilot for UW',
     short_name: 'Campus Copilot',

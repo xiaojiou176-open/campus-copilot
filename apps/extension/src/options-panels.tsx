@@ -398,8 +398,8 @@ export function OptionsPanels(props: {
               </div>
               <p className="surface__meta">
                 {uiLanguage === 'zh-CN'
-                  ? '只有自动发现失败，或你真的需要自定义本地地址时，才继续改更深的 runtime 设置。'
-                  : 'Only keep drilling into deeper runtime settings when autodiscovery fails or you truly need a custom local address.'}
+                  ? '只有自动发现失败，或你真的需要自定义本地地址时，才继续改更深的连接设置。'
+                  : 'Only keep drilling into deeper connection settings when autodiscovery fails or you truly need a custom local address.'}
               </p>
             </div>
           </details>

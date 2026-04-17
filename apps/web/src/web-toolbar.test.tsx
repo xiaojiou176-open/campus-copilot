@@ -48,25 +48,25 @@ describe('web toolbar and support rail', () => {
       createElement(WebToolbar, toolbarProps),
     );
 
-    expect(html).toContain('Student decision workspace');
+    expect(html).toContain('Campus Copilot workbench');
     expect(html).toContain('academic work, administrative signals, and the next decision');
-    expect(html).toContain('Workspace truth');
-    expect(html).toContain('Load / Import');
+    expect(html).toContain('Desk status');
+    expect(html).toContain('Import / Sample');
     expect(html).toContain('Filter / Export');
     expect(html).not.toContain('Trust summary');
-    expect(html).not.toContain('Receipts and diagnostics');
+    expect(html).not.toContain('Stored receipts');
   });
 
   it('renders a supporting trust summary and diagnostics receipts without overclaiming live state', () => {
     const html = renderToStaticMarkup(createElement(WebSupportRail, toolbarProps));
 
-    expect(html).toContain('What this desk can prove');
-    expect(html).toContain('Receipts and diagnostics');
-    expect(html).toContain('Imported sites with data');
-    expect(html).toContain('Tracked entities');
+    expect(html).toContain('What is on this desk');
+    expect(html).toContain('Stored receipts');
+    expect(html).toContain('Sites with data');
+    expect(html).toContain('Items on the desk');
     expect(html).toContain('Unseen updates');
     expect(html).toContain('Latest stored receipt: Canvas');
-    expect(html).toContain('Start with the facts already on the desk.');
+    expect(html).toContain('Start with the facts already on the desk. Review this slice');
     expect(html).toContain('Registration-related and red-zone routes stay outside this product surface.');
   });
 });

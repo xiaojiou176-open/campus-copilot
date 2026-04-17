@@ -15,21 +15,21 @@ test('shows the standalone workbench and exports the current view', async ({ pag
     await expect(firstStatCard.getByText('—')).toBeVisible();
     await expect(loadingWorkbenchHeading).toBeHidden();
   }
-  await expect(page.getByRole('heading', { name: 'Student decision workspace' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Campus Copilot workbench' })).toBeVisible();
   await expect(
     page.getByText('One local desk for academic work, administrative signals, and the next decision.'),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Focus Queue' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Weekly Load' })).toBeVisible();
   await expect(page.getByText('Light load: 1 calendar item.')).toBeVisible();
-  const orientationHeading = page.getByRole('heading', { name: 'Student decision workspace' });
+  const orientationHeading = page.getByRole('heading', { name: 'Campus Copilot workbench' });
   const focusQueueHeading = page.getByRole('heading', { name: 'Focus Queue' });
   const weeklyLoadHeading = page.getByRole('heading', { name: 'Weekly Load' });
-  const trustSummaryHeading = page.getByRole('heading', { name: 'What this desk can prove' });
+  const trustSummaryHeading = page.getByRole('heading', { name: 'What is on this desk' });
   const askAiHeading = page.getByRole('heading', { name: 'Ask AI about this workspace' });
-  const loadImportLabel = page.getByText('Load / Import', { exact: true });
+  const loadImportLabel = page.getByText('Import / Sample', { exact: true });
   const planningPulseHeading = page.getByRole('heading', { name: 'Planning Pulse' });
-  const deepReviewSummary = page.locator('summary').filter({ hasText: 'Deep review drawer' });
+  const deepReviewSummary = page.locator('summary').filter({ hasText: 'More review details' });
   const currentTasksHeading = page.getByRole('heading', { name: 'Current Tasks' });
   const studyMaterialsHeading = page.getByRole('heading', { name: 'Study Materials' });
   const importedCountsHeading = page.getByRole('heading', { name: 'Imported site counts' });

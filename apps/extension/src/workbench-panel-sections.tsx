@@ -28,6 +28,7 @@ import {
   formatTimelineSummary,
   formatTimelineTitle,
   formatWeeklyLoadHighlights,
+  humanizeUiSummary,
   getSiteStatusLabel,
   getSiteStatusTone,
 } from './surface-shell-view-helpers';
@@ -514,10 +515,10 @@ function getAssignmentActionSummary(assignment: OperationsSectionProps['currentA
 
 function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
   if (summary.laneStatus === 'carrier_not_landed') {
-    return 'capture needed';
+    return 'Needs capture';
   }
   if (summary.laneStatus === 'standalone_detail_runtime_lane') {
-    return 'detail-runtime lane';
+    return 'Details ready';
   }
   return 'summary ready';
 }
@@ -527,13 +528,13 @@ function getAdministrativeDetailRuntimeLabel(
   uiLanguage: WorkbenchPanelsProps['uiLanguage'],
 ) {
   if (summary.detailRuntimeStatus === 'blocked_missing_carrier') {
-    return uiLanguage === 'zh-CN' ? 'detail runtime 缺 carrier' : 'detail runtime blocked';
+    return uiLanguage === 'zh-CN' ? '详情暂不可用' : 'Details blocked';
   }
   if (summary.detailRuntimeStatus === 'review_ready') {
-    return uiLanguage === 'zh-CN' ? 'detail runtime 可复核' : 'detail runtime review-ready';
+    return uiLanguage === 'zh-CN' ? '详情可复核' : 'Review ready';
   }
   if (summary.detailRuntimeStatus === 'pending') {
-    return uiLanguage === 'zh-CN' ? 'detail runtime 待提升' : 'detail runtime pending';
+    return uiLanguage === 'zh-CN' ? '详情整理中' : 'Details coming next';
   }
   return undefined;
 }
@@ -897,49 +898,59 @@ export function WorkbenchOverviewSections({
       ) : null}
 
       {surface === 'sidepanel' ? (
-        <div className="surface__grid surface__grid--split">
-          <article className="surface__panel surface__panel--diagnostics surface__panel--subtle">
-            <h2>{text.diagnostics.title}</h2>
-            <p>{text.diagnostics.description}</p>
-            <div className="surface__status-rail">
-              <div className="surface__group">
-                <p className="surface__meta-label">{text.meta.currentStatus}</p>
-                <p className="surface__item-lead">
-                  {diagnostics.healthy ? text.diagnostics.readyToContinue : text.diagnostics.blockedByEnvironmentOrRuntime}
-                </p>
+        <details className="surface__diagnostics-detail surface__workspace-detail--diagnostics">
+          <summary className="surface__workspace-detail-summary">
+            <span className="surface__workspace-detail-copy">
+              <strong>{text.diagnostics.title}</strong>
+              <span>{text.diagnostics.description}</span>
+            </span>
+            <span className="surface__workspace-detail-actions">
+              <span className="surface__badge surface__badge--neutral">{diagnostics.healthy ? text.diagnostics.readyToContinue : text.diagnostics.blockedByEnvironmentOrRuntime}</span>
+              <span className="surface__workspace-detail-toggle">Open diagnostics</span>
+            </span>
+          </summary>
+          <div className="surface__grid surface__grid--split">
+            <article className="surface__panel surface__panel--diagnostics surface__panel--subtle">
+              <div className="surface__status-rail">
+                <div className="surface__group">
+                  <p className="surface__meta-label">{text.meta.currentStatus}</p>
+                  <p className="surface__item-lead">
+                    {diagnostics.healthy ? text.diagnostics.readyToContinue : text.diagnostics.blockedByEnvironmentOrRuntime}
+                  </p>
+                </div>
+                <div className="surface__group">
+                  <p className="surface__meta-label">{text.trustSummary.topBlocker}</p>
+                  {diagnostics.blockers.length > 0 ? (
+                    <ul className="surface__list surface__list--compact">
+                      {diagnostics.blockers.slice(0, 2).map((blocker) => (
+                        <li key={blocker}>{blocker}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{text.diagnostics.noBlockers}</p>
+                  )}
+                </div>
+                <div className="surface__group">
+                  <p className="surface__meta-label">{text.diagnostics.nextActions}</p>
+                  {diagnostics.nextActions.length > 0 ? (
+                    <ul className="surface__list surface__list--compact">
+                      {diagnostics.nextActions.slice(0, 2).map((action) => (
+                        <li key={action}>{action}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>{text.diagnostics.noBlockers}</p>
+                  )}
+                </div>
+                <div className="surface__actions">
+                  <button className="surface__button surface__button--ghost" onClick={() => void onExportDiagnostics()}>
+                    {text.diagnostics.exportJson}
+                  </button>
+                </div>
               </div>
-              <div className="surface__group">
-                <p className="surface__meta-label">{text.trustSummary.topBlocker}</p>
-                {diagnostics.blockers.length > 0 ? (
-                  <ul className="surface__list surface__list--compact">
-                    {diagnostics.blockers.slice(0, 2).map((blocker) => (
-                      <li key={blocker}>{blocker}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>{text.diagnostics.noBlockers}</p>
-                )}
-              </div>
-              <div className="surface__group">
-                <p className="surface__meta-label">{text.diagnostics.nextActions}</p>
-                {diagnostics.nextActions.length > 0 ? (
-                  <ul className="surface__list surface__list--compact">
-                    {diagnostics.nextActions.slice(0, 2).map((action) => (
-                      <li key={action}>{action}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>{text.diagnostics.noBlockers}</p>
-                )}
-              </div>
-              <div className="surface__actions">
-                <button className="surface__button surface__button--ghost" onClick={() => void onExportDiagnostics()}>
-                  {text.diagnostics.exportJson}
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
+            </article>
+          </div>
+        </details>
       ) : null}
 
       {surface === 'sidepanel' ? (
@@ -1205,11 +1216,20 @@ export function WorkbenchDecisionSections({
   const courseClusterCount = courseClusters.length;
   const workItemClusterCount = workItemClusters.length;
   const administrativeSummaryCount = administrativeSummaries.length;
+  const visibleWeeklyLoad = weeklyLoad.filter(
+    (entry) =>
+      entry.items.length > 0 ||
+      entry.assignmentCount > 0 ||
+      (entry.eventCount ?? 0) > 0 ||
+      entry.dueSoonCount > 0 ||
+      entry.overdueCount > 0 ||
+      entry.pinnedCount > 0,
+  );
   const groupedDecisionCopy =
     uiLanguage === 'zh-CN'
       ? {
           mergeHealthEyebrow: '合并健康',
-          mergeHealthTitle: '统一合并底座',
+          mergeHealthTitle: '合并视图健康',
           mergeHealthDescription:
             '这块像总账本状态灯。它告诉你我们已经折成了多少课程簇、多少统一工作项，还有多少对象仍然只是可能匹配。',
           courseClustersTitle: '课程簇',
@@ -1230,13 +1250,13 @@ export function WorkbenchDecisionSections({
           administrativeSnapshotsTitle: '行政摘要',
           administrativeSnapshotsDescription:
             '高敏感行政对象先以摘要卡进入工作台，默认走 review/export-first，不直接铺满首页。',
-          administrativeSnapshotsEmpty: '当前还没有已 landed 的行政摘要进入共享视图。',
+          administrativeSnapshotsEmpty: '当前还没有行政摘要进入共享视图。',
           authorityLabel: '权威来源',
           sitesLabel: '站点',
         }
       : {
           mergeHealthEyebrow: 'Merge Health',
-          mergeHealthTitle: 'Canonical merge substrate',
+          mergeHealthTitle: 'Merged view health',
           mergeHealthDescription:
             'Think of this as the ledger health lamp. It shows how many course clusters and merged work items are already folded in, and how many objects still remain possible matches.',
           courseClustersTitle: 'Course clusters',
@@ -1254,15 +1274,15 @@ export function WorkbenchDecisionSections({
           coursePanoramaTitle: 'Course panorama',
           coursePanoramaDescription:
             'This is the course overview shelf: it keeps folded course clusters and course-site evidence visible without pushing them back into the hero lane.',
-          coursePanoramaEmpty: 'No course clusters have landed in the shared workspace view yet.',
+          coursePanoramaEmpty: 'No course clusters are visible yet.',
           mergedWorkItemsTitle: 'Merged work items',
           mergedWorkItemsDescription:
             'This section keeps the unified work-item view visible instead of dropping back to single-site assignment cards.',
-          mergedWorkItemsEmpty: 'No merged work items have landed in the shared workspace view yet.',
+          mergedWorkItemsEmpty: 'No merged work items are visible yet.',
           administrativeSnapshotsTitle: 'Administrative snapshots',
           administrativeSnapshotsDescription:
             'High-sensitivity administrative objects enter as summary cards first; the default posture stays review/export-first instead of filling the home surface.',
-          administrativeSnapshotsEmpty: 'No landed administrative summaries are visible in the shared workspace view yet.',
+          administrativeSnapshotsEmpty: 'No administrative summaries are visible yet.',
           authorityLabel: 'Authority',
           sitesLabel: 'Sites',
         };
@@ -1464,8 +1484,8 @@ export function WorkbenchDecisionSections({
             </button>
           </div>
           <div className="surface__stack">
-            {weeklyLoad.length ? (
-              weeklyLoad.map((entry) => (
+            {visibleWeeklyLoad.length ? (
+              visibleWeeklyLoad.map((entry) => (
                 <article className="surface__item" key={entry.dateKey}>
                   <div className="surface__item-header">
                     <strong>{entry.dateKey}</strong>
@@ -1566,7 +1586,7 @@ export function WorkbenchDecisionSections({
                 <p className="surface__meta">
                   {uiLanguage === 'zh-CN' ? '当前阶段' : 'Current stage'}: {formatPlanningRuntimeValue(latestPlanningSubstrate.currentStage)}
                   {latestPlanningSubstrate.runtimePosture
-                    ? ` · ${uiLanguage === 'zh-CN' ? '运行姿态' : 'Runtime posture'}: ${formatPlanningRuntimeValue(latestPlanningSubstrate.runtimePosture)}`
+                    ? ` · ${uiLanguage === 'zh-CN' ? '规划姿态' : 'Planning posture'}: ${formatPlanningRuntimeValue(latestPlanningSubstrate.runtimePosture)}`
                     : ''}
                 </p>
               ) : null}
@@ -1706,7 +1726,7 @@ export function WorkbenchOperationsSections({
           administrativeSnapshotsTitle: '行政摘要',
           administrativeSnapshotsDescription:
             '高敏感行政对象先以摘要卡进入工作台，默认走 review/export-first，不直接铺满首页。',
-          administrativeSnapshotsEmpty: '当前还没有已 landed 的行政摘要进入共享视图。',
+          administrativeSnapshotsEmpty: '当前还没有行政摘要进入共享视图。',
           authorityLabel: '权威来源',
           sitesLabel: '站点',
         }
@@ -1714,15 +1734,15 @@ export function WorkbenchOperationsSections({
           coursePanoramaTitle: 'Course panorama',
           coursePanoramaDescription:
             'This is the course overview shelf: it keeps folded course clusters and course-site evidence visible without pushing them back into the hero lane.',
-          coursePanoramaEmpty: 'No course clusters have landed in the shared workspace view yet.',
+          coursePanoramaEmpty: 'No course clusters are visible yet.',
           mergedWorkItemsTitle: 'Merged work items',
           mergedWorkItemsDescription:
             'This section keeps the unified work-item view visible instead of dropping back to single-site assignment cards.',
-          mergedWorkItemsEmpty: 'No merged work items have landed in the shared workspace view yet.',
+          mergedWorkItemsEmpty: 'No merged work items are visible yet.',
           administrativeSnapshotsTitle: 'Administrative snapshots',
           administrativeSnapshotsDescription:
             'High-sensitivity administrative objects enter as summary cards first; the default posture stays review/export-first instead of filling the home surface.',
-          administrativeSnapshotsEmpty: 'No landed administrative summaries are visible in the shared workspace view yet.',
+          administrativeSnapshotsEmpty: 'No administrative summaries are visible yet.',
           authorityLabel: 'Authority',
           sitesLabel: 'Sites',
         };
@@ -1883,8 +1903,8 @@ export function WorkbenchOperationsSections({
                     <span className={`surface__badge surface__badge--${summary.importance}`}>{summary.importance}</span>
                   </div>
                 </div>
-                <p>{summary.summary}</p>
-                {summary.detailRuntimeNote ? <p className="surface__meta">{summary.detailRuntimeNote}</p> : null}
+                <p>{humanizeUiSummary(summary.summary, uiLanguage)}</p>
+                {summary.detailRuntimeNote ? <p className="surface__meta">{humanizeUiSummary(summary.detailRuntimeNote, uiLanguage)}</p> : null}
                 {summary.exactBlockers.length ? (
                   <p className="surface__meta">
                     {uiLanguage === 'zh-CN' ? 'Exact blockers' : 'Exact blockers'}:{' '}

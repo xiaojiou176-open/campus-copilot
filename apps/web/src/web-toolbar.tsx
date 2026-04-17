@@ -55,16 +55,15 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
   return (
     <section className="support-grid" aria-label="Workspace trust and diagnostics">
       <article className="support-card support-card--trust">
-        <p className="eyebrow">Review before AI</p>
-        <h2>What this desk can prove</h2>
+        <p className="eyebrow">Read this first</p>
+        <h2>What is on this desk</h2>
         <p className="support-copy">
-          Start with the facts already on the desk. This summary shows what the current slice can actually prove before
-          you export it or ask AI to explain it.
+          Start with the facts already on the desk. Review this slice before you export it or ask AI to explain it.
         </p>
         <div className="support-list support-list--compact" role="list" aria-label="Trust summary rules">
           <div className="support-rule" role="listitem">
-            <strong>Shared contract</strong>
-            <span>Imports, demo resets, export review, and AI explanation all stay on the same schema and storage path.</span>
+            <strong>One shared view</strong>
+            <span>Imports, sample resets, export review, and AI explanation all stay on the same local desk.</span>
           </div>
           <div className="support-rule" role="listitem">
             <strong>Manual-only boundary</strong>
@@ -78,19 +77,19 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
       </article>
 
       <article className="support-card support-card--diagnostics">
-        <p className="eyebrow">Receipts on deck</p>
-        <h2>Receipts and diagnostics</h2>
+        <p className="eyebrow">Stored receipts</p>
+        <h2>Stored receipts</h2>
         <p className="support-copy">
           This layer only reports what the imported workspace can currently prove, so the review below never has to
           pretend it knows more than the receipts.
         </p>
         <div className="support-metrics" role="list" aria-label="Workspace diagnostics">
           <div className="support-metric" role="listitem">
-            <span>Imported sites with data</span>
+            <span>Sites with data</span>
             <strong>{props.populatedSiteCount}</strong>
           </div>
           <div className="support-metric" role="listitem">
-            <span>Tracked entities</span>
+            <span>Items on the desk</span>
             <strong>{props.trackedEntityCount}</strong>
           </div>
           <div className="support-metric" role="listitem">
@@ -101,7 +100,7 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
         <p className="support-note support-note--receipt">
           {props.topSyncRun
             ? `Latest stored receipt: ${props.siteLabels[props.topSyncRun.site]} · ${props.topSyncRun.outcome} · ${formatRelativeTime(props.topSyncRun.completedAt)}.`
-            : 'No stored sync receipt is visible yet. Import a current-view snapshot first to populate diagnostics and change receipts.'}
+            : 'No stored receipt is visible yet. Import a current-view snapshot first to populate this desk.'}
         </p>
       </article>
     </section>
@@ -113,14 +112,14 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
     <section className="hero hero--orientation">
       <div className="hero-copy">
         <p className="eyebrow">Start here</p>
-        <h1>Student decision workspace</h1>
+        <h1>Campus Copilot workbench</h1>
         <p className="lede">
           One local desk for academic work, administrative signals, and the next decision.
         </p>
       </div>
       <div className="hero-card hero-card--orientation">
-        <p>Workspace truth</p>
-        <strong>{props.ready ? 'Shared storage/read-model loaded' : 'Bootstrapping local workspace'}</strong>
+        <p>Desk status</p>
+        <strong>{props.ready ? 'Local desk ready' : 'Loading your local desk'}</strong>
         <div className="hero-card-grid" role="list" aria-label="Workspace glance">
           <div className="hero-card-cell" role="listitem">
             <span className="hero-card-label">Sites with data</span>
@@ -136,7 +135,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
           </div>
         </div>
         <span>Last refresh {formatRelativeTime(props.now)}</span>
-        <span className="hero-card-note">Read-only, review-first, same schema/export contract.</span>
+        <span className="hero-card-note">Read-only and grounded in the same local workspace.</span>
       </div>
     </section>
   );
@@ -149,30 +148,33 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
         <section className="toolbar-group toolbar-group--primary" aria-labelledby="web-load-import-group">
           <div className="toolbar-group-header">
             <p className="eyebrow" id="web-load-import-group">
-              Load / Import
+              Import / Sample
             </p>
             <p className="toolbar-group-copy">
-              Load or refresh only after the main desk is in focus.
+              Keep this secondary. Open it only when you need a file or a sample desk.
             </p>
           </div>
-          <div className="toolbar-row toolbar-row--actions">
-            <label className="file-button file-button--primary">
-              Import current-view JSON
-              <input
-                type="file"
-                accept="application/json"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) {
-                    void props.onImportFile(file);
-                  }
-                }}
-              />
-            </label>
-            <button type="button" className="quiet-button" onClick={() => void props.onLoadDemo()}>
-              Load demo workspace
-            </button>
-          </div>
+          <details className="toolbar-disclosure toolbar-disclosure--import">
+            <summary>Open import tools</summary>
+            <div className="toolbar-disclosure-actions">
+              <label className="file-button file-button--primary">
+                Import workspace snapshot
+                <input
+                  type="file"
+                  accept="application/json"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      void props.onImportFile(file);
+                    }
+                  }}
+                />
+              </label>
+              <button type="button" className="quiet-button" onClick={() => void props.onLoadDemo()}>
+                Load sample desk
+              </button>
+            </div>
+          </details>
         </section>
 
         <section className="toolbar-group toolbar-group--secondary" aria-labelledby="web-filter-export-group">

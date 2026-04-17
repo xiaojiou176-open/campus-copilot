@@ -147,24 +147,24 @@ describe('web workbench planning pulse', () => {
     expect(html).toContain('Grouped student view');
     expect(html).toContain('Academic lane');
     expect(html).toContain('Administrative lane');
-    expect(html).toContain('Auth &amp; Export Management');
+    expect(html).toContain('Trust and sharing');
     expect(html).toContain('Review scope');
-    expect(html).toContain('Current policy envelope');
-    expect(html).toContain('Site policy overlay and review honesty');
-    expect(html).toContain('Provenance and imported receipt');
+    expect(html).toContain('Sharing boundary');
+    expect(html).toContain('Site rules for this slice');
+    expect(html).toContain('Source and imported receipt');
     expect(html).toContain('MyPlan · current_course · workspace_snapshot · plan:cse');
     expect(html).toContain('Imported snapshot: Imported planning packet');
     expect(html).toContain('Read/export partial · AI blocked');
     expect(html).toContain('Allowed: planning substrates, degree requirement summaries, schedule option context.');
     expect(html).toContain('No review-ready administrative summary families are visible in this slice.');
-    expect(html).toContain('detail runtime pending');
+    expect(html).toContain('Details coming next');
     expect(html).toContain('Planning Pulse');
     expect(html).toContain('Allen School planning draft');
     expect(html).toContain('3 term(s) · 9 planned course(s) · 2 backup course(s) · 4 schedule option(s)');
     expect(html).toContain('Degree progress: Core degree requirements still need one systems elective.');
     expect(html).toContain('Spring 2026: 3 planned · 1 backup · 2 option(s)');
-    expect(html.indexOf('Focus Queue')).toBeLessThan(html.indexOf('Auth &amp; Export Management'));
-    expect(html.indexOf('Weekly Load')).toBeLessThan(html.indexOf('Auth &amp; Export Management'));
+    expect(html.indexOf('Focus Queue')).toBeLessThan(html.indexOf('Trust and sharing'));
+    expect(html.indexOf('Weekly Load')).toBeLessThan(html.indexOf('Trust and sharing'));
   });
 
   it('shows the true planning source badge when the latest substrate came from Time Schedule', () => {
@@ -500,9 +500,10 @@ describe('web workbench planning pulse', () => {
     );
 
     expect(html).toContain('Transcript summary');
-    expect(html).toContain('detail-runtime lane');
-    expect(html).toContain('detail runtime review-ready');
-    expect(html).toContain('Review-ready summary stays export-first until a stronger transcript detail lane is promoted.');
+    expect(html).toContain('Details ready');
+    expect(html).toContain('Review ready');
+    expect(html).toContain('This stays a review summary for now.');
+    expect(html).toContain('Transcript is currently available as a review summary.');
     expect(html).toContain('Exact blockers: transcript_ai_blocked');
     expect(html).toContain('MyUW · myuw summary lane · Export before sharing with AI.');
     expect(html).toContain('myuw summary lane · Export before sharing with AI.');

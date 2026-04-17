@@ -527,6 +527,35 @@ async function probeSitesWithContext(context, attachModeResolved, allowExistingP
 
   const probeTargets = [...SITE_TARGETS, ...PLANNING_ADMIN_TARGETS];
 
+  async function maybeContinueMyPlanSso(page, siteName, snapshot) {
+    if (!['myplan_plan', 'myplan_audit'].includes(siteName)) {
+      return snapshot;
+    }
+
+    const lowered = `${snapshot.finalUrl} ${snapshot.title} ${snapshot.bodyPreview}`.toLowerCase();
+    const looksMyPlanLogin =
+      snapshot.finalUrl.startsWith('https://myplan.uw.edu/') &&
+      (lowered.includes('uw netid weblogin') ||
+        lowered.includes('sign in to start using myplan') ||
+        lowered.includes('sign in to start using uw myplan'));
+
+    if (!looksMyPlanLogin) {
+      return snapshot;
+    }
+
+    const loginTrigger =
+      page.getByRole('button', { name: /UW NetID.*Weblogin/i }).first();
+    const count = await loginTrigger.count().catch(() => 0);
+    if (count < 1) {
+      return snapshot;
+    }
+
+    await loginTrigger.click({ timeout: 1500 }).catch(() => {});
+    await page.waitForLoadState('domcontentloaded', { timeout: 6000 }).catch(() => {});
+    await page.waitForTimeout(900);
+    return readPageSnapshot(page);
+  }
+
   for (const [name, url] of probeTargets) {
     const existingPage = allowExistingPages
       ? await findBestExistingPageMatch(url)
@@ -541,7 +570,9 @@ async function probeSitesWithContext(context, attachModeResolved, allowExistingP
         await page.waitForTimeout(1000);
       }
 
-      const { title, finalUrl, bodyPreview } = await readPageSnapshot(page);
+      let snapshot = await readPageSnapshot(page);
+      snapshot = await maybeContinueMyPlanSso(page, name, snapshot);
+      const { title, finalUrl, bodyPreview } = snapshot;
       const rawClassification = classifyPage(finalUrl, title, bodyPreview);
       const authState = determineAuthState({
         site: name,

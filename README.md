@@ -1,6 +1,6 @@
-# OpenCampus
+# Campus Copilot
 
-> The local-first campus decision desk, with Campus Copilot as the current flagship academic workspace inside it.
+> The flagship local-first academic decision desk inside the OpenCampus family.
 
 > An academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
 
@@ -12,13 +12,17 @@ Real workbench proof, not concept art:
 
 ![Campus Copilot sidepanel overview](docs/assets/sidepanel-overview.png)
 
+Standalone web workbench proof:
+
+![Campus Copilot web workbench overview](docs/assets/web-workbench-overview.png)
+
 ## Naming Today
 
-- **OpenCampus** = the public-facing product and family name
-- **Campus Copilot** = the current flagship student workbench inside OpenCampus
+- **Campus Copilot** = the primary student-facing product and current flagship decision workspace
+- **OpenCampus** = the umbrella family and repo-level public brand above Campus Copilot
 - **Campus Copilot for UW** = the browser-extension distribution name when the school-specific surface needs to be explicit
 
-In plain language: **OpenCampus is the name above the door; Campus Copilot is the flagship desk you sit at today.**
+In plain language: **Campus Copilot is the desk you use today; OpenCampus is the family name above it.**
 
 ## Start Here In 60 Seconds
 
@@ -77,29 +81,29 @@ If you are new, follow this order:
 
 Today the repo already includes:
 
-- a multi-site extension runtime for `Canvas`, `Gradescope`, `EdStem`, and `MyUW`
-- a shared schema + Dexie-backed local read-model layer
+- a browser extension for `Canvas`, `Gradescope`, `EdStem`, and `MyUW`
+- one local desk that keeps imported course and admin facts together
 - assistant-first extension surfaces for `sidepanel`, `popup`, and `options`
-- a read-only web workbench over the same workspace contract
+- a read-only web workbench over the same local desk
 - export presets for current view, weekly assignments, recent updates, deadlines, focus queue, weekly load, and change journal
 - cited AI over structured workbench outputs
-- a thin local BFF for `OpenAI` and `Gemini` API-key flows
-- optional builder-facing read-only surfaces through SDK / CLI / MCP packages
+- a small local bridge for `OpenAI` and `Gemini` API-key flows
+- optional builder routes after the student-facing product story
 
 The honest split is:
 
 - **student-facing workspace first**
-- **repo-local proof second**
-- **builder/public tooling third**
+- **proof receipts second**
+- **builder/public routes only after the product story**
 - **owner-side listing and launch later**
 
 ## Repo-Local Proof Path
 
 Use this route when you want receipts after the product story is clear.
 
-1. Start with [`docs/storefront-assets.md`](docs/storefront-assets.md).
-2. Continue with [`docs/site-capability-matrix.md`](docs/site-capability-matrix.md) for the public capability snapshot.
-3. Use [`docs/verification-matrix.md`](docs/verification-matrix.md) only when you want the deeper maintainer-facing verification registry after the product/proof story is already clear.
+1. Start with [`docs/site-capability-matrix.md`](docs/site-capability-matrix.md) for the public capability snapshot.
+2. Use [`docs/verification-matrix.md`](docs/verification-matrix.md) only when you want the deeper maintainer-facing verification registry after the product/proof story is already clear.
+3. Treat [`docs/storefront-assets.md`](docs/storefront-assets.md) as a narrower proof appendix, not as the first explanation of the product.
 4. Use [`DISTRIBUTION.md`](DISTRIBUTION.md) only for owner-side launch or listing truth, not as the main product explanation.
 
 If you need the deeper appendix afterward, these receipts still exist without taking over the front door:
@@ -160,7 +164,7 @@ http://127.0.0.1:8787
 http://localhost:8787
 ```
 
-Only if autodiscovery fails do you need to open Settings and enter a manual `BFF base URL`.
+Only if autodiscovery fails do you need to open Settings and enter a manual local API address.
 
 ## Builder Quick Paths
 
@@ -175,12 +179,12 @@ Use this section only after the student-facing workspace story already makes sen
 Formal product paths:
 
 - read-only academic workflow
-- shared schema + local read models
+- shared student workspace and local decision views
 - local user-state overlay and derived decision views
 - manual sync from supported sites
 - export from normalized data
 - cited AI over structured results
-- thin BFF for `OpenAI` and `Gemini` API-key flows
+- local API bridge for `OpenAI` and `Gemini` API-key flows
 
 Not formal product paths:
 

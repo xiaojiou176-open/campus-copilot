@@ -136,7 +136,7 @@ describe('workbench overview sections', () => {
     expect(html).toContain('surface__panel--diagnostics');
     expect(html).toContain('Finish the Canvas lab reflection');
     expect(html).toContain('Resume the EdStem session in Profile 1.');
-    expect(html.indexOf('Next up')).toBeLessThan(html.indexOf('Diagnostics'));
+    expect(html.indexOf('Start here')).toBeLessThan(html.indexOf('System check'));
   });
 });
 
@@ -481,7 +481,7 @@ describe('workbench operations sections', () => {
     expect(markup).toContain('Spring quarter tuition is due.');
     expect(markup).toContain('Administrative lane');
     expect(markup).toContain('Planning Pulse stays in the academic/planning lane');
-    expect(markup).toContain('No landed administrative summaries are visible in the shared workspace view yet.');
+    expect(markup).toContain('No administrative summaries are visible yet.');
     expect(markup).toContain('Manual-only campus boundary');
     expect(markup).toContain('Not supported in the current product path');
     expect(markup).toContain('Register.UW automation not supported');
@@ -623,9 +623,10 @@ describe('workbench operations sections', () => {
     );
 
     expect(markup).toContain('Transcript summary');
-    expect(markup).toContain('detail-runtime lane');
-    expect(markup).toContain('detail runtime review-ready');
-    expect(markup).toContain('Review-ready summary stays export-first until a stronger transcript detail lane is promoted.');
+    expect(markup).toContain('Details ready');
+    expect(markup).toContain('Review ready');
+    expect(markup).toContain('This stays a review summary for now.');
+    expect(markup).toContain('Transcript is currently available as a review summary.');
     expect(markup).toContain('Exact blockers: transcript_ai_blocked');
     expect(markup).toContain('MyUW · myuw summary lane · Export before sharing with AI.');
     expect(markup).toContain('myuw summary lane · Export before sharing with AI.');

@@ -452,6 +452,43 @@ textarea {
   justify-content: flex-end;
 }
 
+.surface__hero-status-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin: 0;
+  color: var(--surface-muted);
+  font-size: 0.86rem;
+}
+
+.surface__hero-status-token {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  background: rgba(247, 245, 239, 0.94);
+  color: var(--surface-title);
+  font-weight: 600;
+}
+
+.surface__hero-status-token--success {
+  border-color: rgba(31, 93, 75, 0.16);
+  background: rgba(245, 249, 246, 0.92);
+}
+
+.surface__hero-status-token--warning {
+  border-color: rgba(179, 107, 44, 0.16);
+  background: rgba(251, 248, 241, 0.96);
+}
+
+.surface__hero-status-separator {
+  color: var(--surface-muted-soft);
+  font-weight: 700;
+}
+
 .surface--sidepanel .surface__card {
   padding: 16px;
 }
