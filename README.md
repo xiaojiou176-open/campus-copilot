@@ -4,6 +4,8 @@
 
 > An academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
 
+> Available today: local browser extension + local web workbench + manual sync + read-only workflow.
+
 [Docs](docs/README.md) · [Quickstart](#quickstart) · [Integrations](INTEGRATIONS.md) · [Distribution](DISTRIBUTION.md) · [Privacy](PRIVACY.md) · [Product Brief](docs/01-product-prd.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [License](LICENSE)
 
 ![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
@@ -16,7 +18,12 @@ Standalone web workbench proof:
 
 ![Campus Copilot web workbench overview](docs/assets/web-workbench-overview.png)
 
-## Naming Today
+Proof beyond screenshots:
+
+- [`docs/assets/weekly-assignments-example.md`](docs/assets/weekly-assignments-example.md) shows an export-shaped receipt
+- [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md) shows the current-view decision output
+
+## Public Naming
 
 - **Campus Copilot** = the primary student-facing product and current flagship decision workspace
 - **OpenCampus** = the umbrella family and repo-level public brand above Campus Copilot
@@ -75,7 +82,7 @@ If you are new, follow this order:
 1. Read this README as the student-facing front door.
 2. Run the local workbench through [Quickstart](#quickstart).
 3. Open the short docs router at [`docs/README.md`](docs/README.md).
-4. Only then choose a second-layer route: proof if you want receipts, builder docs if you need integration seams.
+4. Only then choose a deeper route: proof if you want receipts, builder docs if you need integration seams.
 
 ## Current Product Shape
 

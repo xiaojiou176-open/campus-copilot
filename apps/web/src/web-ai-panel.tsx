@@ -74,16 +74,9 @@ export function WebAiPanel(props: {
         </p>
       </div>
 
-      {props.importedEnvelope ? (
-        <p className="meta">
-          Imported snapshot envelope: {props.importedEnvelope.title ?? 'Untitled artifact'} ·{' '}
-          {props.importedEnvelope.scope?.scopeType ?? 'unknown scope'} · AI{' '}
-          {props.importedEnvelope.packaging?.aiAllowed ? 'allowed' : 'blocked'}.
-        </p>
-      ) : null}
       {currentAiBlocked ? (
         <p className="feedback">
-          Ask AI stays blocked on the web surface until the current export envelope carries Layer 2 approval.
+          Ask AI stays blocked for this slice until the current review pass allows it.
         </p>
       ) : null}
 
@@ -106,14 +99,6 @@ export function WebAiPanel(props: {
               <p className="meta-title">What AI cannot do</p>
               <strong>Manual-only guardrail</strong>
               <p>{aiGuardrails.redZone.summary}</p>
-            </article>
-            <article className="guidance-card">
-              <p className="meta-title">Read-only posture</p>
-              <strong>Explanation follows the review desk</strong>
-              <p>
-                Runtime controls and provider settings remain tertiary. The workbench, its receipts, and its export
-                review stay first.
-              </p>
             </article>
           </div>
 
@@ -178,10 +163,6 @@ export function WebAiPanel(props: {
           Question
           <textarea value={props.question} onChange={(event) => props.onQuestionChange(event.target.value)} rows={4} />
         </label>
-        <div className="badge-row">
-          <span className="badge">What AI can see</span>
-          <span className="badge badge-warning">What AI cannot do</span>
-        </div>
         <div className="toolbar-row ai-actions">
           <button
             type="button"

@@ -563,7 +563,7 @@ export function WebWorkbenchPanels(props: {
               hasItems={props.weeklyLoad.length > 0}
               emptyState={<p>No dated workload is visible yet.</p>}
             >
-              {props.weeklyLoad.map((entry) => (
+              {props.weeklyLoad.slice(0, 4).map((entry) => (
                 <article className="item" key={entry.dateKey}>
                   <div className="item-header">
                     <strong>{entry.dateKey}</strong>
@@ -929,44 +929,6 @@ export function WebWorkbenchPanels(props: {
         </article>
       </section>
 
-      <section className="panel">
-        <h2>Administrative snapshots</h2>
-        <p>High-sensitivity administrative surfaces appear here as review-first summaries and still prefer export/review before AI.</p>
-        <div className="stack">
-          <ReadyStateBlock
-            ready={props.workbenchReady}
-            hasItems={administrativeSummaries.length > 0}
-            emptyState={<p>No administrative summaries are visible yet.</p>}
-          >
-            {administrativeSummaries.map((summary) => (
-              <article className="item" key={summary.id}>
-                <div className="item-header">
-                  <strong>{summary.title}</strong>
-                  <div className="badge-row">
-                    <span className="badge badge-warning">{summary.family}</span>
-                    <span className="badge">{getAdministrativeLaneLabel(summary)}</span>
-                    {getAdministrativeDetailRuntimeLabel(summary) ? (
-                      <span className="badge">{getAdministrativeDetailRuntimeLabel(summary)}</span>
-                    ) : null}
-                    <span className="badge">{summary.importance}</span>
-                  </div>
-                </div>
-                <p>{humanizeUiSummary(summary.summary, 'en')}</p>
-                {summary.detailRuntimeNote ? <p className="meta">{humanizeUiSummary(summary.detailRuntimeNote, 'en')}</p> : null}
-                {summary.exactBlockers.length > 0 ? (
-                  <p className="meta">
-                    Exact blockers: {summary.exactBlockers.slice(0, 2).map((blocker) => blocker.id).join(' · ')}
-                  </p>
-                ) : null}
-                <p className="meta">
-                  {props.siteLabels[summary.sourceSurface as Site] ?? summary.sourceSurface} · {summary.authoritySource}
-                  {summary.nextAction ? ` · ${summary.nextAction}` : ''}
-                </p>
-              </article>
-            ))}
-          </ReadyStateBlock>
-        </div>
-      </section>
       <section className="split-grid split-grid--evidence">
         <article className="panel">
           <h2>Current Tasks</h2>
@@ -1028,6 +990,45 @@ export function WebWorkbenchPanels(props: {
             </ReadyStateBlock>
           </div>
         </article>
+      </section>
+
+      <section className="panel">
+        <h2>Administrative snapshots</h2>
+        <p>High-sensitivity administrative surfaces appear here as review-first summaries and still prefer export/review before AI.</p>
+        <div className="stack">
+          <ReadyStateBlock
+            ready={props.workbenchReady}
+            hasItems={administrativeSummaries.length > 0}
+            emptyState={<p>No administrative summaries are visible yet.</p>}
+          >
+            {administrativeSummaries.map((summary) => (
+              <article className="item" key={summary.id}>
+                <div className="item-header">
+                  <strong>{summary.title}</strong>
+                  <div className="badge-row">
+                    <span className="badge badge-warning">{summary.family}</span>
+                    <span className="badge">{getAdministrativeLaneLabel(summary)}</span>
+                    {getAdministrativeDetailRuntimeLabel(summary) ? (
+                      <span className="badge">{getAdministrativeDetailRuntimeLabel(summary)}</span>
+                    ) : null}
+                    <span className="badge">{summary.importance}</span>
+                  </div>
+                </div>
+                <p>{humanizeUiSummary(summary.summary, 'en')}</p>
+                {summary.detailRuntimeNote ? <p className="meta">{humanizeUiSummary(summary.detailRuntimeNote, 'en')}</p> : null}
+                {summary.exactBlockers.length > 0 ? (
+                  <p className="meta">
+                    Exact blockers: {summary.exactBlockers.slice(0, 2).map((blocker) => blocker.id).join(' · ')}
+                  </p>
+                ) : null}
+                <p className="meta">
+                  {props.siteLabels[summary.sourceSurface as Site] ?? summary.sourceSurface} · {summary.authoritySource}
+                  {summary.nextAction ? ` · ${summary.nextAction}` : ''}
+                </p>
+              </article>
+            ))}
+          </ReadyStateBlock>
+        </div>
       </section>
 
       <section className="panel">

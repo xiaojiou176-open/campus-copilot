@@ -765,9 +765,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   ))}
                 </div>
                 <div className="surface__mode-context">
-                  <span className="surface__badge surface__badge--neutral">
-                    {uiLanguage === 'zh-CN' ? '只读桌面' : 'Read-only desk'}
-                  </span>
                   <button className="surface__button surface__button--ghost" onClick={() => void handleCycleLanguagePreference()} type="button">
                     {config.uiLanguage === 'auto' ? 'Auto' : config.uiLanguage === 'en' ? 'EN' : '中文'}
                   </button>
@@ -810,6 +807,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                         <p className="surface__companion-detail">{assistantReadinessSummary}</p>
                       </article>
                     </div>
+                    <p className="surface__meta-label">{text.nextUp.title}</p>
                     <p className="surface__item-lead">{primaryFocusItem ? primaryFocusItem.title : text.nextUp.none}</p>
                     {primaryFocusItem?.summary ? <p>{primaryFocusItem.summary}</p> : null}
                     <p className="surface__meta">

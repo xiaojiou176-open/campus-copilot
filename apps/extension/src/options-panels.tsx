@@ -338,11 +338,11 @@ export function OptionsPanels(props: {
         </article>
 
         <article className="surface__panel">
-          <h2>{uiLanguage === 'zh-CN' ? '语言与本地 AI 连接' : 'Language and local AI connection'}</h2>
+          <h2>{uiLanguage === 'zh-CN' ? '语言与 AI 基础设置' : 'Language and AI basics'}</h2>
           <p>
             {uiLanguage === 'zh-CN'
-              ? '先确认界面语言、本地 AI 服务是否可达，以及当前可用的模型路线。只有默认路径不够时，才需要进入更深设置。'
-              : 'Confirm the interface language, whether the local AI service is reachable, and which model routes are ready. Only drop into deeper settings when the default path is not enough.'}
+                  ? '先确认界面语言、AI 是否已连接，以及当前可用的模型路线。只有默认路径不够时，才需要进入更深设置。'
+                  : 'Confirm the interface language, whether AI is connected, and which model routes are ready. Only drop into deeper settings when the default path is not enough.'}
           </p>
           <label className="surface__field">
             <span>{text.options.interfaceLanguage}</span>
@@ -373,7 +373,7 @@ export function OptionsPanels(props: {
           </div>
           <details className="surface__advanced-settings surface__advanced-settings--supporting">
             <summary className="surface__advanced-settings-summary">
-              <span>{uiLanguage === 'zh-CN' ? '打开 provider readiness 与 fallback 说明' : 'Open provider readiness and fallback notes'}</span>
+              <span>{uiLanguage === 'zh-CN' ? '打开 AI 可用性说明' : 'Open AI readiness notes'}</span>
               <span className="surface__badge surface__badge--neutral">{PROVIDER_OPTIONS.length} providers</span>
             </summary>
             <div className="surface__advanced-settings-body">

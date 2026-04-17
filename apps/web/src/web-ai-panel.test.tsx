@@ -91,8 +91,7 @@ describe('web ai panel guardrails', () => {
     expect(html).toContain('Sharing boundary');
     expect(html).toContain('Site policy overlay');
     expect(html).toContain('Allowed structured families: assignments, announcements, grades, calendar, resource metadata.');
-    expect(html).toContain('Ask AI stays blocked on the web surface until the current export envelope carries Layer 2 approval.');
-    expect(html).toContain('Imported snapshot envelope');
+    expect(html).toContain('Ask AI stays blocked for this slice until the current review pass allows it.');
     expect(html).toContain('What AI can see');
     expect(html).toContain('What AI cannot do');
     expect(html).toContain('Boundary and evidence first');
@@ -102,7 +101,6 @@ describe('web ai panel guardrails', () => {
     expect(html).toContain('Cited answer zone');
     expect(html).toContain('Waiting for a cited answer');
     expect(html).toContain('Advanced settings and opt-ins');
-    expect(html).toContain('These controls stay available for targeted opt-ins and connection debugging, but they are not the main path of this surface.');
     expect(html).toContain('Advanced material analysis');
     expect(html).toContain('default off');
     expect(html).toContain('Local AI service URL');

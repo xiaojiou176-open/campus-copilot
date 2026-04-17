@@ -632,7 +632,6 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByRole('tab', { name: 'Assistant' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Export' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Settings' })).toBeVisible();
-  await expect(page.getByText('Read-only desk')).toBeVisible();
   await expect(page.getByText('Desk status').first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ask AI about this workspace' })).toBeVisible();
   await expect(page.getByText("AI connection isn't ready yet.").first()).toBeVisible();

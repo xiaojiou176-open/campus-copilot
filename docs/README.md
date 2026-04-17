@@ -11,6 +11,12 @@ Treat it like airport signs, not a second maintainer dashboard:
 The public story stays the same as the main README:
 **Campus Copilot is the flagship decision workspace, and OpenCampus is the family name above it.**
 
+Available today:
+- local browser extension
+- local web workbench
+- manual sync
+- read-only workflow
+
 ## Start Here By Intent
 
 - **I want the student-facing product first**: [`../README.md`](../README.md), then [`01-product-prd.md`](01-product-prd.md), then [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
@@ -27,9 +33,8 @@ If you only want one sane reading path, use this order:
 1. [`../README.md`](../README.md)
 2. [`01-product-prd.md`](01-product-prd.md)
 3. [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
-4. [`site-capability-matrix.md`](site-capability-matrix.md)
-5. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
-6. [`verification-matrix.md`](verification-matrix.md) only after the public product/boundary story is already clear
+4. [`site-capability-matrix.md`](site-capability-matrix.md) when you want proof after the product story is clear
+5. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md) when you need the exact boundary posture
 
 ## Proof And Launch Lane
 
