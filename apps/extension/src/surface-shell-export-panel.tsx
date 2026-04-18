@@ -569,8 +569,8 @@ export function SurfaceShellExportPanel(props: {
         ? '这组导出当前停在 review-first summary，并继续保持 export-first；AI 不会因为能导出就自动获得读取权限。'
         : 'This packet currently stays at the review-first summary level and still stays export-first; AI does not inherit access just because export is allowed.'
       : uiLanguage === 'zh-CN'
-        ? `当前导出按 ${exportScopeLabel} 的 Layer 1 / Layer 2 工作区授权来解释边界。`
-        : `This export follows the current Layer 1 / Layer 2 workspace authorization for ${exportScopeLabel}.`;
+        ? `当前导出按 ${exportScopeLabel} 的读取与 AI 授权边界来解释。`
+        : `This export follows the current read/export and AI boundaries for ${exportScopeLabel}.`;
   const exportDepthDetail =
     selectedExportFamilyCard?.status === 'partial'
       ? uiLanguage === 'zh-CN'
@@ -606,11 +606,11 @@ export function SurfaceShellExportPanel(props: {
   const exportAiAllowedDetail =
     exportReviewPackaging.aiAllowed
       ? uiLanguage === 'zh-CN'
-        ? 'Layer 2 当前允许 AI 在这个 packet 上做分析，但不改变导出或站外写边界。'
-        : 'Layer 2 currently allows AI analysis for this packet without changing export or external-write boundaries.'
+        ? '当前允许 AI 分析这个导出包，但不会改变导出或站外写边界。'
+        : 'AI is allowed for this packet without changing export or external-write boundaries.'
       : uiLanguage === 'zh-CN'
-        ? 'Layer 2 仍然比导出更严格；就算能导出，这个 packet 也不会自动开放给 AI。'
-        : 'Layer 2 stays stricter than export here; an exportable packet does not automatically become AI-readable.';
+        ? 'AI 边界仍然比导出更严格；就算能导出，这个导出包也不会自动开放给 AI。'
+        : 'AI stays stricter than export here; an exportable packet does not automatically become AI-readable.';
   const exportRiskLead = formatRiskLabel(exportReviewPackaging.riskLabel, uiLanguage);
   const exportRiskDetail =
     exportReviewPackaging.riskLabel === 'high'

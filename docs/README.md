@@ -17,13 +17,15 @@ Available today:
 - manual sync
 - read-only workflow
 
+Fastest first pass: `README -> product brief -> user surfaces`.
+
 ## Start Here By Intent
 
 - **I want the student-facing product first**: [`../README.md`](../README.md), then [`01-product-prd.md`](01-product-prd.md), then [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
 - **I want to understand how the four-site desk is built**: [`02-system-architecture.md`](02-system-architecture.md), then [`03-domain-schema.md`](03-domain-schema.md), then [`04-adapter-spec.md`](04-adapter-spec.md)
-- **I want repo-local proof that the story is real**: [`site-capability-matrix.md`](site-capability-matrix.md), then [`verification-matrix.md`](verification-matrix.md) if I need the deeper maintainer-facing verification registry, then [`storefront-assets.md`](storefront-assets.md) only if I need the narrower proof appendix
+- **I want proof after I understand the product**: [`site-capability-matrix.md`](site-capability-matrix.md), then [`verification-matrix.md`](verification-matrix.md) if I need the deeper maintainer-facing verification registry, then [`storefront-assets.md`](storefront-assets.md) only if I need the narrower proof appendix
 - **I want the exact safety and boundary posture**: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md), then [`integration-boundaries.md`](integration-boundaries.md), then [`../PRIVACY.md`](../PRIVACY.md)
-- **I want the integration/API surface after the product shape is clear**: [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`../examples/README.md`](../examples/README.md)
+- **I want builder/API routes after the product shape is clear**: [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`../examples/README.md`](../examples/README.md)
 - **I want distribution or store routes**: [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
 
 ## Default Newcomer Route

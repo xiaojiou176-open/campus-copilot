@@ -76,7 +76,7 @@ export function WebAiPanel(props: {
 
       {currentAiBlocked ? (
         <p className="feedback">
-          Ask AI stays blocked for this slice until the current review pass allows it.
+          Ask AI stays off for this slice until this desk allows AI.
         </p>
       ) : null}
 
@@ -103,7 +103,7 @@ export function WebAiPanel(props: {
           </div>
 
           <div>
-            <p className="meta-title">Current review envelope</p>
+            <p className="meta-title">AI access for this slice</p>
           </div>
           <div className="ai-explanation-strip" aria-label="Current export and policy envelope">
             <article className={`guidance-card ${currentAiBlocked ? 'guidance-card--warning' : ''}`}>
@@ -117,8 +117,8 @@ export function WebAiPanel(props: {
                 {currentPackaging
                   ? `Risk ${currentPackaging.riskLabel} · match ${currentPackaging.matchConfidence}. ${
                       currentPackaging.aiAllowed
-                        ? 'The current slice can carry AI explanation.'
-                        : 'The current slice still needs Layer 2 approval before AI can read it.'
+                        ? 'AI can explain this slice now.'
+                        : 'AI is still off for this slice until the trust summary allows it.'
                     }`
                   : 'Load a workspace snapshot before asking AI or exporting from the web surface.'}
               </p>
@@ -134,7 +134,7 @@ export function WebAiPanel(props: {
               </p>
             </article>
             <article className="guidance-card">
-              <p className="meta-title">Site policy overlay</p>
+              <p className="meta-title">Current site rules</p>
               <strong>{currentPolicyOverlay ? currentPolicyOverlay.siteLabel : 'No site-specific overlay yet'}</strong>
               <p>
                 {currentPolicyOverlay
@@ -243,7 +243,7 @@ export function WebAiPanel(props: {
         )}
       </div>
 
-      <p className="meta-title">Advanced settings and opt-ins</p>
+      <p className="meta-title">AI settings and opt-ins</p>
       <details className="advanced-settings advanced-settings--material" open={props.advancedMaterialEnabled}>
         <summary>Advanced material analysis</summary>
         <div className="ai-structured ai-structured--advanced">

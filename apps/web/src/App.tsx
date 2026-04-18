@@ -431,8 +431,8 @@ export function App() {
       if (!currentViewExport.packaging.aiAllowed) {
         throw new Error(
           importedEnvelope?.packaging
-            ? 'This imported workspace carries review metadata, but the current web scope still does not have Layer 2 AI approval. Review the policy envelope before continuing.'
-            : 'The current web scope does not carry Layer 2 AI approval yet. Review the current policy envelope before asking AI.',
+            ? 'This imported workspace still keeps AI off for this slice. Review the trust summary before continuing.'
+            : 'This web slice still keeps AI off. Review the trust summary before asking AI.',
         );
       }
 

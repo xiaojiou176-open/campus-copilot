@@ -162,8 +162,13 @@ export function AskAiPanel(props: {
     `${structuredInputs[3].label}: ${structuredInputs[3].value}`,
     `${structuredInputs[8].label}: ${structuredInputs[8].value}`,
   ].join(' · ');
-  const policyReviewLabel = uiLanguage === 'zh-CN' ? '策略审核与可见证据' : 'Policy review and visible evidence';
-  const structuredLedgerLabel = uiLanguage === 'zh-CN' ? '结构化输入账本' : 'Structured input ledger';
+  const policyReviewLabel = uiLanguage === 'zh-CN' ? '先核对这张桌面的证据' : 'Check the evidence first';
+  const structuredLedgerLabel = uiLanguage === 'zh-CN' ? '这张桌面的输入' : 'Inputs on this desk';
+  const currentSiteRulesLabel = uiLanguage === 'zh-CN' ? '当前站点规则' : 'Current site rules';
+  const readAndExportLabel = uiLanguage === 'zh-CN' ? '读取与导出' : 'Read and export';
+  const aiAccessLabel = uiLanguage === 'zh-CN' ? 'AI 可见性' : 'AI access';
+  const currentQuestionLabel = uiLanguage === 'zh-CN' ? '当前提问门槛' : 'Current question';
+  const aiSettingsLabel = uiLanguage === 'zh-CN' ? 'AI 设置与额外选项' : 'AI settings and opt-ins';
   const suggestedPromptsLabel = uiLanguage === 'zh-CN' ? '建议问题' : 'Suggested prompts';
 
   return (
@@ -244,7 +249,7 @@ export function AskAiPanel(props: {
               {currentPolicyOverlay ? (
                 <article className="surface__status-card">
                   <div className="surface__item-header">
-                    <h3>Current site policy overlay</h3>
+                    <h3>{currentSiteRulesLabel}</h3>
                     <span className="surface__badge surface__badge--neutral">{currentPolicyOverlay.siteLabel}</span>
                   </div>
                   <p className="surface__item-lead">
@@ -399,7 +404,7 @@ export function AskAiPanel(props: {
             </div>
             <div className="surface__evidence-grid">
               <article className="surface__evidence-card">
-                <p className="surface__meta-label">Layer 1 read/export</p>
+                <p className="surface__meta-label">{readAndExportLabel}</p>
                 <p className="surface__item-lead">
                   {readExportSummary.allowed} allowed · {readExportSummary.partial} partial
                 </p>
@@ -408,7 +413,7 @@ export function AskAiPanel(props: {
                 </p>
               </article>
               <article className="surface__evidence-card">
-                <p className="surface__meta-label">Layer 2 AI read</p>
+                <p className="surface__meta-label">{aiAccessLabel}</p>
                 <p className="surface__item-lead">
                   {aiReadSummary.allowed} allowed · {aiReadSummary.confirmRequired} confirm-required
                 </p>
@@ -417,10 +422,14 @@ export function AskAiPanel(props: {
                 </p>
               </article>
               <article className="surface__evidence-card">
-                <p className="surface__meta-label">Request gate</p>
-                <p className="surface__item-lead">Current view export: {structuredInputSummary.currentViewFormat.toUpperCase()}</p>
+                <p className="surface__meta-label">{currentQuestionLabel}</p>
+                <p className="surface__item-lead">
+                  {uiLanguage === 'zh-CN' ? '当前桌面格式' : 'Current desk format'}: {structuredInputSummary.currentViewFormat.toUpperCase()}
+                </p>
                 <p className="surface__meta">
-                  Ask AI still re-checks the current view packaging before anything leaves the extension.
+                  {uiLanguage === 'zh-CN'
+                    ? 'Ask AI 在任何内容离开扩展前，仍会再次检查这张桌面的边界。'
+                    : 'Ask AI still checks this desk before anything leaves the extension.'}
                 </p>
               </article>
             </div>
@@ -488,10 +497,10 @@ export function AskAiPanel(props: {
       </div>
 
       <details className="surface__advanced-settings">
-        <summary className="surface__advanced-settings-summary">
-          <span>{text.askAi.advancedRuntimeSettings}</span>
-          <span className="surface__badge surface__badge--neutral">{selectedProviderLabel}</span>
-        </summary>
+          <summary className="surface__advanced-settings-summary">
+            <span>{aiSettingsLabel}</span>
+            <span className="surface__badge surface__badge--neutral">{selectedProviderLabel}</span>
+          </summary>
         <div className="surface__advanced-settings-body">
           <p className="surface__meta">{text.askAi.advancedRuntimeDescription}</p>
           <div className="surface__grid surface__grid--split">

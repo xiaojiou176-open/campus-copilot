@@ -626,7 +626,7 @@ async function seedTechnicalConfig(
 test('opens the built sidepanel and shows four site status cards', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
 
-  await expect(page.getByRole('heading', { name: 'Your desk for this page' }).first()).toBeVisible({
+  await expect(page.getByRole('heading', { name: 'Your campus desk' }).first()).toBeVisible({
     timeout: 10000,
   });
   await expect(page.getByRole('tab', { name: 'Assistant' })).toBeVisible();
@@ -807,7 +807,7 @@ test('keeps ai gated until the current scope is explicitly allowed', async ({ pa
   const visibleEvidenceCard = askAiPanel
     .locator('article.surface__status-card--success article.surface__evidence-card')
     .first();
-  await askAiPanel.locator('summary').filter({ hasText: 'Policy review and visible evidence' }).click();
+  await askAiPanel.locator('summary').filter({ hasText: 'Check the evidence first' }).click();
   await expect(askAiPanel.getByRole('heading', { name: 'What AI can see' })).toBeVisible();
   await expect(visibleEvidenceCard.getByText('Today snapshot', { exact: true })).toBeVisible();
   await expect(visibleEvidenceCard.getByText(/Open assignments \d+ · Due within 48 hours \d+ · New grades \d+/)).toBeVisible();
@@ -830,7 +830,7 @@ test('keeps ai gated until the current scope is explicitly allowed', async ({ pa
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
   await expect(page.getByText('AI access for this scope still needs to be enabled in Settings/Auth.')).toBeVisible();
-  await expect(askAiPanel.getByRole('heading', { name: 'Current site policy overlay' })).toBeVisible();
+  await expect(askAiPanel.getByRole('heading', { name: 'Current site rules' })).toBeVisible();
   await expect(askAiPanel.getByText('Canvas', { exact: true })).toBeVisible();
 });
 
@@ -878,7 +878,7 @@ test('shows provider not ready when selected provider is unavailable in bff stat
   });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
-  await page.locator('summary').filter({ hasText: 'Advanced AI settings' }).click();
+  await page.locator('summary').filter({ hasText: 'AI settings and opt-ins' }).click();
   await expect(page.getByLabel('Provider')).toBeVisible();
   await page.getByLabel('Provider').selectOption('gemini');
   await page.getByLabel('Question').fill('What changed recently?');
@@ -908,8 +908,8 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
     .locator('article.surface__status-card--success article.surface__evidence-card')
     .first();
 
-  await expect(page.getByRole('heading', { name: '这一页的学习桌面' }).first()).toBeVisible();
-  await chineseAskAiPanel.locator('summary').filter({ hasText: '策略审核与可见证据' }).click();
+  await expect(page.getByRole('heading', { name: '你的校园桌面' }).first()).toBeVisible();
+  await chineseAskAiPanel.locator('summary').filter({ hasText: '先核对这张桌面的证据' }).click();
   await expect(chineseAskAiPanel.getByRole('heading', { name: 'AI 当前能看见什么' })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText('今日快照', { exact: true })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText(/待办作业 \d+ · 48 小时内截止 \d+ · 新成绩 \d+/)).toBeVisible();

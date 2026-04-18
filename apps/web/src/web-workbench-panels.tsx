@@ -534,7 +534,7 @@ export function WebWorkbenchPanels(props: {
               hasItems={props.focusQueue.length > 0}
               emptyState={<p>No focus items are active yet.</p>}
             >
-              {props.focusQueue.slice(0, 6).map((item) => (
+              {props.focusQueue.slice(0, 4).map((item) => (
                 <article className="item" key={item.id}>
                   <div className="item-header">
                     <strong>{item.title}</strong>
@@ -563,7 +563,7 @@ export function WebWorkbenchPanels(props: {
               hasItems={props.weeklyLoad.length > 0}
               emptyState={<p>No dated workload is visible yet.</p>}
             >
-              {props.weeklyLoad.slice(0, 4).map((entry) => (
+              {props.weeklyLoad.slice(0, 3).map((entry) => (
                 <article className="item" key={entry.dateKey}>
                   <div className="item-header">
                     <strong>{entry.dateKey}</strong>
@@ -712,8 +712,8 @@ export function WebWorkbenchPanels(props: {
               {currentPackaging
                 ? `Risk ${currentPackaging.riskLabel} · match ${currentPackaging.matchConfidence} · provenance ${currentPackaging.provenance.length}. ${
                     currentPackaging.aiAllowed
-                      ? 'Layer 2 is currently visible for this slice.'
-                      : 'Layer 2 is still blocked, so AI must stay behind the trust desk.'
+                      ? 'AI is available for this slice.'
+                      : 'AI is still blocked for this slice, so the trust desk stays review-first.'
                   }`
                 : 'Load a shared workbench slice before treating this web surface as export-ready.'}
             </p>

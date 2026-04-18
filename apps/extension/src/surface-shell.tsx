@@ -676,10 +676,15 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     uiLanguage,
   });
   const primaryFocusItem = focusQueue[0];
+  const currentContextTitle = surfaceView.currentSiteSelection || filters.site !== 'all'
+    ? modeCopy.assistant.currentContext
+    : uiLanguage === 'zh-CN'
+      ? '当前桌面'
+      : 'Current desk';
   const currentContextLabel = surfaceView.currentSiteSelection
     ? SITE_LABELS[surfaceView.currentSiteSelection]
     : filters.site === 'all'
-      ? planningCaptureContext?.label ?? modeCopy.export.allSites
+      ? planningCaptureContext?.label ?? (uiLanguage === 'zh-CN' ? '跨站点桌面' : 'Across your campus sites')
       : SITE_LABELS[filters.site];
   const bffStatusLabel =
     bffResolution.source === 'manual'
@@ -718,20 +723,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const allowedAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'allowed').length;
   const confirmRequiredAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'confirm_required').length;
   const blockedAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'blocked').length;
-  const authorizationStatusVariant =
-    blockedAuthorizationCount > 0 ? 'warning' : confirmRequiredAuthorizationCount > 0 ? 'neutral' : 'success';
-  const authorizationStatusLabel =
-    uiLanguage === 'zh-CN'
-      ? blockedAuthorizationCount > 0
-        ? `${blockedAuthorizationCount} 项受阻`
-        : confirmRequiredAuthorizationCount > 0
-          ? `${confirmRequiredAuthorizationCount} 项待确认`
-          : '当前无信任阻碍'
-      : blockedAuthorizationCount > 0
-        ? `${blockedAuthorizationCount} blocked`
-        : confirmRequiredAuthorizationCount > 0
-          ? `${confirmRequiredAuthorizationCount} need review`
-          : 'No trust blockers';
   function enterExportMode(
     nextSite: ExportScopeSite = surfaceView.currentSiteSelection ?? (filters.site === 'all' ? 'all' : filters.site),
   ) {
@@ -778,18 +769,12 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   <article className="surface__panel surface__panel--hero surface__panel--companion">
                     <div className="surface__section-head">
                       <div>
-                        <p className="surface__meta-label">{modeCopy.assistant.currentContext}</p>
+                        <p className="surface__meta-label">{currentContextTitle}</p>
                         <strong>{currentContextLabel}</strong>
                       </div>
                     <p className="surface__hero-status-line">
                       <span className={`surface__hero-status-token surface__hero-status-token--${activeBffBaseUrl ? 'success' : 'warning'}`}>
                         {bffStatusLabel}
-                      </span>
-                      <span className="surface__hero-status-separator" aria-hidden="true">
-                        ·
-                      </span>
-                      <span className={`surface__hero-status-token surface__hero-status-token--${authorizationStatusVariant}`}>
-                        {authorizationStatusLabel}
                       </span>
                     </p>
                     </div>
@@ -1084,7 +1069,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 </div>
               </div>
               <p className="surface__meta">
-                {modeCopy.assistant.currentContext}: {currentContextLabel} · {bffStatusLabel}
+                {currentContextTitle}: {currentContextLabel} · {bffStatusLabel}
               </p>
             </article>
 

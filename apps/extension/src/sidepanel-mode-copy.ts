@@ -24,10 +24,10 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
         export: '导出',
         settings: '设置',
       },
-      assistant: {
-        title: '这一页的学习桌面',
-        description: '先看这一页已经有的事实、桌面状态和当前最该处理的事，再决定要不要提问、导出或打开设置。',
-        currentContext: '当前视图',
+    assistant: {
+      title: '你的校园桌面',
+      description: '先看这张桌面已经收进来的事实、桌面状态和当前最该处理的事，再决定要不要提问、导出或打开设置。',
+      currentContext: '当前桌面',
         visibleFacts: '关键事实',
         activeConnection: '桌面状态',
         openExport: '打开导出',
@@ -36,10 +36,10 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
         hideWorkspace: '收起这一屏',
         syncCurrentSite: '同步当前站点',
         readOnly: '只读',
-        structuredOnly: '仅基于结构化事实',
-        manualOnly: '红区仍需手动',
-        trustSummary: '当前这页只基于你已经看见的事实继续工作，把学业与行政信号放在同一张桌面上分组呈现。',
-        noConnection: 'AI 连接还没就绪。',
+      structuredOnly: '仅基于结构化事实',
+      manualOnly: '红区仍需手动',
+      trustSummary: '当前这页只基于你已经看见的事实继续工作，把学业与行政信号放在同一张桌面上分组呈现。',
+      noConnection: 'AI 连接还没就绪。',
       },
       export: {
         title: '结构化导出模式',
@@ -158,10 +158,10 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
       settings: 'Settings',
     },
     assistant: {
-      title: 'Your desk for this page',
+      title: 'Your campus desk',
       description:
-        'Start with the facts already on this page, check the desk status, and review the next task before you export or open settings.',
-      currentContext: 'This page',
+        'Start with the facts already gathered into this desk, check the desk status, and review the next task before you export or open settings.',
+      currentContext: 'Current desk',
       visibleFacts: 'Key facts',
       activeConnection: 'Desk status',
       openExport: 'Open export',
@@ -173,7 +173,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
       structuredOnly: 'Structured facts only',
       manualOnly: 'Red zones stay manual',
       trustSummary:
-        'This page stays grounded in the facts already visible here.',
+        'This desk stays grounded in the facts already visible here.',
       noConnection: "AI connection isn't ready yet.",
     },
     export: {

@@ -77,11 +77,10 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
       </article>
 
       <article className="support-card support-card--diagnostics">
-        <p className="eyebrow">Stored receipts</p>
-        <h2>Stored receipts</h2>
+        <p className="eyebrow">Visible proof</p>
+        <h2>What this desk can prove</h2>
         <p className="support-copy">
-          This layer only reports what the imported workspace can currently prove, so the review below never has to
-          pretend it knows more than the receipts.
+          Only the receipts already stored here count. This desk does not guess past what it can currently show.
         </p>
         <div className="support-metrics" role="list" aria-label="Workspace diagnostics">
           <div className="support-metric" role="listitem">
@@ -99,8 +98,8 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
         </div>
         <p className="support-note support-note--receipt">
           {props.topSyncRun
-            ? `Latest stored receipt: ${props.siteLabels[props.topSyncRun.site]} · ${props.topSyncRun.outcome} · ${formatRelativeTime(props.topSyncRun.completedAt)}.`
-            : 'No stored receipt is visible yet. Import a current-view snapshot first to populate this desk.'}
+            ? `Latest proof: ${props.siteLabels[props.topSyncRun.site]} · ${props.topSyncRun.outcome} · ${formatRelativeTime(props.topSyncRun.completedAt)}.`
+            : 'No stored proof is visible yet. Import a current-view snapshot first to populate this desk.'}
         </p>
       </article>
     </section>
@@ -135,7 +134,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
           </div>
         </div>
         <span>Last refresh {formatRelativeTime(props.now)}</span>
-        <span className="hero-card-note">Read-only and grounded in the same local workspace.</span>
+        <span className="hero-card-note">Nothing here writes back to campus sites.</span>
       </div>
     </section>
   );
@@ -148,14 +147,14 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
         <section className="toolbar-group toolbar-group--primary" aria-labelledby="web-load-import-group">
           <div className="toolbar-group-header">
             <p className="eyebrow" id="web-load-import-group">
-              Import / Sample
+              Load a desk
             </p>
             <p className="toolbar-group-copy">
-              Keep this secondary. Open it only when you need a file or a sample desk.
+              Keep this secondary. Open it only when you need a file or a sample snapshot.
             </p>
           </div>
           <details className="toolbar-disclosure toolbar-disclosure--import">
-            <summary>Open import tools</summary>
+            <summary>Open load tools</summary>
             <div className="toolbar-disclosure-actions">
               <label className="file-button file-button--primary">
                 Import workspace snapshot
@@ -171,7 +170,7 @@ export function WebToolbarControls(props: WebToolbarControlsProps) {
                 />
               </label>
               <button type="button" className="quiet-button" onClick={() => void props.onLoadDemo()}>
-                Load sample desk
+                Load sample snapshot
               </button>
             </div>
           </details>

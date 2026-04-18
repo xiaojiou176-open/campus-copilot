@@ -4,9 +4,9 @@
 
 > An academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
 
-> Available today: local browser extension + local web workbench + manual sync + read-only workflow.
+> Available today: local browser extension, local web workbench, manual sync, and a read-only workflow.
 
-[Docs](docs/README.md) · [Quickstart](#quickstart) · [Integrations](INTEGRATIONS.md) · [Distribution](DISTRIBUTION.md) · [Privacy](PRIVACY.md) · [Product Brief](docs/01-product-prd.md) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [License](LICENSE)
+[Docs](docs/README.md) · [Quickstart](#quickstart) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Security](SECURITY.md) · [Privacy](PRIVACY.md) · [Distribution](DISTRIBUTION.md)
 
 ![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
 
@@ -18,10 +18,10 @@ Standalone web workbench proof:
 
 ![Campus Copilot web workbench overview](docs/assets/web-workbench-overview.png)
 
-Proof beyond screenshots:
+See the receipts:
 
-- [`docs/assets/weekly-assignments-example.md`](docs/assets/weekly-assignments-example.md) shows an export-shaped receipt
-- [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md) shows the current-view decision output
+- [`docs/assets/weekly-assignments-example.md`](docs/assets/weekly-assignments-example.md) shows an export-ready receipt
+- [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md) shows one current-view decision output
 
 ## Public Naming
 

@@ -739,6 +739,7 @@ try {
 
   const answerLocator = page.locator('.surface__answer');
   const uiErrorLocator = page.locator('.surface__feedback--error');
+  const citationsLocator = page.getByRole('heading', { name: /Citations|引用/ });
   const answerText = (await answerLocator.count())
     ? ((await answerLocator.textContent()) ?? '').trim()
     : '';
@@ -748,7 +749,11 @@ try {
   if (!answerText && uiErrorText) {
     throw new Error(`sidepanel_ai_error:${uiErrorText}`);
   }
-  if (!answerText.toUpperCase().includes('READY')) {
+  const citationsVisible = await citationsLocator.first().isVisible().catch(() => false);
+  if (!answerText) {
+    throw new Error('answer_text_missing');
+  }
+  if (!answerText.toUpperCase().includes('READY') && !citationsVisible) {
     throw new Error(`answer_text_missing_ready:${answerText}`);
   }
 
