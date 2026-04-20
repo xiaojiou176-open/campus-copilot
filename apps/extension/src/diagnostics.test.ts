@@ -73,7 +73,7 @@ describe('diagnostics helpers', () => {
       },
       orderedSiteStatus: [{ site: 'canvas', sync: { lastOutcome: 'success' } }],
       providerOptions,
-      defaultProvider: 'openai',
+      defaultProvider: 'gemini',
       siteLabels,
       locale: 'en',
     });

@@ -696,7 +696,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       openMainWorkbench: 'Open full workbench',
     },
     nextUp: {
-      title: 'Start here',
+      title: 'Next up',
       description: 'The clearest next task before you scroll into the full queue.',
       none: 'Nothing is ranked first yet. Sync a site or pin one important item to create the next step.',
       whyFirst: 'Why this is first',
@@ -741,7 +741,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
         `${noticeCount} notice signal(s) · ${scheduleCount} schedule context item(s)${planningVisible ? ' · Planning Pulse stays in the academic/planning lane' : ''}`,
     },
     trustSummary: {
-      title: 'Desk status',
+      title: 'Workspace status',
       description: 'A quick view of what looks solid, what needs caution, and what is still blocked.',
       freshSites: 'Fresh sites',
       partialSites: 'Partial sites',
@@ -1288,17 +1288,17 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       sync_stale: '同步需留意',
       manual: '你已手动置顶',
     },
-    metrics: {
-      openAssignments: '待办作业',
-      dueWithin48Hours: '48 小时内截止',
-      unseenUpdates: '未查看更新',
-      newGrades: '新成绩',
-      syncedSites: '成功同步站点',
-    },
-    toolbar: {
-      allSites: '全部站点',
-      onlyUnseen: '仅看未查看更新',
-    },
+	    metrics: {
+	      openAssignments: '待办作业',
+	      dueWithin48Hours: '48 小时内截止',
+	      unseenUpdates: '未读更新',
+	      newGrades: '新成绩',
+	      syncedSites: '成功同步站点',
+	    },
+	    toolbar: {
+	      allSites: '全部站点',
+	      onlyUnseen: '仅看未读更新',
+	    },
     todaySnapshot: {
       title: '今日快照',
       description: '这里像桌面上的今日便签。先告诉你今天有没有急事，再决定要不要继续钻进细节。',
@@ -1320,9 +1320,9 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       openOptions: '打开完整设置',
       openMainWorkbench: '打开完整工作台',
     },
-    nextUp: {
-      title: '现在先做什么',
-      description: '这里把排名第一的专注项翻译成人话，让你不用先读完整个队列才知道下一步。',
+	    nextUp: {
+	      title: '下一步',
+	      description: '这里把排名第一的专注项翻译成人话，让你不用先读完整个队列才知道下一步。',
       none: '目前还没有排在第一位的专注项。先同步站点，或先手动置顶一条重要事项。',
       whyFirst: '为什么它排第一',
       dueLabel: '截止时间',
@@ -1365,15 +1365,15 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       administrativeLaneMeta: ({ noticeCount, scheduleCount, planningVisible }) =>
         `${noticeCount} 条提醒信号 · ${scheduleCount} 条时间上下文${planningVisible ? ' · 计划脉冲留在学业/规划线' : ''}`,
     },
-    trustSummary: {
-      title: '可信度摘要',
-      description: '这里把同步健康状况压缩成一眼能懂的摘要：哪些比较稳，哪些要谨慎，哪些还卡着。',
+	    trustSummary: {
+	      title: '工作台状态',
+	      description: '这里把同步健康状况压缩成一眼能懂的摘要：哪些比较稳，哪些要谨慎，哪些还卡着。',
       freshSites: '新鲜站点',
       partialSites: '部分站点',
       staleSites: '陈旧站点',
       blockedSites: '受阻站点',
       notSyncedSites: '未同步站点',
-      unseenUpdates: '未查看更新',
+	      unseenUpdates: '未读更新',
       latestReceipt: '最近收据',
       noRecentReceipt: '还没有同步收据。',
       topBlocker: '当前主要阻塞',

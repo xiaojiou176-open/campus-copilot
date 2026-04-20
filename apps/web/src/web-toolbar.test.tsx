@@ -51,7 +51,7 @@ describe('web toolbar and support rail', () => {
     expect(html).toContain('Campus Copilot workbench');
     expect(html).toContain('academic work, administrative signals, and the next decision');
     expect(html).toContain('Start with Focus Queue first');
-    expect(html).toContain('Desk status');
+    expect(html).toContain('Workspace status');
     expect(html).toContain('Load a desk');
     expect(html).toContain('Filter / Export');
     expect(html).not.toContain('Trust summary');

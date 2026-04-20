@@ -1,16 +1,26 @@
-# OpenCampus Documentation Router
+# OpenCampus Docs
 
 This file is the docs front door.
 
-Treat it like airport signs, not a second maintainer dashboard:
+Use it to answer three questions:
 
-- start with the route that matches your intent
-- read the shortest stable brief first
-- only then go into proof, builder, or owner-side distribution routes
+- what is OpenCampus today?
+- what can I try right now?
+- where do I go next if I want proof or builder detail?
 
-The public story stays the same as the main README:
-**OpenCampus is the family name; Campus Copilot is the flagship decision workspace inside it.**
-When the extension distribution needs to stay school-specific, the explicit label remains **Campus Copilot for UW**.
+OpenCampus is the public repo story.
+Campus Copilot is the current student workspace inside it.
+Use **Campus Copilot for UW** only when the school-specific extension label needs to stay explicit.
+
+## Start Here By Intent
+
+This docs hub stays small on purpose.
+
+Use it when you want:
+
+- the shortest newcomer route
+- the proof and launch lane
+- the builder lane after the product shape is already clear
 
 Available today:
 - local browser extension
@@ -18,30 +28,28 @@ Available today:
 - manual sync
 - read-only workflow
 
-Fastest first pass: `README -> product brief -> user surfaces`.
-
-## Start Here By Intent
-
-- **I want the student-facing product first**: [`../README.md`](../README.md), then [`01-product-prd.md`](01-product-prd.md), then [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
-- **I want to understand how the four-site desk is built**: [`02-system-architecture.md`](02-system-architecture.md), then [`03-domain-schema.md`](03-domain-schema.md), then [`04-adapter-spec.md`](04-adapter-spec.md)
-- **I want proof after I understand the product**: [`site-capability-matrix.md`](site-capability-matrix.md), then [`verification-matrix.md`](verification-matrix.md) if I need the deeper maintainer-facing verification registry, then [`storefront-assets.md`](storefront-assets.md) only if I need the narrower proof appendix
-- **I want the exact safety and boundary posture**: [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md), then [`integration-boundaries.md`](integration-boundaries.md), then [`../PRIVACY.md`](../PRIVACY.md)
-- **I want builder/API routes after the product shape is clear**: [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`../examples/README.md`](../examples/README.md)
-- **I want distribution or store routes**: [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
+Fastest first pass: `README -> product brief -> user surfaces -> proof`.
 
 ## Default Newcomer Route
-
-If you only want one sane reading path, use this order:
 
 1. [`../README.md`](../README.md)
 2. [`01-product-prd.md`](01-product-prd.md)
 3. [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
-4. [`site-capability-matrix.md`](site-capability-matrix.md) when you want proof after the product story is clear
-5. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md) when you need the exact boundary posture
+4. [`site-capability-matrix.md`](site-capability-matrix.md)
+
+That path explains what the product is, what students see, and what current public proof exists.
+
+## Choose What You Need
+
+- **I want the student-facing product first**: [`../README.md`](../README.md), then [`01-product-prd.md`](01-product-prd.md), then [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
+- **I want proof and safety after I understand the product**: [`site-capability-matrix.md`](site-capability-matrix.md), then [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md), then [`verification-matrix.md`](verification-matrix.md) if I need the deeper maintainer-facing registry
+- **I want to understand how the workspace is built**: [`02-system-architecture.md`](02-system-architecture.md), then [`03-domain-schema.md`](03-domain-schema.md), then [`04-adapter-spec.md`](04-adapter-spec.md)
+- **I want builder/API routes after the product shape is clear**: [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md), then [`api/openapi.yaml`](api/openapi.yaml), then [`../examples/README.md`](../examples/README.md)
+- **I want distribution or store routes**: [`../DISTRIBUTION.md`](../DISTRIBUTION.md)
 
 ## Proof And Launch Lane
 
-Use this route when you need stable repo-local proof without turning the docs hub into a launch control room:
+Use this route when you need stable repo-local proof without turning the docs hub into a maintainer control room:
 
 1. [`site-capability-matrix.md`](site-capability-matrix.md)
 2. [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)

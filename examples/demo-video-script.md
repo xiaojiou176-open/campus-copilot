@@ -10,7 +10,7 @@ Keep it short, truthful, and product-first.
 
 ## Opening
 
-“Campus Copilot is a local-first academic decision workspace. It turns Canvas, Gradescope, EdStem, and MyUW into one structured workbench, then lets cited AI explain that structured result instead of scraping the web directly.”
+“OpenCampus keeps Canvas, Gradescope, EdStem, and MyUW on one local-first desk. Campus Copilot is the first shipped workspace in that family, and it lets cited AI explain the structured result instead of scraping the web directly.”
 
 ## Scene 1 — Product identity
 
@@ -22,7 +22,7 @@ Show:
 
 Say:
 
-“Both surfaces now point at the same product truth. This is not a generic chatbot shell. It is a read-only student decision workspace.”
+“Both surfaces now point at the same product truth. This is not a generic chatbot shell. It is a read-only student decision workspace inside OpenCampus.”
 
 ## Scene 2 — Decision surfaces
 
@@ -46,7 +46,15 @@ Say:
 
 “AI comes after structure here. It explains the current workbench state and cites the underlying entities. It does not become the source of truth.”
 
-## Scene 4 — Read-only builder preview
+## Scene 4 — Honest boundary
+
+Say:
+
+“The product stays intentionally narrow. It is read-only, local-first, and focused on helping students understand work before they act.”
+
+## Optional appendix — Builder preview
+
+Use this only if the video needs a later technical appendix, not in the first core minute.
 
 Show:
 
@@ -56,14 +64,8 @@ Show:
 
 Say:
 
-“The builder layer is now real as a read-only preview. There is a repo-public SDK, CLI, MCP config, site MCP sidecars, and site-level API preview packages. But this is still not a hosted autonomy platform.”
-
-## Scene 5 — Honesty about limits
-
-Say:
-
-“Live browser/session control is still a separate internal diagnostics lane. We keep that boundary explicit so the public story stays truthful.”
+“There is already a read-only builder appendix around the same workspace contract. But it stays secondary to the student product story.”
 
 ## Closing
 
-“The repo-local product and builder surfaces are landed. What remains after this is mostly owner-side publishing, video, and any further live-session continuation.”
+“OpenCampus now shows a real local-first workspace, a truthful proof layer, and a growing technical appendix. What comes next is better proof capture, richer media polish, owner-side publishing, and any further live-session continuation.”

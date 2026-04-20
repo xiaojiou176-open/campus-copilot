@@ -3,32 +3,25 @@
   <rect x="32" y="32" width="1216" height="576" rx="30" fill="#FFFFFF" stroke="#D7E3F2" stroke-width="2"/>
 
   <text x="92" y="122" fill="#53729A" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="2">OPENCAMPUS</text>
-  <rect x="92" y="146" width="308" height="48" rx="24" fill="#F2F7FF" stroke="#C7DAF1"/>
-  <text x="122" y="178" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Campus Copilot flagship</text>
+  <rect x="92" y="146" width="182" height="48" rx="24" fill="#F2F7FF" stroke="#C7DAF1"/>
+  <text x="122" y="178" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Available now</text>
 
-  <text x="92" y="286" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700">One local-first desk</text>
-  <text x="92" y="348" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="700">for campus decisions.</text>
-  <text x="92" y="410" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="32">Canvas, Gradescope, EdStem, and MyUW.</text>
+  <text x="92" y="270" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700">Bring Canvas, Gradescope,</text>
+  <text x="92" y="328" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700">EdStem, and MyUW</text>
+  <text x="92" y="386" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700">into one view.</text>
 
-  <rect x="92" y="458" width="720" height="110" rx="26" fill="#14345B"/>
-  <text x="126" y="506" fill="#F6FAFF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Read-only desk. Export receipts. Cited AI.</text>
-  <text x="126" y="544" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="22">OpenCampus umbrella. Campus Copilot flagship.</text>
+  <text x="92" y="434" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="28">A local-first workspace for students who need one calm place to review work.</text>
 
-  <rect x="842" y="120" width="326" height="338" rx="28" fill="#F8FBFE" stroke="#D8E3F2"/>
-  <text x="876" y="164" fill="#53729A" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="1.4">AVAILABLE TODAY</text>
+  <rect x="92" y="474" width="700" height="94" rx="24" fill="#14345B"/>
+  <text x="126" y="515" fill="#F6FAFF" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Read-only workspace. Manual sync. Structured export.</text>
+  <text x="126" y="547" fill="#D6E7FB" font-family="Arial, Helvetica, sans-serif" font-size="19">Cited AI explains the same structured result.</text>
 
-  <rect x="876" y="188" width="236" height="40" rx="20" fill="#EAF3FF" stroke="#BED4EE"/>
-  <text x="900" y="214" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Campus Copilot for UW</text>
+  <rect x="846" y="128" width="324" height="270" rx="28" fill="#F8FBFE" stroke="#D8E3F2"/>
+  <text x="880" y="170" fill="#53729A" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="1.4">CAMPUS COPILOT FOR UW</text>
+  <text x="880" y="236" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700">Browser extension</text>
+  <text x="880" y="288" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="24">plus a matching local</text>
+  <text x="880" y="320" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="24">web workbench.</text>
 
-  <rect x="876" y="258" width="258" height="58" rx="18" fill="#FFFFFF" stroke="#D8E3F2"/>
-  <text x="904" y="292" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Local extension</text>
-
-  <rect x="876" y="330" width="258" height="58" rx="18" fill="#FFFFFF" stroke="#D8E3F2"/>
-  <text x="904" y="364" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Local web workbench</text>
-
-  <rect x="876" y="402" width="258" height="58" rx="18" fill="#FFFFFF" stroke="#D8E3F2"/>
-  <text x="904" y="436" fill="#14345B" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Manual sync</text>
-
-  <text x="876" y="506" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="20">Proof screenshots show the real product.</text>
-  <text x="876" y="536" fill="#36557B" font-family="Arial, Helvetica, sans-serif" font-size="20">The map explains the family, not the proof.</text>
+  <rect x="880" y="344" width="218" height="40" rx="20" fill="#EAF3FF" stroke="#BED4EE"/>
+  <text x="908" y="370" fill="#163A64" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">Built for read-only review</text>
 </svg>

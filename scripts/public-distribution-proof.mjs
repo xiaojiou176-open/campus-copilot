@@ -83,7 +83,11 @@ function classifyOptionalFailure(kind, result) {
   }
 
   const combined = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
-  if (/Cannot connect to the Docker daemon/i.test(combined)) {
+  if (
+    /Cannot connect to the Docker daemon/i.test(combined) ||
+    /failed to connect to the docker API/i.test(combined) ||
+    /docker\.sock.*no such file or directory/i.test(combined)
+  ) {
     return {
       code: 'docker_daemon_unavailable',
       detail: 'docker daemon unavailable on this workstation',

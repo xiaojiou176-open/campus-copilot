@@ -114,7 +114,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
   return (
     <section className="hero hero--orientation">
       <div className="hero-copy">
-        <p className="eyebrow">Start here</p>
+        <p className="eyebrow">Next up</p>
         <h1>Campus Copilot workbench</h1>
         <p className="lede">
           One local desk for academic work, administrative signals, and the next decision.
@@ -122,7 +122,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
         <p className="meta">Start with Focus Queue first, then scan Weekly Load when you need the wider week.</p>
       </div>
       <div className="hero-card hero-card--orientation">
-        <p>Desk status</p>
+        <p>Workspace status</p>
         <strong>{props.ready ? 'Local desk ready' : 'Loading your local desk'}</strong>
         <div className="hero-card-grid" role="list" aria-label="Workspace glance">
           <div className="hero-card-cell" role="listitem">

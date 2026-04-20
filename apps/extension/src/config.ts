@@ -308,7 +308,7 @@ const DEFAULT_EXTENSION_CONFIG = {
   defaultExportFormat: 'markdown',
   uiLanguage: 'auto',
   ai: {
-    defaultProvider: 'openai',
+    defaultProvider: 'gemini',
     models: {
       openai: 'gpt-4.1-mini',
       gemini: 'gemini-2.5-flash',

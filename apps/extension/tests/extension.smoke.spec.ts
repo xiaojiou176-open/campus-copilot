@@ -67,7 +67,7 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
           defaultExportFormat: 'markdown',
           uiLanguage: 'auto',
           ai: {
-            defaultProvider: 'openai',
+            defaultProvider: 'gemini',
             models: {
               openai: 'gpt-4.1-mini',
               gemini: 'gemini-2.5-flash',
@@ -344,17 +344,20 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
         }
         if (url.includes('/api/providers/status')) {
           const config = getStorageState()[configKey];
+          const defaultProvider = config?.ai?.defaultProvider ?? 'gemini';
           return new Response(
             JSON.stringify({
               ok: true,
               providers: {
                 openai: {
-                  ready: Boolean(config?.ai?.bffBaseUrl),
-                  reason: config?.ai?.bffBaseUrl ? 'configured' : 'missing_api_key',
+                  ready: Boolean(config?.ai?.bffBaseUrl) && defaultProvider === 'openai',
+                  reason:
+                    Boolean(config?.ai?.bffBaseUrl) && defaultProvider === 'openai' ? 'configured' : 'missing_api_key',
                 },
                 gemini: {
-                  ready: false,
-                  reason: 'missing_api_key',
+                  ready: Boolean(config?.ai?.bffBaseUrl) && defaultProvider === 'gemini',
+                  reason:
+                    Boolean(config?.ai?.bffBaseUrl) && defaultProvider === 'gemini' ? 'configured' : 'missing_api_key',
                 },
               },
             }),
@@ -636,14 +639,14 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByRole('tab', { name: 'Assistant' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Export' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Trust center' })).toBeVisible();
-  await expect(page.getByText('Desk status').first()).toBeVisible();
+  await expect(page.getByText('Assistant route').first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ask AI about this workspace' })).toBeVisible();
   await expect(page.getByText("AI connection isn't ready yet.").first()).toBeVisible();
-  await expandDetailedWorkspace(page, 'Review this slice');
+  await expandDetailedWorkspace(page, 'Open full workspace');
   await expandDiagnosticsWorkspace(page, 'System check');
   await expect(page.locator('.surface__diagnostics-detail').getByText('System check').first()).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Start here' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Desk status' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Next up' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Workspace status' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Focus Queue' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Weekly Load' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Change Journal' })).toBeVisible();
@@ -692,7 +695,7 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
-  await expandDetailedWorkspace(page, 'Review this slice');
+  await expandDetailedWorkspace(page, 'Open full workspace');
   await page.getByRole('button', { name: 'Sync EdStem' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'EdStem sync succeeded' })).toBeVisible();
   await page.evaluate(async () => {
@@ -755,7 +758,7 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
     });
   });
   await page.reload();
-  await expandDetailedWorkspace(page, 'Review this slice');
+  await expandDetailedWorkspace(page, 'Open full workspace');
   const siteStatusPanel = page.locator('article.surface__panel').filter({
     has: page.getByRole('heading', { name: 'Site Status' }),
   });
@@ -833,8 +836,8 @@ test('keeps ai gated until the current scope is explicitly allowed', async ({ pa
     askAiPanel.locator('article.surface__status-card--success article.surface__evidence-card').nth(2).getByText('MARKDOWN', { exact: true }),
   ).toBeVisible();
   const questionField = page.getByLabel('Question');
-  await expect(page.locator('.surface__workspace-detail summary').filter({ hasText: 'Review this slice first' })).toBeVisible();
-  await expandDetailedWorkspace(page, 'Review this slice');
+  await expect(page.locator('.surface__workspace-detail summary').filter({ hasText: 'Check this workspace first' })).toBeVisible();
+  await expandDetailedWorkspace(page, 'Open full workspace');
   const canvasFilterChip = page.locator('.surface__toolbar').getByRole('button', { name: 'Canvas', exact: true });
   await canvasFilterChip.click();
   await expect(canvasFilterChip).toHaveClass(/surface__chip--active/);
@@ -857,7 +860,7 @@ test('asks ai after the current workspace envelope is explicitly allowed', async
   });
 
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
-  await expandDetailedWorkspace(page, 'Review this slice first');
+  await expandDetailedWorkspace(page, 'Check this workspace first');
   const canvasFilterChip = page.locator('.surface__toolbar').getByRole('button', { name: 'Canvas', exact: true });
   await canvasFilterChip.click();
   await page.getByLabel('Question').fill('What should I pay attention to right now?');
@@ -918,16 +921,16 @@ test('shows provider not ready when selected provider is unavailable in bff stat
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
   await page.locator('summary').filter({ hasText: 'AI settings and opt-ins' }).click();
   await expect(page.getByLabel('Provider')).toBeVisible();
-  await page.getByLabel('Provider').selectOption('gemini');
+  await page.getByLabel('Provider').selectOption('openai');
   await page.getByLabel('Question').fill('What changed recently?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
-  await expect(page.getByText("Gemini is not ready in the local AI route yet.")).toBeVisible();
-  const geminiStatusCard = page
+  await expect(page.getByText("OpenAI is not ready in the local AI route yet.")).toBeVisible();
+  const openAiStatusCard = page
     .locator('article.surface__status-card')
-    .filter({ has: page.locator('strong', { hasText: /^Gemini$/ }) });
-  await expect(geminiStatusCard.getByText('not ready', { exact: true })).toBeVisible();
-  await expect(geminiStatusCard.getByText('missing API key')).toBeVisible();
+    .filter({ has: page.locator('strong', { hasText: /^OpenAI$/ }) });
+  await expect(openAiStatusCard.getByText('not ready', { exact: true })).toBeVisible();
+  await expect(openAiStatusCard.getByText('missing API key')).toBeVisible();
 });
 
 test('switches to Chinese UI and shows partial-success plus site-filter behavior', async ({ page, baseURL }) => {
@@ -951,12 +954,12 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
   await expect(chineseAskAiPanel.getByRole('heading', { name: 'AI 当前能看见什么' })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText('今日快照', { exact: true })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText(/待办作业 \d+ · 48 小时内截止 \d+ · 新成绩 \d+/)).toBeVisible();
-  await expandDetailedWorkspace(page, '查看这一屏');
+  await expandDetailedWorkspace(page, '打开完整工作台');
   await expandDiagnosticsWorkspace(page, '诊断');
   await expect(page.locator('.surface__diagnostics-detail').getByText('诊断').first()).toBeVisible();
   await expect(page.locator('.surface__diagnostics-detail').getByText('被环境或运行时阻塞').first()).toBeVisible();
-  await expect(page.getByRole('heading', { name: '现在先做什么' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '可信度摘要' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '下一步' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '工作台状态' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '专注队列' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '本周负荷' })).toBeVisible();
   await expect(

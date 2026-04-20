@@ -136,7 +136,7 @@ describe('workbench overview sections', () => {
     expect(html).toContain('surface__panel--diagnostics');
     expect(html).toContain('Finish the Canvas lab reflection');
     expect(html).toContain('Resume the EdStem session in Profile 1.');
-    expect(html.indexOf('Start here')).toBeLessThan(html.indexOf('System check'));
+    expect(html.indexOf('Next up')).toBeLessThan(html.indexOf('System check'));
   });
 });
 

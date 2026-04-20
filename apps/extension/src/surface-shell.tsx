@@ -696,14 +696,14 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   });
   const primaryFocusItem = focusQueue[0];
   const currentContextTitle = surfaceView.currentSiteSelection || filters.site !== 'all'
-    ? modeCopy.assistant.currentContext
-    : uiLanguage === 'zh-CN'
-      ? '当前桌面'
-      : 'Current desk';
+      ? modeCopy.assistant.currentContext
+      : uiLanguage === 'zh-CN'
+	      ? '当前视图'
+	      : 'Current view';
   const currentContextLabel = surfaceView.currentSiteSelection
     ? SITE_LABELS[surfaceView.currentSiteSelection]
     : filters.site === 'all'
-      ? planningCaptureContext?.label ?? (uiLanguage === 'zh-CN' ? '跨站点桌面' : 'Across your campus sites')
+	      ? planningCaptureContext?.label ?? (uiLanguage === 'zh-CN' ? '跨全部已连接站点' : 'Across all connected sites')
       : SITE_LABELS[filters.site];
   const bffStatusLabel =
     bffResolution.source === 'manual'
@@ -857,7 +857,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   >
                     <summary className="surface__workspace-detail-summary">
                       <span className="surface__workspace-detail-copy">
-                        <strong>{uiLanguage === 'zh-CN' ? '先看这一屏的事实' : 'Review this slice first'}</strong>
+	                        <strong>{uiLanguage === 'zh-CN' ? '先看这张工作台' : 'Check this workspace first'}</strong>
                         <span>
                           {uiLanguage === 'zh-CN'
                             ? '先确认这一屏的事实、提醒和导出范围，再决定要不要让 AI 解释。'

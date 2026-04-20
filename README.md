@@ -1,36 +1,37 @@
 # OpenCampus
 
-> Campus Copilot is the flagship local-first academic decision workspace in the OpenCampus family. It keeps Canvas, Gradescope, EdStem, and MyUW on one desk, then answers what changed, what matters first, and what to export or ask with cited AI.
+> OpenCampus keeps Canvas, Gradescope, EdStem, and MyUW on one local-first desk so students can see what changed, what matters first, and what to export or ask next.
 
-> Available today: local browser extension, local web workbench, manual sync, and a read-only workflow.
+> Campus Copilot is the first shipped workspace in that family. Today it is available as the `Campus Copilot for UW` browser extension plus a matching local web workbench.
 
 [Docs](docs/README.md) · [Quickstart](#quickstart) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Security](SECURITY.md) · [Privacy](PRIVACY.md) · [Distribution](DISTRIBUTION.md)
 
-## Brand Hierarchy
+## What You Can Try Today
 
-- **OpenCampus** = the umbrella family and repo-level public brand
-- **Campus Copilot** = the flagship decision workspace students use today
-- **Campus Copilot for UW** = the browser-extension distribution name when the school-specific surface needs to stay explicit
+- `Campus Copilot for UW` as the school-specific browser extension surface
+- one local web workbench over the same read-only workspace
+- manual sync, structured export, and cited AI after structure
+- a student-first product story before any builder or launch appendix
 
 ## Public Proof
 
-Real workbench proof, not concept art:
+Real product proof, not concept art:
 
 ![Campus Copilot sidepanel overview](docs/assets/sidepanel-overview.png)
-Extension shell proof: the assistant-first sidepanel with explicit `Export` and `Trust center` paths.
+Extension proof: the current student-facing sidepanel with explicit `Export` and `Trust center` paths.
 
 Standalone web workbench proof:
 
 ![Campus Copilot web workbench overview](docs/assets/web-workbench-overview.png)
-Fuller read-only workbench proof: the broader decision layer on the standalone web surface.
+Web proof: the broader read-only workbench that stays on the same local workspace contract.
 
 ## Start Here In 60 Seconds
 
-Campus Copilot takes four campus sites and turns them into **one local workspace**.
+OpenCampus starts with one narrow promise: keep academic work legible before AI or automation.
 
 1. Sync `Canvas`, `Gradescope`, `EdStem`, and `MyUW` into one workbench.
-2. Open the decision layer to see **what changed**, **what is still open**, and **what to do first**.
-3. Export the same structured view or ask **cited AI** to explain it.
+2. Open the workspace to see **what changed**, **what is still open**, and **what should come first**.
+3. Export the same structured result or ask **cited AI** to explain it.
 
 This repo is not a blank chat shell. It is a **student-first desk**: structure first, export and AI second.
 
@@ -77,6 +78,14 @@ If you are new, follow this order:
 3. Open the short docs router at [`docs/README.md`](docs/README.md).
 4. Only then choose a deeper route: proof if you want receipts, builder docs if you need integration seams.
 
+## Naming, Kept Simple
+
+Use the names in this order:
+
+- **OpenCampus** when you mean the repo-level public story
+- **Campus Copilot** when you mean the current student workspace
+- **Campus Copilot for UW** only when the school-specific extension label needs to stay explicit
+
 ## Current Product Shape
 
 Today the repo already includes:
@@ -101,7 +110,7 @@ The honest split is:
 
 ![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
 
-This illustration is the family/product map, not the proof lane. Keep using the screenshots and receipts above when you want evidence of the current shipped surface.
+This illustration is the orientation map, not the proof lane. Keep using the screenshots and receipts above when you want evidence of the current shipped surface.
 
 See the receipts:
 

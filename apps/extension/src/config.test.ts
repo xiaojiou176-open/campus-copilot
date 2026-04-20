@@ -35,7 +35,7 @@ describe('extension config', () => {
 
     expect(config.defaultExportFormat).toBe('markdown');
     expect(config.uiLanguage).toBe('auto');
-    expect(config.ai.defaultProvider).toBe('openai');
+    expect(config.ai.defaultProvider).toBe('gemini');
     expect(config.ai.models.gemini).toBe('gemini-2.5-flash');
     expect(config.ai.models.switchyard).toBe('gpt-5');
     expect(config.authorization.policyVersion).toBe('wave2-deepwater-productization');
