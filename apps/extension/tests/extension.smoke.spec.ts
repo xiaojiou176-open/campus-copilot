@@ -344,17 +344,20 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
         }
         if (url.includes('/api/providers/status')) {
           const config = getStorageState()[configKey];
+          const defaultProvider = config?.ai?.defaultProvider ?? 'gemini';
           return new Response(
             JSON.stringify({
               ok: true,
               providers: {
                 openai: {
-                  ready: Boolean(config?.ai?.bffBaseUrl),
-                  reason: config?.ai?.bffBaseUrl ? 'configured' : 'missing_api_key',
+                  ready: Boolean(config?.ai?.bffBaseUrl) && defaultProvider === 'openai',
+                  reason:
+                    Boolean(config?.ai?.bffBaseUrl) && defaultProvider === 'openai' ? 'configured' : 'missing_api_key',
                 },
                 gemini: {
-                  ready: false,
-                  reason: 'missing_api_key',
+                  ready: Boolean(config?.ai?.bffBaseUrl) && defaultProvider === 'gemini',
+                  reason:
+                    Boolean(config?.ai?.bffBaseUrl) && defaultProvider === 'gemini' ? 'configured' : 'missing_api_key',
                 },
               },
             }),
@@ -918,16 +921,16 @@ test('shows provider not ready when selected provider is unavailable in bff stat
   await gotoSmokePage(page, baseURL, '/sidepanel.html');
   await page.locator('summary').filter({ hasText: 'AI settings and opt-ins' }).click();
   await expect(page.getByLabel('Provider')).toBeVisible();
-  await page.getByLabel('Provider').selectOption('gemini');
+  await page.getByLabel('Provider').selectOption('openai');
   await page.getByLabel('Question').fill('What changed recently?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
-  await expect(page.getByText("Gemini is not ready in the local AI route yet.")).toBeVisible();
-  const geminiStatusCard = page
+  await expect(page.getByText("OpenAI is not ready in the local AI route yet.")).toBeVisible();
+  const openAiStatusCard = page
     .locator('article.surface__status-card')
-    .filter({ has: page.locator('strong', { hasText: /^Gemini$/ }) });
-  await expect(geminiStatusCard.getByText('not ready', { exact: true })).toBeVisible();
-  await expect(geminiStatusCard.getByText('missing API key')).toBeVisible();
+    .filter({ has: page.locator('strong', { hasText: /^OpenAI$/ }) });
+  await expect(openAiStatusCard.getByText('not ready', { exact: true })).toBeVisible();
+  await expect(openAiStatusCard.getByText('missing API key')).toBeVisible();
 });
 
 test('switches to Chinese UI and shows partial-success plus site-filter behavior', async ({ page, baseURL }) => {
@@ -955,8 +958,8 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
   await expandDiagnosticsWorkspace(page, '诊断');
   await expect(page.locator('.surface__diagnostics-detail').getByText('诊断').first()).toBeVisible();
   await expect(page.locator('.surface__diagnostics-detail').getByText('被环境或运行时阻塞').first()).toBeVisible();
-  await expect(page.getByRole('heading', { name: '现在先做什么' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '可信度摘要' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '下一步' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '工作台状态' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '专注队列' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '本周负荷' })).toBeVisible();
   await expect(
