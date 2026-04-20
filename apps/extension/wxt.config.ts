@@ -26,6 +26,7 @@ export default defineConfig({
       }
 
       viteConfig.build ??= {};
+      viteConfig.base ??= './';
       viteConfig.build.rollupOptions ??= {};
       const output =
         Array.isArray(viteConfig.build.rollupOptions.output) || viteConfig.build.rollupOptions.output == null

@@ -25,7 +25,7 @@ vi.mock('wxt/browser', () => ({
 
 import { SITE_SYNC_HANDLERS } from '../entrypoints/background';
 import { getDefaultExtensionConfig } from './config';
-import { campusCopilotDb, getAdminCarriers, getPlanningSubstratesBySource } from '@campus-copilot/storage';
+import { campusCopilotDb, getAdminCarriers, getPlanningSubstratesBySource, replaceSiteSnapshot } from '@campus-copilot/storage';
 
 type ExecuteScriptMockResult = Array<{ result: unknown }>;
 
@@ -114,6 +114,83 @@ describe('background site dispatch', () => {
         }),
       );
       expect(result.snapshot.resources?.some((resource) => resource.title.toLowerCase().includes('syllabus'))).toBe(true);
+    }
+  });
+
+  it('accumulates course-site page families across syncs instead of replacing the earlier family snapshot', async () => {
+    const executeScriptMock = vi.spyOn(
+      browser.scripting as {
+        executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
+      },
+      'executeScript',
+    );
+
+    executeScriptMock.mockResolvedValueOnce([
+      {
+        result: readFileSync(
+          new URL('../../../packages/adapters-course-sites/src/__fixtures__/home-cse312.html', import.meta.url),
+          'utf8',
+        ),
+      },
+    ]);
+
+    const homeResult = await SITE_SYNC_HANDLERS['course-sites']({
+      activeTab: {
+        tabId: 1,
+        url: 'https://courses.cs.washington.edu/courses/cse312/26sp/',
+      },
+      now: '2026-04-11T12:00:00-07:00',
+      config: getDefaultExtensionConfig(),
+    });
+
+    expect(homeResult.ok).toBe(true);
+    if (homeResult.ok) {
+      await replaceSiteSnapshot(
+        'course-sites',
+        homeResult.snapshot,
+        {
+          status: 'success',
+          lastSyncedAt: '2026-04-11T12:00:00-07:00',
+        },
+        campusCopilotDb,
+      );
+    }
+
+    executeScriptMock.mockResolvedValueOnce([
+      {
+        result: readFileSync(
+          new URL('../../../packages/adapters-course-sites/src/__fixtures__/schedule-cse312.html', import.meta.url),
+          'utf8',
+        ),
+      },
+    ]);
+
+    const scheduleResult = await SITE_SYNC_HANDLERS['course-sites']({
+      activeTab: {
+        tabId: 1,
+        url: 'https://courses.cs.washington.edu/courses/cse312/26sp/schedule',
+      },
+      now: '2026-04-11T12:05:00-07:00',
+      config: getDefaultExtensionConfig(),
+    });
+
+    expect(scheduleResult.ok).toBe(true);
+    if (scheduleResult.ok) {
+      expect(scheduleResult.snapshot.courses?.some((course) => course.code === 'CSE 312')).toBe(true);
+      expect(
+        scheduleResult.snapshot.resources?.some(
+          (resource) => resource.courseId === 'course-sites:course:cse312:26sp' && resource.source.resourceType === 'home_page',
+        ),
+      ).toBe(true);
+      expect(
+        scheduleResult.snapshot.announcements?.some(
+          (announcement) =>
+            announcement.courseId === 'course-sites:course:cse312:26sp' && announcement.source.resourceType === 'home_intro',
+        ),
+      ).toBe(true);
+      expect(
+        scheduleResult.snapshot.events?.some((event) => event.source.resourceType === 'schedule_row'),
+      ).toBe(true);
     }
   });
 
@@ -283,6 +360,65 @@ describe('background site dispatch', () => {
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('Textbooks listed');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('Advisory: Self-placement guidance available');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('Restriction: No credit after CSE 142');
+  });
+
+  it('keeps the broader public Time Schedule lane when an SLN detail fallback is captured later', async () => {
+    await campusCopilotDb.planning_substrates.clear();
+
+    const executeScriptMock = vi.spyOn(
+      browser.scripting as {
+        executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
+      },
+      'executeScript',
+    );
+
+    executeScriptMock.mockResolvedValueOnce([
+      {
+        result: readFileSync(
+          new URL('../../../packages/adapters-time-schedule/src/__fixtures__/public-course-offerings-cse.html', import.meta.url),
+          'utf8',
+        ),
+      },
+    ]);
+
+    await SITE_SYNC_HANDLERS['time-schedule']({
+      activeTab: {
+        tabId: 1,
+        url: 'https://www.washington.edu/students/timeschd/pub/SPR2026/cse.html',
+      },
+      now: '2026-04-10T06:05:00Z',
+      config: getDefaultExtensionConfig(),
+    });
+
+    const beforeDetail = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    const broaderPlannedCourseCount = beforeDetail[0]?.plannedCourseCount ?? 0;
+    const broaderScheduleOptionCount = beforeDetail[0]?.scheduleOptionCount ?? 0;
+
+    executeScriptMock.mockResolvedValueOnce([
+      {
+        result: readFileSync(
+          new URL('../../../packages/adapters-time-schedule/src/__fixtures__/section-detail-cse121a.html', import.meta.url),
+          'utf8',
+        ),
+      },
+    ]);
+
+    await SITE_SYNC_HANDLERS['time-schedule']({
+      activeTab: {
+        tabId: 1,
+        url: 'https://sdb.admin.washington.edu/timeschd/uwnetid/sln.asp?QTRYR=SPR+2026&SLN=12473',
+      },
+      now: '2026-04-10T06:10:00Z',
+      config: getDefaultExtensionConfig(),
+    });
+
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    expect(storedPlanning[0]?.plannedCourseCount).toBe(broaderPlannedCourseCount);
+    expect(storedPlanning[0]?.scheduleOptionCount).toBe(broaderScheduleOptionCount);
+    expect(storedPlanning[0]?.runtimePosture).toBe('public_course_offerings_planning_lane_with_sln_detail');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Public course offerings remain the broader planning carrier');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Authenticated SLN detail was captured');
+    expect(storedPlanning[0]?.terms[0]?.summary).toContain('Detail corroboration: CSE 121 A');
   });
 
   it('falls back to EdStem dashboard DOM when path config is missing but the active tab still exposes course cards', async () => {

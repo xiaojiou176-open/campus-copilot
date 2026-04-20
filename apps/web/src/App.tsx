@@ -389,12 +389,12 @@ export function App() {
 
     if (advancedMaterialEnabled) {
       if (!selectedCourse) {
-        setAiError('Select one course before turning on advanced material analysis.');
+        setAiError('Choose one visible course before turning on advanced material analysis.');
         return;
       }
 
       if (!advancedMaterialExcerpt.trim()) {
-        setAiError('Paste a course excerpt before asking for advanced material analysis.');
+        setAiError('Paste one course excerpt before asking for advanced material analysis.');
         return;
       }
 
@@ -432,7 +432,7 @@ export function App() {
         throw new Error(
           importedEnvelope?.packaging
             ? 'This imported workspace still keeps AI off for this slice. Review the trust summary before continuing.'
-            : 'This web slice still keeps AI off. Review the trust summary before asking AI.',
+            : 'This desk still keeps AI off for this slice. Review the trust summary before asking AI.',
         );
       }
 
@@ -613,6 +613,15 @@ export function App() {
         </div>
 
         <section className="web-shell__overview-band" aria-label="Trust, AI, and export review">
+          <div className="web-shell__support-lane">
+            <WebSupportRail
+              topSyncRun={topSyncRun}
+              populatedSiteCount={populatedSiteCount}
+              trackedEntityCount={trackedEntityCount}
+              unseenUpdateCount={recentUpdates?.unseenCount ?? 0}
+              siteLabels={SITE_LABELS}
+            />
+          </div>
           <div className="web-shell__toolbar-lane web-shell__toolbar-lane--supporting">
             <WebToolbarControls
               feedback={feedback}
@@ -643,60 +652,49 @@ export function App() {
             />
           </div>
 
-          <div className="web-shell__overview-lanes">
-            <div className="web-shell__support-lane">
-              <WebSupportRail
-                topSyncRun={topSyncRun}
-                populatedSiteCount={populatedSiteCount}
-                trackedEntityCount={trackedEntityCount}
-                unseenUpdateCount={recentUpdates?.unseenCount ?? 0}
-                siteLabels={SITE_LABELS}
-              />
-            </div>
-            <div className="web-shell__explanation-lane">
-              <WebAiPanel
-                provider={provider}
-                model={model}
-                switchyardProvider={switchyardProvider}
-                switchyardLane={switchyardLane}
-                providers={PROVIDERS}
-                aiBaseUrl={aiBaseUrl}
-                question={question}
-                aiPending={aiPending}
-                aiError={aiError}
-                aiNotice={aiNotice}
-                aiAnswer={aiAnswer}
-                aiStructured={aiStructured}
-                currentViewExport={currentViewExport}
-                importedEnvelope={importedEnvelope}
-                availableCourses={availableCourses}
-                advancedMaterialEnabled={advancedMaterialEnabled}
-                advancedMaterialCourseId={advancedMaterialCourseId}
-                advancedMaterialExcerpt={advancedMaterialExcerpt}
-                advancedMaterialAcknowledged={advancedMaterialAcknowledged}
-                onAiBaseUrlChange={setAiBaseUrl}
-                onProviderChange={(nextProvider) => {
-                  setProvider(nextProvider);
-                  setModel(PROVIDERS.find((item) => item.value === nextProvider)?.model ?? model);
-                }}
-                onModelChange={setModel}
-                onSwitchyardProviderChange={setSwitchyardProvider}
-                onSwitchyardLaneChange={setSwitchyardLane}
-                onQuestionChange={setQuestion}
-                onAdvancedMaterialEnabledChange={(value) => {
-                  setAdvancedMaterialEnabled(value);
-                  if (!value) {
-                    setAdvancedMaterialCourseId('');
-                    setAdvancedMaterialExcerpt('');
-                    setAdvancedMaterialAcknowledged(false);
-                  }
-                }}
-                onAdvancedMaterialCourseChange={setAdvancedMaterialCourseId}
-                onAdvancedMaterialExcerptChange={setAdvancedMaterialExcerpt}
-                onAdvancedMaterialAcknowledgedChange={setAdvancedMaterialAcknowledged}
-                onAskAi={handleAskAi}
-              />
-            </div>
+          <div className="web-shell__explanation-lane">
+            <WebAiPanel
+              provider={provider}
+              model={model}
+              switchyardProvider={switchyardProvider}
+              switchyardLane={switchyardLane}
+              providers={PROVIDERS}
+              aiBaseUrl={aiBaseUrl}
+              question={question}
+              aiPending={aiPending}
+              aiError={aiError}
+              aiNotice={aiNotice}
+              aiAnswer={aiAnswer}
+              aiStructured={aiStructured}
+              currentViewExport={currentViewExport}
+              importedEnvelope={importedEnvelope}
+              availableCourses={availableCourses}
+              advancedMaterialEnabled={advancedMaterialEnabled}
+              advancedMaterialCourseId={advancedMaterialCourseId}
+              advancedMaterialExcerpt={advancedMaterialExcerpt}
+              advancedMaterialAcknowledged={advancedMaterialAcknowledged}
+              onAiBaseUrlChange={setAiBaseUrl}
+              onProviderChange={(nextProvider) => {
+                setProvider(nextProvider);
+                setModel(PROVIDERS.find((item) => item.value === nextProvider)?.model ?? model);
+              }}
+              onModelChange={setModel}
+              onSwitchyardProviderChange={setSwitchyardProvider}
+              onSwitchyardLaneChange={setSwitchyardLane}
+              onQuestionChange={setQuestion}
+              onAdvancedMaterialEnabledChange={(value) => {
+                setAdvancedMaterialEnabled(value);
+                if (!value) {
+                  setAdvancedMaterialCourseId('');
+                  setAdvancedMaterialExcerpt('');
+                  setAdvancedMaterialAcknowledged(false);
+                }
+              }}
+              onAdvancedMaterialCourseChange={setAdvancedMaterialCourseId}
+              onAdvancedMaterialExcerptChange={setAdvancedMaterialExcerpt}
+              onAdvancedMaterialAcknowledgedChange={setAdvancedMaterialAcknowledged}
+              onAskAi={handleAskAi}
+            />
           </div>
         </section>
 

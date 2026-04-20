@@ -490,7 +490,7 @@ describe('cluster substrate', () => {
     expect(blockerFamilies).toEqual(new Set(['dars', 'transcript', 'finaid', 'accounts', 'tuition_detail', 'profile']));
     expect(administrativeSummaries.find((summary) => summary.family === 'dars')?.sourceSurface).toBe('myplan');
     expect(administrativeSummaries.find((summary) => summary.family === 'tuition_detail')?.summary).toContain(
-      'No truthful tuition-detail runtime carrier is landed yet.',
+      'Billing details are not visible in this desk yet.',
     );
   });
 });

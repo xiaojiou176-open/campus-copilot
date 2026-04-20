@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const requiredFiles = [
   'AGENTS.md',
@@ -26,6 +27,7 @@ const requiredFiles = [
   'scripts/check-container-surface.mjs',
   'scripts/check-mcp-registry-preflight.mjs',
   'scripts/check-skill-catalog.mjs',
+  'scripts/render-social-preview.sh',
   'scripts/consumer/campus-copilot-mcp.sh',
   'scripts/consumer/campus-copilot-site-sidecar.sh',
   'scripts/docker-api-smoke.sh',
@@ -97,6 +99,39 @@ const expectedIssuesUrl = 'https://github.com/xiaojiou176-open/OpenCampus/issues
 const expectedRootHomepage = 'https://xiaojiou176-open.github.io/OpenCampus/';
 
 const failures = [];
+
+export function readPngDimensions(path) {
+  const buffer = readFileSync(path);
+  const pngSignature = '89504e470d0a1a0a';
+  if (buffer.subarray(0, 8).toString('hex') !== pngSignature) {
+    throw new Error(`invalid_png_signature:${path}`);
+  }
+
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+}
+
+export function collectSocialPreviewFailures(path) {
+  if (!existsSync(path)) {
+    return [`missing_public_surface:${path}`];
+  }
+
+  const failures = [];
+  const { width, height } = readPngDimensions(path);
+  const size = statSync(path).size;
+
+  if (width !== 1280 || height !== 640) {
+    failures.push(`social_preview_wrong_dimensions:${width}x${height}`);
+  }
+
+  if (size >= 1048576) {
+    failures.push(`social_preview_file_too_large:${size}`);
+  }
+
+  return failures;
+}
 
 function normalizeRepositoryUrl(value) {
   if (typeof value !== 'string') {
@@ -172,6 +207,9 @@ if (existsSync('package.json')) {
   }
   if (!Array.isArray(rootPackage.keywords) || !rootPackage.keywords.includes('campus-copilot')) {
     failures.push('root_package_keywords_missing_canonical_tag');
+  }
+  if (rootPackage.scripts?.['render:social-preview'] !== 'bash scripts/render-social-preview.sh') {
+    failures.push('root_package_render_social_preview_script_missing');
   }
 }
 
@@ -314,6 +352,10 @@ if (existsSync('apps/web/index.html')) {
   }
 }
 
+for (const failure of collectSocialPreviewFailures('docs/assets/social-preview.png')) {
+  failures.push(failure);
+}
+
 for (const examplePath of exampleJsonFiles) {
   if (!existsSync(examplePath)) {
     failures.push(`missing_example_json:${examplePath}`);
@@ -449,9 +491,29 @@ if (existsSync('docs/README.md')) {
   }
 }
 
-if (failures.length > 0) {
-  console.error(failures.join('\n'));
-  process.exit(1);
+if (existsSync('docs/storefront-assets.md')) {
+  const storefrontAssets = readFileSync('docs/storefront-assets.md', 'utf8');
+  const requiredStorefrontSnippets = [
+    'pnpm render:social-preview',
+    '1280x640',
+    '<1MB',
+  ];
+  for (const snippet of requiredStorefrontSnippets) {
+    if (!storefrontAssets.includes(snippet)) {
+      failures.push(`storefront_assets_missing_snippet:${snippet}`);
+    }
+  }
 }
 
-console.log('public_surface_ok');
+function main() {
+  if (failures.length > 0) {
+    console.error(failures.join('\n'));
+    process.exit(1);
+  }
+
+  console.log('public_surface_ok');
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}

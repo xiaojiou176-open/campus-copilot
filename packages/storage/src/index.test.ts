@@ -848,7 +848,7 @@ describe('storage package', () => {
     expect(queue[0]?.entityRef?.id).toBe(assignment.id);
     expect(queue[0]?.pinned).toBe(true);
     expect(queue[0]?.note).toBe('Start this before lunch');
-    expect(queue[0]?.reasons.some((reason) => reason.detail?.includes('截止时间是'))).toBe(true);
+    expect(queue[0]?.reasons.some((reason) => reason.detail?.includes('Deadline:'))).toBe(true);
     expect(queue.some((item) => item.entityRef?.id === message.id)).toBe(true);
     expect(queue.find((item) => item.entityRef?.id === message.id)?.summary).toContain('database migration checklist');
     const syncItem = queue.find((item) => item.kind === 'sync_state');

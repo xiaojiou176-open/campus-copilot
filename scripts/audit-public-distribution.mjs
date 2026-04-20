@@ -106,6 +106,9 @@ const openClawCompatibleLayoutPaths = [
   'settings.json',
 ];
 
+const containerRuntimeBlocker = process.env.CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER;
+const containerRuntimeBlockerDetail = process.env.CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER_DETAIL;
+
 const packageReadmeByName = {
   '@campus-copilot/sdk': 'packages/sdk/README.md',
   '@campus-copilot/workspace-sdk': 'packages/workspace-sdk/README.md',
@@ -346,11 +349,21 @@ function buildBundleSurface(surface) {
 }
 
 function buildSupportingSurface(surface) {
-  const blockers = surface.requiredPaths.filter((path) => !pathExists(path)).map((path) => `missing:${path}`);
+  const requiredArtifactBlockers = surface.requiredPaths
+    .filter((path) => !pathExists(path))
+    .map((path) => `missing:${path}`);
+  const blockers = [...requiredArtifactBlockers];
+
+  if (surface.surface === 'API container' && containerRuntimeBlocker) {
+    blockers.push(`local_runtime:${containerRuntimeBlocker}`);
+    if (containerRuntimeBlockerDetail) {
+      blockers.push(`runtime_note:${containerRuntimeBlockerDetail}`);
+    }
+  }
 
   return {
     surface: surface.surface,
-    currentState: blockers.length === 0 ? surface.currentStateWhenReady : 'missing required artifacts',
+    currentState: requiredArtifactBlockers.length === 0 ? surface.currentStateWhenReady : 'missing required artifacts',
     registryReadiness: surface.registryReadiness,
     installPath: surface.installPath,
     proofLoop: surface.proof,

@@ -445,28 +445,32 @@ async function expandDiagnosticsWorkspace(page: Page, title: string) {
 }
 
 async function assertOptionsTrustCenter(page: Page) {
-  await expect(page.getByRole('heading', { name: 'Connection and boundary summary' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Desk connection and trust' })).toBeVisible();
   const authorizationHeading = page.getByRole('heading', { name: 'Trust center' }).last();
   const authorizationPanel = authorizationHeading.locator('xpath=ancestor::article[1]');
-  const configurationActionsHeading = page.getByRole('heading', { name: 'Configuration actions' });
+  const configurationActionsHeading = page.getByRole('heading', { name: 'Next steps' });
   await expect(
     authorizationPanel.getByText('Keep read/export separate from AI analysis so “readable” never silently becomes “AI-readable”.'),
   ).toBeVisible();
-  await authorizationPanel.locator('summary').filter({ hasText: 'Open authorization reviews and rule controls' }).click();
-  await expect(authorizationPanel.getByText('Current trust posture')).toBeVisible();
-  await expect(authorizationPanel.locator('summary').filter({ hasText: 'Site boundary reviews' })).toBeVisible();
+  await authorizationPanel.locator('summary').filter({ hasText: 'Open deeper trust reviews' }).first().click();
+  await expect(authorizationPanel.getByText('Current trust summary')).toBeVisible();
+  await expect(authorizationPanel.locator('summary').filter({ hasText: 'Site trust reviews' })).toBeVisible();
   await expect(
     authorizationPanel.locator('summary').filter({ hasText: 'Protected families and course AI confirmations' }),
   ).toBeVisible();
+  await expect(authorizationPanel).not.toContainText('confirm_required');
   await expect(configurationActionsHeading).toBeVisible();
 }
 
 async function expandOptionsRuleEditor(page: Page) {
   const authorizationHeading = page.getByRole('heading', { name: 'Trust center' }).last();
   const authorizationPanel = authorizationHeading.locator('xpath=ancestor::article[1]');
-  await authorizationPanel.locator('summary').filter({ hasText: 'Detailed authorization controls' }).click();
-  await expect(authorizationPanel.locator('label').filter({ hasText: 'All sites · Read & export' })).toBeVisible();
-  await expect(authorizationPanel.locator('label').filter({ hasText: 'All sites · AI analysis' })).toBeVisible();
+  await page.evaluate(() => {
+    for (const details of document.querySelectorAll('details')) {
+      details.open = true;
+    }
+  });
+  return authorizationPanel;
 }
 
 async function seedTechnicalConfig(
@@ -631,7 +635,7 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   });
   await expect(page.getByRole('tab', { name: 'Assistant' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Export' })).toBeVisible();
-  await expect(page.getByRole('tab', { name: 'Settings' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Trust center' })).toBeVisible();
   await expect(page.getByText('Desk status').first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Ask AI about this workspace' })).toBeVisible();
   await expect(page.getByText("AI connection isn't ready yet.").first()).toBeVisible();
@@ -659,21 +663,27 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await expect(page.getByRole('button', { name: 'Sync EdStem' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sync MyUW' })).toBeVisible();
   await expect(page.locator('body')).not.toContainText('gradescope_courses_optional_collector_failed');
+  await page.getByRole('tab', { name: 'Trust center' }).click();
+  await expect(page.getByRole('heading', { name: 'Connection and trust summary' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Trust center' }).first()).toBeVisible();
+  await expect(page.locator('body')).not.toContainText('Allowed rules');
+  await expect(page.locator('body')).not.toContainText('Policy version');
+  await expect(page.locator('body')).not.toContainText('confirm_required');
 });
 
 test('saves settings/auth center changes, syncs edstem, and records export downloads', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
   await assertOptionsTrustCenter(page);
   await maybeCaptureSmokeScreenshot(page, 'extension-options-trust-center');
-  await expandOptionsRuleEditor(page);
-  await page.getByLabel('All sites · AI analysis').selectOption('allowed');
+  const authorizationPanel = await expandOptionsRuleEditor(page);
+  await authorizationPanel.getByLabel('All sites · AI analysis').selectOption('allowed');
   await page.getByRole('button', { name: 'Save configuration' }).click();
   await expect(page.getByText('Configuration saved.')).toBeVisible();
 
   await gotoSmokePage(page, baseURL, '/options.html');
   await assertOptionsTrustCenter(page);
-  await expandOptionsRuleEditor(page);
-  await expect(page.getByLabel('All sites · AI analysis')).toHaveValue('allowed');
+  const savedAuthorizationPanel = await expandOptionsRuleEditor(page);
+  await expect(savedAuthorizationPanel.getByLabel('All sites · AI analysis')).toHaveValue('allowed');
 
   await seedTechnicalConfig(page, {
     bffBaseUrl: 'http://127.0.0.1:8787',
@@ -764,15 +774,17 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   const exportReviewPanel = page.locator('article.surface__panel').filter({
     has: page.getByText('Review & export'),
   });
-  await expect(exportReviewPanel.getByText('Trust review comes before the export action.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Export selection' })).toBeEnabled();
+  await expect(exportReviewPanel.getByText('Review the trust and scope notes before exporting.')).toBeVisible();
+  await expect(exportReviewPanel.getByRole('button', { name: 'Export selection' }).first()).toBeEnabled();
   const aiVisibilityCard = exportReviewPanel.locator('article.surface__evidence-card').nth(2);
   await expect(aiVisibilityCard.locator('p.surface__meta-label')).toContainText('AI visibility');
-  await expect(aiVisibilityCard.locator('p.surface__item-lead')).toContainText(/AI analysis (allowed|blocked)/);
+  await expect(aiVisibilityCard.locator('p.surface__item-lead')).toContainText(
+    /AI analysis (ready now|kept off)/i,
+  );
   const provenanceCard = exportReviewPanel.locator('article.surface__evidence-card').nth(3);
   await expect(provenanceCard.locator('p.surface__meta-label')).toContainText('Provenance');
   await expect(provenanceCard.locator('p.surface__item-lead')).toContainText('Unified local read model');
-  const packetEvidenceSummary = page.locator('summary').filter({ hasText: 'Open detailed packet evidence' }).first();
+  const packetEvidenceSummary = page.locator('summary').filter({ hasText: 'Open detailed export evidence' }).first();
   await expect(packetEvidenceSummary).toBeVisible();
   await packetEvidenceSummary.click();
   const packetEvidenceCards = exportReviewPanel.locator('details article.surface__evidence-card');
@@ -782,7 +794,7 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   const matchConfidenceCard = packetEvidenceCards.nth(2);
   await expect(matchConfidenceCard.locator('p.surface__meta-label')).toContainText('Match confidence');
   await expect(matchConfidenceCard.locator('p.surface__item-lead')).toContainText(/(High|Medium|Low) match confidence/);
-  await page.getByRole('button', { name: 'Export selection' }).click();
+  await exportReviewPanel.getByRole('button', { name: 'Export selection' }).first().click();
   const downloadPayload = JSON.parse(
     (await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY)) ?? '{}',
   );
@@ -829,7 +841,7 @@ test('keeps ai gated until the current scope is explicitly allowed', async ({ pa
   await questionField.fill('What should I pay attention to right now?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
-  await expect(page.getByText('AI access for this scope still needs to be enabled in Settings/Auth.')).toBeVisible();
+  await expect(page.getByText('AI access for this desk still needs to be allowed in Trust Center.')).toBeVisible();
   await expect(askAiPanel.getByRole('heading', { name: 'Current site rules' })).toBeVisible();
   await expect(askAiPanel.getByText('Canvas', { exact: true })).toBeVisible();
 });
@@ -858,12 +870,38 @@ test('asks ai after the current workspace envelope is explicitly allowed', async
   await maybeCaptureSmokeScreenshot(page, 'extension-sidepanel-ai-answer');
 });
 
+test('keeps advanced-material guardrails localized in Chinese UI', async ({ page, baseURL }) => {
+  await gotoSmokePage(page, baseURL, '/options.html');
+  await page.getByLabel('Interface language').selectOption('zh-CN');
+  await page.getByRole('button', { name: /Save configuration|保存配置/ }).click();
+  await expect(page.getByText(/Configuration saved\.|配置已保存。/)).toBeVisible();
+  await seedTechnicalConfig(page, {
+    bffBaseUrl: 'http://127.0.0.1:8787',
+    allowAllLayer2ReadAnalysis: true,
+    allowWorkspaceEnvelope: true,
+    globalLayer2Status: 'allowed',
+    canvasLayer2Status: 'allowed',
+  });
+
+  await gotoSmokePage(page, baseURL, '/sidepanel.html');
+  const chineseAskAiPanel = page.locator('article.surface__panel').filter({
+    has: page.getByRole('heading', { name: '围绕这张工作台来问 AI' }),
+  });
+  await chineseAskAiPanel.locator('summary').filter({ hasText: '高级课程材料分析' }).click();
+  await chineseAskAiPanel.getByLabel('为单门课程开启摘录分析').check();
+  await chineseAskAiPanel.getByRole('textbox', { name: '问题' }).fill('请解释这段课程摘录和当前工作台之间的关系。');
+  await chineseAskAiPanel.getByRole('button', { name: '问 AI' }).click();
+
+  await expect(page.getByText('先选择一门课程，再开启高级课程材料分析。')).toBeVisible();
+  await expect(page.locator('body')).not.toContainText('Select one course before turning on advanced material analysis.');
+});
+
 test('popup stays launcher-first and keeps extra export presets behind disclosure', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/popup.html');
 
   await expect(page.getByRole('button', { name: 'Open assistant' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Quick export' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Settings/Auth' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Trust center' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Current view' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Recent updates' })).toHaveCount(0);
   await expect(page.getByText('More export shortcuts')).toHaveCount(0);
@@ -895,9 +933,9 @@ test('shows provider not ready when selected provider is unavailable in bff stat
 test('switches to Chinese UI and shows partial-success plus site-filter behavior', async ({ page, baseURL }) => {
   await gotoSmokePage(page, baseURL, '/options.html');
   await page.getByLabel('Interface language').selectOption('zh-CN');
-  await page.locator('summary').filter({ hasText: '高级工作台控制项' }).click();
-  await page.locator('summary').filter({ hasText: '高级连接覆盖设置' }).click();
-  await page.getByLabel('本地 AI 服务地址').fill('');
+  await page.locator('summary').filter({ hasText: '连接工具' }).first().click();
+  await page.locator('summary').filter({ hasText: '更深连接工具' }).first().click();
+  await page.getByLabel('手动填写本地 AI 地址').fill('');
   await page.getByRole('button', { name: '保存配置' }).click();
   await expect(page.getByText('配置已保存。')).toBeVisible();
   await gotoSmokePage(page, baseURL, '/sidepanel.html');

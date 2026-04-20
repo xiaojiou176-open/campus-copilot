@@ -1,4 +1,4 @@
-# Documentation Router
+# OpenCampus Documentation Router
 
 This file is the docs front door.
 
@@ -9,7 +9,8 @@ Treat it like airport signs, not a second maintainer dashboard:
 - only then go into proof, builder, or owner-side distribution routes
 
 The public story stays the same as the main README:
-**Campus Copilot is the flagship decision workspace, and OpenCampus is the family name above it.**
+**OpenCampus is the family name; Campus Copilot is the flagship decision workspace inside it.**
+When the extension distribution needs to stay school-specific, the explicit label remains **Campus Copilot for UW**.
 
 Available today:
 - local browser extension
@@ -69,21 +70,21 @@ Use this route only when you already understand the product and need the integra
 The shortest public-safe docs set is built around:
 
 - [`01-product-prd.md`](01-product-prd.md)
-- [`02-system-architecture.md`](02-system-architecture.md)
-- [`03-domain-schema.md`](03-domain-schema.md)
-- [`04-adapter-spec.md`](04-adapter-spec.md)
 - [`06-export-and-user-surfaces.md`](06-export-and-user-surfaces.md)
 - [`07-security-privacy-compliance.md`](07-security-privacy-compliance.md)
-- [`api/openapi.yaml`](api/openapi.yaml)
+- [`site-capability-matrix.md`](site-capability-matrix.md)
 
 Supporting routes that stay useful but clearly secondary:
 
+- [`02-system-architecture.md`](02-system-architecture.md)
+- [`03-domain-schema.md`](03-domain-schema.md)
+- [`04-adapter-spec.md`](04-adapter-spec.md)
 - [`05-ai-provider-and-runtime.md`](05-ai-provider-and-runtime.md)
 - [`verification-matrix.md`](verification-matrix.md)
-- [`site-capability-matrix.md`](site-capability-matrix.md)
 - [`integration-boundaries.md`](integration-boundaries.md)
 - [`storefront-assets.md`](storefront-assets.md)
 - [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md)
+- [`api/openapi.yaml`](api/openapi.yaml)
 
 ## Rules
 

@@ -50,23 +50,25 @@ describe('web toolbar and support rail', () => {
 
     expect(html).toContain('Campus Copilot workbench');
     expect(html).toContain('academic work, administrative signals, and the next decision');
+    expect(html).toContain('Start with Focus Queue first');
     expect(html).toContain('Desk status');
     expect(html).toContain('Load a desk');
     expect(html).toContain('Filter / Export');
     expect(html).not.toContain('Trust summary');
-    expect(html).not.toContain('What this desk can prove');
+    expect(html).not.toContain('What this view can prove right now');
   });
 
   it('renders a supporting trust summary and diagnostics receipts without overclaiming live state', () => {
     const html = renderToStaticMarkup(createElement(WebSupportRail, toolbarProps));
 
-    expect(html).toContain('What is on this desk');
-    expect(html).toContain('What this desk can prove');
+    expect(html).toContain('Why this desk is trustworthy');
+    expect(html).toContain('What this view can prove right now');
     expect(html).toContain('Sites with data');
     expect(html).toContain('Items on the desk');
     expect(html).toContain('Unseen updates');
     expect(html).toContain('Latest proof: Canvas');
-    expect(html).toContain('Start with the facts already on the desk. Review this slice');
+    expect(html).toContain('Start with Focus Queue');
+    expect(html).toContain('Start with the facts already on the desk, the red zones that stay manual, and the proof this view can actually show.');
     expect(html).toContain('Registration-related and red-zone routes stay outside this product surface.');
   });
 });

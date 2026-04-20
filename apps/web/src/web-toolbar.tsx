@@ -56,9 +56,9 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
     <section className="support-grid" aria-label="Workspace trust and diagnostics">
       <article className="support-card support-card--trust">
         <p className="eyebrow">Read this first</p>
-        <h2>What is on this desk</h2>
+        <h2>Why this desk is trustworthy</h2>
         <p className="support-copy">
-          Start with the facts already on the desk. Review this slice before you export it or ask AI to explain it.
+          Start with the facts already on the desk, the red zones that stay manual, and the proof this view can actually show.
         </p>
         <div className="support-list support-list--compact" role="list" aria-label="Trust summary rules">
           <div className="support-rule" role="listitem">
@@ -73,12 +73,16 @@ export function WebSupportRail(props: WebToolbarBaseProps) {
             <strong>Review before forward motion</strong>
             <span>Scope, receipts, and export posture stay visible before the explanation layer takes over.</span>
           </div>
+          <div className="support-rule" role="listitem">
+            <strong>Start with Focus Queue</strong>
+            <span>Use the next-up lane first, then scan Weekly Load when you need broader pacing context.</span>
+          </div>
         </div>
       </article>
 
       <article className="support-card support-card--diagnostics">
         <p className="eyebrow">Visible proof</p>
-        <h2>What this desk can prove</h2>
+        <h2>What this view can prove right now</h2>
         <p className="support-copy">
           Only the receipts already stored here count. This desk does not guess past what it can currently show.
         </p>
@@ -115,6 +119,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
         <p className="lede">
           One local desk for academic work, administrative signals, and the next decision.
         </p>
+        <p className="meta">Start with Focus Queue first, then scan Weekly Load when you need the wider week.</p>
       </div>
       <div className="hero-card hero-card--orientation">
         <p>Desk status</p>
@@ -129,12 +134,12 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
             <strong>{props.unseenUpdateCount}</strong>
           </div>
           <div className="hero-card-cell" role="listitem">
-            <span className="hero-card-label">Latest receipt</span>
+            <span className="hero-card-label">Latest proof</span>
             <strong>{props.topSyncRun ? formatRelativeTime(props.topSyncRun.completedAt) : 'Waiting'}</strong>
           </div>
         </div>
         <span>Last refresh {formatRelativeTime(props.now)}</span>
-        <span className="hero-card-note">Nothing here writes back to campus sites.</span>
+        <span className="hero-card-note">Read-only desk. Stored proof first. Nothing here writes back to campus sites.</span>
       </div>
     </section>
   );

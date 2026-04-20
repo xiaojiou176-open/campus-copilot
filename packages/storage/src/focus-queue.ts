@@ -76,28 +76,28 @@ function buildWorkItemClusterFocusItem(
   if (cluster.workType === 'assignment' || cluster.workType === 'deadline_signal') {
     if (cluster.dueAt && isPast(cluster.dueAt, now)) {
       reasons.push(
-        makePriorityReason('overdue', 'cluster 截止时间已过', 'critical', undefined, `截止时间是 ${cluster.dueAt}。`),
+        makePriorityReason('overdue', 'Cluster deadline already passed', 'critical', undefined, `Deadline: ${cluster.dueAt}.`),
       );
       score += 240;
     } else if (cluster.dueAt && isWithinUpcomingHours(cluster.dueAt, now, 48)) {
       reasons.push(
-        makePriorityReason('due_soon', 'cluster 48 小时内到期', 'high', undefined, `截止时间是 ${cluster.dueAt}。`),
+        makePriorityReason('due_soon', 'Cluster due within 48 hours', 'high', undefined, `Deadline: ${cluster.dueAt}.`),
       );
       score += 190;
     } else if (cluster.dueAt && isWithinUpcomingHours(cluster.dueAt, now, 24 * 7)) {
       reasons.push(
-        makePriorityReason('due_soon', 'cluster 本周内到期', 'medium', undefined, `截止时间是 ${cluster.dueAt}。`),
+        makePriorityReason('due_soon', 'Cluster due this week', 'medium', undefined, `Deadline: ${cluster.dueAt}.`),
       );
       score += 110;
     }
   } else if (cluster.workType === 'grade_signal') {
-    reasons.push(makePriorityReason('new_grade', 'cluster 有新的成绩结果', 'medium'));
+    reasons.push(makePriorityReason('new_grade', 'Cluster has a new grade signal', 'medium'));
     score += 105;
   }
 
   if (isClusterReviewPending(cluster)) {
     reasons.push(
-      makePriorityReason('recently_updated', '当前工作项仍是可能匹配', 'medium', undefined, '这条统一工作项仍需要人工确认。'),
+      makePriorityReason('recently_updated', 'This work item still needs review', 'medium', undefined, 'This merged work item still needs manual confirmation.'),
     );
     score += 40;
   }

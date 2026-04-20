@@ -1041,10 +1041,10 @@ function buildWorkItemClusters(
         ],
         summary:
           band === 'high'
-            ? `${title} 已被折成高置信度统一工作项：${authorityNarrative}。`
+            ? `${title} is now a high-confidence merged work item: ${authorityNarrative}.`
             : band === 'medium'
-            ? `${title} 已形成可用工作项簇：${authorityNarrative}；但 authority 仍有一部分需要人工复核。`
-            : `${title} 当前仍是单站工作项或低置信度候选。`,
+            ? `${title} now has a usable merged cluster: ${authorityNarrative}; some authority still needs manual review.`
+            : `${title} still needs a clearer cross-site merge before it can act like one combined task.`,
         authorityNarrative,
         authorityBreakdown,
         createdAt: observedAt,
@@ -1097,7 +1097,7 @@ function buildAdministrativeSummaries(
           : 'DARS still stays summary-first until the shared planning substrate captures both the MyPlan plan half and the audit-summary half.',
         importance: latestMyPlan.requirementGroupCount > 0 ? 'high' : 'medium',
         aiDefault: 'blocked',
-        authoritySource: 'myplan planning substrate (DARS summary lane)',
+        authoritySource: 'myplan planning snapshot',
         sourceSurface: 'myplan',
         nextAction: 'Review or export the DARS-aligned summary before any AI analysis.',
         exactBlockers: toAdministrativeBlockers(latestMyPlan.exactBlockers),
@@ -1160,43 +1160,43 @@ function buildAdministrativeSummaries(
     [
       {
         family: 'dars',
-        title: 'DARS summary lane',
+        title: 'Degree requirements review',
         summary:
-          'No truthful DARS summary lane is landed yet. Degree-audit detail remains blocked until the shared planning substrate captures a lawful summary carrier.',
+          'Degree requirements are not visible in this desk yet. Keep DARS review-first until a trustworthy planning summary is available.',
         importance: 'high',
         nextAction:
-          'Keep DARS review/export-first until a planning-backed summary lane is landed or an exact external blocker is proven.',
+          'Keep DARS export-first until a planning-backed degree review summary is available or an exact external blocker is proven.',
         sourceSurface: 'myplan',
       },
       {
         family: 'transcript',
-        title: 'Transcript summary lane',
-        summary: 'No truthful transcript runtime carrier is landed yet. Historical-record detail remains blocked until a lawful summary carrier is proven.',
+        title: 'Transcript review summary',
+        summary: 'Transcript details are not visible in this desk yet. Review the current summary or export first until a stronger transcript lane is available.',
         importance: 'high',
         nextAction: 'Do not claim transcript support; either land a summary-first carrier or record an exact external blocker after a bounded live push.',
         sourceSurface: 'myuw',
       },
       {
         family: 'finaid',
-        title: 'Financial-aid summary lane',
-        summary: 'No truthful financial-aid runtime carrier is landed yet. Aid detail remains blocked pending a lawful summary-first carrier.',
+        title: 'Financial aid review summary',
+        summary: 'Financial aid details are not visible in this desk yet. Keep this slice review-first until a stronger aid summary is available.',
         importance: 'high',
         nextAction: 'Keep export-first and AI-blocked until a summary carrier is landed or an exact external blocker is proven.',
         sourceSurface: 'myuw',
       },
       {
         family: 'accounts',
-        title: 'Accounts summary lane',
-        summary: 'No truthful accounts runtime carrier is landed yet. Account-state detail remains blocked pending a lawful summary-first carrier.',
+        title: 'Account review summary',
+        summary: 'Account details are not visible in this desk yet. Keep this slice review-first until a stronger account summary is available.',
         importance: 'medium',
         nextAction: 'Keep review/export-first and AI-blocked until a summary carrier is landed or an exact blocker is proven.',
         sourceSurface: 'myuw',
       },
       {
         family: 'tuition_detail',
-        title: 'Tuition-detail summary lane',
+        title: 'Tuition review summary',
         summary:
-          'No truthful tuition-detail runtime carrier is landed yet. Billing-statement detail remains blocked until a lawful summary-first carrier is proven.',
+          'Billing details are not visible in this desk yet. Keep this slice review-first until a stronger tuition summary is available.',
         importance: 'high',
         nextAction:
           'Keep tuition detail review/export-first until a statement-backed summary carrier is landed or an exact external blocker is proven.',
@@ -1204,9 +1204,9 @@ function buildAdministrativeSummaries(
       },
       {
         family: 'profile',
-        title: 'Profile summary lane',
+        title: 'Profile review summary',
         summary:
-          'No truthful profile runtime carrier is landed yet. Personal-profile detail remains blocked until a lawful summary-first carrier is proven.',
+          'Profile details are not visible in this desk yet. Keep this slice review-first until a stronger profile summary is available.',
         importance: 'medium',
         nextAction:
           'Keep profile review/export-first until a page-backed summary carrier is landed or an exact external blocker is proven.',

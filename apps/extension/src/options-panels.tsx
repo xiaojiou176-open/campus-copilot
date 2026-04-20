@@ -10,7 +10,7 @@ import {
   type ExtensionConfig,
 } from './config';
 import { formatProviderReason, formatProviderStatusError, type ProviderStatusLike } from './provider-status-format';
-import { formatRelativeTime, type ResolvedUiLanguage } from './i18n';
+import { formatAuthorizationStatusLabel, formatRelativeTime, type ResolvedUiLanguage } from './i18n';
 import { EXPORT_FORMAT_OPTIONS, PROVIDER_OPTIONS, SITE_LABELS } from './surface-shell-model';
 import { type UiText } from './surface-shell-view-helpers';
 
@@ -36,39 +36,6 @@ function getManagedPolicySiteLabel(site: (typeof MANAGED_POLICY_SITES)[number]) 
     return 'MyPlan';
   }
   return SITE_LABELS[site];
-}
-
-function formatAuthorizationStatusLabel(
-  status: ExtensionConfig['authorization']['rules'][number]['status'],
-  uiLanguage: ResolvedUiLanguage,
-) {
-  if (uiLanguage === 'zh-CN') {
-    switch (status) {
-      case 'allowed':
-        return '已允许';
-      case 'partial':
-        return '部分';
-      case 'confirm_required':
-        return '需确认';
-      case 'blocked':
-        return '已阻止';
-      default:
-        return status;
-    }
-  }
-
-  switch (status) {
-    case 'allowed':
-      return 'Allowed';
-    case 'partial':
-      return 'Partial';
-    case 'confirm_required':
-      return 'Confirm required';
-    case 'blocked':
-      return 'Blocked';
-    default:
-      return status;
-  }
 }
 
 function formatSiteOverlaySummary(
@@ -255,9 +222,9 @@ export function OptionsPanels(props: {
   const globalLayer1Status = getWorkspaceAuthorizationStatus(optionsDraft, 'layer1_read_export');
   const globalLayer2Status = getWorkspaceAuthorizationStatus(optionsDraft, 'layer2_ai_read_analysis');
   const detailedAuthorizationControlsLabel =
-    uiLanguage === 'zh-CN' ? '详细授权控制' : 'Detailed authorization controls';
+    uiLanguage === 'zh-CN' ? '更深信任审查' : 'Deeper trust reviews';
   const siteBoundaryReviewsLabel =
-    uiLanguage === 'zh-CN' ? '站点边界审查' : 'Site boundary reviews';
+    uiLanguage === 'zh-CN' ? '站点信任审查' : 'Site trust reviews';
   const protectedFamiliesReviewLabel =
     uiLanguage === 'zh-CN' ? '高敏资源与课程确认' : 'Protected families and course AI confirmations';
   const courseLevelAuthorizationLabel =
@@ -267,13 +234,13 @@ export function OptionsPanels(props: {
       ? '当前还没有记录任何课程级 AI opt-in。'
       : 'No course-level AI opt-ins have been captured yet.';
   const connectionSummaryTitle =
-    uiLanguage === 'zh-CN' ? '连接与边界摘要' : 'Connection and boundary summary';
+    uiLanguage === 'zh-CN' ? '桌面连接与信任摘要' : 'Desk connection and trust';
   const connectionSummaryDescription =
     uiLanguage === 'zh-CN'
-      ? '先确认当前 readiness、两层授权和高敏边界，再决定要不要往下改配置或导出。'
-      : 'Confirm readiness, the two-layer authorization posture, and high-sensitivity boundaries before changing settings or exporting.';
+      ? '先确认当前状态、两层授权和高敏边界，再决定要不要往下改配置或导出。'
+      : 'Confirm the current status, the two-layer authorization posture, and high-sensitivity boundaries before changing settings or exporting.';
   const configurationActionsTitle =
-    uiLanguage === 'zh-CN' ? '配置动作' : 'Configuration actions';
+    uiLanguage === 'zh-CN' ? '下一步动作' : 'Next steps';
   const configurationActionsDescription =
     uiLanguage === 'zh-CN'
       ? '保存、刷新和导出放到 trust/boundary 摘要之后，避免首屏先变成控制台。'
@@ -281,7 +248,7 @@ export function OptionsPanels(props: {
   const readExportLabel = uiLanguage === 'zh-CN' ? '读取与导出' : 'Read & export';
   const aiAnalysisLabel = uiLanguage === 'zh-CN' ? 'AI 分析' : 'AI analysis';
   const localAiConnectionLabel = uiLanguage === 'zh-CN' ? '本地 AI 连接' : 'Local AI connection';
-  const trustPostureLabel = uiLanguage === 'zh-CN' ? '当前信任姿态' : 'Current trust posture';
+  const trustPostureLabel = uiLanguage === 'zh-CN' ? '当前信任摘要' : 'Current trust summary';
   const managedSiteAuthorizationSnapshot = MANAGED_POLICY_SITES.map((site) => ({
     site,
     layer1: getSiteAuthorizationStatus(optionsDraft, site, 'layer1_read_export'),
@@ -298,6 +265,8 @@ export function OptionsPanels(props: {
     optionsDraft.sites.edstem.unreadPath,
     optionsDraft.sites.edstem.recentActivityPath,
   ].filter(Boolean).length;
+  const defaultProviderLabel =
+    PROVIDER_OPTIONS.find((option) => option.value === optionsDraft.ai.defaultProvider)?.label ?? optionsDraft.ai.defaultProvider;
 
   return (
     <div className="surface__stack">
@@ -326,7 +295,7 @@ export function OptionsPanels(props: {
               {aiAnalysisLabel}: {formatAuthorizationStatusLabel(globalLayer2Status, uiLanguage)}
             </p>
             <p className="surface__meta">
-              {text.options.defaultProvider}: {optionsDraft.ai.defaultProvider}
+              {text.options.defaultProvider}: {defaultProviderLabel}
               {' · '}
               {text.options.defaultExportFormat}: {optionsDraft.defaultExportFormat.toUpperCase()}
             </p>
@@ -374,7 +343,9 @@ export function OptionsPanels(props: {
           <details className="surface__advanced-settings surface__advanced-settings--supporting">
             <summary className="surface__advanced-settings-summary">
               <span>{uiLanguage === 'zh-CN' ? '打开 AI 可用性说明' : 'Open AI readiness notes'}</span>
-              <span className="surface__badge surface__badge--neutral">{PROVIDER_OPTIONS.length} providers</span>
+              <span className="surface__badge surface__badge--neutral">
+                {uiLanguage === 'zh-CN' ? `${PROVIDER_OPTIONS.length} 条路线` : `${PROVIDER_OPTIONS.length} providers`}
+              </span>
             </summary>
             <div className="surface__advanced-settings-body">
               <div className="surface__evidence-grid surface__evidence-grid--compact">
@@ -455,7 +426,7 @@ export function OptionsPanels(props: {
         </p>
         <details className="surface__advanced-settings" open={false}>
           <summary className="surface__advanced-settings-summary">
-            <span>{uiLanguage === 'zh-CN' ? '展开授权审查与规则控制' : 'Open authorization reviews and rule controls'}</span>
+            <span>{uiLanguage === 'zh-CN' ? '展开更深信任审查' : 'Open deeper trust reviews'}</span>
             <span className="surface__badge surface__badge--neutral">{uiLanguage === 'zh-CN' ? '3 组' : '3 groups'}</span>
           </summary>
           <div className="surface__advanced-settings-body">
@@ -574,7 +545,7 @@ export function OptionsPanels(props: {
                         >
                           {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
                             <option key={`course-draft-${option}`} value={option}>
-                              {option}
+                              {formatAuthorizationStatusLabel(option, uiLanguage)}
                             </option>
                           ))}
                         </select>
@@ -628,7 +599,7 @@ export function OptionsPanels(props: {
                             >
                               {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
                                 <option key={`${rule.id}-${option}`} value={option}>
-                                  {option}
+                                  {formatAuthorizationStatusLabel(option, uiLanguage)}
                                 </option>
                               ))}
                             </select>
@@ -665,7 +636,7 @@ export function OptionsPanels(props: {
                 >
                   {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
                     <option key={`global-layer1-${option}`} value={option}>
-                      {option}
+                      {formatAuthorizationStatusLabel(option, uiLanguage)}
                     </option>
                   ))}
                 </select>
@@ -686,7 +657,7 @@ export function OptionsPanels(props: {
                 >
                   {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
                     <option key={`global-layer2-${option}`} value={option}>
-                      {option}
+                      {formatAuthorizationStatusLabel(option, uiLanguage)}
                     </option>
                   ))}
                 </select>
@@ -711,7 +682,7 @@ export function OptionsPanels(props: {
                   >
                     {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
                       <option key={`${site}-layer1-${option}`} value={option}>
-                        {option}
+                        {formatAuthorizationStatusLabel(option, uiLanguage)}
                       </option>
                     ))}
                   </select>
@@ -733,7 +704,7 @@ export function OptionsPanels(props: {
                   >
                     {AUTHORIZATION_STATUS_OPTIONS.map((option) => (
                       <option key={`${site}-layer2-${option}`} value={option}>
-                        {option}
+                        {formatAuthorizationStatusLabel(option, uiLanguage)}
                       </option>
                     ))}
                   </select>
@@ -781,7 +752,7 @@ export function OptionsPanels(props: {
 
       <details className="surface__advanced-settings" open={false}>
         <summary className="surface__advanced-settings-summary">
-          <span>{uiLanguage === 'zh-CN' ? '高级工作台控制项' : 'Advanced workspace controls'}</span>
+            <span>{uiLanguage === 'zh-CN' ? '连接工具' : 'Connection tools'}</span>
           <span className="surface__badge surface__badge--neutral">
             {uiLanguage === 'zh-CN' ? '4 组' : '4 groups'}
           </span>
@@ -932,7 +903,9 @@ export function OptionsPanels(props: {
                 <details className="surface__advanced-settings surface__advanced-settings--supporting" open={false}>
                   <summary className="surface__advanced-settings-summary">
                     <span>{uiLanguage === 'zh-CN' ? '打开 provider / model overrides' : 'Open provider / model overrides'}</span>
-                    <span className="surface__badge surface__badge--neutral">{PROVIDER_OPTIONS.length} providers</span>
+                    <span className="surface__badge surface__badge--neutral">
+                      {uiLanguage === 'zh-CN' ? `${PROVIDER_OPTIONS.length} 条路线` : `${PROVIDER_OPTIONS.length} providers`}
+                    </span>
                   </summary>
                   <div className="surface__advanced-settings-body">
                     <div className="surface__stack">

@@ -16,7 +16,7 @@ import type {
 } from '@campus-copilot/storage';
 import { useWorkbenchView } from '@campus-copilot/storage';
 import type { ExtensionConfig } from './config';
-import type { ResolvedUiLanguage } from './i18n';
+import { formatAuthorizationStatusLabel, type ResolvedUiLanguage } from './i18n';
 import type { ExportFamilyKind } from './sidepanel-mode-copy';
 import { buildSurfaceExportArtifact, type SurfaceCompositionState } from './surface-shell-composition';
 import { buildDownloadPayload, EXPORT_FORMAT_OPTIONS, SITE_LABELS, type OrderedSiteStatusEntry } from './surface-shell-model';
@@ -78,21 +78,6 @@ function filterCourseResources(resources: Resource[], site: ExportScopeSite, cou
   });
 }
 
-function formatAuthorizationStatusLabel(status: string | undefined, uiLanguage: ResolvedUiLanguage) {
-  if (uiLanguage === 'zh-CN') {
-    if (status === 'allowed') return '已允许';
-    if (status === 'partial') return '部分';
-    if (status === 'confirm_required') return '需确认';
-    if (status === 'blocked') return '已阻止';
-    return '未设置';
-  }
-  if (status === 'allowed') return 'Allowed';
-  if (status === 'partial') return 'Partial';
-  if (status === 'confirm_required') return 'Confirm required';
-  if (status === 'blocked') return 'Blocked';
-  return 'Unset';
-}
-
 function formatRiskLabel(riskLabel: 'low' | 'medium' | 'high', uiLanguage: ResolvedUiLanguage) {
   if (uiLanguage === 'zh-CN') {
     if (riskLabel === 'high') return '高风险';
@@ -118,13 +103,13 @@ function formatMatchConfidenceLabel(matchConfidence: 'low' | 'medium' | 'high', 
 function formatProvenanceSourceType(sourceType: ExportProvenanceEntry['sourceType'], uiLanguage: ResolvedUiLanguage) {
   if (uiLanguage === 'zh-CN') {
     if (sourceType === 'official_api') return '官方 API';
-    if (sourceType === 'session_interface') return '会话载体';
+    if (sourceType === 'session_interface') return '会话来源';
     if (sourceType === 'page_state') return '页面状态';
     return '派生读模型';
   }
   if (sourceType === 'official_api') return 'official API';
-  if (sourceType === 'session_interface') return 'session-backed carrier';
-  if (sourceType === 'page_state') return 'page-state carrier';
+  if (sourceType === 'session_interface') return 'session-backed source';
+  if (sourceType === 'page_state') return 'page-state source';
   return 'derived read model';
 }
 
@@ -528,12 +513,20 @@ export function SurfaceShellExportPanel(props: {
   const exportReviewDescription = modeCopy.families[exportFamily].description;
   const exportTrustSummary =
     exportFamily === 'administrative_snapshot'
-      ? 'Summary-first and review-first. AI stays more restrictive than read/export for this packet.'
+      ? uiLanguage === 'zh-CN'
+        ? '这组高敏摘要先审阅、再导出；AI 仍然比读取与导出更严格。'
+        : 'This high-sensitivity summary stays review-first before export, and AI remains stricter than read/export.'
       : exportFamily === 'cluster_merge_review'
-        ? 'Review-first packet for authority and possible-match checks before anything leaves the extension.'
+        ? uiLanguage === 'zh-CN'
+          ? '这组合并审查结果会先审阅 authority source 和 possible-match，再决定是否导出。'
+          : 'This merge-review packet stays review-first so source-of-truth and possible-match checks remain visible before export.'
         : isCourseScopedExportSite(exportScopeSite)
-          ? 'Course scope narrows the packet before export, so review stays tied to one course lane.'
-          : 'Whole-site export stays truthful when the source does not map cleanly to one course lane.';
+          ? uiLanguage === 'zh-CN'
+            ? '课程范围会先把导出缩到单门课，再进入审阅和导出。'
+            : 'Course scope narrows the export to one course lane before review and export.'
+          : uiLanguage === 'zh-CN'
+            ? '当前更适合按站点整体导出，这样比强行先切课程更诚实。'
+            : 'Whole-site export stays truthful when the source does not map cleanly to one course lane.';
 
   const getWorkspaceAuthorizationRule = (
     layer: 'layer1_read_export' | 'layer2_ai_read_analysis',
@@ -566,81 +559,81 @@ export function SurfaceShellExportPanel(props: {
   const exportAuthorizationDetail =
     exportFamily === 'administrative_snapshot'
       ? uiLanguage === 'zh-CN'
-        ? '这组导出当前停在 review-first summary，并继续保持 export-first；AI 不会因为能导出就自动获得读取权限。'
-        : 'This packet currently stays at the review-first summary level and still stays export-first; AI does not inherit access just because export is allowed.'
+        ? '这组导出当前停在先审阅摘要，并继续保持导出优先；AI 不会因为能导出就自动获得读取权限。'
+        : 'This export currently stays at the review-first summary level and export-first path; AI does not inherit access just because export is allowed.'
       : uiLanguage === 'zh-CN'
         ? `当前导出按 ${exportScopeLabel} 的读取与 AI 授权边界来解释。`
         : `This export follows the current read/export and AI boundaries for ${exportScopeLabel}.`;
   const exportDepthDetail =
     selectedExportFamilyCard?.status === 'partial'
       ? uiLanguage === 'zh-CN'
-        ? '这条资源族已经 landed，但仍是部分深度，不会伪装成 full parity。'
-        : 'This family is landed but still partial depth; it should not be treated as full parity.'
+        ? '这项导出内容已经可用，但仍是部分深度，不会伪装成完整覆盖。'
+        : 'This export surface is available, but still only covers part of the full depth.'
       : selectedExportFamilyCard?.status === 'blocked'
         ? uiLanguage === 'zh-CN'
-          ? '当前 carrier 还没到可导出产品面，这里只允许诚实地显示为 blocked。'
-          : 'The carrier is not productized for export yet, so this stays honestly blocked.'
+          ? '当前数据来源还没整理到可导出的产品面，所以这里只会诚实显示为当前不可用。'
+          : 'This data source is not productized for export yet, so it stays honestly unavailable.'
         : uiLanguage === 'zh-CN'
-          ? '这条资源族当前已经处在可导出的 landed 路径上。'
-          : 'This family is currently on the landed export path.';
+          ? '这项导出内容当前已经处在可导出的正式路径上。'
+          : 'This export surface is currently on the supported export path.';
   const exportPacketHonesty =
     exportFamily === 'administrative_snapshot'
       ? uiLanguage === 'zh-CN'
-        ? '高敏摘要当前停在 review-first summary；导出允许不等于 AI 自动继承读取。'
-        : 'High-sensitivity summaries currently stay at the review-first summary level; export allowed does not mean AI automatically inherit read access.'
+        ? '高敏摘要当前停在先审阅摘要；导出允许不等于 AI 自动继承读取。'
+        : 'High-sensitivity summaries stay review-first here; export allowed does not mean AI automatically inherits read access.'
       : selectedExportFamilyCard?.status === 'blocked'
         ? uiLanguage === 'zh-CN'
-          ? '当前只允许诚实地停在 review blocked，不把未产品化 carrier 包装成可导出。'
-          : 'This stays honestly review-blocked instead of pretending an unproductized carrier is export-ready.'
+          ? '当前只会诚实停在先审阅、暂不导出，不把还没整理好的数据来源包装成可导出。'
+          : 'This stays honestly review-first and unavailable instead of pretending an unfinished data source is export-ready.'
         : uiLanguage === 'zh-CN'
-          ? '先审 scope、授权和深度，再决定是否导出这个 packet。'
-          : 'Review scope, authorization, and depth before deciding whether to export this packet.';
+          ? '先审范围、授权和深度，再决定是否导出这张结果卡。'
+          : 'Review scope, authorization, and depth before deciding whether to export this result card.';
   const exportAiAllowedLead =
     uiLanguage === 'zh-CN'
       ? exportReviewPackaging.aiAllowed
-        ? 'AI 分析已允许'
-        : 'AI 分析保持阻止'
+        ? 'AI 分析已就绪'
+        : 'AI 分析保持关闭'
       : exportReviewPackaging.aiAllowed
-        ? 'AI analysis allowed'
-        : 'AI analysis blocked';
+        ? 'AI analysis ready now'
+        : 'AI analysis kept off';
   const exportAiAllowedDetail =
     exportReviewPackaging.aiAllowed
       ? uiLanguage === 'zh-CN'
-        ? '当前允许 AI 分析这个导出包，但不会改变导出或站外写边界。'
-        : 'AI is allowed for this packet without changing export or external-write boundaries.'
+        ? '当前允许 AI 分析这张结果卡，但不会改变导出或站外写边界。'
+        : 'AI may analyze this result card without changing export or external-write boundaries.'
       : uiLanguage === 'zh-CN'
-        ? 'AI 边界仍然比导出更严格；就算能导出，这个导出包也不会自动开放给 AI。'
-        : 'AI stays stricter than export here; an exportable packet does not automatically become AI-readable.';
+        ? 'AI 边界仍然比导出更严格；就算能导出，这张结果卡也不会自动开放给 AI。'
+        : 'AI stays stricter than export here; an exportable result card does not automatically become AI-readable.';
   const exportRiskLead = formatRiskLabel(exportReviewPackaging.riskLabel, uiLanguage);
   const exportRiskDetail =
     exportReviewPackaging.riskLabel === 'high'
       ? uiLanguage === 'zh-CN'
-        ? '这个 packet 需要更高强度的 operator 判断，不应被当成低风险素材。'
-        : 'This packet needs stronger operator judgment and should not be treated as low-risk material.'
+        ? '这张导出结果需要更仔细的人工复核，不应被当成低风险素材。'
+        : 'This export result needs a more careful manual review and should not be treated as low-risk material.'
       : exportReviewPackaging.riskLabel === 'medium'
         ? uiLanguage === 'zh-CN'
-          ? '当前允许 review-first 地继续，但仍需要看清 carrier 和授权边界。'
-          : 'This can proceed review-first, but the carrier and authorization boundary still need to stay visible.'
+          ? '当前可以先审阅再继续，但仍需要看清数据来源和授权边界。'
+          : 'This can proceed review-first, but the data source and authorization boundary still need to stay visible.'
         : uiLanguage === 'zh-CN'
-          ? '当前风险标签较低，但仍按 review-first desk 展示，不做静默导出假设。'
+          ? '当前风险标签较低，但仍按先审阅桌面展示，不做静默导出假设。'
           : 'This currently carries a lower risk label, but it still stays on the review-first desk instead of assuming silent export.';
   const exportMatchLead = formatMatchConfidenceLabel(exportReviewPackaging.matchConfidence, uiLanguage);
   const exportMatchDetail =
     exportReviewPackaging.matchConfidence === 'high'
       ? uiLanguage === 'zh-CN'
-        ? '当前 packet 的作用域和载体比较稳定，operator 只需要做常规核对。'
-        : 'This packet currently maps through a more stable scope and carrier lane, so normal operator review is usually enough.'
+        ? '当前这张结果卡的范围和来源比较稳定，通常做常规复核就够了。'
+        : 'This result card currently maps through a more stable scope and source, so a normal review pass is usually enough.'
       : exportReviewPackaging.matchConfidence === 'medium'
         ? uiLanguage === 'zh-CN'
-          ? '当前仍有一定的合并或作用域不确定性，所以 review 不该被跳过。'
+          ? '当前仍有一定的合并或范围不确定性，所以审阅步骤不该被跳过。'
           : 'There is still some scope or merge uncertainty here, so the review step should stay visible.'
         : uiLanguage === 'zh-CN'
-          ? '当前匹配把握较弱，适合先停在 review，而不是假装已经 fully resolved。'
-          : 'Confidence is weaker here, so it is more honest to stop at review than to pretend the packet is fully resolved.';
+          ? '当前匹配把握较弱，适合先停在审阅，而不是假装已经完全厘清。'
+          : 'Confidence is weaker here, so it is more honest to stop at review than to pretend the result is fully resolved.';
   const exportProvenanceEntries: ExportProvenanceEntry[] = exportReviewPackaging.provenance ?? [];
   const exportProvenanceLead =
     exportProvenanceEntries[0]?.label ??
-    (uiLanguage === 'zh-CN' ? '当前 packet 没有来源标签' : 'No provenance label on this packet');
+    (uiLanguage === 'zh-CN' ? '当前这张结果卡还没有来源标签' : 'This result card does not have a provenance label yet.');
   const exportProvenanceSourceSummary =
     exportProvenanceEntries.length > 0
       ? Array.from(new Set(exportProvenanceEntries.map((entry) => formatProvenanceSourceType(entry.sourceType, uiLanguage)))).join(' · ')
@@ -650,11 +643,11 @@ export function SurfaceShellExportPanel(props: {
   const exportProvenanceDetail =
     exportProvenanceEntries.length > 0
       ? uiLanguage === 'zh-CN'
-        ? `${exportProvenanceEntries.length} 条只读来源线索 · ${exportProvenanceSourceSummary}`
+        ? `${exportProvenanceEntries.length} 条只读来源 · ${exportProvenanceSourceSummary}`
         : `${exportProvenanceEntries.length} read-only provenance lanes · ${exportProvenanceSourceSummary}`
       : uiLanguage === 'zh-CN'
-        ? '当前 review 卡还没有拿到来源明细。'
-        : 'This review card does not currently have provenance detail.';
+        ? '当前这张结果卡还没有拿到来源明细。'
+        : 'This result card does not currently have provenance detail.';
   const exportProvenanceSecondary =
     exportProvenanceEntries.length > 1 ? exportProvenanceEntries.slice(1, 3).map((entry) => entry.label).join(' · ') : undefined;
   const exportScopeReceipt = [exportScopeLabel, exportCourseLabel ?? modeCopy.allCourses, selectedFormatLabel].join(' · ');
@@ -736,8 +729,11 @@ export function SurfaceShellExportPanel(props: {
             </select>
           </label>
           <div className="surface__actions surface__actions--wrap">
+            <button className="surface__button" disabled={!selectedExportFamilyCard?.exportable} onClick={() => void handleExportSelection()} type="button">
+              {modeCopy.exportButton}
+            </button>
             <button className="surface__button surface__button--ghost" onClick={onBackToAssistant} type="button">
-              {uiLanguage === 'zh-CN' ? '助手' : 'Assistant'}
+              {uiLanguage === 'zh-CN' ? '返回助手' : 'Back to assistant'}
             </button>
           </div>
           {exportFeedback ? <p className="surface__feedback">{exportFeedback}</p> : null}
@@ -772,10 +768,10 @@ export function SurfaceShellExportPanel(props: {
           <div>
             <strong>{exportReviewTitle}</strong>
             <p className="surface__meta">
-              {exportReviewDescription} {uiLanguage === 'zh-CN' ? '先看 trust review，再点导出。' : 'Trust review comes before the export action.'}
+              {exportReviewDescription} {uiLanguage === 'zh-CN' ? '先看信任与范围说明，再点导出。' : 'Review the trust and scope notes before exporting.'}
             </p>
             <p className="surface__meta">
-              {uiLanguage === 'zh-CN' ? '当前 packet receipt：' : 'Current packet receipt: '} {exportScopeReceipt}
+              {uiLanguage === 'zh-CN' ? '当前导出范围：' : 'Current export scope: '} {exportScopeReceipt}
             </p>
           </div>
           <span
@@ -797,7 +793,7 @@ export function SurfaceShellExportPanel(props: {
             <p className="surface__meta">{exportAuthorizationDetail}</p>
           </article>
           <article className="surface__evidence-card">
-            <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '导出包诚实度' : 'Packet honesty'}</p>
+            <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '导出边界' : 'Export boundary'}</p>
             <p className="surface__item-lead">{selectedExportFamilyCard?.status === 'blocked' ? exportReviewStatus : exportReviewTitle}</p>
             <p className="surface__meta">{exportPacketHonesty}</p>
           </article>
@@ -807,7 +803,7 @@ export function SurfaceShellExportPanel(props: {
             <p className="surface__meta">{exportAiAllowedDetail}</p>
           </article>
           <article className="surface__evidence-card">
-            <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '来源线索' : 'Provenance'}</p>
+            <p className="surface__meta-label">{uiLanguage === 'zh-CN' ? '数据来源' : 'Provenance'}</p>
             <p className="surface__item-lead">{exportProvenanceLead}</p>
             <p className="surface__meta">{exportProvenanceDetail}</p>
             {exportProvenanceSecondary ? <p className="surface__meta">{exportProvenanceSecondary}</p> : null}
@@ -815,8 +811,8 @@ export function SurfaceShellExportPanel(props: {
         </div>
         <details className="surface__advanced-settings surface__advanced-settings--supporting">
           <summary className="surface__advanced-settings-summary">
-            <span>{uiLanguage === 'zh-CN' ? '打开更细的导出证据' : 'Open detailed packet evidence'}</span>
-            <span className="surface__badge surface__badge--neutral">3 items</span>
+            <span>{uiLanguage === 'zh-CN' ? '打开更细的导出证据' : 'Open detailed export evidence'}</span>
+            <span className="surface__badge surface__badge--neutral">{uiLanguage === 'zh-CN' ? '3 项' : '3 items'}</span>
           </summary>
           <div className="surface__advanced-settings-body">
             <div className="surface__evidence-grid surface__evidence-grid--compact">
@@ -848,7 +844,7 @@ export function SurfaceShellExportPanel(props: {
             {modeCopy.exportButton}
           </button>
           <button className="surface__button surface__button--secondary" onClick={onOpenSettings} type="button">
-            {uiLanguage === 'zh-CN' ? '设置' : 'Settings'}
+            {uiLanguage === 'zh-CN' ? '信任中心' : 'Trust center'}
           </button>
         </div>
       </article>

@@ -183,7 +183,7 @@ function getClusterReviewStatusText(decision: ClusterReviewDecision | undefined,
   if (decision === 'dismissed') {
     return 'Dismissed locally';
   }
-  return needsReview ? 'Possible match' : 'Merged';
+  return needsReview ? 'Needs review' : 'Merged';
 }
 
 function getClusterReviewStatusClass(decision: ClusterReviewDecision | undefined, needsReview: boolean) {
@@ -324,23 +324,23 @@ function getAssignmentActionSummary(assignment: { actionHints?: string[] }) {
 
 function getAdministrativeLaneLabel(summary: AdministrativeSummary) {
   if (summary.laneStatus === 'carrier_not_landed') {
-    return 'Needs capture';
+    return 'Needs setup';
   }
   if (summary.laneStatus === 'standalone_detail_runtime_lane') {
     return 'Details ready';
   }
-  return 'summary ready';
+  return 'Review summary';
 }
 
 function getAdministrativeDetailRuntimeLabel(summary: AdministrativeSummary) {
   if (summary.detailRuntimeStatus === 'blocked_missing_carrier') {
-    return 'Details blocked';
+    return 'Details off for now';
   }
   if (summary.detailRuntimeStatus === 'review_ready') {
     return 'Review ready';
   }
   if (summary.detailRuntimeStatus === 'pending') {
-    return 'Details coming next';
+    return 'More detail next';
   }
   return undefined;
 }
@@ -689,7 +689,7 @@ export function WebWorkbenchPanels(props: {
           Review the current scope, sharing boundary, provenance, and site rules before exporting or asking AI.
           This lane stays read-only and works like a quieter review desk, not a second product shell.
         </p>
-        <div className="ai-explanation-strip" aria-label="Auth and export management">
+        <div className="ai-explanation-strip" aria-label="Trust and export management">
           <article className="guidance-card">
             <p className="meta-title">Review scope</p>
             <strong>{formatScopeLine(currentScope)}</strong>
@@ -795,7 +795,7 @@ export function WebWorkbenchPanels(props: {
                 <span className="badge">{mergedCourseCount}</span>
               </div>
               <p className="meta">
-                merged {props.mergeHealth?.mergedCount ?? 0} · possible match {props.mergeHealth?.possibleMatchCount ?? 0}
+                merged {props.mergeHealth?.mergedCount ?? 0} · needs review {props.mergeHealth?.possibleMatchCount ?? 0}
               </p>
             </article>
             <article className="item">

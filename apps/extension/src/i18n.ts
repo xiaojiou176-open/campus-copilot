@@ -34,6 +34,22 @@ export function readBrowserLanguage(): string {
   return navigator.languages?.[0] ?? navigator.language ?? 'en-US';
 }
 
+export function formatAuthorizationStatusLabel(status: string | undefined, uiLanguage: ResolvedUiLanguage) {
+  if (uiLanguage === 'zh-CN') {
+    if (status === 'allowed') return '已就绪';
+    if (status === 'partial') return '先复核';
+    if (status === 'confirm_required') return '需确认';
+    if (status === 'blocked') return '保持关闭';
+    return '未设置';
+  }
+
+  if (status === 'allowed') return 'Ready now';
+  if (status === 'partial') return 'Review-first';
+  if (status === 'confirm_required') return 'Needs confirmation';
+  if (status === 'blocked') return 'Kept off';
+  return 'Unset';
+}
+
 type UiText = {
   exportPresets: {
     weeklyAssignments: string;
@@ -464,6 +480,11 @@ type UiText = {
     aiFallbackWithoutCitations: string;
     bffMissingForAi: string;
     providerNotReadyInBff: (provider: string) => string;
+    aiScopeNeedsTrustCenter: string;
+    advancedMaterialCourseRequired: string;
+    advancedMaterialExcerptRequired: string;
+    advancedMaterialAcknowledgementRequired: string;
+    advancedMaterialNotice: (courseLabel: string) => string;
     partialSuccess: (site: string) => string;
     overlayPinned: string;
     overlayUnpinned: string;
@@ -600,7 +621,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
     },
     hero: {
       sidepanelEyebrow: 'Campus Copilot Sidepanel',
-      sidepanelTitle: 'Academic workbench',
+      sidepanelTitle: 'Trust-first campus desk',
       sidepanelDescription:
         'Keep today\'s academic work, administrative signals, and trust state on one desk before you ask, export, or go deeper.',
       popupEyebrow: 'Campus Copilot Popup',
@@ -608,7 +629,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       popupDescription:
         'Popup stays lightweight and acts like a quick pulse check: sync status, priority counts, and the fastest way into the main workbench.',
       optionsEyebrow: 'Campus Copilot Options',
-      optionsTitle: 'Settings and trust center',
+      optionsTitle: 'Trust center',
       optionsDescription:
         'Check what the product may read, what AI may analyze, and which local AI route is ready without turning this page into a second desk.',
     },
@@ -671,7 +692,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       openExport: 'Open export',
       exportCurrentView: 'Export current view',
       markUpdatesSeen: 'Mark updates as seen',
-      openOptions: 'Open Options',
+      openOptions: 'Open full settings',
       openMainWorkbench: 'Open full workbench',
     },
     nextUp: {
@@ -959,7 +980,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       currentViewDescription: 'Capture the exact workbench slice that is already in front of you.',
     },
     options: {
-      configurationTitle: 'Settings and authorization',
+      configurationTitle: 'Trust center and authorization',
       configurationDescription:
         'Start with trust and connection status. Expand deeper connection and site overrides only when the default path is not enough.',
       siteConfiguration: 'Site configuration',
@@ -978,20 +999,20 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       unreadPathPlaceholder: 'Optional: leave empty to avoid overriding the unread path',
       recentActivityPath: 'EdStem recent activity path',
       recentActivityPathPlaceholder: 'Optional: leave empty to avoid overriding the recent activity path',
-      aiBffConfiguration: 'Local AI connection',
-      bffBaseUrl: 'Local AI service URL',
+      aiBffConfiguration: 'Local AI route',
+      bffBaseUrl: 'Manual local AI address',
       bffBaseUrlPlaceholder: 'For example: http://127.0.0.1:8787',
       defaultProvider: 'Default provider',
-      refreshBffStatus: 'Refresh AI route status',
+      refreshBffStatus: 'Refresh route check',
       refreshingBffStatus: 'Refreshing...',
       openAiModel: 'OpenAI model',
       geminiModel: 'Gemini model',
       switchyardModel: 'Switchyard model',
       switchyardRuntimeProvider: 'Switchyard provider',
       switchyardLane: 'Switchyard lane',
-      advancedRuntimeSettings: 'Advanced connection overrides',
+      advancedRuntimeSettings: 'Deeper connection tools',
       advancedRuntimeDescription:
-        'Manual service overrides, model names, and site-specific paths stay here so the first screen can stay summary-first.',
+        'Manual addresses, model names, and site-specific overrides stay here so the first screen can stay summary-first.',
       manualFallbackOnly: 'Manual address only',
       defaultExportFormat: 'Default export format',
       saveConfiguration: 'Save configuration',
@@ -1028,8 +1049,13 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       aiRequestFailed: 'AI request failed.',
       aiFallbackWithoutCitations:
         'The current provider returned a displayable answer, but it did not include the structured citation block yet. Treat this as uncited fallback.',
-      bffMissingForAi: 'The local AI service URL is not configured yet. Set it in Settings first.',
+      bffMissingForAi: 'The local AI route is not configured yet. Add a manual address in Trust Center first.',
       providerNotReadyInBff: (provider) => `${provider} is not ready in the local AI route yet.`,
+      aiScopeNeedsTrustCenter: 'AI access for this desk still needs to be allowed in Trust Center.',
+      advancedMaterialCourseRequired: 'Choose one course before turning on advanced material analysis.',
+      advancedMaterialExcerptRequired: 'Paste one course excerpt before asking for advanced material analysis.',
+      advancedMaterialAcknowledgementRequired: 'Confirm the course-material responsibility notice before continuing.',
+      advancedMaterialNotice: (courseLabel) => `Advanced material analysis used only the pasted excerpt for ${courseLabel}.`,
       partialSuccess: (site) => `${site} partially succeeded.`,
       overlayPinned: 'Pinned for focus.',
       overlayUnpinned: 'Removed from pinned focus.',
@@ -1039,14 +1065,14 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       overlayNoteCleared: 'Local note cleared.',
     },
     diagnosticsMessages: {
-      missingBffBaseUrl: 'Local AI service URL is not configured yet',
+      missingBffBaseUrl: 'Local AI route is not configured yet',
       providerStatusFetchFailed: 'AI route status fetch failed',
-      bffBaseUrlNotConfigured: 'Local AI service URL is not configured',
+      bffBaseUrlNotConfigured: 'Local AI route is not configured',
       providerNotReady: (providers) => `Provider not ready: ${providers}`,
       defaultProviderNotReady: (provider) => `Default provider not ready: ${provider}`,
       sitesStillMissingLivePrerequisites: (sites) => `Sites still missing live prerequisites: ${sites}`,
       bffProviderStatusFetchFailed: 'Local AI route status fetch failed',
-      nextActionSetBff: 'Set the local AI service URL in Settings, then refresh route status.',
+      nextActionSetBff: 'Add a manual local AI address in Trust Center, then refresh the route check.',
       nextActionProviderKey: 'Add at least one formal provider API key before attempting a real AI round-trip.',
       nextActionSwitchProvider: 'Switch to a ready provider or configure the current default provider API key.',
       nextActionRestoreSiteContext: 'Restore the real logged-in context or trigger sync from the correct site tab, then retry live validation.',
@@ -1226,11 +1252,11 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       sidepanelTitle: '学习工作台',
       sidepanelDescription: '先把今天的学业任务、行政信号和 trust 状态放到同一张桌面上，再决定要不要提问、导出或继续下钻。',
       popupEyebrow: 'Campus Copilot 弹窗',
-      popupTitle: '快速体温计',
+      popupTitle: '轻量速览',
       popupDescription: 'Popup 保持轻量，负责给你一个很快的体温计：有没有同步、有没有高优先级数字、要不要立刻打开主工作台。',
       optionsEyebrow: 'Campus Copilot 设置',
-      optionsTitle: '设置与信任中心',
-      optionsDescription: '先看清产品能读什么、AI 能分析什么、当前连的是哪条本地 AI 路线，不把这页做成第二张桌面。',
+      optionsTitle: '信任中心',
+      optionsDescription: '先看清产品能读什么、AI 能分析什么、当前连的是哪条本地 AI 路线；更深设置留在下层，不把这页做成第二张桌面。',
     },
     meta: {
       noSyncYet: '还没有同步',
@@ -1291,7 +1317,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       openExport: '打开导出',
       exportCurrentView: '导出当前视图',
       markUpdatesSeen: '标记更新已查看',
-      openOptions: '打开设置',
+      openOptions: '打开完整设置',
       openMainWorkbench: '打开完整工作台',
     },
     nextUp: {
@@ -1530,7 +1556,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       questionBox: '提问框',
       suggestedPrompts: '建议问题',
       answerWithCitations: '带引用的回答',
-      advancedRuntimeSettings: '高级 AI 设置',
+      advancedRuntimeSettings: '更深 AI 工具',
       advancedRuntimeDescription:
         '服务商、模型和 Switchyard 控件都下沉到这里，作为 AI 路线细节存在。第一屏主角应该始终是学习工作台，不是调参面板。',
       uncitedAnswerWarning: '需要引用',
@@ -1542,7 +1568,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       placeholder: '例如：我现在最该关注什么？最近有什么变化？',
       ask: '问 AI',
       configure: '打开 AI 设置',
-      missingBffFeedback: '当前还没配置本地 AI 服务地址，所以 AI 入口只会诚实提示，不会静默失败。',
+      missingBffFeedback: '当前还没配置本地 AI 路线，所以 AI 入口只会诚实提示，不会静默失败。',
       refreshProviderStatus: '刷新服务商状态',
       refreshingProviderStatus: '刷新中…',
       keyPoints: '要点',
@@ -1576,7 +1602,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       currentViewDescription: '直接导出你眼前这块工作台切片。',
     },
     options: {
-      configurationTitle: '设置与授权中心',
+      configurationTitle: '信任中心与授权',
       configurationDescription:
         '先看连接、语言和授权状态；只有默认路径不够时，再展开更深的连接与站点覆盖设置。',
       siteConfiguration: '站点配置',
@@ -1585,18 +1611,18 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       authorizationCenter: '信任中心',
       authorizationCenterDescription:
         '把读取与导出、AI 分析分开讲清楚，同时显式展示站点边界与课程级确认，让产品继续保持“先结构、后 AI”。',
-      readyProviders: '已就绪 AI 路线',
+      readyProviders: '可用 AI 路线',
       confirmRequired: '需要确认',
-      blockedFamilies: '被拦住的高敏家族',
-      highSensitivityFamilies: '高敏摘要家族',
+      blockedFamilies: '受限的高敏内容',
+      highSensitivityFamilies: '高敏摘要内容组',
       threadsPath: 'EdStem 讨论串路径',
       threadsPathPlaceholder: '例如：/api/courses/90031/threads?limit=30&sort=new',
       unreadPath: 'EdStem 未读路径',
       unreadPathPlaceholder: '可选：留空表示不额外覆盖 unread 路径',
       recentActivityPath: 'EdStem 最近活动路径',
       recentActivityPathPlaceholder: '可选：留空表示不额外覆盖 recent activity 路径',
-      aiBffConfiguration: '本地 AI 连接',
-      bffBaseUrl: '本地 AI 服务地址',
+      aiBffConfiguration: '本地 AI 路线',
+      bffBaseUrl: '手动填写本地 AI 地址',
       bffBaseUrlPlaceholder: '例如：http://127.0.0.1:8787',
       defaultProvider: '默认服务商',
       refreshBffStatus: '刷新 AI 路线状态',
@@ -1606,7 +1632,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       switchyardModel: 'Switchyard 模型',
       switchyardRuntimeProvider: 'Switchyard 服务提供方',
       switchyardLane: 'Switchyard 通道',
-      advancedRuntimeSettings: '高级连接覆盖设置',
+      advancedRuntimeSettings: '更深连接工具',
       advancedRuntimeDescription:
         '手动服务覆盖、模型名称和站点级路径覆盖都下沉到这里，让第一屏继续保持 summary-first。',
       manualFallbackOnly: '仅手动覆盖',
@@ -1644,8 +1670,13 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       noDisplayableAnswer: '本地 AI 服务已响应，但当前 provider 没有返回可展示的回答。',
       aiRequestFailed: 'AI 请求失败。',
       aiFallbackWithoutCitations: '当前 provider 返回了可展示的回答，但还没有带上结构化引用块。请把它视为无引用的退化回答。',
-      bffMissingForAi: '当前还没配置本地 AI 服务地址，所以 AI 入口只会诚实提示，不会静默失败。',
+      bffMissingForAi: '当前还没配置本地 AI 路线，请先在信任中心填写手动地址。',
       providerNotReadyInBff: (provider) => `${provider} 当前在本地 AI 路线里还没有 ready。`,
+      aiScopeNeedsTrustCenter: '这张桌面的 AI 可见性仍需在“信任中心”里单独放行。',
+      advancedMaterialCourseRequired: '先选择一门课程，再开启高级课程材料分析。',
+      advancedMaterialExcerptRequired: '先粘贴一段课程摘录，再请求高级课程材料分析。',
+      advancedMaterialAcknowledgementRequired: '继续前先确认课程材料责任提示。',
+      advancedMaterialNotice: (courseLabel) => `高级课程材料分析只使用了 ${courseLabel} 的粘贴摘录。`,
       partialSuccess: (site) => `${site} 已部分同步成功。`,
       overlayPinned: '已加入专注置顶。',
       overlayUnpinned: '已取消专注置顶。',
@@ -1655,14 +1686,14 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       overlayNoteCleared: '本地备注已清除。',
     },
     diagnosticsMessages: {
-      missingBffBaseUrl: '还没有配置本地 AI 服务地址',
+      missingBffBaseUrl: '还没有配置本地 AI 路线',
       providerStatusFetchFailed: 'AI 路线状态拉取失败',
-      bffBaseUrlNotConfigured: '本地 AI 服务地址尚未配置',
+      bffBaseUrlNotConfigured: '本地 AI 路线尚未配置',
       providerNotReady: (providers) => `服务商未就绪：${providers}`,
       defaultProviderNotReady: (provider) => `默认服务商未就绪：${provider}`,
       sitesStillMissingLivePrerequisites: (sites) => `站点仍缺 live 条件：${sites}`,
       bffProviderStatusFetchFailed: '本地 AI 路线状态拉取失败',
-      nextActionSetBff: '先在设置中填写本地 AI 服务地址，再刷新路线状态。',
+      nextActionSetBff: '先在信任中心填写手动本地 AI 地址，再刷新路线状态。',
       nextActionProviderKey: '如果要做真实 AI round-trip，请至少补一条正式 provider API key。',
       nextActionSwitchProvider: '切换到已 ready 的 provider，或补齐当前默认 provider 的正式 API key。',
       nextActionRestoreSiteContext: '先补真实登录态或在对应站点标签页中触发同步，再重试站点 live 验收。',

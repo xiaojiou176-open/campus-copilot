@@ -164,17 +164,17 @@ export function SurfaceShellAskAiContainer(props: {
 
     if (advancedMaterialEnabled) {
       if (!selectedCourse) {
-        setAiError('Select one course before turning on advanced material analysis.');
+        setAiError(text.feedback.advancedMaterialCourseRequired);
         return;
       }
 
       if (!advancedMaterialExcerpt.trim()) {
-        setAiError('Paste a course excerpt before asking for advanced material analysis.');
+        setAiError(text.feedback.advancedMaterialExcerptRequired);
         return;
       }
 
       if (!advancedMaterialAcknowledged) {
-        setAiError('Confirm the course-material responsibility notice before continuing.');
+        setAiError(text.feedback.advancedMaterialAcknowledgementRequired);
         return;
       }
     }
@@ -238,11 +238,7 @@ export function SurfaceShellAskAiContainer(props: {
       });
 
       if (!exportArtifact.packaging.aiAllowed) {
-        setAiError(
-          uiLanguage === 'zh-CN'
-            ? '当前范围的 AI 读取仍需在“设置与授权”里单独放行。'
-            : 'AI access for this scope still needs to be enabled in Settings/Auth.',
-        );
+        setAiError(text.feedback.aiScopeNeedsTrustCenter);
         return;
       }
 
@@ -272,7 +268,7 @@ export function SurfaceShellAskAiContainer(props: {
       setAiStructuredAnswer(resolvedAnswer.structuredAnswer);
       setAiNotice(
         advancedMaterialAnalysis.enabled && selectedCourse
-          ? `Advanced material analysis used only the pasted excerpt for ${advancedMaterialAnalysis.courseLabel}.`
+          ? text.feedback.advancedMaterialNotice(advancedMaterialAnalysis.courseLabel)
           : resolvedAnswer.citationCoverage === 'uncited_fallback'
             ? text.feedback.aiFallbackWithoutCitations
             : undefined,

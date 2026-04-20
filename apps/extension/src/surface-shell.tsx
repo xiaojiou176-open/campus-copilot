@@ -38,7 +38,14 @@ import {
   type ExtensionConfig,
 } from './config';
 import './styles.css';
-import { formatRelativeTime, getUiText, readBrowserLanguage, resolveUiLanguage } from './i18n';
+import {
+  formatAuthorizationStatusLabel,
+  formatRelativeTime,
+  getUiText,
+  readBrowserLanguage,
+  resolveUiLanguage,
+  type ResolvedUiLanguage,
+} from './i18n';
 import {
   buildDownloadPayload,
   buildEmptyProviderStatus,
@@ -141,6 +148,18 @@ function filterSiteRecords<T extends { site: Site; courseId?: string }>(
 
     return true;
   });
+}
+
+function formatLanguageSwitchLabel(preference: ExtensionConfig['uiLanguage'], uiLanguage: ResolvedUiLanguage) {
+  if (preference === 'auto') {
+    return uiLanguage === 'zh-CN' ? '语言：跟随浏览器' : 'Language: Browser';
+  }
+
+  if (uiLanguage === 'zh-CN') {
+    return preference === 'en' ? '语言：English' : '语言：中文';
+  }
+
+  return preference === 'en' ? 'Language: English' : 'Language: Chinese';
 }
 
 export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
@@ -721,8 +740,16 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
   const popupLauncherCopy = modeCopy.popup;
   const authorizationRules = config.authorization.rules;
   const allowedAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'allowed').length;
+  const partialAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'partial').length;
   const confirmRequiredAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'confirm_required').length;
   const blockedAuthorizationCount = authorizationRules.filter((rule) => rule.status === 'blocked').length;
+  const needsReviewAuthorizationCount = partialAuthorizationCount + confirmRequiredAuthorizationCount;
+  const trustReadyLabel = formatAuthorizationStatusLabel('allowed', uiLanguage);
+  const trustNeedsReviewLabel = uiLanguage === 'zh-CN' ? '仍需复核' : 'Needs review';
+  const trustAiOffLabel = formatAuthorizationStatusLabel('blocked', uiLanguage);
+  const defaultAiRouteLabel = uiLanguage === 'zh-CN' ? '默认 AI 路线' : 'Default AI route';
+  const defaultProviderDisplayLabel =
+    PROVIDER_OPTIONS.find((option) => option.value === config.ai.defaultProvider)?.label ?? config.ai.defaultProvider;
   function enterExportMode(
     nextSite: ExportScopeSite = surfaceView.currentSiteSelection ?? (filters.site === 'all' ? 'all' : filters.site),
   ) {
@@ -756,8 +783,8 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   ))}
                 </div>
                 <div className="surface__mode-context">
-                  <button className="surface__button surface__button--ghost" onClick={() => void handleCycleLanguagePreference()} type="button">
-                    {config.uiLanguage === 'auto' ? 'Auto' : config.uiLanguage === 'en' ? 'EN' : '中文'}
+                  <button className="surface__button surface__button--quiet" onClick={() => void handleCycleLanguagePreference()} type="button">
+                    {formatLanguageSwitchLabel(config.uiLanguage, uiLanguage)}
                   </button>
                 </div>
               </div>
@@ -979,9 +1006,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                       <button className="surface__button surface__button--ghost" onClick={() => void refreshProviderStatus()} type="button">
                         {text.options.refreshBffStatus}
                       </button>
-                      <button className="surface__button surface__button--secondary" onClick={() => void handleCycleLanguagePreference()} type="button">
-                        {config.uiLanguage === 'auto' ? 'Auto' : config.uiLanguage === 'en' ? 'EN' : '中文'}
-                      </button>
                       <button
                         className="surface__button surface__button--ghost"
                         onClick={() => {
@@ -1000,17 +1024,27 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     <div className="surface__stack">
                       <p className="surface__meta-label">{modeCopy.authorization.currentReads}</p>
                       <p className="surface__meta">
-                        Canvas, Gradescope, EdStem, and MyUW structured workspace facts, plus the current read-only
-                        planning/admin lanes such as MyPlan Planning Pulse, Time Schedule planning context, and
-                        review-first MyUW detail summaries.
+                        {uiLanguage === 'zh-CN'
+                          ? 'Canvas、Gradescope、EdStem、MyUW 的结构化桌面事实，以及当前只读的规划 / 行政支线，例如 MyPlan / DARS 计划脉冲、Time Schedule 规划上下文、以及 MyUW 的先审阅细节摘要。'
+                          : 'Canvas, Gradescope, EdStem, and MyUW structured workspace facts, plus the current read-only planning/admin lanes such as MyPlan Planning Pulse, Time Schedule planning context, and review-first MyUW detail summaries.'}
                       </p>
                       <p className="surface__meta-label">{modeCopy.authorization.plannedReads}</p>
                       <div className="surface__pill-row">
-                        <span className="surface__badge surface__badge--success">MyPlan / DARS Planning Pulse</span>
-                        <span className="surface__badge surface__badge--success">MyUW review-first summaries</span>
-                        <span className="surface__badge surface__badge--warning">Canvas deeper runtime detail</span>
-                        <span className="surface__badge surface__badge--warning">Gradescope / EdStem deepwater tails</span>
-                        <span className="surface__badge surface__badge--danger">Register.UW / Notify.UW red zone</span>
+                        <span className="surface__badge surface__badge--success">
+                          {uiLanguage === 'zh-CN' ? 'MyPlan / DARS 计划脉冲' : 'MyPlan / DARS Planning Pulse'}
+                        </span>
+                        <span className="surface__badge surface__badge--success">
+                          {uiLanguage === 'zh-CN' ? 'MyUW 先审阅摘要' : 'MyUW review-first summaries'}
+                        </span>
+                        <span className="surface__badge surface__badge--warning">
+                          {uiLanguage === 'zh-CN' ? 'Canvas 更深页面仍在补齐' : 'Canvas deeper pages still in progress'}
+                        </span>
+                        <span className="surface__badge surface__badge--warning">
+                          {uiLanguage === 'zh-CN' ? 'Gradescope / EdStem 更深页面仍在补齐' : 'Gradescope / EdStem deeper pages still in progress'}
+                        </span>
+                        <span className="surface__badge surface__badge--danger">
+                          {uiLanguage === 'zh-CN' ? 'Register.UW / Notify.UW 红区' : 'Register.UW / Notify.UW red zone'}
+                        </span>
                       </div>
                     </div>
                   </article>
@@ -1019,7 +1053,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                     <p>{modeCopy.connection.description}</p>
                     <div className="surface__stack">
                       <p className="surface__meta">
-                        {text.options.defaultProvider}: {config.ai.defaultProvider}
+                        {text.options.defaultProvider}: {defaultProviderDisplayLabel}
                       </p>
                       <p className="surface__meta">
                         {text.options.defaultExportFormat}: {config.defaultExportFormat.toUpperCase()}
@@ -1126,22 +1160,22 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
               <div className="surface__grid surface__grid--stats">
                 <article className="surface__metric">
                   <span className="surface__metric-value">{allowedAuthorizationCount}</span>
-                  <span className="surface__metric-label">Allowed rules</span>
+                  <span className="surface__metric-label">{trustReadyLabel}</span>
                 </article>
                 <article className="surface__metric">
-                  <span className="surface__metric-value">{confirmRequiredAuthorizationCount}</span>
-                  <span className="surface__metric-label">Confirm required</span>
+                  <span className="surface__metric-value">{needsReviewAuthorizationCount}</span>
+                  <span className="surface__metric-label">{trustNeedsReviewLabel}</span>
                 </article>
                 <article className="surface__metric">
                   <span className="surface__metric-value">{blockedAuthorizationCount}</span>
-                  <span className="surface__metric-label">Blocked</span>
+                  <span className="surface__metric-label">{trustAiOffLabel}</span>
                 </article>
               </div>
               <p className="surface__meta">
                 {modeCopy.connection.resolvedUrl}: {activeBffBaseUrl ?? modeCopy.connection.none}
               </p>
               <p className="surface__meta">
-                Policy version: {config.authorization.policyVersion} · {text.options.defaultProvider}: {config.ai.defaultProvider}
+                {defaultAiRouteLabel}: {defaultProviderDisplayLabel}
               </p>
             </article>
 

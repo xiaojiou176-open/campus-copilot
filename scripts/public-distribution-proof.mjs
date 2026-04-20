@@ -1,7 +1,6 @@
 import { spawnSync } from 'node:child_process';
 
 const commands = [
-  { command: 'node', args: ['scripts/audit-public-distribution.mjs'] },
   { command: 'pnpm', args: ['check:skill-catalog'] },
   { command: 'pnpm', args: ['check:mcp-registry-preflight'] },
   { command: 'pnpm', args: ['check:container-surface'] },
@@ -46,7 +45,7 @@ const commands = [
   { command: 'node', args: ['--experimental-strip-types', 'examples/gradescope-api-usage.ts'] },
   { command: 'node', args: ['--experimental-strip-types', 'examples/edstem-api-usage.ts'] },
   { command: 'node', args: ['--experimental-strip-types', 'examples/myuw-api-usage.ts'] },
-  { command: 'pnpm', args: ['smoke:docker:api'] },
+  { command: 'pnpm', args: ['smoke:docker:api'], optionalFailureKind: 'container_runtime' },
 ];
 
 function buildSanitizedChildEnv(overrides = {}) {
@@ -69,17 +68,84 @@ function buildSanitizedChildEnv(overrides = {}) {
   return env;
 }
 
-for (const { command, args, cwd } of commands) {
+function writeCommandOutput(result) {
+  if (result.stdout) {
+    process.stdout.write(result.stdout);
+  }
+  if (result.stderr) {
+    process.stderr.write(result.stderr);
+  }
+}
+
+function classifyOptionalFailure(kind, result) {
+  if (kind !== 'container_runtime') {
+    return undefined;
+  }
+
+  const combined = `${result.stdout ?? ''}\n${result.stderr ?? ''}`;
+  if (/Cannot connect to the Docker daemon/i.test(combined)) {
+    return {
+      code: 'docker_daemon_unavailable',
+      detail: 'docker daemon unavailable on this workstation',
+    };
+  }
+
+  if (/permission denied.*docker daemon/i.test(combined)) {
+    return {
+      code: 'docker_daemon_permission_denied',
+      detail: 'docker daemon requires extra workstation permission',
+    };
+  }
+
+  return undefined;
+}
+
+let optionalRuntimeBlocker;
+
+for (const { command, args, cwd, optionalFailureKind } of commands) {
   const result = spawnSync(command, args, {
     cwd: cwd ?? process.cwd(),
     encoding: 'utf8',
-    stdio: 'inherit',
+    stdio: 'pipe',
     env: buildSanitizedChildEnv(),
   });
 
+  writeCommandOutput(result);
+
   if (result.status !== 0) {
+    const classified = classifyOptionalFailure(optionalFailureKind, result);
+    if (classified) {
+      optionalRuntimeBlocker = classified;
+      console.warn(
+        `public_distribution_proof_notice:${classified.code}:${classified.detail}`,
+      );
+      continue;
+    }
+
     process.exit(result.status ?? 1);
   }
+}
+
+const auditEnv = buildSanitizedChildEnv(
+  optionalRuntimeBlocker
+    ? {
+        CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER: optionalRuntimeBlocker.code,
+        CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER_DETAIL: optionalRuntimeBlocker.detail,
+      }
+    : {},
+);
+
+const auditResult = spawnSync('node', ['scripts/audit-public-distribution.mjs'], {
+  cwd: process.cwd(),
+  encoding: 'utf8',
+  stdio: 'pipe',
+  env: auditEnv,
+});
+
+writeCommandOutput(auditResult);
+
+if (auditResult.status !== 0) {
+  process.exit(auditResult.status ?? 1);
 }
 
 console.log('public_distribution_proof_ok');

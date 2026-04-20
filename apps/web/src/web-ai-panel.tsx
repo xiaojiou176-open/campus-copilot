@@ -243,7 +243,7 @@ export function WebAiPanel(props: {
         )}
       </div>
 
-      <p className="meta-title">AI settings and opt-ins</p>
+      <p className="meta-title">Advanced AI options</p>
       <details className="advanced-settings advanced-settings--material" open={props.advancedMaterialEnabled}>
         <summary>Advanced material analysis</summary>
         <div className="ai-structured ai-structured--advanced">
@@ -308,18 +308,17 @@ export function WebAiPanel(props: {
       </details>
 
       <details className="advanced-settings">
-        <summary>Advanced connection settings</summary>
+        <summary>Connection details and owner-only overrides</summary>
         <p className="meta">
-          These controls stay available for targeted opt-ins and connection debugging, but they are not
-          the main path of this surface.
+          Only open these controls when the default local AI route is not enough or you are actively diagnosing a local connection.
         </p>
         <div className="ai-controls">
           <label>
-            Local AI service URL
+            Local AI service address
             <input value={props.aiBaseUrl} onChange={(event) => props.onAiBaseUrlChange(event.target.value)} />
           </label>
           <label>
-            Provider
+            Explanation route
             <select value={props.provider} onChange={(event) => props.onProviderChange(event.target.value as ProviderId)}>
               {props.providers.map((item) => (
                 <option key={item.value} value={item.value}>
@@ -329,13 +328,13 @@ export function WebAiPanel(props: {
             </select>
           </label>
           <label>
-            Model
+            Model name
             <input value={props.model} onChange={(event) => props.onModelChange(event.target.value)} />
           </label>
           {props.provider === 'switchyard' ? (
             <>
               <label>
-                Switchyard provider
+                Switchyard route
                 <select
                   value={props.switchyardProvider}
                   onChange={(event) => props.onSwitchyardProviderChange(event.target.value as SwitchyardRuntimeProvider)}
@@ -348,7 +347,7 @@ export function WebAiPanel(props: {
                 </select>
               </label>
               <label>
-                Switchyard lane
+                Switchyard mode
                 <select value={props.switchyardLane} onChange={(event) => props.onSwitchyardLaneChange(event.target.value as SwitchyardLane)}>
                   <option value="web">web</option>
                   <option value="byok">byok</option>

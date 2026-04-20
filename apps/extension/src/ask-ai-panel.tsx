@@ -8,7 +8,7 @@ import { AiStructuredAnswerSchema } from './ai-answer-resolution';
 import { getAiSitePolicyOverlay } from './ai-site-policy';
 import { formatProviderReason, type ProviderStatusLike } from './provider-status-format';
 import { summarizeAuthorizationState } from './export-input';
-import { formatRelativeTime, type ResolvedUiLanguage } from './i18n';
+import { formatAuthorizationStatusLabel, formatRelativeTime, type ResolvedUiLanguage } from './i18n';
 import { PROVIDER_OPTIONS } from './surface-shell-model';
 import { type UiText } from './surface-shell-view-helpers';
 import type { ExtensionConfig } from './config';
@@ -170,6 +170,7 @@ export function AskAiPanel(props: {
   const currentQuestionLabel = uiLanguage === 'zh-CN' ? '当前提问门槛' : 'Current question';
   const aiSettingsLabel = uiLanguage === 'zh-CN' ? 'AI 设置与额外选项' : 'AI settings and opt-ins';
   const suggestedPromptsLabel = uiLanguage === 'zh-CN' ? '建议问题' : 'Suggested prompts';
+  const totalChecksLabel = uiLanguage === 'zh-CN' ? '项检查' : 'total checks';
 
   return (
     <article className="surface__panel surface__panel--ask-ai">
@@ -406,19 +407,25 @@ export function AskAiPanel(props: {
               <article className="surface__evidence-card">
                 <p className="surface__meta-label">{readAndExportLabel}</p>
                 <p className="surface__item-lead">
-                  {readExportSummary.allowed} allowed · {readExportSummary.partial} partial
+                  {readExportSummary.allowed} {formatAuthorizationStatusLabel('allowed', uiLanguage)} ·{' '}
+                  {readExportSummary.partial} {formatAuthorizationStatusLabel('partial', uiLanguage)}
                 </p>
                 <p className="surface__meta">
-                  {readExportSummary.confirmRequired} confirm-required · {readExportSummary.blocked} blocked · {readExportSummary.total} total rules
+                  {readExportSummary.confirmRequired} {formatAuthorizationStatusLabel('confirm_required', uiLanguage)} ·{' '}
+                  {readExportSummary.blocked} {formatAuthorizationStatusLabel('blocked', uiLanguage)} · {readExportSummary.total}{' '}
+                  {totalChecksLabel}
                 </p>
               </article>
               <article className="surface__evidence-card">
                 <p className="surface__meta-label">{aiAccessLabel}</p>
                 <p className="surface__item-lead">
-                  {aiReadSummary.allowed} allowed · {aiReadSummary.confirmRequired} confirm-required
+                  {aiReadSummary.allowed} {formatAuthorizationStatusLabel('allowed', uiLanguage)} ·{' '}
+                  {aiReadSummary.confirmRequired} {formatAuthorizationStatusLabel('confirm_required', uiLanguage)}
                 </p>
                 <p className="surface__meta">
-                  {aiReadSummary.partial} partial · {aiReadSummary.blocked} blocked · {aiReadSummary.total} total rules
+                  {aiReadSummary.partial} {formatAuthorizationStatusLabel('partial', uiLanguage)} ·{' '}
+                  {aiReadSummary.blocked} {formatAuthorizationStatusLabel('blocked', uiLanguage)} · {aiReadSummary.total}{' '}
+                  {totalChecksLabel}
                 </p>
               </article>
               <article className="surface__evidence-card">

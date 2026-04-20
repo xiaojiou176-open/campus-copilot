@@ -21,6 +21,13 @@ import {
 } from '@campus-copilot/adapters-myuw';
 import {
   createCourseSitesAdapter,
+  type CourseSiteAnnouncement,
+  type CourseSiteAssignment,
+  type CourseSiteCourse,
+  type CourseSiteEvent,
+  type CourseSitePageFamily,
+  type CourseSiteResource,
+  type CourseSiteSnapshot,
   type CourseSitesSyncResult,
 } from '@campus-copilot/adapters-course-sites';
 import {
@@ -37,6 +44,7 @@ import {
 } from '@campus-copilot/core';
 import {
   campusCopilotDb,
+  getLatestPlanningSubstrateBySource,
   getSiteEntityCounts,
   getSyncStateBySite,
   putSyncState,
@@ -521,6 +529,14 @@ function buildTimeSchedulePlanningSubstrate(input: {
   snapshot: SiteSnapshotPayload;
   capturedAt: string;
   sourceUrl: string;
+  previous?: {
+    termCode: string;
+    termLabel: string;
+    plannedCourseCount: number;
+    backupCourseCount: number;
+    scheduleOptionCount: number;
+    summary?: string;
+  };
 }) {
   const quarterLabel = inferTimeScheduleQuarterLabel(input.snapshot);
   const termCode = slugifyTimeScheduleQuarter(quarterLabel) || 'current-quarter';
@@ -532,13 +548,21 @@ function buildTimeSchedulePlanningSubstrate(input: {
     ? 'public_course_offerings_planning_lane_with_sln_detail'
     : TIME_SCHEDULE_STAGE_UNDERSTANDING.runtimePosture;
   const currentTruth = capturedFromDetailPage
-    ? 'Time Schedule still stays read-only and public-offerings-first, but the current planning lane now also has an authenticated SLN detail corroboration for richer section context, including concrete meeting, location, seat-availability, and exposed section-type / credit / requirement-tag proof.'
+    ? 'Time Schedule still stays read-only and public-offerings-first, and the current planning lane now folds authenticated SLN detail corroboration back into the existing public carrier for richer section context, including concrete meeting, location, seat-availability, and exposed section-type / credit / requirement-tag proof.'
     : TIME_SCHEDULE_STAGE_UNDERSTANDING.currentTruth;
   const detailCorroboration = capturedFromDetailPage ? buildTimeScheduleDetailCorroboration(input.snapshot) : undefined;
+  const preservedPlannedCourseCount =
+    capturedFromDetailPage && input.previous
+      ? Math.max(input.snapshot.courses?.length ?? 0, input.previous.plannedCourseCount)
+      : input.snapshot.courses?.length ?? 0;
+  const preservedScheduleOptionCount =
+    capturedFromDetailPage && input.previous
+      ? Math.max(input.snapshot.events?.length ?? 0, input.previous.scheduleOptionCount)
+      : input.snapshot.events?.length ?? 0;
   const termSummary = capturedFromDetailPage
     ? detailCorroboration
-      ? `Public course offerings plus authenticated SLN detail were captured from ${input.sourceUrl}. Detail corroboration: ${detailCorroboration}.`
-      : `Public course offerings plus authenticated SLN detail were captured from ${input.sourceUrl}.`
+      ? `${input.previous ? `Public course offerings remain the broader planning carrier for ${input.previous.plannedCourseCount} course(s) and ${input.previous.scheduleOptionCount} schedule context item(s). ` : ''}Authenticated SLN detail was captured from ${input.sourceUrl} and merged back into that same planning lane. Detail corroboration: ${detailCorroboration}.`
+      : `${input.previous ? `Public course offerings remain the broader planning carrier for ${input.previous.plannedCourseCount} course(s) and ${input.previous.scheduleOptionCount} schedule context item(s). ` : ''}Authenticated SLN detail was captured from ${input.sourceUrl} and merged back into that same planning lane.`
     : `Public course offerings captured from ${input.sourceUrl}.`;
 
   return {
@@ -550,9 +574,9 @@ function buildTimeSchedulePlanningSubstrate(input: {
     planId: `time-schedule:${termCode}`,
     planLabel: `Time Schedule · ${quarterLabel}`,
     termCount: 1,
-    plannedCourseCount: input.snapshot.courses?.length ?? 0,
-    backupCourseCount: 0,
-    scheduleOptionCount: input.snapshot.events?.length ?? 0,
+    plannedCourseCount: preservedPlannedCourseCount,
+    backupCourseCount: input.previous?.backupCourseCount ?? 0,
+    scheduleOptionCount: preservedScheduleOptionCount,
     requirementGroupCount: 0,
     programExplorationCount: 0,
     currentStage: TIME_SCHEDULE_STAGE_UNDERSTANDING.currentStage,
@@ -564,13 +588,134 @@ function buildTimeSchedulePlanningSubstrate(input: {
       {
         termCode,
         termLabel: quarterLabel,
-        plannedCourseCount: input.snapshot.courses?.length ?? 0,
-        backupCourseCount: 0,
-        scheduleOptionCount: input.snapshot.events?.length ?? 0,
+        plannedCourseCount: preservedPlannedCourseCount,
+        backupCourseCount: input.previous?.backupCourseCount ?? 0,
+        scheduleOptionCount: preservedScheduleOptionCount,
         summary: termSummary,
       },
     ],
   };
+}
+
+function dedupeById<T extends { id: string }>(current: T[], previous: T[]) {
+  const merged = new Map<string, T>();
+  for (const record of [...current, ...previous]) {
+    if (!merged.has(record.id)) {
+      merged.set(record.id, record);
+    }
+  }
+  return [...merged.values()];
+}
+
+function isCourseSiteResourceFromFamily(
+  resource: CourseSiteResource,
+  courseId: string,
+  family: CourseSitePageFamily,
+) {
+  return (
+    resource.courseId === courseId &&
+    (resource.source.resourceType === `${family}_page` ||
+      (resource.source.resourceType === 'link' && resource.id.includes(`:${family}:`)))
+  );
+}
+
+function isCourseSiteAssignmentFromFamily(
+  assignment: CourseSiteAssignment,
+  courseId: string,
+  family: CourseSitePageFamily,
+) {
+  if (assignment.courseId !== courseId) {
+    return false;
+  }
+  if (family !== 'assignments') {
+    return false;
+  }
+  return assignment.source.resourceType === 'assignment_row' || assignment.source.resourceType === 'tasks_section';
+}
+
+function isCourseSiteAnnouncementFromFamily(
+  announcement: CourseSiteAnnouncement,
+  courseId: string,
+  family: CourseSitePageFamily,
+) {
+  return family === 'home' && announcement.courseId === courseId && announcement.source.resourceType === 'home_intro';
+}
+
+function isCourseSiteEventFromFamily(
+  event: CourseSiteEvent,
+  courseId: string,
+  family: CourseSitePageFamily,
+) {
+  if (event.courseId !== courseId) {
+    return false;
+  }
+  if (family === 'schedule') {
+    return (
+      event.source.resourceType === 'schedule_row' ||
+      event.source.resourceType === 'schedule_deadline_note' ||
+      event.source.resourceType === 'calendar_day' ||
+      event.source.resourceType === 'calendar_deadline'
+    );
+  }
+  if (family === 'assignments') {
+    return event.source.resourceType === 'tasks_exam_section';
+  }
+  return false;
+}
+
+async function readExistingCourseSiteSnapshot(): Promise<CourseSiteSnapshot> {
+  const [courses, resources, assignments, announcements, grades, messages, events] = await Promise.all([
+    campusCopilotDb.courses.where('site').equals('course-sites').toArray() as Promise<CourseSiteCourse[]>,
+    campusCopilotDb.resources.where('site').equals('course-sites').toArray() as Promise<CourseSiteResource[]>,
+    campusCopilotDb.assignments.where('site').equals('course-sites').toArray() as Promise<CourseSiteAssignment[]>,
+    campusCopilotDb.announcements.where('site').equals('course-sites').toArray() as Promise<CourseSiteAnnouncement[]>,
+    campusCopilotDb.grades.where('site').equals('course-sites').toArray(),
+    campusCopilotDb.messages.where('site').equals('course-sites').toArray(),
+    campusCopilotDb.events.where('site').equals('course-sites').toArray() as Promise<CourseSiteEvent[]>,
+  ]);
+
+  return {
+    courses,
+    resources,
+    assignments,
+    announcements,
+    grades,
+    messages,
+    events,
+  } satisfies CourseSiteSnapshot;
+}
+
+function mergeCourseSiteSnapshotByFamily(input: {
+  existing: CourseSiteSnapshot;
+  current: CourseSiteSnapshot;
+  courseId: string;
+  family: CourseSitePageFamily;
+}) {
+  const { existing, current, courseId, family } = input;
+
+  return {
+    courses: dedupeById(current.courses ?? [], existing.courses ?? []),
+    resources: dedupeById(
+      current.resources ?? [],
+      (existing.resources ?? []).filter((resource) => !isCourseSiteResourceFromFamily(resource, courseId, family)),
+    ),
+    assignments: dedupeById(
+      current.assignments ?? [],
+      (existing.assignments ?? []).filter((assignment) => !isCourseSiteAssignmentFromFamily(assignment, courseId, family)),
+    ),
+    announcements: dedupeById(
+      current.announcements ?? [],
+      (existing.announcements ?? []).filter(
+        (announcement) => !isCourseSiteAnnouncementFromFamily(announcement, courseId, family),
+      ),
+    ),
+    grades: dedupeById(current.grades ?? [], existing.grades ?? []),
+    messages: dedupeById(current.messages ?? [], existing.messages ?? []),
+    events: dedupeById(
+      current.events ?? [],
+      (existing.events ?? []).filter((event) => !isCourseSiteEventFromFamily(event, courseId, family)),
+    ),
+  } satisfies CourseSiteSnapshot;
 }
 
 async function buildSiteStatusView(site: Site): Promise<SiteSyncStatusView> {
@@ -707,11 +852,29 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
   },
   'course-sites': async ({ activeTab, now, pageHtml }) => {
     const html = pageHtml ?? (await extractPageHtml(activeTab.tabId));
-    return createCourseSitesAdapter().sync({
+    const result = await createCourseSitesAdapter().sync({
       url: activeTab.url,
       pageHtml: html,
       now,
     });
+    if (!result.ok) {
+      return result;
+    }
+
+    const existing = await readExistingCourseSiteSnapshot();
+    const primaryCourseId = result.snapshot.courses?.[0]?.id;
+    if (!primaryCourseId) {
+      return result;
+    }
+    return {
+      ...result,
+      snapshot: mergeCourseSiteSnapshotByFamily({
+        existing,
+        current: result.snapshot,
+        courseId: primaryCourseId,
+        family: result.family,
+      }),
+    };
   },
   'time-schedule': async ({ activeTab, now, pageHtml }) => {
     const html = pageHtml ?? (await extractPageHtml(activeTab.tabId));
@@ -762,6 +925,10 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
       const snapshot = isTimeScheduleSectionDetailUrl(activeTab.url)
         ? buildTimeScheduleDetailSnapshot(html, activeTab.url)
         : buildTimeScheduleSnapshot(html, activeTab.url);
+      const previousPlanning = await getLatestPlanningSubstrateBySource('time-schedule', campusCopilotDb);
+      const nextQuarterLabel = inferTimeScheduleQuarterLabel(snapshot);
+      const nextTermCode = slugifyTimeScheduleQuarter(nextQuarterLabel) || 'current-quarter';
+      const previousTerm = previousPlanning?.terms.find((term) => term.termCode === nextTermCode);
       await replacePlanningSubstratesBySource(
         'time-schedule',
         [
@@ -769,6 +936,7 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
             snapshot,
             capturedAt: now,
             sourceUrl: activeTab.url,
+            previous: previousTerm,
           }),
         ],
         campusCopilotDb,

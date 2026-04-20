@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
-  <title id="title">Campus Copilot Academic Decision Workbench</title>
-  <desc id="desc">Academic decision workspace for structured campus snapshots and cited AI.</desc>
+  <title id="title">Campus Copilot Workbench</title>
+  <desc id="desc">Read-only workbench for imported campus snapshots, decision views, exports, and cited AI.</desc>
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
       <stop offset="0%" stop-color="#edf5ef" />
@@ -10,20 +10,20 @@
   <rect width="1200" height="630" fill="url(#bg)" rx="36" />
   <rect x="56" y="56" width="1088" height="518" rx="28" fill="#ffffff" stroke="#1f5d4b" stroke-width="4" />
   <text x="96" y="140" fill="#1f5d4b" font-size="28" font-family="Georgia, 'Times New Roman', serif">Campus Copilot</text>
-  <text x="96" y="215" fill="#12261d" font-size="64" font-weight="700" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Academic Workbench</text>
-  <text x="96" y="276" fill="#355345" font-size="28" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Academic decision workspace</text>
+  <text x="96" y="215" fill="#12261d" font-size="64" font-weight="700" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Workbench</text>
+  <text x="96" y="276" fill="#355345" font-size="28" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Read-only decision workspace</text>
   <text x="96" y="334" fill="#355345" font-size="26" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Canvas · Gradescope · EdStem · MyUW</text>
   <g fill="#1f5d4b" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="24">
-    <text x="96" y="418">Snapshot-first</text>
-    <text x="96" y="462">Cited AI over structured study context</text>
-    <text x="96" y="506">Read-only SDK / CLI / MCP preview</text>
+    <text x="96" y="418">Imported snapshots on one desk</text>
+    <text x="96" y="462">Focus Queue, Weekly Load, and exports</text>
+    <text x="96" y="506">Cited AI over the same structured view</text>
   </g>
   <g transform="translate(760 150)">
     <rect width="280" height="250" rx="20" fill="#f3f8f4" stroke="#9fc2ab" stroke-width="3" />
     <text x="28" y="48" fill="#1f5d4b" font-size="26" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Today</text>
-    <text x="28" y="96" fill="#12261d" font-size="22" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">3 assignments need attention</text>
-    <text x="28" y="136" fill="#355345" font-size="20" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">2 recent changes</text>
-    <text x="28" y="176" fill="#355345" font-size="20" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">1 cited AI summary ready</text>
+    <text x="28" y="96" fill="#12261d" font-size="22" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Focus Queue is ready first</text>
+    <text x="28" y="136" fill="#355345" font-size="20" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Weekly Load stays on the same desk</text>
+    <text x="28" y="176" fill="#355345" font-size="20" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Exports and cited AI follow the same slice</text>
     <rect x="28" y="198" width="144" height="28" rx="14" fill="#1f5d4b" />
     <text x="46" y="218" fill="#ffffff" font-size="18" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">Focus Queue</text>
   </g>

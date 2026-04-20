@@ -25,9 +25,9 @@ test('shows the standalone workbench and exports the current view', async ({ pag
   const orientationHeading = page.getByRole('heading', { name: 'Campus Copilot workbench' });
   const focusQueueHeading = page.getByRole('heading', { name: 'Focus Queue' });
   const weeklyLoadHeading = page.getByRole('heading', { name: 'Weekly Load' });
-  const trustSummaryHeading = page.getByRole('heading', { name: 'What is on this desk' });
+  const trustSummaryHeading = page.getByRole('heading', { name: 'Why this desk is trustworthy' });
   const askAiHeading = page.getByRole('heading', { name: 'Ask AI about this workspace' });
-  const loadImportLabel = page.getByText('Import / Sample', { exact: true });
+  const loadImportLabel = page.getByText('Load a desk', { exact: true });
   const planningPulseHeading = page.getByRole('heading', { name: 'Planning Pulse' });
   const deepReviewSummary = page.locator('summary').filter({ hasText: 'More review details' });
   const currentTasksHeading = page.getByRole('heading', { name: 'Current Tasks' });
@@ -60,7 +60,7 @@ test('shows the standalone workbench and exports the current view', async ({ pag
   expect(focusQueueBox!.y).toBeLessThan(planningPulseBox!.y);
   expect(weeklyLoadBox!.y).toBeLessThan(planningPulseBox!.y);
   expect(planningPulseBox!.y).toBeLessThan(loadImportBox!.y);
-  expect(loadImportBox!.y).toBeLessThan(trustSummaryBox!.y);
+  expect(trustSummaryBox!.y).toBeLessThan(loadImportBox!.y);
   expect(loadImportBox!.y).toBeLessThan(askAiBox!.y);
   expect(focusQueueBox!.y).toBeLessThan(planningPulseBox!.y);
   expect(planningPulseBox!.y).toBeLessThan(deepReviewSummaryBox!.y);

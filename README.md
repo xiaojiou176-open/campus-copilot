@@ -1,35 +1,28 @@
-# Campus Copilot
+# OpenCampus
 
-> The flagship local-first academic decision desk inside the OpenCampus family.
-
-> An academic decision workspace for students who want Canvas, Gradescope, EdStem, and MyUW in one structured place, then want clear answers to what changed, what matters first, and what to export or ask with cited AI.
+> Campus Copilot is the flagship local-first academic decision workspace in the OpenCampus family. It keeps Canvas, Gradescope, EdStem, and MyUW on one desk, then answers what changed, what matters first, and what to export or ask with cited AI.
 
 > Available today: local browser extension, local web workbench, manual sync, and a read-only workflow.
 
 [Docs](docs/README.md) · [Quickstart](#quickstart) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Security](SECURITY.md) · [Privacy](PRIVACY.md) · [Distribution](DISTRIBUTION.md)
 
-![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
+## Brand Hierarchy
+
+- **OpenCampus** = the umbrella family and repo-level public brand
+- **Campus Copilot** = the flagship decision workspace students use today
+- **Campus Copilot for UW** = the browser-extension distribution name when the school-specific surface needs to stay explicit
+
+## Public Proof
 
 Real workbench proof, not concept art:
 
 ![Campus Copilot sidepanel overview](docs/assets/sidepanel-overview.png)
+Extension shell proof: the assistant-first sidepanel with explicit `Export` and `Trust center` paths.
 
 Standalone web workbench proof:
 
 ![Campus Copilot web workbench overview](docs/assets/web-workbench-overview.png)
-
-See the receipts:
-
-- [`docs/assets/weekly-assignments-example.md`](docs/assets/weekly-assignments-example.md) shows an export-ready receipt
-- [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md) shows one current-view decision output
-
-## Public Naming
-
-- **Campus Copilot** = the primary student-facing product and current flagship decision workspace
-- **OpenCampus** = the umbrella family and repo-level public brand above Campus Copilot
-- **Campus Copilot for UW** = the browser-extension distribution name when the school-specific surface needs to be explicit
-
-In plain language: **Campus Copilot is the desk you use today; OpenCampus is the family name above it.**
+Fuller read-only workbench proof: the broader decision layer on the standalone web surface.
 
 ## Start Here In 60 Seconds
 
@@ -90,7 +83,7 @@ Today the repo already includes:
 
 - a browser extension for `Canvas`, `Gradescope`, `EdStem`, and `MyUW`
 - one local desk that keeps imported course and admin facts together
-- assistant-first extension surfaces for `sidepanel`, `popup`, and `options`
+- student-first extension surfaces with explicit `Assistant`, `Export`, and `Trust center` modes
 - a read-only web workbench over the same local desk
 - export presets for current view, weekly assignments, recent updates, deadlines, focus queue, weekly load, and change journal
 - cited AI over structured workbench outputs
@@ -103,6 +96,17 @@ The honest split is:
 - **proof receipts second**
 - **builder/public routes only after the product story**
 - **owner-side listing and launch later**
+
+## Product Map
+
+![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
+
+This illustration is the family/product map, not the proof lane. Keep using the screenshots and receipts above when you want evidence of the current shipped surface.
+
+See the receipts:
+
+- [`docs/assets/weekly-assignments-example.md`](docs/assets/weekly-assignments-example.md) shows an export-ready receipt
+- [`examples/current-view-triage-example.md`](examples/current-view-triage-example.md) shows one current-view decision output
 
 ## Repo-Local Proof Path
 
@@ -171,7 +175,7 @@ http://127.0.0.1:8787
 http://localhost:8787
 ```
 
-Only if autodiscovery fails do you need to open Settings and enter a manual local API address.
+Only if autodiscovery fails do you need to open Trust Center and enter a manual local API address.
 
 ## Builder Quick Paths
 

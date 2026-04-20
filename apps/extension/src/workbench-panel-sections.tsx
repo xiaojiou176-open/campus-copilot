@@ -1258,10 +1258,10 @@ export function WorkbenchDecisionSections({
           mergeHealthEyebrow: 'Merge Health',
           mergeHealthTitle: 'Merged view health',
           mergeHealthDescription:
-            'Think of this as the ledger health lamp. It shows how many course clusters and merged work items are already folded in, and how many objects still remain possible matches.',
+            'Think of this as the shared-desk health lamp. It shows how many course clusters and merged work items are already folded in, and how many objects still need review.',
           courseClustersTitle: 'Course clusters',
           courseClustersSummary: (count: number) => `${count} course clusters are already in the shared workspace view.`,
-          mergeStats: (merged: number, possible: number) => `merged ${merged} · possible ${possible}`,
+          mergeStats: (merged: number, possible: number) => `merged ${merged} · needs review ${possible}`,
           workItemClustersTitle: 'Work-item clusters',
           workItemClustersSummary: (count: number) =>
             `${count} merged work items are already in the shared workspace view.`,

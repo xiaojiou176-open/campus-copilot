@@ -1023,6 +1023,18 @@ textarea {
   border-color: rgba(31, 93, 75, 0.12);
 }
 
+.surface__button--quiet {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(245, 242, 235, 0.78);
+  color: var(--surface-muted);
+  border-color: rgba(97, 93, 89, 0.12);
+  box-shadow: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .surface__feedback {
   margin-top: 12px !important;
   color: var(--surface-accent-strong) !important;
@@ -1327,6 +1339,7 @@ summary:focus-visible,
 .surface__button:hover,
 .surface__button--secondary:hover,
 .surface__button--ghost:hover,
+.surface__button--quiet:hover,
 .surface__chip:hover,
 .surface__pulse-action:hover,
 .surface__advanced-settings:hover {
@@ -1337,6 +1350,7 @@ summary:focus-visible,
 .surface__button:active,
 .surface__button--secondary:active,
 .surface__button--ghost:active,
+.surface__button--quiet:active,
 .surface__chip:active,
 .surface__pulse-action:active {
   box-shadow: var(--surface-shadow-sm);

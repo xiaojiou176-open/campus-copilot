@@ -22,7 +22,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
       modeNav: {
         assistant: '助手',
         export: '导出',
-        settings: '设置',
+        settings: '信任中心',
       },
     assistant: {
       title: '你的校园桌面',
@@ -31,7 +31,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
         visibleFacts: '关键事实',
         activeConnection: '桌面状态',
         openExport: '打开导出',
-        openSettings: '打开信任设置',
+        openSettings: '打开信任中心',
         showWorkspace: '查看这一屏',
         hideWorkspace: '收起这一屏',
         syncCurrentSite: '同步当前站点',
@@ -43,15 +43,15 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
       },
       export: {
         title: '结构化导出模式',
-        description: '先选站点，再选课程，再选资源族，最后导出你真正要带走的那一层事实。',
+        description: '先选站点，再按课程缩小范围，再选要导出的内容，最后导出真正要带走的那一层事实。',
         siteLabel: '站点范围',
         courseLabel: '课程范围',
         formatLabel: '导出格式',
-        familyLabel: '资源族',
+        familyLabel: '导出内容',
         exportButton: '导出当前选择',
         allCourses: '全部课程',
         allSites: '全部站点',
-        courseScopedHint: '课程型站点建议先选课程，再选资源族。',
+        courseScopedHint: '课程型站点建议先选课程，再选要导出的内容。',
         globalHint: '当前站点更适合按站点整体导出，而不是先选课程。',
         badges: {
           available: '已可导出',
@@ -76,7 +76,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
             description: '只导出公告与提醒信号。',
           },
           messages: {
-            label: 'Inbox / 讨论',
+            label: '消息 / 讨论',
             description: '只导出消息、线程摘要与最新沟通事实。',
           },
           grades: {
@@ -93,10 +93,10 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
           },
           administrative_snapshot: {
             label: '行政摘要',
-            description: '导出 DARS / 学费类高敏感摘要，默认走 review-first。',
+            description: '导出 DARS / 学费类高敏感摘要，默认先审阅再导出。',
           },
           cluster_merge_review: {
-            label: 'Merge 账本',
+            label: '合并审查',
             description: '导出课程簇、工作项簇和 possible-match 审核材料。',
           },
           instructor_feedback: {
@@ -104,11 +104,11 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
             description: '这类信息已经预留位置，但 Canvas 还没把老师评语稳定带到这里。',
           },
           syllabus: {
-            label: 'Syllabus',
+            label: '课程大纲',
             description: '当前已经能看到 syllabus 摘要和相关资料，但还不是完整正文或完整课程资料线。',
           },
           groups: {
-            label: 'Groups',
+            label: '课程小组',
             description: '当前只能看到部分小组摘要和跳转链接，还不是完整共享视图。',
           },
           recordings: {
@@ -131,20 +131,20 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
         clearOverride: '清空自定义地址',
       },
       authorization: {
-        title: '读取边界与信任中心',
+        title: '信任中心',
         description: '这里先讲清楚当前能读什么、哪些还只是部分可见，以及哪些仍需要更严格边界。',
-        currentReads: '当前正式读取面',
+        currentReads: '当前可读取的内容',
         plannedReads: '更深读取与当前状态',
       },
       popup: {
-        launchTitle: '这一页的快速脉搏',
-        launchDescription: 'Popup 只做 quick pulse launcher：打开助手、进入导出，或去设置与信任中心，不把自己做成第二块工作台。',
+        launchTitle: '这一页速览',
+        launchDescription: 'Popup 只做轻量入口：打开助手、进入导出，或去信任中心，不把自己做成第二块工作台。',
         openAssistant: '打开助手',
         openExport: '快速导出',
-        openSettings: '设置与授权',
+        openSettings: '信任中心',
         syncCurrentSite: '同步当前站点',
         quickExportTitle: '快速动作',
-        quickExportDescription: '先从这里发射到助手、导出或设置；如果要更细的审阅，再进入侧边栏完整流程。',
+        quickExportDescription: '先从这里进入助手、导出或信任中心；如果要更细的审阅，再进入侧边栏完整流程。',
         moreExports: '更多导出捷径',
         fewerExports: '收起额外导出',
       },
@@ -155,17 +155,17 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
     modeNav: {
       assistant: 'Assistant',
       export: 'Export',
-      settings: 'Settings',
+      settings: 'Trust center',
     },
     assistant: {
       title: 'Your campus desk',
       description:
-        'Start with the facts already gathered into this desk, check the desk status, and review the next task before you export or open settings.',
+        'Start with the facts already gathered into this desk, check the desk status, and review the next task before you export or open the trust center.',
       currentContext: 'Current desk',
       visibleFacts: 'Key facts',
       activeConnection: 'Desk status',
       openExport: 'Open export',
-      openSettings: 'Open trust settings',
+      openSettings: 'Open trust center',
       showWorkspace: 'Review this slice',
       hideWorkspace: 'Hide this slice',
       syncCurrentSite: 'Sync current site',
@@ -178,15 +178,15 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
     },
     export: {
       title: 'Structured export mode',
-      description: 'Pick a site, narrow to a course when it helps, choose a resource family, then export the exact slice you mean.',
+      description: 'Pick a site, narrow to a course when it helps, choose what to export, then export the exact slice you mean.',
       siteLabel: 'Site scope',
       courseLabel: 'Course scope',
       formatLabel: 'Export format',
-      familyLabel: 'Resource family',
+      familyLabel: 'What to export',
       exportButton: 'Export selection',
       allCourses: 'All courses',
       allSites: 'All sites',
-      courseScopedHint: 'Course-first export works best for course-centric sites.',
+      courseScopedHint: 'Course-first export works best for course-centric sites before choosing what to export.',
       globalHint: 'This site exports more truthfully at the whole-site level than at the course level.',
       badges: {
         available: 'Exportable now',
@@ -226,10 +226,10 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
           label: 'Course panorama',
           description: 'Export course clusters, course-website evidence, and cross-site course summaries.',
         },
-        administrative_snapshot: {
-          label: 'Administrative snapshot',
-          description: 'Export DARS/tuition-style high-sensitivity summaries in a review-first packet.',
-        },
+          administrative_snapshot: {
+            label: 'Administrative snapshot',
+            description: 'Export DARS/tuition-style high-sensitivity summaries in a review-first packet.',
+          },
         cluster_merge_review: {
           label: 'Cluster merge review',
           description: 'Export course clusters, work-item clusters, and possible-match review material.',
@@ -267,23 +267,23 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
       clearOverride: 'Clear custom address',
     },
     authorization: {
-      title: 'Reading boundaries and trust center',
+      title: 'Trust center',
       description:
         'This area explains what the product may read now, what still stays partial, and what still needs a stricter boundary.',
-      currentReads: 'Current formal reads',
+      currentReads: 'Current readable scope',
       plannedReads: 'Deeper reads and current status',
     },
     popup: {
-      launchTitle: 'Quick pulse from this page',
+      launchTitle: 'Quick snapshot from this page',
       launchDescription:
-        'Keep the popup in quick-pulse launcher mode: open the assistant, jump into export, or review settings/auth without turning this into a second dashboard.',
+        'Keep the popup in quick-pulse launcher mode: open the assistant, jump into export, or review the trust center without turning this into a second dashboard.',
       openAssistant: 'Open assistant',
       openExport: 'Quick export',
-      openSettings: 'Settings/Auth',
+      openSettings: 'Trust center',
       syncCurrentSite: 'Sync current site',
       quickExportTitle: 'Fast actions',
       quickExportDescription:
-        'Launch into assistant, export, or settings from here. Move into the sidepanel flow when you need a fuller review.',
+        'Launch into assistant, export, or the trust center from here. Move into the sidepanel flow when you need a fuller review.',
       moreExports: 'More export shortcuts',
       fewerExports: 'Hide extra export shortcuts',
     },

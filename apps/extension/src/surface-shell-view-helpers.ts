@@ -92,11 +92,14 @@ export function humanizeUiSummary(value: string | undefined, locale: ResolvedUiL
     next = next.replace(/No truthful accounts runtime carrier is landed yet\./gi, 'Account details are not available yet.');
     next = next.replace(/No truthful tuition-detail runtime carrier is landed yet\./gi, 'Billing details are not available yet.');
     next = next.replace(/No truthful profile runtime carrier is landed yet\./gi, 'Profile details are not available yet.');
+    next = next.replace(/No truthful DARS summary lane is landed yet\./gi, 'Degree requirements are not available in this desk yet.');
+    next = next.replace(/Degree-audit detail remains blocked until the shared planning substrate captures a lawful summary carrier\./gi, 'Keep DARS review-first until a stronger planning summary is available.');
     next = next.replace(/Historical-record detail remains blocked until a lawful summary carrier is proven\./gi, 'You can review the current summary for now.');
     next = next.replace(/Aid detail remains blocked pending a lawful summary-first carrier\./gi, 'You can review the current summary for now.');
     next = next.replace(/Account-state detail remains blocked pending a lawful summary-first carrier\./gi, 'You can review the current summary for now.');
     next = next.replace(/Billing-statement detail remains blocked until a lawful summary-first carrier is proven\./gi, 'You can review the current summary for now.');
     next = next.replace(/Personal-profile detail remains blocked until a lawful summary-first carrier is proven\./gi, 'You can review the current summary for now.');
+    next = next.replace(/single-site work item or a low-confidence candidate/gi, 'a task that still needs a clearer cross-site merge');
     next = next.replace(/lawful summary(?:-first)? carrier/gi, 'trusted summary');
     next = next.replace(/runtime carrier/gi, 'details');
     next = next.replace(/shared planning substrate/gi, 'planning snapshot');

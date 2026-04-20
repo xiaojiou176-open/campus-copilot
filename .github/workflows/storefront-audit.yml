@@ -42,10 +42,12 @@ jobs:
           pnpm check:english-canonical
           pnpm check:actions-pinning
           pnpm check:docs:ssot
+          pnpm --filter @campus-copilot/web test:interaction
+          pnpm render:social-preview
 
       - name: Manual follow-up reminder
         run: |
           echo "Manual lane only:"
           echo "- Review the current maintainership checklist before any owner-side launch action"
           echo "- Review docs/storefront-assets.md"
-          echo "- If assets changed, re-capture screenshots locally and review them before merge"
+          echo "- If screenshots or public assets changed, review the freshly rendered outputs before merge"

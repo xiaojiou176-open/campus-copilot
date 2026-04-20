@@ -100,12 +100,13 @@ describe('web ai panel guardrails', () => {
     expect(html).toContain('The current workbench slice, focus queue, weekly load, planning pulse, and exported current view');
     expect(html).toContain('Cited answer zone');
     expect(html).toContain('Waiting for a cited answer');
-    expect(html).toContain('AI settings and opt-ins');
+    expect(html).toContain('Advanced AI options');
     expect(html).toContain('Advanced material analysis');
     expect(html).toContain('default off');
-    expect(html).toContain('Local AI service URL');
-    expect(html).toContain('Provider');
-    expect(html).toContain('Model');
+    expect(html).toContain('Connection details and owner-only overrides');
+    expect(html).toContain('Local AI service address');
+    expect(html).toContain('Explanation route');
+    expect(html).toContain('Model name');
     expect(html).toContain('disabled=""');
     expect(html).toContain('type="checkbox"');
     expect(html).toContain('Enable excerpt analysis for one course');
