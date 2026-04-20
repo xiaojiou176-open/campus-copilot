@@ -1568,7 +1568,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       placeholder: '例如：我现在最该关注什么？最近有什么变化？',
       ask: '问 AI',
       configure: '打开 AI 设置',
-      missingBffFeedback: '当前还没配置本地 AI 路线，所以 AI 入口只会诚实提示，不会静默失败。',
+      missingBffFeedback: '本地 AI 路线未就绪。',
       refreshProviderStatus: '刷新服务商状态',
       refreshingProviderStatus: '刷新中…',
       keyPoints: '要点',

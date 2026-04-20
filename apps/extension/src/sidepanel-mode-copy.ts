@@ -38,7 +38,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
 	        readOnly: '只读',
 	      structuredOnly: '仅基于结构化事实',
 	      manualOnly: '高风险步骤保持手动',
-	      trustSummary: '当前这页只基于你已经看见的事实继续工作，把学业与行政信号放在同一张桌面上分组呈现。',
+	      trustSummary: '只根据你已经看见的事实工作。',
 	      noConnection: 'AI 连接还没就绪。',
 	      },
       export: {

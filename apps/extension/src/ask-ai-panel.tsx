@@ -177,11 +177,7 @@ export function AskAiPanel(props: {
       <div className="surface__section-head">
         <div>
           <h2>{text.askAi.title}</h2>
-          <p>{text.askAi.description}</p>
         </div>
-        <span className="surface__badge surface__badge--neutral">
-          {uiLanguage === 'zh-CN' ? '解释层' : 'Explanation layer'}
-        </span>
       </div>
 
       <div className="surface__ask-ai-flow surface__ask-ai-flow--compact">
@@ -190,14 +186,10 @@ export function AskAiPanel(props: {
             <div className="surface__item-header">
               <div className="surface__status-intro-copy">
                 <p className="surface__meta-label">{text.askAi.runtimeSummary}</p>
-                <p className="surface__item-lead">
-                  {uiLanguage === 'zh-CN' ? '伴随可信快照' : 'Companion trust snapshot'}
-                </p>
                 <p className="surface__meta">
                   {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
                   {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
                 </p>
-                <p className="surface__meta">{trustSnapshot} · {text.askAi.manualOnlyBadge}</p>
               </div>
               <span className={`surface__badge surface__badge--${selectedProviderReady ? 'success' : 'warning'}`}>
                 {selectedProviderReady ? text.meta.ready : text.meta.notReady}
@@ -273,11 +265,6 @@ export function AskAiPanel(props: {
             <div className="surface__section-head">
               <div>
                 <h3>{text.askAi.questionBox}</h3>
-                <p className="surface__meta">
-                  {uiLanguage === 'zh-CN'
-                    ? '先看上面的证据和边界，再基于这张工作台发问。'
-                    : 'Review the evidence and boundary notes first, then ask from the current workspace.'}
-                </p>
               </div>
               <span className="surface__badge surface__badge--neutral">{selectedProviderLabel}</span>
             </div>

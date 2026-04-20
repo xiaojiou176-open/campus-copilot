@@ -857,11 +857,9 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                   >
                     <summary className="surface__workspace-detail-summary">
                       <span className="surface__workspace-detail-copy">
-	                        <strong>{uiLanguage === 'zh-CN' ? '先看这张工作台' : 'Check this workspace first'}</strong>
+                        <strong>{uiLanguage === 'zh-CN' ? '先看这张工作台' : 'Check this workspace first'}</strong>
                         <span>
-                          {uiLanguage === 'zh-CN'
-                            ? '先确认这一屏的事实、提醒和导出范围，再决定要不要让 AI 解释。'
-                            : 'Check the visible facts, alerts, and export scope before deciding whether AI needs to explain them.'}
+                          {uiLanguage === 'zh-CN' ? '先确认这一屏的事实、提醒和导出范围。' : 'Check the visible facts, alerts, and export scope.'}
                         </span>
                       </span>
                       <span className="surface__workspace-detail-actions">
@@ -1087,7 +1085,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
             <article className="surface__panel surface__panel--pulse-summary">
               <p className="surface__eyebrow">{copy.eyebrow}</p>
               <h1 className="surface__title surface__title--compact">{popupLauncherCopy.launchTitle}</h1>
-              <p className="surface__copy surface__copy--compact">{popupLauncherCopy.launchDescription}</p>
               <div className="surface__summary-grid surface__summary-grid--compact surface__summary-grid--slim">
                 <div className="surface__summary-cell surface__summary-cell--slim">
                   <strong className="surface__summary-value">{todaySnapshot?.totalAssignments ?? 0}</strong>
@@ -1109,7 +1106,6 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
 
             <article className="surface__panel surface__panel--fast-actions">
               <h2>{popupLauncherCopy.quickExportTitle}</h2>
-              <p>{popupLauncherCopy.quickExportDescription}</p>
               <div className="surface__launcher-actions">
                 <button className="surface__button" onClick={() => void handleOpenMainWorkbench()} type="button">
                   {popupLauncherCopy.openAssistant}
