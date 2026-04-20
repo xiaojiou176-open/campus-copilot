@@ -115,6 +115,7 @@ export function AskAiPanel(props: {
   const advancedMaterialGuard = aiGuardrails.advancedMaterial;
   const currentPolicyOverlay = getAiSitePolicyOverlay(currentPolicySite);
   const [readExportSummary, aiReadSummary] = summarizeAuthorizationState(config.authorization);
+  const selectedProviderReason = formatProviderReason(selectedProviderStatus?.reason, uiLanguage);
   const structuredInputs = [
     {
       label: text.askAi.structuredInputLabels.todaySnapshot,
@@ -157,11 +158,11 @@ export function AskAiPanel(props: {
       value: structuredInputSummary.currentViewFormat.toUpperCase(),
     },
   ];
-  const trustSnapshot = [
-    `${structuredInputs[0].label}: ${structuredInputs[0].value}`,
-    `${structuredInputs[3].label}: ${structuredInputs[3].value}`,
-    `${structuredInputs[8].label}: ${structuredInputs[8].value}`,
-  ].join(' · ');
+  const evidenceFirstLabel = uiLanguage === 'zh-CN' ? '先核对这张桌面的证据' : 'Check this desk first';
+  const routeSummaryLabel = uiLanguage === 'zh-CN' ? 'AI 路线' : 'AI route';
+  const evidenceSummary = structuredInputs[0].value;
+  const evidenceMeta = `${structuredInputs[3].label} ${structuredInputs[3].value} · ${structuredInputs[9].label} ${structuredInputs[9].value}`;
+  const routeStatusSummary = `${selectedProviderLabel} · ${selectedProviderReady ? text.meta.ready : text.meta.notReady}`;
   const policyReviewLabel = uiLanguage === 'zh-CN' ? '先核对这张桌面的证据' : 'Check the evidence first';
   const structuredLedgerLabel = uiLanguage === 'zh-CN' ? '这张桌面的输入' : 'Inputs on this desk';
   const currentSiteRulesLabel = uiLanguage === 'zh-CN' ? '当前站点规则' : 'Current site rules';
@@ -185,14 +186,15 @@ export function AskAiPanel(props: {
           <aside aria-live="polite" className="surface__status-intro surface__status-intro--compact surface__status-intro--supporting">
             <div className="surface__item-header">
               <div className="surface__status-intro-copy">
-                <p className="surface__meta-label">{text.askAi.runtimeSummary}</p>
+                <p className="surface__meta-label">{evidenceFirstLabel}</p>
+                <p className="surface__item-lead">{evidenceSummary}</p>
+                <p className="surface__meta">{evidenceMeta}</p>
                 <p className="surface__meta">
-                  {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
-                  {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
+                  {routeSummaryLabel}: {routeStatusSummary} · {selectedProviderReason}
                 </p>
               </div>
-              <span className={`surface__badge surface__badge--${selectedProviderReady ? 'success' : 'warning'}`}>
-                {selectedProviderReady ? text.meta.ready : text.meta.notReady}
+              <span className="surface__badge surface__badge--neutral">
+                {structuredInputs.length} items
               </span>
             </div>
           </aside>
@@ -223,8 +225,7 @@ export function AskAiPanel(props: {
                   </article>
                 </div>
                 <p className="surface__meta">
-                  {selectedProviderLabel} · {selectedProviderReady ? text.meta.ready : text.meta.notReady} ·{' '}
-                  {formatProviderReason(selectedProviderStatus?.reason, uiLanguage)}
+                  {routeSummaryLabel}: {routeStatusSummary} · {selectedProviderReason}
                 </p>
               </article>
 

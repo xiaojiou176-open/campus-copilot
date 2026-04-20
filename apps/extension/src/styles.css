@@ -536,7 +536,15 @@ textarea {
 }
 
 .surface--sidepanel .surface__ask-ai-sidebar--supporting {
+  order: 0;
+}
+
+.surface--sidepanel .surface__ask-ai-flow > .surface__advanced-settings {
   order: 2;
+}
+
+.surface--sidepanel .surface__ask-ai-flow > .surface__advanced-settings + .surface__advanced-settings {
+  order: 3;
 }
 
 .surface--sidepanel .surface__question-card,
