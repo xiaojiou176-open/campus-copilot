@@ -8,7 +8,7 @@ import { AiStructuredAnswerSchema } from './ai-answer-resolution';
 import { getAiSitePolicyOverlay } from './ai-site-policy';
 import { formatProviderReason, type ProviderStatusLike } from './provider-status-format';
 import { summarizeAuthorizationState } from './export-input';
-import { formatAuthorizationStatusLabel, formatRelativeTime, type ResolvedUiLanguage } from './i18n';
+import { formatAuthorizationStatusLabel, type ResolvedUiLanguage } from './i18n';
 import { PROVIDER_OPTIONS } from './surface-shell-model';
 import { type UiText } from './surface-shell-view-helpers';
 import type { ExtensionConfig } from './config';
