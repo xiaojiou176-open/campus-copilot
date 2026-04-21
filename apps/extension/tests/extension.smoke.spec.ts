@@ -822,7 +822,7 @@ test('keeps ai gated until the current scope is explicitly allowed', async ({ pa
   const visibleEvidenceCard = askAiPanel
     .locator('article.surface__status-card--success article.surface__evidence-card')
     .first();
-  await askAiPanel.locator('summary').filter({ hasText: 'Check the evidence first' }).click();
+  await askAiPanel.locator('summary').filter({ hasText: 'See what AI can use' }).click();
   await expect(askAiPanel.getByRole('heading', { name: 'What AI can see' })).toBeVisible();
   await expect(visibleEvidenceCard.getByText('Today snapshot', { exact: true })).toBeVisible();
   await expect(visibleEvidenceCard.getByText(/Open assignments \d+ · Due within 48 hours \d+ · New grades \d+/)).toBeVisible();
@@ -950,7 +950,7 @@ test('switches to Chinese UI and shows partial-success plus site-filter behavior
     .first();
 
   await expect(page.getByRole('heading', { name: '你的校园桌面' }).first()).toBeVisible();
-  await chineseAskAiPanel.locator('summary').filter({ hasText: '先核对这张桌面的证据' }).click();
+  await chineseAskAiPanel.locator('summary').filter({ hasText: '看 AI 会基于什么来答' }).click();
   await expect(chineseAskAiPanel.getByRole('heading', { name: 'AI 当前能看见什么' })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText('今日快照', { exact: true })).toBeVisible();
   await expect(chineseVisibleEvidenceCard.getByText(/待办作业 \d+ · 48 小时内截止 \d+ · 新成绩 \d+/)).toBeVisible();
