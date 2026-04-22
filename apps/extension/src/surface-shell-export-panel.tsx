@@ -591,11 +591,11 @@ export function SurfaceShellExportPanel(props: {
   const exportAiAllowedLead =
     uiLanguage === 'zh-CN'
       ? exportReviewPackaging.aiAllowed
-        ? 'AI 分析已就绪'
-        : 'AI 分析保持关闭'
+        ? 'AI 权限已就绪'
+        : 'AI 权限保持关闭'
       : exportReviewPackaging.aiAllowed
-        ? 'AI analysis ready now'
-        : 'AI analysis kept off';
+        ? 'AI permission ready now'
+        : 'AI permission kept off';
   const exportAiAllowedDetail =
     exportReviewPackaging.aiAllowed
       ? uiLanguage === 'zh-CN'

@@ -19,6 +19,9 @@
 
 Real product proof, not concept art:
 
+These are public-proof crops of the current shipped surfaces.
+They do not replace the deeper local installed-state or manual live review lane that stays documented in [`docs/storefront-assets.md`](docs/storefront-assets.md) and [`docs/live-validation-runbook.md`](docs/live-validation-runbook.md).
+
 ![Campus Copilot sidepanel overview](docs/assets/sidepanel-overview.png)
 Extension proof: the current student-facing sidepanel with explicit `Export` and `Trust center` paths.
 

@@ -120,7 +120,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
 	      connection: {
 	        title: '连接与信任摘要',
 	        description: '默认先自动发现本机常见地址；只有自动发现失败时，才需要手动填写。',
-	        autodiscovered: '已发现本地 AI 路线',
+	        autodiscovered: '本地连接已激活',
 	        manual: '自定义 AI 路线',
 	        none: '本地 AI 路线未就绪',
 	        manualUnreachable: '你当前填写的本地 AI 地址不可达。请清空它，或改成可用地址后再试。',
@@ -137,7 +137,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
         plannedReads: '更深读取与当前状态',
       },
       popup: {
-        launchTitle: '这一页速览',
+        launchTitle: '这张桌面的速览',
         launchDescription: '从这里快速进入助手、导出或信任中心。',
         openAssistant: '打开助手',
         openExport: '快速导出',
@@ -255,7 +255,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
     connection: {
       title: 'Connection and trust summary',
       description: 'Try the common local addresses first. Only use a manual address when autodiscovery fails.',
-      autodiscovered: 'Local AI route found',
+      autodiscovered: 'Local connection active',
       manual: 'Custom AI route',
       none: 'No local AI route',
       manualUnreachable:
@@ -274,7 +274,7 @@ export function getSidepanelModeCopy(locale: ResolvedUiLanguage) {
       plannedReads: 'Deeper reads and current status',
     },
     popup: {
-      launchTitle: 'Quick snapshot from this page',
+      launchTitle: 'Quick snapshot from your desk',
       launchDescription:
         'Use this popup as a light entry point into assistant, export, or trust center.',
       openAssistant: 'Open assistant',

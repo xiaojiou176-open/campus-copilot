@@ -193,6 +193,7 @@ export function OptionsPanels(props: {
   uiLanguage: ResolvedUiLanguage;
   optionsDraft: ExtensionConfig;
   setOptionsDraft: Dispatch<SetStateAction<ExtensionConfig>>;
+  activeBffBaseUrl?: string;
   providerStatus: ProviderStatusLike;
   providerStatusPending: boolean;
   availableCourses: Array<{ id: string; site: string; label: string; title?: string }>;
@@ -206,6 +207,7 @@ export function OptionsPanels(props: {
     uiLanguage,
     optionsDraft,
     setOptionsDraft,
+    activeBffBaseUrl,
     providerStatus,
     providerStatusPending,
     availableCourses,
@@ -216,6 +218,7 @@ export function OptionsPanels(props: {
   } = props;
 
   const readyProviderCount = PROVIDER_OPTIONS.filter((option) => providerStatus.providers[option.value]?.ready).length;
+  const effectiveBffBaseUrl = activeBffBaseUrl || optionsDraft.ai.bffBaseUrl;
   const blockedResourceFamilyCount = ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS.filter(
     (family) => getResourceFamilyAuthorizationStatus(optionsDraft, family.resourceFamily, 'layer2_ai_read_analysis') === 'blocked',
   ).length;
@@ -246,7 +249,7 @@ export function OptionsPanels(props: {
       ? '保存、刷新和导出放到 trust/boundary 摘要之后，避免首屏先变成控制台。'
       : 'Save, refresh, and export stay after the trust and boundary summary so the first screen does not read like a control console.';
   const readExportLabel = uiLanguage === 'zh-CN' ? '读取与导出' : 'Read & export';
-  const aiAnalysisLabel = uiLanguage === 'zh-CN' ? 'AI 分析' : 'AI analysis';
+  const aiAnalysisLabel = uiLanguage === 'zh-CN' ? 'AI 权限' : 'AI permission';
   const localAiConnectionLabel = uiLanguage === 'zh-CN' ? '本地 AI 连接' : 'Local AI connection';
   const trustPostureLabel = uiLanguage === 'zh-CN' ? '当前信任摘要' : 'Current trust summary';
   const managedSiteAuthorizationSnapshot = MANAGED_POLICY_SITES.map((site) => ({
@@ -333,7 +336,7 @@ export function OptionsPanels(props: {
           </label>
           <div className="surface__stack">
             <p className="surface__meta">
-              {localAiConnectionLabel}: {optionsDraft.ai.bffBaseUrl || text.options.manualFallbackOnly}
+              {localAiConnectionLabel}: {effectiveBffBaseUrl || text.options.manualFallbackOnly}
             </p>
             <p className="surface__meta">
               {text.meta.lastChecked}: {formatRelativeTime(uiLanguage, providerStatus.checkedAt)}
@@ -413,16 +416,12 @@ export function OptionsPanels(props: {
         <p className="surface__meta">
           {uiLanguage === 'zh-CN'
             ? '保持读取与导出、AI 分析分层，不把“能读”误写成“能让 AI 看”。'
-            : 'Keep read/export separate from AI analysis so “readable” never silently becomes “AI-readable”.'}
-        </p>
-        <p className="surface__meta">
-          {localAiConnectionLabel}: {optionsDraft.ai.bffBaseUrl || text.options.manualFallbackOnly}
-          {providerStatus.error ? ` · ${formatProviderStatusError(providerStatus.error, uiLanguage)}` : ''}
+            : 'Keep read/export separate from AI permissions so “readable” never silently becomes “AI-readable”.'}
         </p>
         <p className="surface__meta">
           {uiLanguage === 'zh-CN'
             ? '如果需要更保守的姿态，优先先收紧 AI 分析；真正的站点审查和规则编辑留在下一层。'
-            : 'If you need a safer posture, tighten AI analysis first; site-by-site reviews and rule editing stay one layer deeper.'}
+            : 'If you need a safer posture, tighten AI permissions first; site-by-site reviews and rule editing stay one layer deeper.'}
         </p>
         <details className="surface__advanced-settings" open={false}>
           <summary className="surface__advanced-settings-summary">
@@ -534,7 +533,7 @@ export function OptionsPanels(props: {
                         </select>
                       </label>
                       <label className="surface__field">
-                        <span>{uiLanguage === 'zh-CN' ? 'AI 分析状态' : 'AI analysis status'}</span>
+                        <span>{uiLanguage === 'zh-CN' ? 'AI 权限状态' : 'AI permission status'}</span>
                         <select
                           value={courseAuthorizationDraftStatus}
                           onChange={(event) =>
@@ -642,7 +641,7 @@ export function OptionsPanels(props: {
                 </select>
               </label>
               <label className="surface__field">
-                <span>{uiLanguage === 'zh-CN' ? '全部站点 · AI 分析' : 'All sites · AI analysis'}</span>
+                <span>{uiLanguage === 'zh-CN' ? '全部站点 · AI 权限' : 'All sites · AI permission'}</span>
                 <select
                   value={globalLayer2Status}
                   onChange={(event) =>

@@ -204,4 +204,72 @@ describe('ask ai panel guardrails', () => {
     expect(html).toContain('Ask from this desk');
     expect(html).toContain('Weekly load 7');
   });
+
+  it('shows a blocked state instead of the full question form when the selected provider is not ready', () => {
+    const html = renderToStaticMarkup(
+      createElement(AskAiPanel, {
+        text: getUiText('en'),
+        uiLanguage: 'en',
+        config: getDefaultExtensionConfig(),
+        activeBffBaseUrl: 'http://127.0.0.1:8787',
+        providerStatus: {
+          providers: {
+            openai: { ready: false, reason: 'missing_api_key' },
+            gemini: { ready: false, reason: 'missing_api_key' },
+            switchyard: { ready: false, reason: 'missing_runtime_url' },
+          },
+          checkedAt: '2026-04-21T12:00:00.000Z',
+        },
+        providerStatusPending: false,
+        aiProvider: 'gemini',
+        aiModel: 'gemini-2.5-flash',
+        switchyardProvider: 'chatgpt',
+        switchyardLane: 'web',
+        aiQuestion: '',
+        aiPending: false,
+        currentPolicySite: 'canvas',
+        availableCourses: [{ id: 'canvas:course:1', label: 'Canvas · CSE 142' }],
+        advancedMaterialEnabled: false,
+        advancedMaterialCourseId: '',
+        advancedMaterialExcerpt: '',
+        advancedMaterialAcknowledged: false,
+        structuredInputSummary: {
+          totalAssignments: 0,
+          dueSoonAssignments: 0,
+          newGrades: 0,
+          recentUpdatesCount: 0,
+          priorityAlertsCount: 0,
+          focusQueueCount: 0,
+          weeklyLoadCount: 7,
+          changeJournalCount: 0,
+          courseClusterCount: 0,
+          workItemClusterCount: 0,
+          administrativeSummaryCount: 0,
+          currentViewFormat: 'markdown',
+        },
+        onProviderChange: () => {},
+        onModelChange: () => {},
+        onSwitchyardProviderChange: () => {},
+        onSwitchyardLaneChange: () => {},
+        onQuestionChange: () => {},
+        onAdvancedMaterialEnabledChange: () => {},
+        onAdvancedMaterialCourseChange: () => {},
+        onAdvancedMaterialExcerptChange: () => {},
+        onAdvancedMaterialAcknowledgedChange: () => {},
+        onAskAi: async () => {},
+        onRefreshProviderStatus: async () => {},
+        onOpenConfiguration: () => {},
+      }),
+    );
+
+    expect(html).toContain('AI route');
+    expect(html).toContain('Not ready yet');
+    expect(html).toContain('Fix the provider setup first, then ask a question.');
+    expect(html).toContain('Refresh provider status or open AI settings to fix the provider setup.');
+    expect(html).toContain('Open AI settings');
+    expect(html).toContain('Refresh provider status');
+    expect(html).not.toContain('Finish the local route first');
+    expect(html).not.toContain('Question</span>');
+    expect(html).not.toContain('Suggested prompts');
+  });
 });

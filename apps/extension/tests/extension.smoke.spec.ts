@@ -453,7 +453,7 @@ async function assertOptionsTrustCenter(page: Page) {
   const authorizationPanel = authorizationHeading.locator('xpath=ancestor::article[1]');
   const configurationActionsHeading = page.getByRole('heading', { name: 'Next steps' });
   await expect(
-    authorizationPanel.getByText('Keep read/export separate from AI analysis so “readable” never silently becomes “AI-readable”.'),
+    authorizationPanel.getByText('Keep read/export separate from AI permissions so “readable” never silently becomes “AI-readable”.'),
   ).toBeVisible();
   await authorizationPanel.locator('summary').filter({ hasText: 'Open deeper trust reviews' }).first().click();
   await expect(authorizationPanel.getByText('Current trust summary')).toBeVisible();
@@ -679,14 +679,14 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   await assertOptionsTrustCenter(page);
   await maybeCaptureSmokeScreenshot(page, 'extension-options-trust-center');
   const authorizationPanel = await expandOptionsRuleEditor(page);
-  await authorizationPanel.getByLabel('All sites · AI analysis').selectOption('allowed');
+  await authorizationPanel.getByLabel('All sites · AI permission').selectOption('allowed');
   await page.getByRole('button', { name: 'Save configuration' }).click();
   await expect(page.getByText('Configuration saved.')).toBeVisible();
 
   await gotoSmokePage(page, baseURL, '/options.html');
   await assertOptionsTrustCenter(page);
   const savedAuthorizationPanel = await expandOptionsRuleEditor(page);
-  await expect(savedAuthorizationPanel.getByLabel('All sites · AI analysis')).toHaveValue('allowed');
+  await expect(savedAuthorizationPanel.getByLabel('All sites · AI permission')).toHaveValue('allowed');
 
   await seedTechnicalConfig(page, {
     bffBaseUrl: 'http://127.0.0.1:8787',
@@ -782,7 +782,7 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   const aiVisibilityCard = exportReviewPanel.locator('article.surface__evidence-card').nth(2);
   await expect(aiVisibilityCard.locator('p.surface__meta-label')).toContainText('AI visibility');
   await expect(aiVisibilityCard.locator('p.surface__item-lead')).toContainText(
-    /AI analysis (ready now|kept off)/i,
+    /AI permission (ready now|kept off)/i,
   );
   const provenanceCard = exportReviewPanel.locator('article.surface__evidence-card').nth(3);
   await expect(provenanceCard.locator('p.surface__meta-label')).toContainText('Provenance');
@@ -922,10 +922,13 @@ test('shows provider not ready when selected provider is unavailable in bff stat
   await page.locator('summary').filter({ hasText: 'AI settings and opt-ins' }).click();
   await expect(page.getByLabel('Provider')).toBeVisible();
   await page.getByLabel('Provider').selectOption('openai');
-  await page.getByLabel('Question').fill('What changed recently?');
-  await page.getByRole('button', { name: 'Ask AI' }).click();
-
-  await expect(page.getByText("OpenAI is not ready in the local AI route yet.")).toBeVisible();
+  await expect(page.getByText('OpenAI is not ready on this desk yet. Fix the provider setup first, then ask a question.')).toBeVisible();
+  await expect(page.getByText('Refresh provider status or open AI settings to fix the provider setup.')).toBeVisible();
+  const askAiPanel = page.locator('article.surface__panel--ask-ai');
+  await expect(askAiPanel.getByRole('button', { name: 'Open AI settings' })).toBeVisible();
+  await expect(askAiPanel.getByRole('button', { name: 'Refresh provider status' }).first()).toBeVisible();
+  await expect(page.getByLabel('Question')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Ask AI' })).toHaveCount(0);
   const openAiStatusCard = page
     .locator('article.surface__status-card')
     .filter({ has: page.locator('strong', { hasText: /^OpenAI$/ }) });

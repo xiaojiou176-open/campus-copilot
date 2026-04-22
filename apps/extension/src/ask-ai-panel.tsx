@@ -201,6 +201,12 @@ export function AskAiPanel(props: {
     0;
   const showEmptyStateCta =
     !hasStructuredDeskEvidence && !aiQuestion.trim() && !aiPending && !aiAnswer && !parsedStructuredAnswer.success;
+  const showProviderBlockedState =
+    !showEmptyStateCta &&
+    !selectedProviderReady &&
+    !aiPending &&
+    !aiAnswer &&
+    !parsedStructuredAnswer.success;
   const structuredLedgerLabel = uiLanguage === 'zh-CN' ? '这张桌面的输入' : 'Inputs on this desk';
   const currentSiteRulesLabel = uiLanguage === 'zh-CN' ? '当前站点规则' : 'Current site rules';
   const readAndExportLabel = uiLanguage === 'zh-CN' ? '读取与导出' : 'Read and export';
@@ -321,6 +327,47 @@ export function AskAiPanel(props: {
                       {text.askAi.configure}
                     </button>
                   ) : null}
+                </div>
+              </>
+            ) : showProviderBlockedState ? (
+              <>
+                <div className="surface__section-head">
+                  <div>
+                    <h3>{routeSummaryLabel}</h3>
+                    <p className="surface__meta">
+                      {uiLanguage === 'zh-CN'
+                        ? `${selectedProviderLabel} 当前还不能在这张桌面里直接回答，先把 provider 设置补齐，再继续提问。`
+                        : `${selectedProviderLabel} is not ready on this desk yet. Fix the provider setup first, then ask a question.`}
+                    </p>
+                  </div>
+                  <span className="surface__badge surface__badge--warning">{routeStatusSummary}</span>
+                </div>
+                <div className="surface__stack surface__stack--compact">
+                  <p className="surface__item-lead">
+                    {uiLanguage === 'zh-CN'
+                      ? `${routeSummaryLabel}：${routeStatusMeta}`
+                      : `${routeSummaryLabel}: ${routeStatusMeta}`}
+                  </p>
+                  <p className="surface__meta">
+                    {uiLanguage === 'zh-CN'
+                      ? '先刷新 provider 状态，或打开 AI 设置修正 provider 设置。'
+                      : 'Refresh provider status or open AI settings to fix the provider setup.'}
+                  </p>
+                </div>
+                <div className="surface__actions surface__actions--wrap surface__actions--tight">
+                  {onOpenConfiguration ? (
+                    <button className="surface__button" onClick={() => onOpenConfiguration()} type="button">
+                      {text.askAi.configure}
+                    </button>
+                  ) : null}
+                  <button
+                    className="surface__button surface__button--ghost"
+                    disabled={providerStatusPending}
+                    onClick={() => void onRefreshProviderStatus()}
+                    type="button"
+                  >
+                    {providerStatusPending ? `${text.askAi.refreshingProviderStatus}` : text.askAi.refreshProviderStatus}
+                  </button>
                 </div>
               </>
             ) : (

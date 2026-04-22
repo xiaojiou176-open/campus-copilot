@@ -1193,6 +1193,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
                 uiLanguage={uiLanguage}
                 optionsDraft={optionsDraft}
                 setOptionsDraft={setOptionsDraft}
+                activeBffBaseUrl={activeBffBaseUrl}
                 providerStatus={providerStatus}
                 providerStatusPending={providerStatusPending}
                 availableCourses={availableCourses}
