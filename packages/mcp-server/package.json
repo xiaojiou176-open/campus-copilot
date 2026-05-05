@@ -44,6 +44,6 @@
     "@campus-copilot/sdk": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "esbuild": "^0.28.0",
-    "zod": "^4.1.5"
+    "zod": "^4.4.3"
   }
 }
