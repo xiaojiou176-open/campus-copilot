@@ -13,6 +13,6 @@
   "dependencies": {
     "@campus-copilot/adapters-base": "workspace:*",
     "@campus-copilot/schema": "workspace:*",
-    "zod": "^4.1.5"
+    "zod": "^4.4.3"
   }
 }
