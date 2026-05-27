@@ -1,0 +1,11 @@
+{
+  "mcp": {
+    "servers": {
+      "opencampus": {
+        "command": "pnpm",
+        "args": ["--filter", "@opencampus/mcp-server", "start"],
+        "cwd": "/ABSOLUTE/PATH/TO/opencampus"
+      }
+    }
+  }
+}

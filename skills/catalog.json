@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "1.0.0",
+  "pack": {
+    "name": "opencampus-public-skills",
+    "version": "0.1.0",
+    "visibility": "repo-public",
+    "distribution": "local-bundle",
+    "officialListing": "not_listed",
+    "scope": "read-only",
+    "readme": "README.md",
+    "description": "Repo-owned catalog for OpenCampus public read-only skills. This is a local bundle surface, not an upstream marketplace manifest."
+  },
+  "skills": [
+    {
+      "id": "read-only-workspace-analysis",
+      "entrypoint": "read-only-workspace-analysis/SKILL.md",
+      "summary": "Summarize what is open, what changed, what is due soon, and which site is carrying the workload from a OpenCampus snapshot.",
+      "scope": "read-only",
+      "consumerRoutes": [
+        "codex",
+        "claude-code",
+        "openclaw-style-local-runtime"
+      ],
+      "companionFiles": [
+        "../examples/workspace-snapshot.sample.json",
+        "../examples/openclaw-readonly.md",
+        "../examples/cli-usage.md"
+      ]
+    },
+    {
+      "id": "read-only-workspace-audit",
+      "entrypoint": "read-only-workspace-audit/SKILL.md",
+      "summary": "Audit whether one imported workspace snapshot is rich enough for export, cited AI, or MCP consumption without reopening live browser automation.",
+      "scope": "read-only",
+      "consumerRoutes": [
+        "codex",
+        "claude-code",
+        "openclaw-style-local-runtime"
+      ],
+      "companionFiles": [
+        "../examples/integrations/codex-mcp.example.json",
+        "../examples/integrations/claude-code-mcp.example.json",
+        "../examples/workspace-snapshot.sample.json"
+      ]
+    },
+    {
+      "id": "current-view-triage",
+      "entrypoint": "current-view-triage/SKILL.md",
+      "summary": "Turn one imported workspace view into a plain-language answer to what the student should do first right now.",
+      "scope": "read-only",
+      "consumerRoutes": [
+        "codex",
+        "claude-code",
+        "openclaw-style-local-runtime"
+      ],
+      "companionFiles": [
+        "current-view-triage/README.md",
+        "current-view-triage/references/mcp-setup.md",
+        "current-view-triage/references/input-shape.md",
+        "current-view-triage/references/capability-map.md",
+        "current-view-triage/references/example-output.md"
+      ]
+    },
+    {
+      "id": "openclaw-readonly-consumer",
+      "entrypoint": "openclaw-readonly-consumer/SKILL.md",
+      "summary": "Guide an OpenClaw-style local runtime onto the snapshot-first or thin-BFF-first read-only OpenCampus path.",
+      "scope": "read-only",
+      "consumerRoutes": [
+        "openclaw-style-local-runtime"
+      ],
+      "companionFiles": [
+        "../examples/openclaw-readonly.md",
+        "../examples/README.md",
+        "site-mcp-consumer/SKILL.md"
+      ]
+    },
+    {
+      "id": "site-mcp-consumer",
+      "entrypoint": "site-mcp-consumer/SKILL.md",
+      "summary": "Wire one site-scoped read-only MCP sidecar for Codex, Claude Code, Claude Desktop, or another local MCP runtime.",
+      "scope": "read-only",
+      "consumerRoutes": [
+        "claude-code",
+        "claude-desktop",
+        "codex",
+        "openclaw-style-local-runtime"
+      ],
+      "companionFiles": [
+        "../examples/mcp/codex.example.json",
+        "../examples/mcp/claude-desktop.example.json",
+        "../examples/openclaw-readonly.md"
+      ]
+    },
+    {
+      "id": "site-overview-audit",
+      "entrypoint": "site-overview-audit/SKILL.md",
+      "summary": "Inspect one supported site's current snapshot records in a smaller, site-scoped read-only card.",
+      "scope": "read-only",
+      "consumerRoutes": [
+        "claude-code",
+        "codex",
+        "openclaw-style-local-runtime"
+      ],
+      "companionFiles": [
+        "../examples/site-overview-audit-example.md",
+        "../examples/mcp/codex.example.json",
+        "../examples/mcp/claude-desktop.example.json"
+      ]
+    },
+    {
+      "id": "site-snapshot-review",
+      "entrypoint": "site-snapshot-review/SKILL.md",
+      "summary": "Review one site's exported snapshot records through the shared snapshot contract without claiming live browser truth.",
+      "scope": "read-only",
+      "consumerRoutes": [
+        "codex",
+        "claude-code"
+      ],
+      "companionFiles": [
+        "../examples/workspace-snapshot.sample.json",
+        "../examples/sdk-usage.ts",
+        "site-mcp-consumer/SKILL.md"
+      ]
+    },
+    {
+      "id": "switchyard-runtime-check",
+      "entrypoint": "switchyard-runtime-check/SKILL.md",
+      "summary": "Verify the optional local Switchyard runtime seam while preserving OpenCampus answer semantics.",
+      "scope": "read-only",
+      "consumerRoutes": [
+        "codex",
+        "claude-code",
+        "openclaw-style-local-runtime"
+      ],
+      "companionFiles": [
+        "../examples/integrations/plugin-bundles.md",
+        "../examples/openclaw-readonly.md",
+        "../packages/provider-runtime/README.md"
+      ]
+    }
+  ]
+}

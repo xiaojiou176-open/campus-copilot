@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "repo-owned-clawhub-skill-submission-packet",
+  "truthBoundary": "This is a repo-owned submission packet that mirrors official ClawHub skill-publish inputs and OpenClaw bundle-detection facts. It is not an upstream marketplace manifest.",
+  "officialSources": {
+    "clawhub": "https://docs.openclaw.ai/tools/clawhub",
+    "skills": "https://docs.openclaw.ai/tools/skills",
+    "bundles": "https://docs.openclaw.ai/plugins/bundles"
+  },
+  "pack": {
+    "name": "opencampus-public-skills",
+    "version": "0.1.0",
+    "scope": "read-only",
+    "sourceRoot": "skills",
+    "bundleCompatibility": {
+      "openclawBundleFormat": "manifestless-claude-layout",
+      "detectedRoots": [
+        "skills/"
+      ],
+      "nativeManifestIncluded": false
+    }
+  },
+  "publishDefaults": {
+    "changelogSource": "CHANGELOG.md",
+    "defaultTags": [
+      "latest"
+    ]
+  },
+  "skills": [
+    {
+      "id": "read-only-workspace-analysis",
+      "slug": "read-only-workspace-analysis",
+      "displayName": "Read Only Workspace Analysis",
+      "version": "0.1.0",
+      "path": "skills/read-only-workspace-analysis/SKILL.md",
+      "tags": [
+        "latest"
+      ],
+      "summary": "Summarize what is open, what changed, what is due soon, and which site is carrying the workload from a OpenCampus snapshot."
+    },
+    {
+      "id": "read-only-workspace-audit",
+      "slug": "read-only-workspace-audit",
+      "displayName": "Read Only Workspace Audit",
+      "version": "0.1.0",
+      "path": "skills/read-only-workspace-audit/SKILL.md",
+      "tags": [
+        "latest"
+      ],
+      "summary": "Audit whether one imported workspace snapshot is rich enough for export, cited AI, or MCP consumption without reopening live browser automation."
+    },
+    {
+      "id": "current-view-triage",
+      "slug": "current-view-triage",
+      "displayName": "Current View Triage",
+      "version": "0.1.0",
+      "path": "skills/current-view-triage/SKILL.md",
+      "tags": [
+        "latest"
+      ],
+      "summary": "Turn one imported workspace view into a plain-language answer to what the student should do first right now."
+    },
+    {
+      "id": "openclaw-readonly-consumer",
+      "slug": "openclaw-readonly-consumer",
+      "displayName": "Openclaw Readonly Consumer",
+      "version": "0.1.0",
+      "path": "skills/openclaw-readonly-consumer/SKILL.md",
+      "tags": [
+        "latest"
+      ],
+      "summary": "Guide an OpenClaw-style local runtime onto the snapshot-first or thin-BFF-first read-only OpenCampus path."
+    },
+    {
+      "id": "site-mcp-consumer",
+      "slug": "site-mcp-consumer",
+      "displayName": "Site Mcp Consumer",
+      "version": "0.1.0",
+      "path": "skills/site-mcp-consumer/SKILL.md",
+      "tags": [
+        "latest"
+      ],
+      "summary": "Wire one site-scoped read-only MCP sidecar for Codex, Claude Code, Claude Desktop, or another local MCP runtime."
+    },
+    {
+      "id": "site-overview-audit",
+      "slug": "site-overview-audit",
+      "displayName": "Site Overview Audit",
+      "version": "0.1.0",
+      "path": "skills/site-overview-audit/SKILL.md",
+      "tags": [
+        "latest"
+      ],
+      "summary": "Inspect one supported site's current snapshot records in a smaller, site-scoped read-only card."
+    },
+    {
+      "id": "site-snapshot-review",
+      "slug": "site-snapshot-review",
+      "displayName": "Site Snapshot Review",
+      "version": "0.1.0",
+      "path": "skills/site-snapshot-review/SKILL.md",
+      "tags": [
+        "latest"
+      ],
+      "summary": "Review one site's exported snapshot records through the shared snapshot contract without claiming live browser truth."
+    },
+    {
+      "id": "switchyard-runtime-check",
+      "slug": "switchyard-runtime-check",
+      "displayName": "Switchyard Runtime Check",
+      "version": "0.1.0",
+      "path": "skills/switchyard-runtime-check/SKILL.md",
+      "tags": [
+        "latest"
+      ],
+      "summary": "Verify the optional local Switchyard runtime seam while preserving OpenCampus answer semantics."
+    }
+  ]
+}
