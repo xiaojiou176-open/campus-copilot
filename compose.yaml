@@ -1,0 +1,32 @@
+services:
+  opencampus-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: opencampus-api:local
+    init: true
+    environment:
+      PORT: "8787"
+      HOST: "0.0.0.0"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      OPENAI_BASE_URL: "${OPENAI_BASE_URL:-}"
+      GEMINI_BASE_URL: "${GEMINI_BASE_URL:-}"
+      SWITCHYARD_BASE_URL: "${SWITCHYARD_BASE_URL:-}"
+      SWITCHYARD_AUTH_TOKEN: "${SWITCHYARD_AUTH_TOKEN:-}"
+    ports:
+      - "127.0.0.1:${OPENCAMPUS_DOCKER_API_PORT:-18787}:8787"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8787/health').then((response)=>{if(!response.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    security_opt:
+      - no-new-privileges:true
