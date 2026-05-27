@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
-import type { ExportPreset } from '@opencampus/exporter';
-import type { SiteSyncOutcome } from '@opencampus/core';
-import type { Alert, Announcement, Assignment, EntityKind, Event, Message, Resource, Site } from '@opencampus/schema';
+import type { ExportPreset } from '@campus-copilot/exporter';
+import type { SiteSyncOutcome } from '@campus-copilot/core';
+import type { Alert, Announcement, Assignment, EntityKind, Event, Message, Resource, Site } from '@campus-copilot/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
@@ -15,7 +15,7 @@ import type {
   WeeklyLoadEntry,
   WorkItemCluster,
   WorkbenchFilter,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 import type { ResolvedUiLanguage } from './i18n';
 import type { DiagnosticsSummary } from './diagnostics-summary';
 import type { OrderedSiteStatusEntry, SurfaceKind } from './surface-shell-model';

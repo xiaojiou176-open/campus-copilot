@@ -3,8 +3,8 @@
 Use one of the site-scoped MCP binaries with a snapshot:
 
 ```bash
-export OPENCAMPUS_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
-pnpm --filter @opencampus/mcp-readonly start:canvas
+export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
+pnpm --filter @campus-copilot/mcp-readonly start:canvas
 ```
 
 Use the generic BFF + snapshot MCP server via the integration examples under:

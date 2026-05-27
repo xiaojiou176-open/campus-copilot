@@ -1,6 +1,6 @@
-import type { ProviderId } from '@opencampus/ai';
-import type { SiteSyncOutcome } from '@opencampus/core';
-import type { Site } from '@opencampus/schema';
+import type { ProviderId } from '@campus-copilot/ai';
+import type { SiteSyncOutcome } from '@campus-copilot/core';
+import type { Site } from '@campus-copilot/schema';
 import { getUiText, type ResolvedUiLanguage } from './i18n';
 import type { ProviderStatusLike } from './provider-status-format';
 

@@ -9,8 +9,8 @@ import type {
   PriorityReason,
   Resource,
   TimelineEntry,
-} from '@opencampus/schema';
-import { EntityRefSchema } from '@opencampus/schema';
+} from '@campus-copilot/schema';
+import { EntityRefSchema } from '@campus-copilot/schema';
 import type {
   ChangeEvent,
   EntityState,

@@ -12,14 +12,14 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@opencampus/ai';
+} from '@campus-copilot/ai';
 import {
   createExportArtifact,
   type ExportArtifact,
   type ExportFormat,
   type ExportInput,
   type ExportPreset,
-} from '@opencampus/exporter';
+} from '@campus-copilot/exporter';
 import {
   AnnouncementSchema,
   AssignmentSchema,
@@ -35,14 +35,14 @@ import {
   type Message,
   type Resource,
   type Site,
-} from '@opencampus/schema';
+} from '@campus-copilot/schema';
 import {
   PlanningSubstrateOwnerSchema,
   type ChangeEvent,
   type ImportedWorkbenchSnapshot,
   type SyncRun,
-} from '@opencampus/storage';
-export type { ImportedWorkbenchSnapshot } from '@opencampus/storage';
+} from '@campus-copilot/storage';
+export type { ImportedWorkbenchSnapshot } from '@campus-copilot/storage';
 
 export const SnapshotSiteSchema = z.enum(['all', 'canvas', 'gradescope', 'edstem', 'myuw', 'time-schedule', 'course-sites']);
 export type SnapshotSite = z.infer<typeof SnapshotSiteSchema>;
@@ -262,7 +262,7 @@ export function buildExportInputFromSnapshot(
   const siteLabel = site === 'all' ? 'All sites' : site;
   return {
     generatedAt: snapshot.generatedAt,
-    viewTitle: `OpenCampus snapshot (${siteLabel})`,
+    viewTitle: `CampusCopilot snapshot (${siteLabel})`,
     planningSubstrates: snapshot.planningSubstrates ?? [],
     resources: filterBySite(snapshot.resources, site),
     assignments: filterBySite(snapshot.assignments, site),
@@ -288,7 +288,7 @@ export function createExportArtifactFromSnapshot(input: {
   });
 }
 
-export class OpenCampusClient {
+export class CampusCopilotClient {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
 
@@ -375,7 +375,7 @@ export class OpenCampusClient {
   }
 }
 
-export { OpenCampusApiClient } from './api.ts';
+export { CampusCopilotApiClient } from './api.ts';
 export { buildWorkspaceSummary, loadImportedSnapshotFile, parseImportedSnapshot } from './snapshot.ts';
 export {
   getCanvasAssignments,

@@ -1,6 +1,6 @@
-# @opencampus/mcp
+# @campus-copilot/mcp
 
-Snapshot-first config helpers for the OpenCampus read-only MCP preview.
+Snapshot-first config helpers for the CampusCopilot read-only MCP preview.
 
 This package does **not** run the MCP server by itself.  
 It exists to make the repo-public MCP wiring explicit and truthful.
@@ -15,7 +15,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @opencampus/mcp test
+pnpm --filter @campus-copilot/mcp test
 ```
 
 Shared public-preview proof loop from the repo root:

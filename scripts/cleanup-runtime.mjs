@@ -9,7 +9,7 @@ import {
   summarizeCachePolicy,
 } from './lib/cache-governance.mjs';
 
-const repoRoot = process.env.OPENCAMPUS_REPO_ROOT ?? process.cwd();
+const repoRoot = process.env.CAMPUS_COPILOT_REPO_ROOT ?? process.cwd();
 process.chdir(repoRoot);
 
 function collectChromeProcessList() {
@@ -70,7 +70,7 @@ console.log(
         legacyBrowserRoots:
           'Legacy browser roots are reported for migration hygiene only. They are never auto-deleted by cleanup:runtime.',
         browserRoot:
-          'The repo-owned browser root is permanent browser state under ~/.cache/opencampus/browser/chrome-user-data and is excluded from generic external cache GC.',
+          'The repo-owned browser root is permanent browser state under ~/.cache/campus-copilot/browser/chrome-user-data and is excluded from generic external cache GC.',
       },
     },
     null,

@@ -5,22 +5,22 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@opencampus/ai';
+} from '@campus-copilot/ai';
 
-export interface OpenCampusHealthPayload {
+export interface CampusCopilotHealthPayload {
   ok: true;
   service: string;
   mode: string;
   requestId?: string;
 }
 
-export interface OpenCampusProviderStatusPayload {
+export interface CampusCopilotProviderStatusPayload {
   ok: true;
   requestId?: string;
   providers: Record<string, { ready: boolean; reason: string }>;
 }
 
-export interface OpenCampusChatResponse {
+export interface CampusCopilotChatResponse {
   ok?: boolean;
   provider?: string;
   runtimeProvider?: string;
@@ -35,7 +35,7 @@ export interface OpenCampusChatResponse {
 
 type FetchLike = typeof fetch;
 
-export class OpenCampusApiClient {
+export class CampusCopilotApiClient {
   readonly baseUrl: string;
   private readonly fetchImpl: FetchLike;
 
@@ -44,14 +44,14 @@ export class OpenCampusApiClient {
     this.fetchImpl = fetchImpl;
   }
 
-  async health(): Promise<OpenCampusHealthPayload> {
+  async health(): Promise<CampusCopilotHealthPayload> {
     const response = await this.fetchImpl(`${this.baseUrl}/health`);
-    return (await response.json()) as OpenCampusHealthPayload;
+    return (await response.json()) as CampusCopilotHealthPayload;
   }
 
-  async providerStatus(): Promise<OpenCampusProviderStatusPayload> {
+  async providerStatus(): Promise<CampusCopilotProviderStatusPayload> {
     const response = await this.fetchImpl(`${this.baseUrl}/api/providers/status`);
-    return (await response.json()) as OpenCampusProviderStatusPayload;
+    return (await response.json()) as CampusCopilotProviderStatusPayload;
   }
 
   async chat(input: {
@@ -60,7 +60,7 @@ export class OpenCampusApiClient {
     messages: ChatMessage[];
     switchyardProvider?: SwitchyardRuntimeProvider;
     switchyardLane?: SwitchyardLane;
-  }): Promise<OpenCampusChatResponse> {
+  }): Promise<CampusCopilotChatResponse> {
     const request = createProviderProxyRequest(input);
     const response = await this.fetchImpl(`${this.baseUrl}${request.route}`, {
       method: 'POST',
@@ -70,6 +70,6 @@ export class OpenCampusApiClient {
       body: JSON.stringify(request.body),
     });
 
-    return (await response.json()) as OpenCampusChatResponse;
+    return (await response.json()) as CampusCopilotChatResponse;
   }
 }

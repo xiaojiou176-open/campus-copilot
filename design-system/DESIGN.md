@@ -1,4 +1,4 @@
-# OpenCampus DESIGN
+# CampusCopilot DESIGN
 
 更新时间：2026-04-17 America/Los_Angeles
 
@@ -9,7 +9,7 @@
 
 一句话先讲死：
 
-> **OpenCampus 不是 chat shell，不是开发者后台，也不是营销落地页。**
+> **CampusCopilot 不是 chat shell，不是开发者后台，也不是营销落地页。**
 > **它是学生真正会坐下来用的 calm decision desk。**
 
 UI 一切判断都围绕这三件事：
@@ -149,18 +149,18 @@ UI 一切判断都围绕这三件事：
 2. primary CTA 是不是只有 1-2 个
 3. warning / blocked / manual-only 是否一眼可见
 4. 页面有没有因为想“更酷”而变得更像 generic SaaS / chat shell
-5. copy 有没有把 OpenCampus 讲成会替用户操作学校系统的机器人
+5. copy 有没有把 CampusCopilot 讲成会替用户操作学校系统的机器人
 
 ## 11. Current Brand Split
 
-- **OpenCampus** = 当前用户真正使用的旗舰工作台
-- **OpenCampus** = umbrella family / repo-level public brand
-- **OpenCampus for UW** = extension distribution name
+- **CampusCopilot** = 当前用户真正使用的旗舰工作台
+- **CampusCopilot** = umbrella family / repo-level public brand
+- **CampusCopilot for UW** = extension distribution name
 
 写法上优先：
 
-- H1 / first-fold: `OpenCampus`
-- secondary framing / family line: `OpenCampus`
+- H1 / first-fold: `CampusCopilot`
+- secondary framing / family line: `CampusCopilot`
 
 ## 12. Done Definition
 

@@ -25,7 +25,7 @@ If you need the exact repo-side publication truth behind these bundles, pair thi
 
 If your client cannot set `cwd`, use the repo-owned wrapper:
 
-- [`../../scripts/consumer/opencampus-mcp.sh`](../../scripts/consumer/opencampus-mcp.sh)
+- [`../../scripts/consumer/campus-copilot-mcp.sh`](../../scripts/consumer/campus-copilot-mcp.sh)
 
 It keeps the launch command short and lets Codex/Claude-style consumers point at one stable script instead of an inline shell one-liner.
 

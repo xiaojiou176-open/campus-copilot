@@ -4,9 +4,9 @@ import type {
   ProviderId,
   SwitchyardLane,
   SwitchyardRuntimeProvider,
-} from '@opencampus/ai';
-import type { TodaySnapshot, FocusQueueItem, PlanningSubstrateOwner, WeeklyLoadEntry, ChangeEvent, WorkbenchFilter } from '@opencampus/storage';
-import { useWorkbenchView } from '@opencampus/storage';
+} from '@campus-copilot/ai';
+import type { TodaySnapshot, FocusQueueItem, PlanningSubstrateOwner, WeeklyLoadEntry, ChangeEvent, WorkbenchFilter } from '@campus-copilot/storage';
+import { useWorkbenchView } from '@campus-copilot/storage';
 import { resolveAiAnswer, type AiStructuredAnswer } from './ai-answer-resolution';
 import { AskAiPanel } from './ask-ai-panel';
 import {

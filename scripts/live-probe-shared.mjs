@@ -57,7 +57,7 @@ function normalizeAttachMode(value) {
 
 export function buildChromeProfileEnvHint(homeDir = '$HOME') {
   return {
-    CHROME_USER_DATA_DIR: `${homeDir}/.cache/opencampus/browser/chrome-user-data`,
+    CHROME_USER_DATA_DIR: `${homeDir}/.cache/campus-copilot/browser/chrome-user-data`,
     CHROME_PROFILE_NAME: CANONICAL_CHROME_PROFILE_DIRECTORY,
   };
 }

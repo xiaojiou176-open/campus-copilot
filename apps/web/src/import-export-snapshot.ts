@@ -1,5 +1,5 @@
-import type { ExportArtifact, ExportPackagingMetadata, ExportScopeMetadata } from '@opencampus/exporter';
-import type { ImportedWorkbenchSnapshot } from '@opencampus/storage';
+import type { ExportArtifact, ExportPackagingMetadata, ExportScopeMetadata } from '@campus-copilot/exporter';
+import type { ImportedWorkbenchSnapshot } from '@campus-copilot/storage';
 
 export interface ImportedArtifactEnvelope {
   title?: string;

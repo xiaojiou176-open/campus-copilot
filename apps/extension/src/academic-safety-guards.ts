@@ -5,7 +5,7 @@ import {
   getAcademicRedZoneUiGuards as getSharedAcademicRedZoneUiGuards,
   type AcademicAiCallerGuardrails as SharedAcademicAiCallerGuardrails,
   type AcademicRedZoneUiGuard as SharedAcademicRedZoneUiGuard,
-} from '@opencampus/ai';
+} from '@campus-copilot/ai';
 
 const SHARED_RED_ZONE_REGISTER_GUARD = getSharedAcademicRedZoneUiGuard('register-uw');
 

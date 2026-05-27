@@ -7,16 +7,16 @@ import {
   type AiRuntimeRequest,
   type ChatMessage,
   type ProviderId,
-} from '@opencampus/ai';
+} from '@campus-copilot/ai';
 import {
   createExportArtifact,
   type ExportArtifact,
   type ExportFormat,
   type ExportPreset,
-} from '@opencampus/exporter';
-import type { Site } from '@opencampus/schema';
+} from '@campus-copilot/exporter';
+import type { Site } from '@campus-copilot/schema';
 import {
-  createOpenCampusDb,
+  createCampusCopilotDb,
   getAllSiteEntityCounts,
   getFocusQueue,
   getLatestSyncRuns,
@@ -29,7 +29,7 @@ import {
   replaceImportedWorkbenchSnapshot,
   type ImportedWorkbenchSnapshot,
   type WorkbenchFilter,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 
 export interface WorkspaceDeriveOptions {
   now?: string;
@@ -128,9 +128,9 @@ function normalizeImportedSnapshot(candidate: unknown): ImportedWorkbenchSnapsho
 async function withLoadedSnapshot<T>(
   snapshot: ImportedWorkbenchSnapshot,
   options: WorkspaceDeriveOptions,
-  callback: (db: ReturnType<typeof createOpenCampusDb>, now: string, filters: WorkbenchFilter) => Promise<T>,
+  callback: (db: ReturnType<typeof createCampusCopilotDb>, now: string, filters: WorkbenchFilter) => Promise<T>,
 ) {
-  const db = createOpenCampusDb(`opencampus-workspace-sdk-${randomUUID()}`);
+  const db = createCampusCopilotDb(`campus-copilot-workspace-sdk-${randomUUID()}`);
   const now = options.now ?? snapshot.generatedAt;
   const filters = options.filters ?? DEFAULT_FILTERS;
 

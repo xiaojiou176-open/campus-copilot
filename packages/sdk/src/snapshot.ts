@@ -17,8 +17,8 @@ import {
   type Message,
   type Resource,
   type Site,
-} from '@opencampus/schema';
-import { PlanningSubstrateOwnerSchema } from '@opencampus/storage/contracts';
+} from '@campus-copilot/schema';
+import { PlanningSubstrateOwnerSchema } from '@campus-copilot/storage/contracts';
 
 const SyncRunSchema = z
   .object({

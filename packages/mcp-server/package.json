@@ -1,36 +1,36 @@
 {
-  "name": "@opencampus/mcp-server",
+  "name": "@campus-copilot/mcp-server",
   "version": "0.1.1",
   "private": false,
-  "description": "Unified read-only MCP stdio server for OpenCampus builder workflows.",
+  "description": "Unified read-only MCP stdio server for CampusCopilot builder workflows.",
   "license": "MIT",
   "keywords": [
-    "opencampus",
+    "campus-copilot",
     "mcp",
     "server",
     "read-only",
     "stdio"
   ],
-  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/mcp-server",
+  "homepage": "https://github.com/xiaojiou176-open/campus-copilot/tree/main/packages/mcp-server",
   "bugs": {
-    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
+    "url": "https://github.com/xiaojiou176-open/campus-copilot/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
+    "url": "https://github.com/xiaojiou176-open/campus-copilot.git",
     "directory": "packages/mcp-server"
   },
   "publishConfig": {
     "access": "public"
   },
-  "mcpName": "io.github.xiaojiou176-open/opencampus-mcp",
+  "mcpName": "io.github.xiaojiou176-open/campus-copilot-mcp",
   "type": "module",
   "files": [
     "README.md",
     "dist"
   ],
   "bin": {
-    "opencampus-mcp": "./dist/bin.mjs"
+    "campus-copilot-mcp": "./dist/bin.mjs"
   },
   "scripts": {
     "build": "pnpm exec esbuild ./src/bin.ts ./src/server.ts --bundle --platform=node --format=esm --target=node20 --legal-comments=none --banner:js='#!/usr/bin/env node' --outdir=dist --out-extension:.js=.mjs",
@@ -41,7 +41,7 @@
     "test": "node --test ./src/server.test.mjs ./src/bin.test.mjs"
   },
   "devDependencies": {
-    "@opencampus/sdk": "workspace:*",
+    "@campus-copilot/sdk": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "esbuild": "^0.28.0",
     "zod": "^4.1.5"

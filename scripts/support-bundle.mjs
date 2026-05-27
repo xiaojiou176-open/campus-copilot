@@ -184,7 +184,7 @@ supportBundle.readableSummary = buildSupportHighlights(supportBundle);
 const outputDir = join(process.cwd(), '.runtime-cache');
 mkdirSync(outputDir, { recursive: true });
 
-const filename = `opencampus-support-bundle-${new Date().toISOString().replace(/[:]/g, '-')}.json`;
+const filename = `campus-copilot-support-bundle-${new Date().toISOString().replace(/[:]/g, '-')}.json`;
 const outputPath = join(outputDir, filename);
 const relativeOutputPath = relative(process.cwd(), outputPath) || `.runtime-cache/${filename}`;
 writeFileSync(outputPath, JSON.stringify(supportBundle, null, 2), 'utf8');

@@ -51,7 +51,7 @@ describe('api thin bff', () => {
   it('returns a health payload without touching providers', () => {
     expect(createHealthPayload()).toEqual({
       ok: true,
-      service: 'opencampus-bff',
+      service: 'campus-copilot-bff',
       mode: 'thin-bff',
     });
   });
@@ -101,7 +101,7 @@ describe('api thin bff', () => {
     expect(response.status).toBe(204);
     expect(response.headers['access-control-allow-origin']).toBe('*');
     expect(response.headers['access-control-allow-methods']).toContain('OPTIONS');
-    expect(response.headers['x-opencampus-request-id']).toBeTruthy();
+    expect(response.headers['x-campus-copilot-request-id']).toBeTruthy();
   });
 
   it('serves provider readiness over HTTP', async () => {
@@ -338,7 +338,7 @@ describe('api thin bff', () => {
         JSON.stringify({
           outputText: JSON.stringify({
             summary: '先看这周 Canvas 的截止项。',
-            bullets: ['ChatGPT Web 路径已由 Switchyard 提供', 'OpenCampus 只消费结构化答案'],
+            bullets: ['ChatGPT Web 路径已由 Switchyard 提供', 'CampusCopilot 只消费结构化答案'],
             nextActions: ['先按 Focus Queue 处理最早到期项'],
             trustGaps: ['如果还没 live sync，需要先确认最新 Canvas 标签页状态'],
             citations: [

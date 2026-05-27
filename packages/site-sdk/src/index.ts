@@ -1,5 +1,5 @@
-import type { ImportedWorkbenchSnapshot } from '@opencampus/storage';
-import { buildSiteOverview, type SiteOverview } from '@opencampus/workspace-sdk';
+import type { ImportedWorkbenchSnapshot } from '@campus-copilot/storage';
+import { buildSiteOverview, type SiteOverview } from '@campus-copilot/workspace-sdk';
 
 export async function getCanvasOverview(snapshot: ImportedWorkbenchSnapshot) {
   return buildSiteOverview(snapshot, 'canvas');

@@ -12,8 +12,8 @@ import {
   type Message,
   type Resource,
   type Site,
-} from '@opencampus/schema';
-import { IsoDateTimeSchema } from '@opencampus/schema';
+} from '@campus-copilot/schema';
+import { IsoDateTimeSchema } from '@campus-copilot/schema';
 import {
   ChangeEventSchema,
   EntityStateSchema,
@@ -26,7 +26,7 @@ import {
   type SyncRun,
   type SyncState,
 } from './contracts.ts';
-import { openCampusDb, type OpenCampusDB } from './db.ts';
+import { openCampusDb, type CampusCopilotDB } from './db.ts';
 import { recomputeClusterSubstrate } from './cluster-substrate.ts';
 
 type ImportedTrackedEntity = Resource | Assignment | Announcement | Message | Grade | Event;
@@ -106,7 +106,7 @@ function buildSyncStates(
 
 export async function replaceImportedWorkbenchSnapshot(
   snapshot: ImportedWorkbenchSnapshot,
-  db: OpenCampusDB = openCampusDb,
+  db: CampusCopilotDB = openCampusDb,
 ) {
   const importedAt = IsoDateTimeSchema.parse(snapshot.generatedAt);
   const planningSubstrates = (snapshot.planningSubstrates ?? []).map((item) => PlanningSubstrateOwnerSchema.parse(item));

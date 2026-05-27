@@ -6,7 +6,7 @@ const genericConfigs = [
   'examples/integrations/codex-mcp-shell.example.json',
   'examples/integrations/claude-code-mcp.example.json',
   'examples/integrations/claude-code-mcp-shell.example.json',
-  'examples/codex/opencampus-mcp.json',
+  'examples/codex/campus-copilot-mcp.json',
 ];
 
 const sidecarConfigs = [
@@ -17,10 +17,10 @@ const sidecarConfigs = [
 ];
 
 const sidecarCommands = new Set([
-  'opencampus-mcp-canvas',
-  'opencampus-mcp-gradescope',
-  'opencampus-mcp-edstem',
-  'opencampus-mcp-myuw',
+  'campus-copilot-mcp-canvas',
+  'campus-copilot-mcp-gradescope',
+  'campus-copilot-mcp-edstem',
+  'campus-copilot-mcp-myuw',
 ]);
 
 const packageReadmeExpectations = [
@@ -95,20 +95,20 @@ export function validateGenericConfig(path, json) {
 
   const failures = [];
   for (const [name, config] of Object.entries(servers)) {
-    if (name !== 'opencampus') {
+    if (name !== 'campus-copilot') {
       failures.push(`unexpected_generic_server_name:${path}:${name}`);
     }
     const args = Array.isArray(config.args) ? config.args : [];
     const joined = args.join(' ');
     if (config.command === 'pnpm') {
       if (
-        !joined.includes('@opencampus/mcp-server') ||
-        (!joined.includes('opencampus-mcp') && !joined.includes('start'))
+        !joined.includes('@campus-copilot/mcp-server') ||
+        (!joined.includes('campus-copilot-mcp') && !joined.includes('start'))
       ) {
         failures.push(`unexpected_generic_args:${path}`);
       }
     } else if (config.command === 'bash') {
-      if (!joined.includes('/absolute/path/to/opencampus/scripts/consumer/opencampus-mcp.sh')) {
+      if (!joined.includes('/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-mcp.sh')) {
         failures.push(`unexpected_shell_wrapper_args:${path}`);
       }
     } else {
@@ -127,7 +127,7 @@ export function validateSidecarConfig(path, json) {
 
   const failures = [];
   for (const [name, config] of Object.entries(servers)) {
-    if (!name.startsWith('opencampus-')) {
+    if (!name.startsWith('campus-copilot-')) {
       failures.push(`unexpected_sidecar_server_name:${path}:${name}`);
     }
     const args = Array.isArray(config.args) ? config.args : [];
@@ -135,19 +135,19 @@ export function validateSidecarConfig(path, json) {
     if (sidecarCommands.has(config.command)) {
       // bare sidecar binaries are valid as-is
     } else if (config.command === 'pnpm') {
-      if (!joined.includes('@opencampus/mcp-readonly') || !joined.includes('--dir') || !joined.includes('/absolute/path/to/opencampus')) {
+      if (!joined.includes('@campus-copilot/mcp-readonly') || !joined.includes('--dir') || !joined.includes('/absolute/path/to/campus-copilot')) {
         failures.push(`unexpected_repo_root_sidecar_args:${path}:${name}`);
       }
     } else if (config.command === 'bash') {
-      if (!joined.includes('/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh')) {
+      if (!joined.includes('/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-site-sidecar.sh')) {
         failures.push(`unexpected_repo_root_sidecar_args:${path}:${name}`);
       }
     } else {
       failures.push(`unexpected_sidecar_command:${path}:${config.command ?? 'missing'}`);
     }
-    if (!config.env || typeof config.env.OPENCAMPUS_SNAPSHOT !== 'string') {
+    if (!config.env || typeof config.env.CAMPUS_COPILOT_SNAPSHOT !== 'string') {
       failures.push(`missing_snapshot_env:${path}:${name}`);
-    } else if (!config.env.OPENCAMPUS_SNAPSHOT.includes('/absolute/path/')) {
+    } else if (!config.env.CAMPUS_COPILOT_SNAPSHOT.includes('/absolute/path/')) {
       failures.push(`snapshot_env_placeholder_drift:${path}:${name}`);
     }
   }

@@ -21,13 +21,13 @@ registry_targets:
     submit_via: submit this folder as skills/current-view-triage/ in OpenHands/extensions
 
 boundaries:
-  product_identity: Read-only student triage over OpenCampus snapshots or current-view MCP output.
+  product_identity: Read-only student triage over CampusCopilot snapshots or current-view MCP output.
   canonical_repo_version: 0.1.0
   official_listing_state: clawhub-live-openhands-review-pending
   not_claimed:
     - No live OpenHands/extensions listing exists yet
     - No live browser-session truth is claimed from snapshot-only evidence
-    - No hosted OpenCampus service is claimed
+    - No hosted CampusCopilot service is claimed
 
 pair_with:
   - SKILL.md

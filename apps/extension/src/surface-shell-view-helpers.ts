@@ -1,6 +1,6 @@
-import type { SiteSyncOutcome } from '@opencampus/core';
-import type { Alert, ImportanceLevel, PriorityReason, PriorityReasonCode, TimelineKind } from '@opencampus/schema';
-import type { ChangeEvent, FocusQueueItem, SyncRun, WeeklyLoadEntry } from '@opencampus/storage';
+import type { SiteSyncOutcome } from '@campus-copilot/core';
+import type { Alert, ImportanceLevel, PriorityReason, PriorityReasonCode, TimelineKind } from '@campus-copilot/schema';
+import type { ChangeEvent, FocusQueueItem, SyncRun, WeeklyLoadEntry } from '@campus-copilot/storage';
 import { formatDateTime, formatRelativeTime, getUiText, type ResolvedUiLanguage } from './i18n';
 import { SITE_LABELS, type OrderedSiteStatusEntry } from './surface-shell-model';
 

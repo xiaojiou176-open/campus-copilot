@@ -31,7 +31,7 @@ test('browser bootstrap dry-run reports source and target without mutating targe
       profile: {
         info_cache: {
           'Profile 13': {
-            name: 'OpenCampus',
+            name: 'CampusCopilot',
           },
         },
       },
@@ -51,8 +51,8 @@ test('browser bootstrap dry-run reports source and target without mutating targe
     assert.equal(payload.status, 'dry_run');
     assert.equal(payload.summary.sourceProfileDirectory, 'Profile 13');
     assert.equal(payload.summary.targetProfileDirectory, 'Profile 1');
-    assert.equal(payload.summary.profileDisplayName, 'opencampus');
-    assert.equal(existsSync(join(sandbox.home, '.cache/opencampus/browser/chrome-user-data/Local State')), false);
+    assert.equal(payload.summary.profileDisplayName, 'campus-copilot');
+    assert.equal(existsSync(join(sandbox.home, '.cache/campus-copilot/browser/chrome-user-data/Local State')), false);
   } finally {
     sandbox.cleanup();
   }
@@ -69,8 +69,8 @@ test('browser bootstrap apply copies only Local State and one profile into Profi
       profile: {
         info_cache: {
           'Profile 13': {
-            name: 'OpenCampus',
-            shortcut_name: 'OpenCampus',
+            name: 'CampusCopilot',
+            shortcut_name: 'CampusCopilot',
           },
         },
       },
@@ -91,7 +91,7 @@ test('browser bootstrap apply copies only Local State and one profile into Profi
     const payload = JSON.parse(result.stdout);
     assert.equal(payload.status, 'ok');
 
-    const targetRoot = join(sandbox.home, '.cache/opencampus/browser/chrome-user-data');
+    const targetRoot = join(sandbox.home, '.cache/campus-copilot/browser/chrome-user-data');
     const targetProfile = join(targetRoot, 'Profile 1');
     assert.equal(existsSync(join(targetRoot, 'Local State')), true);
     assert.equal(existsSync(join(targetProfile, 'Preferences')), true);
@@ -99,7 +99,7 @@ test('browser bootstrap apply copies only Local State and one profile into Profi
 
     const localState = JSON.parse(readFileSync(join(targetRoot, 'Local State'), 'utf8'));
     assert.equal(localState.profile.last_used, 'Profile 1');
-    assert.equal(localState.profile.info_cache['Profile 1'].name, 'opencampus');
+    assert.equal(localState.profile.info_cache['Profile 1'].name, 'campus-copilot');
   } finally {
     sandbox.cleanup();
   }

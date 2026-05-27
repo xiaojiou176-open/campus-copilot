@@ -1,10 +1,10 @@
-import type { PriorityReason, Site } from '@opencampus/schema';
+import type { PriorityReason, Site } from '@campus-copilot/schema';
 import {
   setClusterReviewDecision,
   type AdministrativeSummary,
   type ClusterReviewDecision,
   type ClusterReviewTargetKind,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 import { formatDateTime, formatRelativeTime } from './i18n';
 import { SITE_LABELS } from './surface-shell-model';
 import { getAcademicRedZoneHardStops } from './academic-safety-guards';
@@ -1763,7 +1763,7 @@ export function WorkbenchOperationsSections({
       ? {
           title: 'Manual-only campus boundary',
           description:
-            'Register.UW and Notify.UW stay outside the current product path. OpenCampus stops at static explanation and manual routing here.',
+            'Register.UW and Notify.UW stay outside the current product path. CampusCopilot stops at static explanation and manual routing here.',
           badge: 'No-go',
           reason: 'Not supported in the current product path',
           secondary: 'This surface crosses the current read-only academic safety boundary.',
@@ -1773,7 +1773,7 @@ export function WorkbenchOperationsSections({
       : {
           title: '仅支持手动继续的校园边界',
           description:
-            'Register.UW 和 Notify.UW 仍然在当前产品路径之外。OpenCampus 在这里只提供静态说明和手动跳转，不替你操作。',
+            'Register.UW 和 Notify.UW 仍然在当前产品路径之外。CampusCopilot 在这里只提供静态说明和手动跳转，不替你操作。',
           badge: '禁止区',
           reason: '当前产品路径不支持这一表面',
           secondary: '这条线已经越过当前只读学术安全边界。',

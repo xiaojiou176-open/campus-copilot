@@ -1,16 +1,16 @@
-# OpenCampus Docs
+# CampusCopilot Docs
 
 This file is the docs front door.
 
 Use it to answer three questions:
 
-- what is OpenCampus today?
+- what is CampusCopilot today?
 - what can I try right now?
 - where do I go next if I want proof or builder detail?
 
-OpenCampus is the public repo story.
-OpenCampus is the current student workspace inside it.
-Use **OpenCampus for UW** only when the school-specific extension label needs to stay explicit.
+CampusCopilot is the public repo story.
+CampusCopilot is the current student workspace inside it.
+Use **CampusCopilot for UW** only when the school-specific extension label needs to stay explicit.
 
 ## Start Here By Intent
 

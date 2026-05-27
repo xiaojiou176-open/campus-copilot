@@ -48,7 +48,7 @@ describe('web toolbar and support rail', () => {
       createElement(WebToolbar, toolbarProps),
     );
 
-    expect(html).toContain('OpenCampus workbench');
+    expect(html).toContain('CampusCopilot workbench');
     expect(html).toContain('academic work, administrative signals, and the next decision');
     expect(html).toContain('Start with Focus Queue first');
     expect(html).toContain('Workspace status');

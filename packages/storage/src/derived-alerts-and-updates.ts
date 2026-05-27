@@ -1,16 +1,16 @@
 import type {
   Alert,
   TimelineEntry,
-} from '@opencampus/schema';
+} from '@campus-copilot/schema';
 import {
   AlertSchema,
   TimelineEntrySchema,
-} from '@opencampus/schema';
+} from '@campus-copilot/schema';
 import {
   RecentUpdatesFeedSchema,
   type RecentUpdatesFeed,
 } from './contracts.ts';
-import { openCampusDb, type OpenCampusDB } from './db.ts';
+import { openCampusDb, type CampusCopilotDB } from './db.ts';
 import { getAdministrativeSummaries, getAllCourseClusters, getAllWorkItemClusters, getMergeHealthSummary } from './cluster-substrate.ts';
 import {
   compareNewest,
@@ -32,7 +32,7 @@ function normalizeClusterSite(site: string) {
   return site === 'myplan' ? 'myuw' : site;
 }
 
-export async function getPriorityAlerts(now: string, db: OpenCampusDB = openCampusDb): Promise<Alert[]> {
+export async function getPriorityAlerts(now: string, db: CampusCopilotDB = openCampusDb): Promise<Alert[]> {
   const [assignments, announcements, messages, grades, events, syncStates, entityStates, courseClusters, workItemClusters, administrativeSummaries, mergeHealth] = await Promise.all([
     db.assignments.toArray(),
     db.announcements.toArray(),
@@ -489,7 +489,7 @@ export async function getPriorityAlerts(now: string, db: OpenCampusDB = openCamp
 export async function getRecentUpdates(
   now: string,
   limit = 8,
-  db: OpenCampusDB = openCampusDb,
+  db: CampusCopilotDB = openCampusDb,
 ): Promise<RecentUpdatesFeed> {
   const [announcements, assignments, grades, messages, events, entityStates] = await Promise.all([
     db.announcements.toArray(),

@@ -1,6 +1,6 @@
-# @opencampus/sdk
+# @campus-copilot/sdk
 
-Read-only builder SDK for OpenCampus.
+Read-only builder SDK for CampusCopilot.
 
 It wraps the local BFF and the imported-workbench snapshot contract without pretending this is already a hosted platform.
 
@@ -14,7 +14,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @opencampus/sdk test
+pnpm --filter @campus-copilot/sdk test
 ```
 
 Shared public-preview proof loop from the repo root:
@@ -29,7 +29,7 @@ First file to try:
 
 ## Current surface
 
-- `OpenCampusApiClient` for `health`, `providerStatus`, and `chat`
+- `CampusCopilotApiClient` for `health`, `providerStatus`, and `chat`
 - snapshot parsing and workspace summary helpers
 - site-filtered snapshot helpers for `canvas`, `gradescope`, `edstem`, and `myuw`
 

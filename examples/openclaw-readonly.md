@@ -1,19 +1,19 @@
 # OpenClaw-Style Read-Only Consumer
 
-Use this path only when your local operator/runtime can launch a **stdio MCP server** or a **site-scoped MCP sidecar** and you want OpenCampus to act as a **read-only academic context provider**.
+Use this path only when your local operator/runtime can launch a **stdio MCP server** or a **site-scoped MCP sidecar** and you want CampusCopilot to act as a **read-only academic context provider**.
 
 This is the safe mental model:
 
-- OpenCampus supplies structured study context
+- CampusCopilot supplies structured study context
 - your local runtime decides how to consume that context
-- OpenCampus does **not** become a browser-control provider or write-capable operator plugin
+- CampusCopilot does **not** become a browser-control provider or write-capable operator plugin
 
 ## Choose the narrowest path first
 
 | Path | Start with | Best when you want | Keep this boundary |
 | :-- | :-- | :-- | :-- |
-| Generic stdio MCP server | `pnpm --filter @opencampus/mcp-server start` | one read-only server that can answer health, provider, ask, snapshot-view, and export requests | keep it as a context surface, not an operator loop |
-| Site-scoped sidecar | `pnpm --filter @opencampus/mcp-readonly start:<site>` | one narrow site view over one local snapshot | do not market it as a live-site plugin |
+| Generic stdio MCP server | `pnpm --filter @campus-copilot/mcp-server start` | one read-only server that can answer health, provider, ask, snapshot-view, and export requests | keep it as a context surface, not an operator loop |
+| Site-scoped sidecar | `pnpm --filter @campus-copilot/mcp-readonly start:<site>` | one narrow site view over one local snapshot | do not market it as a live-site plugin |
 | Thin local BFF | `pnpm start:api` | local provider status or cited-AI chat on the Campus semantic contract | do not call it hosted infrastructure |
 
 ## Recommended path
@@ -21,22 +21,22 @@ This is the safe mental model:
 ### 1. Start with the generic read-only MCP server
 
 ```bash
-pnpm --filter @opencampus/mcp-server start
+pnpm --filter @campus-copilot/mcp-server start
 ```
 
 Use this when you want:
 
 - local BFF health
 - provider readiness
-- read-only `ask_opencampus`
+- read-only `ask_campus-copilot`
 - imported snapshot views
 - export artifact generation
 
 ### 2. Use site-scoped sidecars when you only need one site's snapshot
 
 ```bash
-export OPENCAMPUS_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
-pnpm --filter @opencampus/mcp-readonly start:canvas
+export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
+pnpm --filter @campus-copilot/mcp-readonly start:canvas
 ```
 
 ### 3. Keep the contract read-only
@@ -73,14 +73,14 @@ If it does **not** support that exact shape, stay with the command snippets in t
 If you only need a safe public fixture, start with:
 
 ```bash
-export OPENCAMPUS_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
+export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
 ```
 
 ## Suggested first tools
 
 1. `campus_health`
 2. `providers_status`
-3. `ask_opencampus`
+3. `ask_campus-copilot`
 4. one of the `*_snapshot_view` tools
 5. `export_snapshot_artifact`
 
@@ -99,7 +99,7 @@ These are the safest starting points when you want OpenClaw-style consumers to s
 
 - reading the current decision layer from a local snapshot
 - exporting artifacts for another local tool to inspect
-- keeping Campus semantics inside OpenCampus while your runtime stays outside it
+- keeping Campus semantics inside CampusCopilot while your runtime stays outside it
 
 ## What this path still does not mean
 

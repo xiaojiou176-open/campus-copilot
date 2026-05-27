@@ -1,4 +1,4 @@
-import type { AdapterCapabilities, AttemptsByResource, SiteSnapshot } from '@opencampus/adapters-base';
+import type { AdapterCapabilities, AttemptsByResource, SiteSnapshot } from '@campus-copilot/adapters-base';
 import type {
   Announcement,
   Assignment,
@@ -9,7 +9,7 @@ import type {
   Resource,
   SourceRef,
   Grade,
-} from '@opencampus/schema';
+} from '@campus-copilot/schema';
 
 export const COURSE_SITES_SUPPORTED_HOSTS = ['courses.cs.washington.edu'] as const;
 

@@ -1,12 +1,12 @@
-# OpenCampus Capability Map
+# CampusCopilot Capability Map
 
-This skill intentionally stays on the read-only OpenCampus surfaces.
+This skill intentionally stays on the read-only CampusCopilot surfaces.
 
 ## Core MCP tools
 
 - `campus_health`
 - `providers_status`
-- `ask_opencampus`
+- `ask_campus-copilot`
 - `canvas_snapshot_view`
 - `gradescope_snapshot_view`
 - `edstem_snapshot_view`
@@ -17,5 +17,5 @@ This skill intentionally stays on the read-only OpenCampus surfaces.
 
 1. `campus_health`
 2. one or more `*_snapshot_view` tools
-3. `ask_opencampus` if a question exists
+3. `ask_campus-copilot` if a question exists
 4. `export_snapshot_artifact` only if the operator needs a saved proof artifact

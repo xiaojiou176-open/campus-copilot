@@ -287,7 +287,7 @@ export type AiCitationCoverage = z.infer<typeof AiCitationCoverageSchema>;
 export const HealthPayloadSchema = z
   .object({
     ok: z.literal(true),
-    service: z.literal('opencampus-bff'),
+    service: z.literal('campus-copilot-bff'),
     mode: z.literal('thin-bff'),
     requestId: z.string().optional(),
   })
@@ -741,7 +741,7 @@ export function buildAiRuntimeMessages(input: z.input<typeof AiRuntimeRequestSch
 
   return {
     systemPrompt: [
-      'You are OpenCampus AI.',
+      'You are CampusCopilot AI.',
       'You operate strictly after structure: use only unified schema, read-model, and export results.',
       'Never request raw DOM, raw HTML, cookies, or site-specific payloads.',
       ...advancedMaterialPromptLines,

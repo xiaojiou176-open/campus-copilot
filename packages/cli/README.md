@@ -1,6 +1,6 @@
-# @opencampus/cli
+# @campus-copilot/cli
 
-Read-only CLI for OpenCampus builder workflows.
+Read-only CLI for CampusCopilot builder workflows.
 
 Use this package when you want one terminal-first entry point for snapshot summaries, provider readiness, export, or cited-AI checks without starting from MCP first.
 
@@ -14,13 +14,13 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @opencampus/cli start help
+pnpm --filter @campus-copilot/cli start help
 ```
 
 First command to try:
 
 ```bash
-pnpm --filter @opencampus/cli start status
+pnpm --filter @campus-copilot/cli start status
 ```
 
 Shared public-preview proof loop from the repo root:

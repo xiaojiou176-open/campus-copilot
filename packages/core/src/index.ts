@@ -1,11 +1,11 @@
-import type { Site } from '@opencampus/schema';
+import type { Site } from '@campus-copilot/schema';
 import {
   SITE_SYNC_OUTCOMES,
   type AdapterCapabilities,
   type SiteAdapter,
   type SiteSyncOutcome,
-} from '@opencampus/adapters-base';
-import type { EntityCounts, SiteEntityCounts, SyncResourceFailure, SyncState } from '@opencampus/storage';
+} from '@campus-copilot/adapters-base';
+import type { EntityCounts, SiteEntityCounts, SyncResourceFailure, SyncState } from '@campus-copilot/storage';
 import { z } from 'zod';
 
 export type SurfaceName = 'sidepanel' | 'popup' | 'options';
@@ -26,7 +26,7 @@ export interface AdapterRegistryPort {
   getCapabilities(site: Site): Promise<AdapterCapabilities | undefined>;
 }
 
-export interface OpenCampusCommandMap {
+export interface CampusCopilotCommandMap {
   loadSurface: {
     surface: SurfaceName;
   };
@@ -36,7 +36,7 @@ export interface OpenCampusCommandMap {
 }
 
 export const SiteSyncOutcomeSchema = z.enum(SITE_SYNC_OUTCOMES);
-export type { SiteSyncOutcome } from '@opencampus/adapters-base';
+export type { SiteSyncOutcome } from '@campus-copilot/adapters-base';
 export const CanvasSyncOutcomeSchema = SiteSyncOutcomeSchema;
 
 export const SYNC_SITE_COMMAND = 'syncSite';

@@ -9,7 +9,7 @@ import {
   type SiteSyncSuccess,
   type SiteSnapshot,
   runCollectorPipeline,
-} from '@opencampus/adapters-base';
+} from '@campus-copilot/adapters-base';
 import {
   AssignmentSchema,
   CourseSchema,
@@ -22,7 +22,7 @@ import {
   type Grade,
   type HealthStatus,
   type Resource,
-} from '@opencampus/schema';
+} from '@campus-copilot/schema';
 import { z } from 'zod';
 
 type GradescopeRequestPath = string;

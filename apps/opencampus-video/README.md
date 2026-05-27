@@ -1,12 +1,12 @@
-# OpenCampus Video
+# CampusCopilot Video
 
 This app holds the first-party Remotion walkthrough for the repo's public
 surface.
 
 Current goal:
 
-- keep the public narrative aligned with `OpenCampus` first
-- show `OpenCampus` as the first shipped workspace
+- keep the public narrative aligned with `CampusCopilot` first
+- show `CampusCopilot` as the first shipped workspace
 - use real repo proof assets instead of generic motion filler
 - keep the Ask AI lane visibly evidence-first, not chat-shell-first
 
@@ -21,30 +21,30 @@ pnpm install
 Start Remotion Studio:
 
 ```console
-pnpm --filter @opencampus/opencampus-video dev
+pnpm --filter @campus-copilot/campus-copilot-video dev
 ```
 
 Render a still for quick review:
 
 ```console
-pnpm --filter @opencampus/opencampus-video render:still
+pnpm --filter @campus-copilot/campus-copilot-video render:still
 ```
 
 Render the walkthrough video:
 
 ```console
-pnpm --filter @opencampus/opencampus-video render:video
+pnpm --filter @campus-copilot/campus-copilot-video render:video
 ```
 
 Lint and type-check the app:
 
 ```console
-pnpm --filter @opencampus/opencampus-video lint
+pnpm --filter @campus-copilot/campus-copilot-video lint
 ```
 
 ## Current Composition
 
-- `OpenCampusWalkthrough`
+- `CampusCopilotWalkthrough`
 - `1280x720`
 - `30 fps`
 - `29 seconds`

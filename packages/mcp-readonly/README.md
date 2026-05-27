@@ -1,6 +1,6 @@
-# @opencampus/mcp-readonly
+# @campus-copilot/mcp-readonly
 
-Read-only MCP sidecars for OpenCampus snapshot workflows.
+Read-only MCP sidecars for CampusCopilot snapshot workflows.
 
 Use this package when you only need one site's records and do not want the larger generic MCP server surface.
 
@@ -14,8 +14,8 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @opencampus/mcp-readonly build
-pnpm --filter @opencampus/mcp-readonly test
+pnpm --filter @campus-copilot/mcp-readonly build
+pnpm --filter @campus-copilot/mcp-readonly test
 ```
 
 Shared public-preview proof loop from the repo root:
@@ -31,8 +31,8 @@ First file to try:
 Repo-root runnable sidecar:
 
 ```bash
-export OPENCAMPUS_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
-pnpm --filter @opencampus/mcp-readonly start:canvas
+export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
+pnpm --filter @campus-copilot/mcp-readonly start:canvas
 ```
 
 Registry-unblock progress in this repo:
@@ -41,12 +41,12 @@ Registry-unblock progress in this repo:
 - this package no longer depends on private workspace packages at runtime
 - official listing is still a separate upstream step; this README does not imply it has already happened
 
-Each binary exposes site-filtered tools over an exported OpenCampus workspace snapshot:
+Each binary exposes site-filtered tools over an exported CampusCopilot workspace snapshot:
 
-- `opencampus-mcp-canvas`
-- `opencampus-mcp-gradescope`
-- `opencampus-mcp-edstem`
-- `opencampus-mcp-myuw`
+- `campus-copilot-mcp-canvas`
+- `campus-copilot-mcp-gradescope`
+- `campus-copilot-mcp-edstem`
+- `campus-copilot-mcp-myuw`
 
 The MCP surface is intentionally narrow:
 

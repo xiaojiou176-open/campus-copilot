@@ -45,9 +45,9 @@ These labels are the vocabulary for the rest of the distribution docs:
 | Surface | Current truthful state | First proof | Read next |
 | :-- | :-- | :-- | :-- |
 | Main repository + Pages | public and GitHub Pages-backed | open the repo and homepage | [`README.md`](README.md) |
-| `@opencampus/mcp-server` stdio route | `public-ready (repo-local)` | `pnpm --filter @opencampus/mcp-server start --help` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
-| Docker / container path | `container-ready (repo-local)` | `docker build -t opencampus-api:local .`, `docker compose -f compose.yaml up -d opencampus-api`, then `pnpm smoke:docker:api` | this file |
-| Browser extension | `build-ready product surface` | `pnpm --filter @opencampus/extension build` | this file |
+| `@campus-copilot/mcp-server` stdio route | `public-ready (repo-local)` | `pnpm --filter @campus-copilot/mcp-server start --help` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
+| Docker / container path | `container-ready (repo-local)` | `docker build -t campus-copilot-api:local .`, `docker compose -f compose.yaml up -d campus-copilot-api`, then `pnpm smoke:docker:api` | this file |
+| Browser extension | `build-ready product surface` | `pnpm --filter @campus-copilot/extension build` | this file |
 | CLI / sidecars / provider-runtime / site APIs | `public-ready (repo-local)` or `registry candidate` | `pnpm proof:public` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
 | SDK / workspace-sdk / site-sdk | `public-ready (repo-local)` + `registry candidate` | `pnpm proof:public` | [`INTEGRATIONS.md`](INTEGRATIONS.md) |
 | Public skill pack | `public-ready (repo-local)` | `pnpm check:skill-catalog` | [`skills/README.md`](skills/README.md) |
@@ -62,7 +62,7 @@ Repo-owned packet anchors that remain tracked and public-safe:
 
 Use the extension lane like a stage-gate, not like a vague "maybe ready" claim:
 
-- `build-ready`: `pnpm --filter @opencampus/extension build`
+- `build-ready`: `pnpm --filter @campus-copilot/extension build`
 - `asset-ready`: icons, screenshots, and privacy/support assets are already tracked in the repo
 - `packet-ready`: the repo can build the extension surface and package its public assets truthfully
 - `owner-only later`: the final Chrome Web Store dashboard upload, metadata fields, and submit click
@@ -74,7 +74,7 @@ These do **not** block repo-side readiness:
 - future package publication under owner credentials for the non-registry package lanes
 - official marketplace or directory submission
 - Chrome Web Store dashboard submission
-- container visibility/public read-back for `ghcr.io/xiaojiou176-open/opencampus-api`
+- container visibility/public read-back for `ghcr.io/xiaojiou176-open/campus-copilot-api`
 - promo video, launch post, or off-repo distribution
 
 Keep these repo-side gates green before any owner-side step:

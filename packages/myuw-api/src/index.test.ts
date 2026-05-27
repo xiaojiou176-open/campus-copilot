@@ -5,7 +5,7 @@ function parseImportedWorkbenchSnapshot(raw: string) {
   return JSON.parse(raw);
 }
 
-describe('@opencampus/myuw-api', () => {
+describe('@campus-copilot/myuw-api', () => {
   it('returns a read-only MyUW snapshot view', () => {
     const snapshot = parseImportedWorkbenchSnapshot(
       JSON.stringify({

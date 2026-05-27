@@ -9,7 +9,7 @@ import {
   type SiteSyncFailure,
   type SiteSyncOutcome,
   runCollectorPipeline,
-} from '@opencampus/adapters-base';
+} from '@campus-copilot/adapters-base';
 import {
   AnnouncementSchema,
   AssignmentSchema,
@@ -27,7 +27,7 @@ import {
   type HealthStatus,
   type Message,
   type Resource,
-} from '@opencampus/schema';
+} from '@campus-copilot/schema';
 import { z } from 'zod';
 
 type CanvasRequestPath = string;

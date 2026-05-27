@@ -51,7 +51,7 @@ function waitForExistingBuild() {
 }
 
 function buildSdkDist() {
-  const result = spawnSync('pnpm', ['--filter', '@opencampus/sdk', 'build'], {
+  const result = spawnSync('pnpm', ['--filter', '@campus-copilot/sdk', 'build'], {
     cwd: repoRoot,
     stdio: 'inherit',
   });

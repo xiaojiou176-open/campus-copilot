@@ -6,15 +6,15 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@opencampus/ai';
-import { buildWorkbenchAiProxyRequest, buildWorkbenchExportInput } from '@opencampus/core';
+} from '@campus-copilot/ai';
+import { buildWorkbenchAiProxyRequest, buildWorkbenchExportInput } from '@campus-copilot/core';
 import {
   createExportArtifact,
   type ExportArtifact,
   type ExportFormat,
   type ExportPreset,
-} from '@opencampus/exporter';
-import type { Course, Site } from '@opencampus/schema';
+} from '@campus-copilot/exporter';
+import type { Course, Site } from '@campus-copilot/schema';
 import {
   openCampusDb,
   replaceImportedWorkbenchSnapshot,
@@ -33,7 +33,7 @@ import {
   useWeeklyLoad,
   useWorkbenchView,
   type WorkbenchFilter,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 import {
   applyImportedEnvelopeToArtifact,
   DEMO_IMPORTED_SNAPSHOT,

@@ -56,7 +56,7 @@ function createToolDefinitions(site) {
   return [
     {
       name: 'get_site_overview',
-      description: `Return a read-only overview for ${site} from an exported OpenCampus workspace snapshot.`,
+      description: `Return a read-only overview for ${site} from an exported CampusCopilot workspace snapshot.`,
       inputSchema: {
         type: 'object',
         additionalProperties: false,
@@ -129,7 +129,7 @@ async function handleRequest(site, dataset, message) {
           tools: {},
         },
         serverInfo: {
-          name: `opencampus-mcp-${site}`,
+          name: `campus-copilot-mcp-${site}`,
           version: '0.1.0',
         },
       },

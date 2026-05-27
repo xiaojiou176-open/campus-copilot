@@ -1,6 +1,6 @@
 # Current View Input Shape
 
-Use this when OpenCampus MCP is not connected and the agent only has a snapshot or current-view export.
+Use this when CampusCopilot MCP is not connected and the agent only has a snapshot or current-view export.
 
 ## What the triage skill needs
 

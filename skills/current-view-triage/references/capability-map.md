@@ -1,12 +1,12 @@
 # Current View Triage Capability Map
 
-This skill only needs the read-only OpenCampus surfaces.
+This skill only needs the read-only CampusCopilot surfaces.
 
 ## Core tools
 
 - `campus_health`
 - `providers_status`
-- `ask_opencampus`
+- `ask_campus-copilot`
 - `canvas_snapshot_view`
 - `gradescope_snapshot_view`
 - `edstem_snapshot_view`

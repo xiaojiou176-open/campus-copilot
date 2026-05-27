@@ -1,23 +1,23 @@
 {
   "mcpServers": {
-    "opencampus-canvas": {
+    "campus-copilot-canvas": {
       "command": "bash",
       "args": [
-        "/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh",
+        "/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-site-sidecar.sh",
         "canvas"
       ],
       "env": {
-        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     },
-    "opencampus-edstem": {
+    "campus-copilot-edstem": {
       "command": "bash",
       "args": [
-        "/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh",
+        "/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-site-sidecar.sh",
         "edstem"
       ],
       "env": {
-        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     }
   }

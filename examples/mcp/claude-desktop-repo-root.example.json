@@ -1,23 +1,23 @@
 {
   "mcpServers": {
-    "opencampus-gradescope": {
+    "campus-copilot-gradescope": {
       "command": "bash",
       "args": [
-        "/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh",
+        "/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-site-sidecar.sh",
         "gradescope"
       ],
       "env": {
-        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     },
-    "opencampus-myuw": {
+    "campus-copilot-myuw": {
       "command": "bash",
       "args": [
-        "/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh",
+        "/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-site-sidecar.sh",
         "myuw"
       ],
       "env": {
-        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     }
   }

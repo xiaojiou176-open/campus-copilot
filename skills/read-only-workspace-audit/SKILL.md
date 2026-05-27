@@ -5,7 +5,7 @@ description: Audit whether one imported workspace snapshot is rich enough for ex
 
 # Read-Only Workspace Audit
 
-Use this skill when you have an imported OpenCampus workspace snapshot and need to answer:
+Use this skill when you have an imported CampusCopilot workspace snapshot and need to answer:
 
 - what is currently open
 - which site carries which evidence
@@ -16,13 +16,13 @@ Rules:
 - stay read-only
 - operate on imported snapshots or exported current-view artifacts
 - do not claim live browser/session truth from snapshot-only evidence
-- keep OpenCampus positioned as a local-first academic decision workspace
+- keep CampusCopilot positioned as a local-first academic decision workspace
 
 Suggested toolchain:
 
-1. `opencampus summary --snapshot <path>`
-2. `opencampus site --snapshot <path> --site <canvas|gradescope|edstem|myuw>`
-3. `pnpm --filter @opencampus/mcp-server start` for the generic BFF + snapshot MCP flow, or one of the site-scoped `pnpm --filter @opencampus/mcp-readonly start:<site>` commands for snapshot-only reads
+1. `campus-copilot summary --snapshot <path>`
+2. `campus-copilot site --snapshot <path> --site <canvas|gradescope|edstem|myuw>`
+3. `pnpm --filter @campus-copilot/mcp-server start` for the generic BFF + snapshot MCP flow, or one of the site-scoped `pnpm --filter @campus-copilot/mcp-readonly start:<site>` commands for snapshot-only reads
 
 Companion examples:
 

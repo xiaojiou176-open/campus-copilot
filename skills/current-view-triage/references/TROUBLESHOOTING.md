@@ -1,4 +1,4 @@
-# OpenCampus Troubleshooting
+# CampusCopilot Troubleshooting
 
 Use this page when the packet looks right on paper but the first triage answer
 still fails.

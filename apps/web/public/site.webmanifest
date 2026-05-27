@@ -1,6 +1,6 @@
 {
-  "name": "OpenCampus Workbench",
-  "short_name": "OpenCampus",
+  "name": "CampusCopilot Workbench",
+  "short_name": "CampusCopilot",
   "description": "Read-only workbench for imported campus snapshots, decision views, exports, and cited AI review.",
   "display": "standalone",
   "background_color": "#edf5ef",

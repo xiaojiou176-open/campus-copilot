@@ -1,8 +1,8 @@
-# Design System: OpenCampus
+# Design System: CampusCopilot
 
 ## 1. Visual Theme & Atmosphere
 
-OpenCampus should feel like a calm academic desk, not a chatbot showroom, not a developer console, and not a fintech dashboard. The atmosphere is steady, trustworthy, and desk-like: local-first, read-only, student-first, and structured before clever. The visual density sits in the middle: enough information to make decisions quickly, but never a wall of equal-weight cards. Motion should stay restrained and purposeful, like a drawer opening on a well-built cabinet rather than a marketing animation.
+CampusCopilot should feel like a calm academic desk, not a chatbot showroom, not a developer console, and not a fintech dashboard. The atmosphere is steady, trustworthy, and desk-like: local-first, read-only, student-first, and structured before clever. The visual density sits in the middle: enough information to make decisions quickly, but never a wall of equal-weight cards. Motion should stay restrained and purposeful, like a drawer opening on a well-built cabinet rather than a marketing animation.
 
 Donor order is fixed:
 

@@ -1,17 +1,17 @@
 {
-  "name": "@opencampus/sdk",
+  "name": "@campus-copilot/sdk",
   "version": "0.1.0",
   "private": false,
-  "description": "Read-only SDK for OpenCampus local BFF and imported workspace snapshots.",
+  "description": "Read-only SDK for CampusCopilot local BFF and imported workspace snapshots.",
   "license": "MIT",
-  "keywords": ["opencampus", "sdk", "local-first", "read-only", "snapshot"],
-  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/sdk",
+  "keywords": ["campus-copilot", "sdk", "local-first", "read-only", "snapshot"],
+  "homepage": "https://github.com/xiaojiou176-open/campus-copilot/tree/main/packages/sdk",
   "bugs": {
-    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
+    "url": "https://github.com/xiaojiou176-open/campus-copilot/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
+    "url": "https://github.com/xiaojiou176-open/campus-copilot.git",
     "directory": "packages/sdk"
   },
   "publishConfig": {
@@ -33,10 +33,10 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@opencampus/ai": "workspace:*",
-    "@opencampus/exporter": "workspace:*",
-    "@opencampus/schema": "workspace:*",
-    "@opencampus/storage": "workspace:*",
+    "@campus-copilot/ai": "workspace:*",
+    "@campus-copilot/exporter": "workspace:*",
+    "@campus-copilot/schema": "workspace:*",
+    "@campus-copilot/storage": "workspace:*",
     "esbuild": "^0.28.0",
     "zod": "^4.1.5"
   }

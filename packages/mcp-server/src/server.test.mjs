@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { CAMPUS_MCP_SERVER_TOOL_NAMES, createOpenCampusMcpServer } from '../dist/server.mjs';
+import { CAMPUS_MCP_SERVER_TOOL_NAMES, createCampusCopilotMcpServer } from '../dist/server.mjs';
 
 test('mcp-server registers the expected read-only tool surface', async () => {
-  const server = createOpenCampusMcpServer();
+  const server = createCampusCopilotMcpServer();
   const client = new Client({
-    name: 'opencampus-mcp-server-test-client',
+    name: 'campus-copilot-mcp-server-test-client',
     version: '0.1.1',
   });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();

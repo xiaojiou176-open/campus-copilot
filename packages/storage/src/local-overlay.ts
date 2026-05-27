@@ -1,4 +1,4 @@
-import { openCampusDb, type OpenCampusDB } from './db.ts';
+import { openCampusDb, type CampusCopilotDB } from './db.ts';
 import {
   LocalEntityOverlayFieldSchema,
   LocalEntityOverlayInputSchema,
@@ -62,7 +62,7 @@ export async function upsertLocalEntityOverlay(input: LocalEntityOverlayInput, d
 export async function clearLocalEntityOverlayField(
   entityId: string,
   field: LocalEntityOverlayField,
-  db: OpenCampusDB = openCampusDb,
+  db: CampusCopilotDB = openCampusDb,
 ) {
   const parsedField = LocalEntityOverlayFieldSchema.parse(field);
   const existing = await db.local_entity_overlay.get(entityId);
@@ -143,7 +143,7 @@ export async function saveEntityNote(
   );
 }
 
-export async function getLocalEntityOverlayByEntityIds(entityIds: string[], db: OpenCampusDB = openCampusDb) {
+export async function getLocalEntityOverlayByEntityIds(entityIds: string[], db: CampusCopilotDB = openCampusDb) {
   const overlays = entityIds.length > 0 ? await db.local_entity_overlay.bulkGet(entityIds) : [];
   return overlays.filter((overlay): overlay is LocalEntityOverlay => Boolean(overlay));
 }

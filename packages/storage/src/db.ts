@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { Announcement, Assignment, Course, Event, Grade, Message, Resource } from '@opencampus/schema';
+import type { Announcement, Assignment, Course, Event, Grade, Message, Resource } from '@campus-copilot/schema';
 import type {
   AdminCarrierRecord,
   AdministrativeSummary,
@@ -15,7 +15,7 @@ import type {
   WorkItemCluster,
 } from './contracts.ts';
 
-export class OpenCampusDB extends Dexie {
+export class CampusCopilotDB extends Dexie {
   courses!: Table<Course, string>;
   resources!: Table<Resource, string>;
   assignments!: Table<Assignment, string>;
@@ -36,7 +36,7 @@ export class OpenCampusDB extends Dexie {
   sync_runs!: Table<SyncRun, string>;
   change_events!: Table<ChangeEvent, string>;
 
-  constructor(name = 'opencampus') {
+  constructor(name = 'campus-copilot') {
     super(name);
     this.version(1).stores({
       courses: '&id, site, title, code',
@@ -200,8 +200,8 @@ export class OpenCampusDB extends Dexie {
   }
 }
 
-export function createOpenCampusDb(name?: string) {
-  return new OpenCampusDB(name);
+export function createCampusCopilotDb(name?: string) {
+  return new CampusCopilotDB(name);
 }
 
-export const openCampusDb = createOpenCampusDb();
+export const openCampusDb = createCampusCopilotDb();

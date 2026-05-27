@@ -1,5 +1,5 @@
-import type { Alert, TimelineEntry } from '@opencampus/schema';
-import type { ChangeEvent, FocusQueueItem, WeeklyLoadEntry } from '@opencampus/storage';
+import type { Alert, TimelineEntry } from '@campus-copilot/schema';
+import type { ChangeEvent, FocusQueueItem, WeeklyLoadEntry } from '@campus-copilot/storage';
 import { getUiText, type ResolvedUiLanguage } from './i18n';
 import {
   formatAlertSummary,

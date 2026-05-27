@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { openCampusDb, getLatestPlanningSubstrateBySource } from '@opencampus/storage';
+import { openCampusDb, getLatestPlanningSubstrateBySource } from '@campus-copilot/storage';
 
 vi.mock('./background-tab-context', () => ({
   getActiveTabContext: vi.fn(),

@@ -98,23 +98,23 @@ test('audit:disk inventories the explicit clone lane, temp roots, and shared pnp
     mkdirSync(join(sandbox.repo, 'node_modules'), { recursive: true });
     writeFileSync(join(sandbox.repo, 'node_modules/.modules.yaml'), `storeDir: ${storePath}\n`, { encoding: 'utf8' });
     mkdirSync(join(sandbox.repo, '.runtime-cache'), { recursive: true });
-    writeFileSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-test.json'), '{}', { encoding: 'utf8' });
-    const externalCacheHome = join(sandbox.home, '.cache/opencampus');
+    writeFileSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-test.json'), '{}', { encoding: 'utf8' });
+    const externalCacheHome = join(sandbox.home, '.cache/campus-copilot');
     const managedExternalCacheRoot = join(externalCacheHome, 'cache');
     mkdirSync(join(managedExternalCacheRoot, 'recent-cache'), { recursive: true });
     mkdirSync(join(externalCacheHome, 'browser/chrome-user-data/Profile 1'), { recursive: true });
     writeFileSync(join(externalCacheHome, 'browser/chrome-user-data/Local State'), '{}', { encoding: 'utf8' });
     symlinkSync('146.0.7680.178:1', join(externalCacheHome, 'browser/chrome-user-data/RunningChromeVersion'));
 
-    const cloneRoot = join(sandbox.home, '.opencampus-profile13-clone');
+    const cloneRoot = join(sandbox.home, '.campus-copilot-profile13-clone');
     mkdirSync(join(cloneRoot, 'OptGuideOnDeviceModel'), { recursive: true });
     mkdirSync(join(cloneRoot, 'Profile 13'), { recursive: true });
     writeFileSync(join(cloneRoot, 'OptGuideOnDeviceModel/model.bin'), 'x'.repeat(4096), { encoding: 'utf8' });
 
     const tmpOne = join(sandbox.root, 'tmp-one');
     const tmpTwo = join(sandbox.root, 'tmp-two');
-    mkdirSync(join(tmpOne, 'opencampus-support-bundle-smoke.123'), { recursive: true });
-    mkdirSync(join(tmpTwo, 'opencampus-provider-roundtrip.456'), { recursive: true });
+    mkdirSync(join(tmpOne, 'campus-copilot-support-bundle-smoke.123'), { recursive: true });
+    mkdirSync(join(tmpTwo, 'campus-copilot-provider-roundtrip.456'), { recursive: true });
     mkdirSync(join(managedExternalCacheRoot, 'fresh-entry'), { recursive: true });
 
     const payload = runAuditDisk({
@@ -124,7 +124,7 @@ test('audit:disk inventories the explicit clone lane, temp roots, and shared pnp
         PATH: `${sandbox.bin}:${process.env.PATH}`,
         FAKE_PNPM_STORE_DIR: storeRoot,
         FAKE_PNPM_STORE_PATH: storePath,
-        OPENCAMPUS_TEMP_ROOTS: `${tmpOne}:${tmpTwo}`,
+        CAMPUS_COPILOT_TEMP_ROOTS: `${tmpOne}:${tmpTwo}`,
       },
     });
 
@@ -157,7 +157,7 @@ test('audit:disk inventories the explicit clone lane, temp roots, and shared pnp
     assert.match(payload.pnpmStoreReferences.classification.classification, /^shared/);
     assert.equal(payload.pnpmStoreReferences.classification.repoExclusive, 'no');
 
-    assert.equal(payload.tmpResidues.pattern, 'opencampus-*');
+    assert.equal(payload.tmpResidues.pattern, 'campus-copilot-*');
     assert.deepEqual(
       payload.tmpResidues.roots.map((entry) => entry.path),
       [tmpOne, tmpTwo],
@@ -188,7 +188,7 @@ test('audit:disk keeps clone lane output stable when the clone directory is abse
         PATH: `${sandbox.bin}:${process.env.PATH}`,
         FAKE_PNPM_STORE_DIR: storeRoot,
         FAKE_PNPM_STORE_PATH: storePath,
-        OPENCAMPUS_TEMP_ROOTS: join(sandbox.root, 'tmp-only'),
+        CAMPUS_COPILOT_TEMP_ROOTS: join(sandbox.root, 'tmp-only'),
       },
     });
 
@@ -209,10 +209,10 @@ test('cleanup:runtime removes repo-named temp residues across configured temp ro
     writeFileSync(join(sandbox.repo, '.runtime-cache/test-probe.json'), '{}', { encoding: 'utf8' });
     writeFileSync(join(sandbox.repo, '.runtime-cache/test-debug.log'), 'debug', { encoding: 'utf8' });
     writeFileSync(join(sandbox.repo, '.runtime-cache/keep.txt'), 'keep', { encoding: 'utf8' });
-    writeFileSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-03-30T00-00-00.000Z.json'), '{}', { encoding: 'utf8' });
-    writeFileSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-03-31T00-00-00.000Z.json'), '{}', { encoding: 'utf8' });
-    writeFileSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-04-01T00-00-00.000Z.json'), '{}', { encoding: 'utf8' });
-    writeFileSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-04-02T00-00-00.000Z.json'), '{}', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-03-30T00-00-00.000Z.json'), '{}', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-03-31T00-00-00.000Z.json'), '{}', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-01T00-00-00.000Z.json'), '{}', { encoding: 'utf8' });
+    writeFileSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-02T00-00-00.000Z.json'), '{}', { encoding: 'utf8' });
 
     mkdirSync(join(sandbox.repo, 'apps/extension/.output'), { recursive: true });
     mkdirSync(join(sandbox.repo, 'apps/extension/.wxt'), { recursive: true });
@@ -242,12 +242,12 @@ test('cleanup:runtime removes repo-named temp residues across configured temp ro
     const tmpTwo = join(sandbox.root, 'tmp-two');
     mkdirSync(tmpOne, { recursive: true });
     mkdirSync(tmpTwo, { recursive: true });
-    mkdirSync(join(tmpOne, 'opencampus-provider-roundtrip.123'), { recursive: true });
-    mkdirSync(join(tmpTwo, 'opencampus-support-bundle-smoke.456'), { recursive: true });
+    mkdirSync(join(tmpOne, 'campus-copilot-provider-roundtrip.123'), { recursive: true });
+    mkdirSync(join(tmpTwo, 'campus-copilot-support-bundle-smoke.456'), { recursive: true });
     mkdirSync(join(tmpTwo, 'support-bundle-smoke.789'), { recursive: true });
     mkdirSync(join(tmpTwo, 'chrome-mcp-uploads'), { recursive: true });
 
-    const externalCacheHome = join(sandbox.home, '.cache/opencampus');
+    const externalCacheHome = join(sandbox.home, '.cache/campus-copilot');
     const managedExternalCacheRoot = join(externalCacheHome, 'cache');
     mkdirSync(join(managedExternalCacheRoot, 'fresh-cache'), { recursive: true });
     mkdirSync(join(managedExternalCacheRoot, 'stale-cache'), { recursive: true });
@@ -279,15 +279,15 @@ test('cleanup:runtime removes repo-named temp residues across configured temp ro
       cwd: sandbox.repo,
       env: {
         HOME: sandbox.home,
-        OPENCAMPUS_REPO_ROOT: sandbox.repo,
-        OPENCAMPUS_TEMP_ROOTS: `${tmpOne}:${tmpTwo}`,
-        OPENCAMPUS_CACHE_HOME: externalCacheHome,
-        OPENCAMPUS_MANAGED_EXTERNAL_CACHE_ROOT: managedExternalCacheRoot,
+        CAMPUS_COPILOT_REPO_ROOT: sandbox.repo,
+        CAMPUS_COPILOT_TEMP_ROOTS: `${tmpOne}:${tmpTwo}`,
+        CAMPUS_COPILOT_CACHE_HOME: externalCacheHome,
+        CAMPUS_COPILOT_MANAGED_EXTERNAL_CACHE_ROOT: managedExternalCacheRoot,
       },
     });
 
-    assert.equal(existsSync(join(tmpOne, 'opencampus-provider-roundtrip.123')), false);
-    assert.equal(existsSync(join(tmpTwo, 'opencampus-support-bundle-smoke.456')), false);
+    assert.equal(existsSync(join(tmpOne, 'campus-copilot-provider-roundtrip.123')), false);
+    assert.equal(existsSync(join(tmpTwo, 'campus-copilot-support-bundle-smoke.456')), false);
     assert.equal(existsSync(join(tmpTwo, 'support-bundle-smoke.789')), true);
     assert.equal(existsSync(join(tmpTwo, 'chrome-mcp-uploads')), true);
     assert.equal(existsSync(join(sandbox.repo, 'apps/extension/.output')), true);
@@ -309,15 +309,15 @@ test('cleanup:runtime removes repo-named temp residues across configured temp ro
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/browser-identity/index.html')), true);
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/raw/submission.raw.html')), false);
     assert.equal(
-      existsSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-03-30T00-00-00.000Z.json')),
+      existsSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-03-30T00-00-00.000Z.json')),
       false,
     );
     assert.equal(
-      existsSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-04-01T00-00-00.000Z.json')),
+      existsSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-01T00-00-00.000Z.json')),
       true,
     );
     assert.equal(
-      existsSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-04-02T00-00-00.000Z.json')),
+      existsSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-02T00-00-00.000Z.json')),
       true,
     );
     assert.equal(existsSync(join(managedExternalCacheRoot, 'stale-cache')), false);
@@ -366,12 +366,12 @@ test('cleanup:runtime closeout mode removes fresh sensitive runtime residue with
     writeFileSync(join(sandbox.repo, '.runtime-cache/mcp-registry/unpacked/manifest.json'), '{}', { encoding: 'utf8' });
     writeFileSync(join(sandbox.repo, '.runtime-cache/ui-audit/web/report.json'), '{}', { encoding: 'utf8' });
     writeFileSync(join(sandbox.repo, '.runtime-cache/visual-proof/extension-smoke/proof.json'), '{}', { encoding: 'utf8' });
-    writeFileSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-04-15T00-00-00.000Z.json'), '{}', {
+    writeFileSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-15T00-00-00.000Z.json'), '{}', {
       encoding: 'utf8',
     });
     writeFileSync(join(sandbox.repo, '.runtime-cache/coverage/coverage-summary.json'), '{}', { encoding: 'utf8' });
 
-    const externalCacheHome = join(sandbox.home, '.cache/opencampus');
+    const externalCacheHome = join(sandbox.home, '.cache/campus-copilot');
     mkdirSync(join(externalCacheHome, 'browser/chrome-user-data/Profile 1'), { recursive: true });
     writeFileSync(join(externalCacheHome, 'browser/chrome-user-data/Local State'), '{}', { encoding: 'utf8' });
 
@@ -379,16 +379,16 @@ test('cleanup:runtime closeout mode removes fresh sensitive runtime residue with
       cwd: sandbox.repo,
       env: {
         HOME: sandbox.home,
-        OPENCAMPUS_REPO_ROOT: sandbox.repo,
-        OPENCAMPUS_CACHE_HOME: externalCacheHome,
-        OPENCAMPUS_RUNTIME_CLEAN_LEVEL: 'closeout',
+        CAMPUS_COPILOT_REPO_ROOT: sandbox.repo,
+        CAMPUS_COPILOT_CACHE_HOME: externalCacheHome,
+        CAMPUS_COPILOT_RUNTIME_CLEAN_LEVEL: 'closeout',
       },
     });
 
     assert.equal(payload.policy.runtimeCleanupMode, 'closeout');
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/raw/regrade.raw.html')), false);
     assert.equal(
-      existsSync(join(sandbox.repo, '.runtime-cache/opencampus-support-bundle-2026-04-15T00-00-00.000Z.json')),
+      existsSync(join(sandbox.repo, '.runtime-cache/campus-copilot-support-bundle-2026-04-15T00-00-00.000Z.json')),
       false,
     );
     assert.equal(existsSync(join(sandbox.repo, '.runtime-cache/temp/fresh-temp')), false);

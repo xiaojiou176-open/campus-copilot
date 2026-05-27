@@ -1,4 +1,4 @@
-# @opencampus/site-sdk
+# @campus-copilot/site-sdk
 
 Read-only per-site overview helpers on top of the imported-workspace contract.
 
@@ -14,7 +14,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @opencampus/site-sdk test
+pnpm --filter @campus-copilot/site-sdk test
 ```
 
 Shared public-preview proof loop from the repo root:
@@ -39,7 +39,7 @@ First file to try:
 
 - snapshot-first
 - read-only
-- built on `@opencampus/workspace-sdk`
+- built on `@campus-copilot/workspace-sdk`
 - not a live collector and not a public API promise for site internals
 
 ## See also
