@@ -14,7 +14,7 @@ import {
   type Message,
   type Resource,
   type Site,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
 import {
   SyncRunSchema,

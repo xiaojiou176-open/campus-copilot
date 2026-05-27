@@ -1,5 +1,5 @@
 {
-  "name": "@campus-copilot/adapters-myplan",
+  "name": "@opencampus/adapters-myplan",
   "version": "0.0.0",
   "private": true,
   "type": "module",

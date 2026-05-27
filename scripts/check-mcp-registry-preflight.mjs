@@ -22,7 +22,7 @@ export function validateMcpRegistryPreflight() {
   const readme = readFileSync(fromRepoRoot('packages/mcp-server/README.md'), 'utf8');
   const distribution = readFileSync(fromRepoRoot('DISTRIBUTION.md'), 'utf8');
   const examples = readFileSync(fromRepoRoot('examples/integrations/README.md'), 'utf8');
-  const expectedBundleUrl = `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
+  const expectedBundleUrl = `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v${pkg.version}/opencampus-mcp-${pkg.version}.mcpb`;
 
   if (pkg.private !== false) {
     failures.push('mcp_registry_package_must_be_public');

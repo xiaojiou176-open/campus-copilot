@@ -43,7 +43,7 @@ importers:
 
   apps/api:
     dependencies:
-      '@campus-copilot/ai':
+      '@opencampus/ai':
         specifier: workspace:*
         version: link:../../packages/ai
       zod:
@@ -56,40 +56,40 @@ importers:
 
   apps/extension:
     dependencies:
-      '@campus-copilot/adapters-canvas':
+      '@opencampus/adapters-canvas':
         specifier: workspace:*
         version: link:../../packages/adapters-canvas
-      '@campus-copilot/adapters-course-sites':
+      '@opencampus/adapters-course-sites':
         specifier: workspace:*
         version: link:../../packages/adapters-course-sites
-      '@campus-copilot/adapters-edstem':
+      '@opencampus/adapters-edstem':
         specifier: workspace:*
         version: link:../../packages/adapters-edstem
-      '@campus-copilot/adapters-gradescope':
+      '@opencampus/adapters-gradescope':
         specifier: workspace:*
         version: link:../../packages/adapters-gradescope
-      '@campus-copilot/adapters-myplan':
+      '@opencampus/adapters-myplan':
         specifier: workspace:*
         version: link:../../packages/adapters-myplan
-      '@campus-copilot/adapters-myuw':
+      '@opencampus/adapters-myuw':
         specifier: workspace:*
         version: link:../../packages/adapters-myuw
-      '@campus-copilot/adapters-time-schedule':
+      '@opencampus/adapters-time-schedule':
         specifier: workspace:*
         version: link:../../packages/adapters-time-schedule
-      '@campus-copilot/ai':
+      '@opencampus/ai':
         specifier: workspace:*
         version: link:../../packages/ai
-      '@campus-copilot/core':
+      '@opencampus/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@campus-copilot/exporter':
+      '@opencampus/exporter':
         specifier: workspace:*
         version: link:../../packages/exporter
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../../packages/schema
-      '@campus-copilot/storage':
+      '@opencampus/storage':
         specifier: workspace:*
         version: link:../../packages/storage
       react:
@@ -151,19 +151,19 @@ importers:
 
   apps/web:
     dependencies:
-      '@campus-copilot/ai':
+      '@opencampus/ai':
         specifier: workspace:*
         version: link:../../packages/ai
-      '@campus-copilot/core':
+      '@opencampus/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@campus-copilot/exporter':
+      '@opencampus/exporter':
         specifier: workspace:*
         version: link:../../packages/exporter
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../../packages/schema
-      '@campus-copilot/storage':
+      '@opencampus/storage':
         specifier: workspace:*
         version: link:../../packages/storage
       react:
@@ -191,16 +191,16 @@ importers:
 
   packages/adapters-base:
     dependencies:
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
 
   packages/adapters-canvas:
     dependencies:
-      '@campus-copilot/adapters-base':
+      '@opencampus/adapters-base':
         specifier: workspace:*
         version: link:../adapters-base
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
       zod:
@@ -209,10 +209,10 @@ importers:
 
   packages/adapters-course-sites:
     dependencies:
-      '@campus-copilot/adapters-base':
+      '@opencampus/adapters-base':
         specifier: workspace:*
         version: link:../adapters-base
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
 
@@ -220,10 +220,10 @@ importers:
 
   packages/adapters-edstem:
     dependencies:
-      '@campus-copilot/adapters-base':
+      '@opencampus/adapters-base':
         specifier: workspace:*
         version: link:../adapters-base
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
       zod:
@@ -232,10 +232,10 @@ importers:
 
   packages/adapters-gradescope:
     dependencies:
-      '@campus-copilot/adapters-base':
+      '@opencampus/adapters-base':
         specifier: workspace:*
         version: link:../adapters-base
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
       zod:
@@ -246,10 +246,10 @@ importers:
 
   packages/adapters-myuw:
     dependencies:
-      '@campus-copilot/adapters-base':
+      '@opencampus/adapters-base':
         specifier: workspace:*
         version: link:../adapters-base
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
       zod:
@@ -266,7 +266,7 @@ importers:
 
   packages/cli:
     devDependencies:
-      '@campus-copilot/sdk':
+      '@opencampus/sdk':
         specifier: workspace:*
         version: link:../sdk
       esbuild:
@@ -275,19 +275,19 @@ importers:
 
   packages/core:
     dependencies:
-      '@campus-copilot/adapters-base':
+      '@opencampus/adapters-base':
         specifier: workspace:*
         version: link:../adapters-base
-      '@campus-copilot/ai':
+      '@opencampus/ai':
         specifier: workspace:*
         version: link:../ai
-      '@campus-copilot/exporter':
+      '@opencampus/exporter':
         specifier: workspace:*
         version: link:../exporter
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
-      '@campus-copilot/storage':
+      '@opencampus/storage':
         specifier: workspace:*
         version: link:../storage
       zod:
@@ -296,19 +296,19 @@ importers:
 
   packages/edstem-api:
     devDependencies:
-      '@campus-copilot/sdk':
+      '@opencampus/sdk':
         specifier: workspace:*
         version: link:../sdk
 
   packages/exporter:
     dependencies:
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
 
   packages/gradescope-api:
     devDependencies:
-      '@campus-copilot/sdk':
+      '@opencampus/sdk':
         specifier: workspace:*
         version: link:../sdk
 
@@ -322,7 +322,7 @@ importers:
 
   packages/mcp-server:
     devDependencies:
-      '@campus-copilot/sdk':
+      '@opencampus/sdk':
         specifier: workspace:*
         version: link:../sdk
       '@modelcontextprotocol/sdk':
@@ -337,7 +337,7 @@ importers:
 
   packages/myuw-api:
     devDependencies:
-      '@campus-copilot/sdk':
+      '@opencampus/sdk':
         specifier: workspace:*
         version: link:../sdk
 
@@ -355,16 +355,16 @@ importers:
 
   packages/sdk:
     devDependencies:
-      '@campus-copilot/ai':
+      '@opencampus/ai':
         specifier: workspace:*
         version: link:../ai
-      '@campus-copilot/exporter':
+      '@opencampus/exporter':
         specifier: workspace:*
         version: link:../exporter
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
-      '@campus-copilot/storage':
+      '@opencampus/storage':
         specifier: workspace:*
         version: link:../storage
       esbuild:
@@ -376,13 +376,13 @@ importers:
 
   packages/site-sdk:
     devDependencies:
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
-      '@campus-copilot/storage':
+      '@opencampus/storage':
         specifier: workspace:*
         version: link:../storage
-      '@campus-copilot/workspace-sdk':
+      '@opencampus/workspace-sdk':
         specifier: workspace:*
         version: link:../workspace-sdk
       esbuild:
@@ -391,10 +391,10 @@ importers:
 
   packages/storage:
     dependencies:
-      '@campus-copilot/adapters-base':
+      '@opencampus/adapters-base':
         specifier: workspace:*
         version: link:../adapters-base
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
       dexie:
@@ -410,16 +410,16 @@ importers:
 
   packages/workspace-sdk:
     devDependencies:
-      '@campus-copilot/ai':
+      '@opencampus/ai':
         specifier: workspace:*
         version: link:../ai
-      '@campus-copilot/exporter':
+      '@opencampus/exporter':
         specifier: workspace:*
         version: link:../exporter
-      '@campus-copilot/schema':
+      '@opencampus/schema':
         specifier: workspace:*
         version: link:../schema
-      '@campus-copilot/storage':
+      '@opencampus/storage':
         specifier: workspace:*
         version: link:../storage
       esbuild:

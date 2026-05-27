@@ -21,25 +21,25 @@ pnpm install
 Start Remotion Studio:
 
 ```console
-pnpm --filter @campus-copilot/opencampus-video dev
+pnpm --filter @opencampus/opencampus-video dev
 ```
 
 Render a still for quick review:
 
 ```console
-pnpm --filter @campus-copilot/opencampus-video render:still
+pnpm --filter @opencampus/opencampus-video render:still
 ```
 
 Render the walkthrough video:
 
 ```console
-pnpm --filter @campus-copilot/opencampus-video render:video
+pnpm --filter @opencampus/opencampus-video render:video
 ```
 
 Lint and type-check the app:
 
 ```console
-pnpm --filter @campus-copilot/opencampus-video lint
+pnpm --filter @opencampus/opencampus-video lint
 ```
 
 ## Current Composition

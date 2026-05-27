@@ -1,4 +1,4 @@
-# @campus-copilot/mcp-server
+# @opencampus/mcp-server
 
 Read-only MCP server for the local Campus Copilot BFF and imported workspace snapshots.
 
@@ -16,7 +16,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/mcp-server build
+pnpm --filter @opencampus/mcp-server build
 pnpm start:mcp
 ```
 
@@ -29,7 +29,7 @@ pnpm proof:public
 First command to try:
 
 ```bash
-pnpm --filter @campus-copilot/mcp-server start
+pnpm --filter @opencampus/mcp-server start
 ```
 
 Registry-unblock progress in this repo:
@@ -75,8 +75,8 @@ That split is on purpose:
 Build the containerized BFF from the repo root:
 
 ```bash
-docker build -t campus-copilot-api:local .
-docker compose up -d campus-copilot-api
+docker build -t opencampus-api:local .
+docker compose up -d opencampus-api
 ```
 
 Use the container path when you need a local HTTP surface or container-friendly
@@ -87,14 +87,14 @@ If you want the shortest rule in one sentence: pair it with the local stdio MCP 
 You can also launch the local container directly without Compose:
 
 ```bash
-docker run --rm -p 8787:8787 campus-copilot-api:local
+docker run --rm -p 8787:8787 opencampus-api:local
 ```
 
 ## Current tools
 
 - `campus_health`
 - `providers_status`
-- `ask_campus_copilot`
+- `ask_opencampus`
 - `canvas_snapshot_view`
 - `gradescope_snapshot_view`
 - `edstem_snapshot_view`

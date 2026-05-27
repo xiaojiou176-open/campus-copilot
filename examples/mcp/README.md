@@ -2,7 +2,7 @@
 
 These files show the **site-scoped** read-only MCP path.
 
-Use them when you only need one site's snapshot records and do not need the generic cross-site tools from `@campus-copilot/mcp-server`.
+Use them when you only need one site's snapshot records and do not need the generic cross-site tools from `@opencampus/mcp-server`.
 
 ## Two safe ways to launch sidecars
 
@@ -13,7 +13,7 @@ These are the shortest configs:
 - [`codex.example.json`](codex.example.json)
 - [`claude-desktop.example.json`](claude-desktop.example.json)
 
-They assume the `campus-copilot-mcp-*` binaries are already available in your `PATH`.
+They assume the `opencampus-mcp-*` binaries are already available in your `PATH`.
 
 ### 2. Repo-root runnable examples
 

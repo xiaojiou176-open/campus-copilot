@@ -6,7 +6,7 @@ This skill only needs the read-only Campus Copilot surfaces.
 
 - `campus_health`
 - `providers_status`
-- `ask_campus_copilot`
+- `ask_opencampus`
 - `canvas_snapshot_view`
 - `gradescope_snapshot_view`
 - `edstem_snapshot_view`

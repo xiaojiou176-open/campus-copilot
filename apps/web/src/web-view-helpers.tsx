@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { WeeklyLoadEntry } from '@campus-copilot/storage';
+import type { WeeklyLoadEntry } from '@opencampus/storage';
 
 export function formatDateTime(value: string | undefined) {
   if (!value) {

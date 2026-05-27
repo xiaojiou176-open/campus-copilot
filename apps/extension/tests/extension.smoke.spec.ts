@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
 const CONFIG_KEY = 'campusCopilotConfig';
-const SITE_STATE_KEY = '__campus_copilot_mock_site_states__';
-const DOWNLOAD_KEY = '__campus_copilot_last_download__';
+const SITE_STATE_KEY = '__opencampus_mock_site_states__';
+const DOWNLOAD_KEY = '__opencampus_last_download__';
 const SMOKE_CAPTURE_DIR = process.env.EXTENSION_SMOKE_CAPTURE_DIR;
 
 function resolveSmokeBaseUrl(baseURL?: string) {
@@ -161,13 +161,13 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
         window.localStorage.setItem(key, JSON.stringify(value));
       };
 
-      const seededKey = '__campus_copilot_smoke_seeded__';
+      const seededKey = '__opencampus_smoke_seeded__';
       if (!window.sessionStorage.getItem(seededKey)) {
         // Reset the fixture once per test context, while preserving state across in-test navigations.
         writeJson('__extension_storage__', defaultConfig);
         writeJson(siteStateKey, defaultStates);
         window.localStorage.removeItem(downloadKey);
-        window.localStorage.removeItem('__campus_copilot_opened_options__');
+        window.localStorage.removeItem('__opencampus_opened_options__');
         window.sessionStorage.setItem(seededKey, '1');
       }
 
@@ -291,7 +291,7 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
           addListener() {},
         },
         async openOptionsPage() {
-          window.localStorage.setItem('__campus_copilot_opened_options__', 'true');
+          window.localStorage.setItem('__opencampus_opened_options__', 'true');
         },
       };
 
@@ -658,7 +658,7 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await page.getByRole('button', { name: 'Export diagnostics JSON' }).click();
   await page.waitForFunction((downloadKey) => Boolean(localStorage.getItem(downloadKey)), DOWNLOAD_KEY);
   const diagnosticsPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
-  expect(diagnosticsPayload).toContain('campus-copilot-diagnostics.json');
+  expect(diagnosticsPayload).toContain('opencampus-diagnostics.json');
   await expect(page.getByRole('heading', { name: 'Site Status' })).toBeVisible();
   await maybeCaptureSmokeScreenshot(page, 'extension-sidepanel-overview');
   await expect(page.getByRole('button', { name: 'Sync Canvas' })).toBeVisible();
@@ -701,7 +701,7 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   await page.evaluate(async () => {
     const openCampusCopilotDb = () =>
       new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('campus-copilot');
+        const request = indexedDB.open('opencampus');
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
       });

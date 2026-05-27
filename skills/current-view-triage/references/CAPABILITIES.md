@@ -6,7 +6,7 @@ This skill intentionally stays on the read-only Campus Copilot surfaces.
 
 - `campus_health`
 - `providers_status`
-- `ask_campus_copilot`
+- `ask_opencampus`
 - `canvas_snapshot_view`
 - `gradescope_snapshot_view`
 - `edstem_snapshot_view`
@@ -17,5 +17,5 @@ This skill intentionally stays on the read-only Campus Copilot surfaces.
 
 1. `campus_health`
 2. one or more `*_snapshot_view` tools
-3. `ask_campus_copilot` if a question exists
+3. `ask_opencampus` if a question exists
 4. `export_snapshot_artifact` only if the operator needs a saved proof artifact

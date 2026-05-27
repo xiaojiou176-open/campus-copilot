@@ -10,5 +10,5 @@ pnpm verify:governance
 pnpm typecheck
 pnpm test
 pnpm smoke:api
-pnpm --filter @campus-copilot/web build
-pnpm --filter @campus-copilot/extension build
+pnpm --filter @opencampus/web build
+pnpm --filter @opencampus/extension build

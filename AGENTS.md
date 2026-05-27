@@ -55,18 +55,18 @@ pnpm verify:hosted
 如果碰到 BFF 或 API 入口，再补 targeted 证据：
 
 ```bash
-pnpm --filter @campus-copilot/api test
+pnpm --filter @opencampus/api test
 bash scripts/api-healthcheck.sh
 ```
 
 ## 当前 live / profile / auth 纪律
 
 - 做真实 campus-site live/browser/session 推进时，当前 repo 的 canonical Chrome 根目录不再是默认系统根，而是：
-  - `~/.cache/campus-copilot/browser/chrome-user-data/`
+  - `~/.cache/opencampus/browser/chrome-user-data/`
 - 当前 repo 的 canonical profile directory 是：
   - `Profile 1`
 - 当前 repo 的 canonical 显示名是：
-  - `campus-copilot`
+  - `opencampus`
 - 旧世界里默认 Chrome 根目录下的 `Profile 13` 只再承担一件事：
   - **一次性迁移源**
 - 默认系统 Chrome 根目录：
@@ -88,7 +88,7 @@ bash scripts/api-healthcheck.sh
   - 可以提示用户手工 pin 一次
   - 但不要去写 Chrome 私有 avatar/theme/pinned-tab 偏好
 - 对 `Canvas / Gradescope / EdStem / MyUW` 的默认工作假设必须是：
-  - 如果用了正确的 repo-owned `Profile 1`（显示名 `campus-copilot`），要么已有登录态；
+  - 如果用了正确的 repo-owned `Profile 1`（显示名 `opencampus`），要么已有登录态；
   - 要么密码管理器已经能自动填充；
 - agent 应先继续推动登录 / SSO / 会话续接，而不是一看到 `session_resumable` 或 `mfa_required` 就停。
 - 只有在正确 profile 下确认：
@@ -134,14 +134,14 @@ bash scripts/api-healthcheck.sh
     - `CAMPUS_COPILOT_BROWSER_LAUNCH_REASON=<auditable reason>`
   - 没有这两个变量时，`scripts/browser-launch.mjs` 必须直接 fail closed，而不是默认 detached second-launch
 - 具体 canonical root：
-  - `~/.cache/campus-copilot/browser/chrome-user-data/`
+  - `~/.cache/opencampus/browser/chrome-user-data/`
 - 具体 canonical attach 端口：
   - `127.0.0.1:9334`
 - 我们默认只允许一个 repo-owned headed Chrome 实例；以后你和自动化都 attach 到这同一实例，不再 second-launch 同一根目录。
-- clone lane 默认禁用；`~/.campus-copilot-profile13-clone` 与 `.chrome-debug-profile` 只作为 **legacy migration candidate** 盘点，不再属于当前 repo 的正式默认 lane。
+- clone lane 默认禁用；`~/.opencampus-profile13-clone` 与 `.chrome-debug-profile` 只作为 **legacy migration candidate** 盘点，不再属于当前 repo 的正式默认 lane。
 - 当前 repo 自己可控的 runtime 产物统一放进 `.runtime-cache/`，例如 temp、browser evidence、live traces、support bundle、coverage。
 - 当前 repo 若需要 repo-exclusive external cache，统一放在：
-  - `${XDG_CACHE_HOME:-$HOME/.cache}/campus-copilot`
+  - `${XDG_CACHE_HOME:-$HOME/.cache}/opencampus`
   - 默认 TTL = `168h`
   - 默认总容量上限 = `2048 MiB`
   - generic cache 走 `${cacheHome}/cache`
@@ -153,8 +153,8 @@ bash scripts/api-healthcheck.sh
   - 如果已经推进到 `Duo / 2FA`、`CAPTCHA / challenge`、`tenant/account wall`，就记成 owner-only / external blocker
   - 不要因为“不甘心”就无限 relaunch / 无限 clone profile / 无限开新 tab
 - repo 运行中的临时文件应放在 repo 自己的 `.runtime-cache/temp`，不要再把活文件写进会被 `cleanup:runtime` 横扫的通用 temp roots。
-- `cleanup:runtime` 只清 repo-named temp residues、`.runtime-cache/` 下已声明的 runtime/debug artifacts、以及 `~/.cache/campus-copilot/cache` 下受 TTL/容量上限约束的 repo-exclusive external cache。
-- `cleanup:runtime` **绝不碰** `~/.cache/campus-copilot/browser/chrome-user-data` 这条永久态 browser root。
+- `cleanup:runtime` 只清 repo-named temp residues、`.runtime-cache/` 下已声明的 runtime/debug artifacts、以及 `~/.cache/opencampus/cache` 下受 TTL/容量上限约束的 repo-exclusive external cache。
+- `cleanup:runtime` **绝不碰** `~/.cache/opencampus/browser/chrome-user-data` 这条永久态 browser root。
 - `cleanup:runtime` **不清** `apps/extension/.output`、`apps/extension/.wxt`、`apps/extension/test-results`、共享工具缓存、别的 repo 的 browser/runtime 资源。
 - 如果当前 repo 本轮启动了 listener / clone / temp artifacts，结束前必须做 hygiene ledger：
   - 找到了什么
@@ -164,7 +164,7 @@ bash scripts/api-healthcheck.sh
 - 当前 repo 为诊断新开的登录页 / 中间页 / 试探页 tab，结束前要尽量回收；不要把成排探测 tab 留在浏览器里。
 - 若当前 repo 本轮没有实际拉起 Docker / container 资源，就不要为了“全面 cleanup”去动系统级 Docker 状态。
 - 当前 repo 的 deterministic CI 默认继续走 GitHub-hosted runner；不要把本地真实 Chrome profile、self-hosted runner、或本地 runner 假设混进默认 CI。
-- 当前 repo 的 repo-owned browser root 虽然位于 `~/.cache/campus-copilot/` 下，但它属于 **browser state**，不是 generic external cache；不要让 TTL/cap GC 误删它。
+- 当前 repo 的 repo-owned browser root 虽然位于 `~/.cache/opencampus/` 下，但它属于 **browser state**，不是 generic external cache；不要让 TTL/cap GC 误删它。
 - 外部站点上仍然只允许：
   - 登录推进
   - SSO continuation
@@ -273,11 +273,11 @@ bash scripts/api-healthcheck.sh
 ### 5. 正确 profile 规则是硬约束
 
 - 做真实 campus-site live/browser/session 推进时，**唯一应优先使用的 profile directory 是 repo-owned browser root 里的 `Profile 1`**。
-- `campus-copilot` 是这个 repo-owned profile 的显示名。
+- `opencampus` 是这个 repo-owned profile 的显示名。
 - 旧世界里默认系统 Chrome 根目录下的 `Profile 13` 只是迁移源，不再是当前运行主路径。
 - 不要把默认 `.chrome-debug-profile` 当成真实学生会话真相源；它只是 legacy 调试残留。
 - 做真实站点登录推进时，必须显式对准：
-  - `CHROME_USER_DATA_DIR="$HOME/.cache/campus-copilot/browser/chrome-user-data"`
+  - `CHROME_USER_DATA_DIR="$HOME/.cache/opencampus/browser/chrome-user-data"`
   - `CHROME_PROFILE_NAME="Profile 1"`
 - live/browser 诊断脚本缺少 browser root、或 repo-owned 单实例未启动时，应直接 fail fast，而不是隐式兜底。
 - 不要把任意桌面 Chrome 窗口、AppleScript 读到的现有标签页、或 GUI 前台状态，当成当前 repo 的 live 真相面。
@@ -285,7 +285,7 @@ bash scripts/api-healthcheck.sh
 ### 6. 四站登录推进规则
 
 - 对 `Canvas / Gradescope / EdStem / MyUW` 的默认工作假设必须是：
-  - 如果用了正确的 repo-owned `Profile 1`（显示名 `campus-copilot`），要么已有登录态；
+  - 如果用了正确的 repo-owned `Profile 1`（显示名 `opencampus`），要么已有登录态；
   - 要么密码管理器已经能自动填充；
   - agent 应先继续推动登录 / SSO / 会话续接，而不是把登录页本身当终点。
 - `Gradescope` 的默认推进顺序要写死：
@@ -301,9 +301,9 @@ bash scripts/api-healthcheck.sh
 ### 6.5 runtime cache 与 external cache 纪律
 
 - repo 内部自研 runtime 产物统一放进 `.runtime-cache/`，不要再维护多套 repo-owned runtime 根。
-- repo-exclusive external cache 统一放进 `~/.cache/campus-copilot/`，并且默认受 TTL / 容量上限治理。
+- repo-exclusive external cache 统一放进 `~/.cache/opencampus/`，并且默认受 TTL / 容量上限治理。
 - repo-owned browser root 固定放进：
-  - `~/.cache/campus-copilot/browser/chrome-user-data/`
+  - `~/.cache/opencampus/browser/chrome-user-data/`
 - 这个 browser root 是 **repo-owned browser state**，不是 generic external cache，不参与普通 TTL/cap GC。
 - 默认治理值：
   - external cache TTL = `168h`
@@ -311,7 +311,7 @@ bash scripts/api-healthcheck.sh
   - `.runtime-cache/temp` TTL = `72h`
   - `.runtime-cache/browser-evidence` 与 `.runtime-cache/live-traces` TTL = `168h`
   - support bundle 至少保留最近 `3` 份
-- `~/.campus-copilot-profile13-clone` 与 `.chrome-debug-profile` 是 legacy browser roots，不再算正式缓存根；只做盘点与迁移候选，不做当前主路径。
+- `~/.opencampus-profile13-clone` 与 `.chrome-debug-profile` 是 legacy browser roots，不再算正式缓存根；只做盘点与迁移候选，不做当前主路径。
 - 旧世界里系统默认 Chrome 根目录下的 `Profile 13` 现在也只算迁移源，不再算当前 repo 的运行 SSOT。
 - `~/Library/Caches/ms-playwright`、`~/Library/Caches/pnpm`、`~/Library/pnpm`、`~/.npm` 等共享工具缓存继续视为 shared layer，不由当前 repo 自动清理。
 
@@ -342,7 +342,7 @@ bash scripts/api-healthcheck.sh
 
 ### 9. archive 阅读和 prompt 续推纪律
 
-- 处理 `campus-copilot` 这类 archive archaeology：
+- 处理 `opencampus` 这类 archive archaeology：
   - docs 需要完整读完；
   - conversations 至少要精读最新与关键转折线程；
   - 不能只摘最后一条 assistant 结论；
@@ -381,7 +381,7 @@ bash scripts/api-healthcheck.sh
 - `.agents/skills/l1-browser-context-boundaries/SKILL.md`
   - 适用：区分“自持浏览器 DOM 自动化”和“用户当前真实会话”，避免 GUI 越界；这是 same-name overlay，保持 direct entry
 - `.agents/skills/l1-runtime-resource-hygiene/SKILL.md`
-  - 适用：browser/profile/tab hygiene、cross-repo listener collision、clone lifecycle、`.runtime-cache/`、`~/.cache/campus-copilot/`、legacy browser roots、真实 Chrome profile 契约、GitHub-hosted CI 边界；这是 same-name overlay，保持 direct entry
+  - 适用：browser/profile/tab hygiene、cross-repo listener collision、clone lifecycle、`.runtime-cache/`、`~/.cache/opencampus/`、legacy browser roots、真实 Chrome profile 契约、GitHub-hosted CI 边界；这是 same-name overlay，保持 direct entry
 
 ## 阅读顺序
 

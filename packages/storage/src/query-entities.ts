@@ -1,4 +1,4 @@
-import { SiteSchema, type Site } from '@campus-copilot/schema';
+import { SiteSchema, type Site } from '@opencampus/schema';
 import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
 import {
   EntityCountsSchema,

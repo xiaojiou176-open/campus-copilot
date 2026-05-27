@@ -1,5 +1,5 @@
 {
-  "name": "@campus-copilot/adapters-course-sites",
+  "name": "@opencampus/adapters-course-sites",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@campus-copilot/adapters-base": "workspace:*",
-    "@campus-copilot/schema": "workspace:*"
+    "@opencampus/adapters-base": "workspace:*",
+    "@opencampus/schema": "workspace:*"
   }
 }

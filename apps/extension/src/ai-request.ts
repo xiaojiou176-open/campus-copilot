@@ -3,10 +3,10 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@campus-copilot/ai';
-import { buildWorkbenchAiProxyRequest as buildSharedWorkbenchAiProxyRequest } from '@campus-copilot/core';
-import type { ExportArtifact } from '@campus-copilot/exporter';
-import type { Alert, TimelineEntry } from '@campus-copilot/schema';
+} from '@opencampus/ai';
+import { buildWorkbenchAiProxyRequest as buildSharedWorkbenchAiProxyRequest } from '@opencampus/core';
+import type { ExportArtifact } from '@opencampus/exporter';
+import type { Alert, TimelineEntry } from '@opencampus/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
@@ -18,7 +18,7 @@ import type {
   TodaySnapshot,
   WeeklyLoadEntry,
   WorkItemCluster,
-} from '@campus-copilot/storage';
+} from '@opencampus/storage';
 import { getUiText, type ResolvedUiLanguage } from './i18n';
 import {
   buildLocalizedAlertPresentation,

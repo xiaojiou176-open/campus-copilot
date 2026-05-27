@@ -40,7 +40,7 @@ export function validateContainerPublicationSurface() {
     }
   }
 
-  if (!distribution.includes('ghcr.io/xiaojiou176-open/campus-copilot-api')) {
+  if (!distribution.includes('ghcr.io/xiaojiou176-open/opencampus-api')) {
     failures.push('container_publication_distribution_missing_public_image');
   }
   if (!distribution.includes('pnpm smoke:docker:api')) {

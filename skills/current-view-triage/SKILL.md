@@ -29,7 +29,7 @@ Treat it like a **read-only triage plugin card** over one imported workspace sna
 
 - `campus_health`
 - `providers_status`
-- `ask_campus_copilot`
+- `ask_opencampus`
 - the four `*_snapshot_view` tools
 - `export_snapshot_artifact`
 

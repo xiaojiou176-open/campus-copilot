@@ -34,9 +34,9 @@ test('getBrowserBootstrapPlan points at repo-owned browser root and source Profi
 
     assert.equal(plan.sourceChromeRoot, join(sandbox.home, 'Library/Application Support/Google/Chrome'));
     assert.equal(plan.sourceProfileDirectory, 'Profile 13');
-    assert.equal(plan.targetUserDataRoot, join(sandbox.home, '.cache/campus-copilot/browser/chrome-user-data'));
+    assert.equal(plan.targetUserDataRoot, join(sandbox.home, '.cache/opencampus/browser/chrome-user-data'));
     assert.equal(plan.targetProfileDirectory, 'Profile 1');
-    assert.equal(plan.profileDisplayName, 'campus-copilot');
+    assert.equal(plan.profileDisplayName, 'opencampus');
     assert.equal(plan.browserCdpPort, 9334);
   } finally {
     sandbox.cleanup();
@@ -61,12 +61,12 @@ test('buildBootstrappedLocalState rewrites source profile metadata into Profile 
   const nextState = buildBootstrappedLocalState(
     sourceState,
     'Profile 1',
-    'campus-copilot',
+    'opencampus',
     'Profile 13',
   );
 
   assert.deepEqual(Object.keys(nextState.profile.info_cache), ['Profile 1']);
-  assert.equal(nextState.profile.info_cache['Profile 1'].name, 'campus-copilot');
+  assert.equal(nextState.profile.info_cache['Profile 1'].name, 'opencampus');
   assert.equal(nextState.profile.last_used, 'Profile 1');
   assert.deepEqual(nextState.profile.last_active_profiles, ['Profile 1']);
 });
@@ -103,7 +103,7 @@ test('cleanupExternalCache trims managed cache but never touches the browser sub
     const policy = getCacheGovernancePolicy(
       {
         HOME: sandbox.home,
-        CAMPUS_COPILOT_CACHE_HOME: join(sandbox.home, '.cache/campus-copilot'),
+        CAMPUS_COPILOT_CACHE_HOME: join(sandbox.home, '.cache/opencampus'),
       },
       { homeDir: sandbox.home },
     );

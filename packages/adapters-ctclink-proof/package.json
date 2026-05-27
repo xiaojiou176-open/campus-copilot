@@ -1,5 +1,5 @@
 {
-  "name": "@campus-copilot/adapters-ctclink-proof",
+  "name": "@opencampus/adapters-ctclink-proof",
   "version": "0.0.0",
   "private": true,
   "type": "module",

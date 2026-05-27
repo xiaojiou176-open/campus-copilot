@@ -1,8 +1,8 @@
-# @campus-copilot/gradescope-api
+# @opencampus/gradescope-api
 
 Read-only Gradescope helpers over the current Campus Copilot snapshot contract.
 
-If you are still choosing between this package, `@campus-copilot/site-sdk`, or the site-sidecar path, start with [`../../examples/toolbox-chooser.md`](../../examples/toolbox-chooser.md) first.
+If you are still choosing between this package, `@opencampus/site-sdk`, or the site-sidecar path, start with [`../../examples/toolbox-chooser.md`](../../examples/toolbox-chooser.md) first.
 
 ## Install
 
@@ -12,8 +12,8 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/gradescope-api build
-pnpm --filter @campus-copilot/gradescope-api test
+pnpm --filter @opencampus/gradescope-api build
+pnpm --filter @opencampus/gradescope-api test
 ```
 
 Shared public-preview proof loop from the repo root:

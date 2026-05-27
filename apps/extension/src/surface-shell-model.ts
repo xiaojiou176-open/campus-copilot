@@ -1,8 +1,8 @@
-import type { ProviderId } from '@campus-copilot/ai';
-import type { ExportFormat } from '@campus-copilot/exporter';
-import type { SiteSyncOutcome } from '@campus-copilot/core';
-import type { Alert, Site } from '@campus-copilot/schema';
-import type { SiteEntityCounts, SyncRun, SyncState, WorkbenchFilter } from '@campus-copilot/storage';
+import type { ProviderId } from '@opencampus/ai';
+import type { ExportFormat } from '@opencampus/exporter';
+import type { SiteSyncOutcome } from '@opencampus/core';
+import type { Alert, Site } from '@opencampus/schema';
+import type { SiteEntityCounts, SyncRun, SyncState, WorkbenchFilter } from '@opencampus/storage';
 import { buildSiteBlockingHint } from './background-runtime';
 import type { ExtensionConfig } from './config';
 import { buildDiagnosticsSummary, type DiagnosticsSummary } from './diagnostics-summary';

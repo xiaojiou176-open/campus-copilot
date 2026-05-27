@@ -10,7 +10,7 @@ import {
   type SiteSyncSuccess,
   type SiteSnapshot,
   runCollectorPipeline,
-} from '@campus-copilot/adapters-base';
+} from '@opencampus/adapters-base';
 import {
   AnnouncementSchema,
   CourseSchema,
@@ -21,7 +21,7 @@ import {
   type Course,
   type Event,
   type HealthStatus,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 import { z } from 'zod';
 
 type MyUWFailureCode = 'unauthorized' | 'unsupported_context' | 'malformed_response' | 'request_failed';

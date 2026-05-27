@@ -129,7 +129,7 @@ async function handleRequest(site, dataset, message) {
           tools: {},
         },
         serverInfo: {
-          name: `campus-copilot-mcp-${site}`,
+          name: `opencampus-mcp-${site}`,
           version: '0.1.0',
         },
       },

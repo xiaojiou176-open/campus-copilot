@@ -28,7 +28,7 @@ function getOptionValue(args, optionName) {
 
 export async function runSiteMcpBin(site) {
   const args = process.argv[2] === '--' ? process.argv.slice(3) : process.argv.slice(2);
-  const binaryName = `campus-copilot-mcp-${site}`;
+  const binaryName = `opencampus-mcp-${site}`;
 
   if (args.includes('--help') || args.includes('-h')) {
     console.log(usage(binaryName, site));

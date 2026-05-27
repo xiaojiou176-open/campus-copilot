@@ -1,4 +1,4 @@
-# @campus-copilot/mcp
+# @opencampus/mcp
 
 Snapshot-first config helpers for the Campus Copilot read-only MCP preview.
 
@@ -15,7 +15,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/mcp test
+pnpm --filter @opencampus/mcp test
 ```
 
 Shared public-preview proof loop from the repo root:

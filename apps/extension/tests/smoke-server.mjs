@@ -49,7 +49,7 @@ async function ensureBuildExists() {
   if (missing.length > 0) {
     process.stderr.write(
       `missing exported extension build: ${missing.join(', ')} under ${root}\n` +
-        'run `pnpm --filter @campus-copilot/extension build` before Playwright smoke.\n',
+        'run `pnpm --filter @opencampus/extension build` before Playwright smoke.\n',
     );
     process.exit(1);
   }

@@ -8,7 +8,7 @@ import { getWeeklyLoad } from './weekly-load';
 
 describe('replaceImportedWorkbenchSnapshot', () => {
   it('hydrates the shared storage contract for a read-only web surface', async () => {
-    const db = createCampusCopilotDb(`campus-copilot-import-${Date.now()}`);
+    const db = createCampusCopilotDb(`opencampus-import-${Date.now()}`);
     await replaceImportedWorkbenchSnapshot(
       {
         generatedAt: '2026-04-03T09:00:00-07:00',

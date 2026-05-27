@@ -8,7 +8,7 @@
     "bundles": "https://docs.openclaw.ai/plugins/bundles"
   },
   "pack": {
-    "name": "campus-copilot-public-skills",
+    "name": "opencampus-public-skills",
     "version": "0.1.0",
     "scope": "read-only",
     "sourceRoot": "skills",

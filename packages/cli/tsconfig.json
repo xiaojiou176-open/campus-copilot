@@ -5,9 +5,9 @@
     "baseUrl": "../..",
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@campus-copilot/ai": ["packages/ai/src/index.ts"],
-      "@campus-copilot/exporter": ["packages/exporter/src/index.ts"],
-      "@campus-copilot/sdk": ["packages/sdk/src/index.ts"]
+      "@opencampus/ai": ["packages/ai/src/index.ts"],
+      "@opencampus/exporter": ["packages/exporter/src/index.ts"],
+      "@opencampus/sdk": ["packages/sdk/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts"]

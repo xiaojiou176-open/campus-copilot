@@ -1,8 +1,8 @@
-# @campus-copilot/edstem-api
+# @opencampus/edstem-api
 
 Read-only EdStem helpers over the current Campus Copilot snapshot contract.
 
-If you are still choosing between this package, `@campus-copilot/site-sdk`, or the site-sidecar path, start with [`../../examples/toolbox-chooser.md`](../../examples/toolbox-chooser.md) first.
+If you are still choosing between this package, `@opencampus/site-sdk`, or the site-sidecar path, start with [`../../examples/toolbox-chooser.md`](../../examples/toolbox-chooser.md) first.
 
 ## Install
 
@@ -12,8 +12,8 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/edstem-api build
-pnpm --filter @campus-copilot/edstem-api test
+pnpm --filter @opencampus/edstem-api build
+pnpm --filter @opencampus/edstem-api test
 ```
 
 Shared public-preview proof loop from the repo root:

@@ -1,10 +1,10 @@
-import type { PriorityReason, Site } from '@campus-copilot/schema';
+import type { PriorityReason, Site } from '@opencampus/schema';
 import {
   setClusterReviewDecision,
   type AdministrativeSummary,
   type ClusterReviewDecision,
   type ClusterReviewTargetKind,
-} from '@campus-copilot/storage';
+} from '@opencampus/storage';
 import { formatDateTime, formatRelativeTime } from './i18n';
 import { SITE_LABELS } from './surface-shell-model';
 import { getAcademicRedZoneHardStops } from './academic-safety-guards';

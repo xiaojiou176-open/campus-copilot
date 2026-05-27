@@ -61,7 +61,7 @@ if (sessionConfig.profileRequirementStatus !== 'configured') {
         blocked: 'browser_root_profile_config_invalid',
         nextActions: [
           sessionConfig.missingEnvMessage,
-          'Use the repo-owned browser root and the dedicated `Profile 1` whose display name is `campus-copilot`.',
+          'Use the repo-owned browser root and the dedicated `Profile 1` whose display name is `opencampus`.',
         ].filter(Boolean),
         cachePolicy: {
           externalCacheHome: cachePolicy.externalCacheHome,

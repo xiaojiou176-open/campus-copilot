@@ -93,7 +93,7 @@ async function waitForHealthy(url, attempts = 40, validate) {
 function validateBffHealth({ body }) {
   try {
     const payload = JSON.parse(body);
-    return payload?.ok === true && payload?.service === 'campus-copilot-bff' && payload?.mode === 'thin-bff';
+    return payload?.ok === true && payload?.service === 'opencampus-bff' && payload?.mode === 'thin-bff';
   } catch {
     return false;
   }
@@ -328,7 +328,7 @@ async function seedPublicScreenshotData(page) {
   const fixture = buildPublicScreenshotFixture();
   await page.evaluate(async ({ fixture }) => {
     const openDb = await new Promise((resolve, reject) => {
-      const request = indexedDB.open('campus-copilot');
+      const request = indexedDB.open('opencampus');
       request.onerror = () => reject(new Error('open_indexeddb_failed'));
       request.onsuccess = () => resolve(request.result);
     });

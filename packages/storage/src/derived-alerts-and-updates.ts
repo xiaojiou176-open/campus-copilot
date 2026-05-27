@@ -1,11 +1,11 @@
 import type {
   Alert,
   TimelineEntry,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 import {
   AlertSchema,
   TimelineEntrySchema,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 import {
   RecentUpdatesFeedSchema,
   type RecentUpdatesFeed,

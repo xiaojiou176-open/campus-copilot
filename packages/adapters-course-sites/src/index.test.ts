@@ -13,7 +13,7 @@ function readFixture(relativePath: string) {
   return readFileSync(new URL(`./__fixtures__/${relativePath}`, import.meta.url), 'utf8');
 }
 
-describe('@campus-copilot/adapters-course-sites', () => {
+describe('@opencampus/adapters-course-sites', () => {
   it('extracts a course, structured resources, and a welcome announcement from a course home page', async () => {
     const adapter = createCourseSitesAdapter();
     const result = await adapter.sync({

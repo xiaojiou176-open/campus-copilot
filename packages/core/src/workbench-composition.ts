@@ -8,7 +8,7 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@campus-copilot/ai';
+} from '@opencampus/ai';
 import type {
   AuthorizationState,
   ExportArtifact,
@@ -16,8 +16,8 @@ import type {
   ExportPackagingMetadata,
   ExportPreset,
   ExportScopeMetadata,
-} from '@campus-copilot/exporter';
-import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, TimelineEntry } from '@campus-copilot/schema';
+} from '@opencampus/exporter';
+import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, TimelineEntry } from '@opencampus/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
@@ -31,7 +31,7 @@ import type {
   WorkItemCluster,
   WorkbenchFilter,
   WorkbenchView,
-} from '@campus-copilot/storage';
+} from '@opencampus/storage';
 
 export interface WorkbenchPresentationOverrides {
   viewTitle?: string;

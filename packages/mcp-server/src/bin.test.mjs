@@ -9,7 +9,7 @@ test('mcp-server bin exposes a help surface', () => {
   });
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /Usage: campus-copilot-mcp/);
+  assert.match(result.stdout, /Usage: opencampus-mcp/);
   assert.match(result.stdout, /read-only/);
 });
 

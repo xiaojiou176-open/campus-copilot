@@ -1,4 +1,4 @@
-# @campus-copilot/workspace-sdk
+# @opencampus/workspace-sdk
 
 Read-only workspace derivation helpers for imported Campus Copilot snapshots.
 
@@ -16,7 +16,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/workspace-sdk test
+pnpm --filter @opencampus/workspace-sdk test
 ```
 
 Shared public-preview proof loop from the repo root:

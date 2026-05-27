@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "campus-copilot": {
+    "opencampus": {
       "command": "pnpm",
       "args": [
         "--filter",
-        "@campus-copilot/mcp-server",
+        "@opencampus/mcp-server",
         "start"
       ]
     }

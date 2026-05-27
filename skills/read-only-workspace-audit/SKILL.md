@@ -20,9 +20,9 @@ Rules:
 
 Suggested toolchain:
 
-1. `campus-copilot summary --snapshot <path>`
-2. `campus-copilot site --snapshot <path> --site <canvas|gradescope|edstem|myuw>`
-3. `pnpm --filter @campus-copilot/mcp-server start` for the generic BFF + snapshot MCP flow, or one of the site-scoped `pnpm --filter @campus-copilot/mcp-readonly start:<site>` commands for snapshot-only reads
+1. `opencampus summary --snapshot <path>`
+2. `opencampus site --snapshot <path> --site <canvas|gradescope|edstem|myuw>`
+3. `pnpm --filter @opencampus/mcp-server start` for the generic BFF + snapshot MCP flow, or one of the site-scoped `pnpm --filter @opencampus/mcp-readonly start:<site>` commands for snapshot-only reads
 
 Companion examples:
 

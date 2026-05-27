@@ -177,9 +177,9 @@ describe('adapters-time-schedule limited shared landing', () => {
       dependencies?: Record<string, string>;
     };
 
-    expect(source).not.toContain('@campus-copilot/schema');
-    expect(source).not.toContain('@campus-copilot/storage');
-    expect(source).not.toContain('@campus-copilot/core');
+    expect(source).not.toContain('@opencampus/schema');
+    expect(source).not.toContain('@opencampus/storage');
+    expect(source).not.toContain('@opencampus/core');
     expect(packageJson.dependencies ?? {}).toEqual({});
   });
 

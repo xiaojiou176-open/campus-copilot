@@ -160,5 +160,5 @@ test('bin strips the pnpm run separator before dispatch', () => {
   );
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /campus-copilot <command> \[--flags\]/);
+  assert.match(result.stdout, /opencampus <command> \[--flags\]/);
 });

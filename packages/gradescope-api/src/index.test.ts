@@ -5,7 +5,7 @@ function parseImportedWorkbenchSnapshot(raw: string) {
   return JSON.parse(raw);
 }
 
-describe('@campus-copilot/gradescope-api', () => {
+describe('@opencampus/gradescope-api', () => {
   it('returns a read-only Gradescope snapshot view', () => {
     const snapshot = parseImportedWorkbenchSnapshot(
       JSON.stringify({

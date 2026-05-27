@@ -1,10 +1,10 @@
 {
-  "name": "@campus-copilot/mcp-readonly",
+  "name": "@opencampus/mcp-readonly",
   "version": "0.1.0",
   "private": false,
   "description": "Read-only site-scoped MCP sidecars for Campus Copilot snapshots.",
   "license": "MIT",
-  "keywords": ["campus-copilot", "mcp", "read-only", "sidecar", "snapshot"],
+  "keywords": ["opencampus", "mcp", "read-only", "sidecar", "snapshot"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/mcp-readonly",
   "bugs": {
     "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
@@ -20,10 +20,10 @@
   "type": "module",
   "files": ["README.md", "dist"],
   "bin": {
-    "campus-copilot-mcp-canvas": "./dist/canvas.js",
-    "campus-copilot-mcp-gradescope": "./dist/gradescope.js",
-    "campus-copilot-mcp-edstem": "./dist/edstem.js",
-    "campus-copilot-mcp-myuw": "./dist/myuw.js"
+    "opencampus-mcp-canvas": "./dist/canvas.js",
+    "opencampus-mcp-gradescope": "./dist/gradescope.js",
+    "opencampus-mcp-edstem": "./dist/edstem.js",
+    "opencampus-mcp-myuw": "./dist/myuw.js"
   },
   "scripts": {
     "build": "pnpm exec esbuild ./bin/canvas.mjs ./bin/gradescope.mjs ./bin/edstem.mjs ./bin/myuw.mjs --bundle --platform=node --format=esm --target=node20 --legal-comments=none --banner:js='#!/usr/bin/env node' --outdir=dist",

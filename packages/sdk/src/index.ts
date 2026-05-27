@@ -12,14 +12,14 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@campus-copilot/ai';
+} from '@opencampus/ai';
 import {
   createExportArtifact,
   type ExportArtifact,
   type ExportFormat,
   type ExportInput,
   type ExportPreset,
-} from '@campus-copilot/exporter';
+} from '@opencampus/exporter';
 import {
   AnnouncementSchema,
   AssignmentSchema,
@@ -35,14 +35,14 @@ import {
   type Message,
   type Resource,
   type Site,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 import {
   PlanningSubstrateOwnerSchema,
   type ChangeEvent,
   type ImportedWorkbenchSnapshot,
   type SyncRun,
-} from '@campus-copilot/storage';
-export type { ImportedWorkbenchSnapshot } from '@campus-copilot/storage';
+} from '@opencampus/storage';
+export type { ImportedWorkbenchSnapshot } from '@opencampus/storage';
 
 export const SnapshotSiteSchema = z.enum(['all', 'canvas', 'gradescope', 'edstem', 'myuw', 'time-schedule', 'course-sites']);
 export type SnapshotSite = z.infer<typeof SnapshotSiteSchema>;

@@ -67,7 +67,7 @@ export function validateSkillCatalog(catalog = readSkillCatalog()) {
   if (!pack || typeof pack !== 'object') {
     failures.push('skill_catalog_missing_pack');
   } else {
-    if (pack.name !== 'campus-copilot-public-skills') {
+    if (pack.name !== 'opencampus-public-skills') {
       failures.push('skill_catalog_pack_name_drift');
     }
     if (!SEMVER_RE.test(pack.version ?? '')) {

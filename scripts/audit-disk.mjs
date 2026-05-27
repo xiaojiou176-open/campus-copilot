@@ -72,7 +72,7 @@ function getSupportBundleSummary() {
   const runtimeCacheRoot = policy.runtimeCacheRoot;
   const bundles = existsSync(runtimeCacheRoot)
     ? readdirSync(runtimeCacheRoot)
-        .filter((entry) => entry.startsWith('campus-copilot-support-bundle-') && entry.endsWith('.json'))
+        .filter((entry) => entry.startsWith('opencampus-support-bundle-') && entry.endsWith('.json'))
         .map((entry) => join(runtimeCacheRoot, entry))
         .sort()
     : [];
@@ -81,7 +81,7 @@ function getSupportBundleSummary() {
 
   return {
     label: 'support_bundles',
-    pathPattern: join(runtimeCacheRoot, 'campus-copilot-support-bundle-*.json'),
+    pathPattern: join(runtimeCacheRoot, 'opencampus-support-bundle-*.json'),
     exists: bundles.length > 0,
     count: bundles.length,
     sizeKb,
@@ -144,7 +144,7 @@ function getTmpResidues() {
       continue;
     }
 
-    const stdout = runOptional('find', [root.path, '-maxdepth', '1', '-name', 'campus-copilot-*', '-print']);
+    const stdout = runOptional('find', [root.path, '-maxdepth', '1', '-name', 'opencampus-*', '-print']);
     for (const line of stdout.split('\n').map((value) => value.trim()).filter(Boolean)) {
       const sizeKb = getEntrySizeKb(line);
       matches.push({
@@ -159,7 +159,7 @@ function getTmpResidues() {
   }
 
   return {
-    pattern: 'campus-copilot-*',
+    pattern: 'opencampus-*',
     roots: policy.tempRoots,
     matches,
   };

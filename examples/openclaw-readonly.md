@@ -12,8 +12,8 @@ This is the safe mental model:
 
 | Path | Start with | Best when you want | Keep this boundary |
 | :-- | :-- | :-- | :-- |
-| Generic stdio MCP server | `pnpm --filter @campus-copilot/mcp-server start` | one read-only server that can answer health, provider, ask, snapshot-view, and export requests | keep it as a context surface, not an operator loop |
-| Site-scoped sidecar | `pnpm --filter @campus-copilot/mcp-readonly start:<site>` | one narrow site view over one local snapshot | do not market it as a live-site plugin |
+| Generic stdio MCP server | `pnpm --filter @opencampus/mcp-server start` | one read-only server that can answer health, provider, ask, snapshot-view, and export requests | keep it as a context surface, not an operator loop |
+| Site-scoped sidecar | `pnpm --filter @opencampus/mcp-readonly start:<site>` | one narrow site view over one local snapshot | do not market it as a live-site plugin |
 | Thin local BFF | `pnpm start:api` | local provider status or cited-AI chat on the Campus semantic contract | do not call it hosted infrastructure |
 
 ## Recommended path
@@ -21,14 +21,14 @@ This is the safe mental model:
 ### 1. Start with the generic read-only MCP server
 
 ```bash
-pnpm --filter @campus-copilot/mcp-server start
+pnpm --filter @opencampus/mcp-server start
 ```
 
 Use this when you want:
 
 - local BFF health
 - provider readiness
-- read-only `ask_campus_copilot`
+- read-only `ask_opencampus`
 - imported snapshot views
 - export artifact generation
 
@@ -36,7 +36,7 @@ Use this when you want:
 
 ```bash
 export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
-pnpm --filter @campus-copilot/mcp-readonly start:canvas
+pnpm --filter @opencampus/mcp-readonly start:canvas
 ```
 
 ### 3. Keep the contract read-only
@@ -80,7 +80,7 @@ export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
 
 1. `campus_health`
 2. `providers_status`
-3. `ask_campus_copilot`
+3. `ask_opencampus`
 4. one of the `*_snapshot_view` tools
 5. `export_snapshot_artifact`
 

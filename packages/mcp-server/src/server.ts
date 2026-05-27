@@ -8,21 +8,21 @@ import {
   buildSnapshotSiteView,
   createExportArtifactFromSnapshot,
   readImportedWorkbenchSnapshot,
-} from '@campus-copilot/sdk';
+} from '@opencampus/sdk';
 
 const SNAPSHOT_SITES = ['canvas', 'gradescope', 'edstem', 'myuw', 'time-schedule'] as const;
 
 export const CAMPUS_MCP_SERVER_TOOL_NAMES = [
   'campus_health',
   'providers_status',
-  'ask_campus_copilot',
+  'ask_opencampus',
   ...SNAPSHOT_SITES.map((site) => `${site}_snapshot_view`),
   'export_snapshot_artifact',
 ] as const;
 
 export function createCampusCopilotMcpServer() {
   const server = new McpServer({
-    name: 'campus-copilot-mcp',
+    name: 'opencampus-mcp',
     version: '0.1.1',
   });
 
@@ -80,7 +80,7 @@ export function createCampusCopilotMcpServer() {
   );
 
   server.registerTool(
-    'ask_campus_copilot',
+    'ask_opencampus',
     {
       title: 'Ask Campus Copilot',
       description:

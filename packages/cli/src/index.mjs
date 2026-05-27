@@ -3,7 +3,7 @@ import {
   buildWorkspaceSummary,
   parseImportedSnapshot,
   loadImportedSnapshotFile,
-} from '@campus-copilot/sdk';
+} from '@opencampus/sdk';
 import { existsSync } from 'node:fs';
 import { isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -59,7 +59,7 @@ function createExportArtifactFromSnapshot({ snapshot, preset, format, site = 'al
 
   return {
     format,
-    filename: `campus-copilot-${preset}.${format === 'markdown' ? 'md' : format}`,
+    filename: `opencampus-${preset}.${format === 'markdown' ? 'md' : format}`,
     content: format === 'json' ? JSON.stringify(scoped, null, 2) : sections.join('\n'),
   };
 }
@@ -89,7 +89,7 @@ function parseArgs(argv) {
 
 function renderHelp() {
   return [
-    'campus-copilot <command> [--flags]',
+    'opencampus <command> [--flags]',
     '',
     'Commands:',
     '  help | --help',

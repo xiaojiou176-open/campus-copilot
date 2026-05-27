@@ -7,20 +7,20 @@
     "schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"
   },
   "package": {
-    "name": "@campus-copilot/mcp-server",
+    "name": "@opencampus/mcp-server",
     "version": "0.1.1",
-    "mcpName": "io.github.xiaojiou176-open/campus-copilot-mcp",
+    "mcpName": "io.github.xiaojiou176-open/opencampus-mcp",
     "distributionType": "mcpb",
     "publishConfigAccess": "public",
     "releaseTag": "v0.1.1",
-    "releaseAsset": "campus-copilot-mcp-0.1.1.mcpb",
-    "releaseAssetUrl": "https://github.com/xiaojiou176-open/OpenCampus/releases/download/v0.1.1/campus-copilot-mcp-0.1.1.mcpb",
+    "releaseAsset": "opencampus-mcp-0.1.1.mcpb",
+    "releaseAssetUrl": "https://github.com/xiaojiou176-open/OpenCampus/releases/download/v0.1.1/opencampus-mcp-0.1.1.mcpb",
     "fileSha256": "381a1bdf42cf83cd832039b6e1df7fa20f08f8ea2a6eb92329f64cde7bb61814",
     "npmPublicationRequiredBeforeRegistrySubmit": false
   },
   "server": {
     "schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-    "name": "io.github.xiaojiou176-open/campus-copilot-mcp",
+    "name": "io.github.xiaojiou176-open/opencampus-mcp",
     "title": "Campus Copilot MCP",
     "description": "Read-only MCP server for the local Campus Copilot BFF and imported workspace snapshots.",
     "repository": {
@@ -41,8 +41,8 @@
     "packetDoc": "DISTRIBUTION.md"
   },
   "ownerWorkflow": {
-    "buildLocalBundle": "pnpm --filter @campus-copilot/mcp-server build && node scripts/build-mcpb-bundle.mjs",
-    "uploadReleaseAsset": "gh release upload v0.1.1 campus-copilot-mcp-0.1.1.mcpb --repo xiaojiou176-open/OpenCampus --clobber",
+    "buildLocalBundle": "pnpm --filter @opencampus/mcp-server build && node scripts/build-mcpb-bundle.mjs",
+    "uploadReleaseAsset": "gh release upload v0.1.1 opencampus-mcp-0.1.1.mcpb --repo xiaojiou176-open/OpenCampus --clobber",
     "login": "mcp-publisher login github",
     "publishMetadata": "mcp-publisher publish packages/mcp-server/server.json"
   },

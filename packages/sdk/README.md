@@ -1,4 +1,4 @@
-# @campus-copilot/sdk
+# @opencampus/sdk
 
 Read-only builder SDK for Campus Copilot.
 
@@ -14,7 +14,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/sdk test
+pnpm --filter @opencampus/sdk test
 ```
 
 Shared public-preview proof loop from the repo root:

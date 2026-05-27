@@ -16,7 +16,7 @@ import {
   type Message,
   type Resource,
   type TimelineEntry,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 
 export type ExportPreset =
   | 'weekly_assignments'
@@ -2391,7 +2391,7 @@ function renderIcs(dataset: ExportDataset) {
 
 function buildFilename(preset: ExportPreset, format: ExportFormat, generatedAt: string) {
   const datePart = generatedAt.slice(0, 10);
-  return `campus-copilot-${PRESET_LABELS[preset]}-${datePart}.${format}`;
+  return `opencampus-${PRESET_LABELS[preset]}-${datePart}.${format}`;
 }
 
 export function createExportArtifact(request: {

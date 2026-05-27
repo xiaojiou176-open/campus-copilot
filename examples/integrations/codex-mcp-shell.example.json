@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "campus-copilot": {
+    "opencampus": {
       "command": "bash",
       "args": [
-        "/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-mcp.sh"
+        "/absolute/path/to/opencampus/scripts/consumer/opencampus-mcp.sh"
       ]
     }
   }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "pack": {
-    "name": "campus-copilot-public-skills",
+    "name": "opencampus-public-skills",
     "version": "0.1.0",
     "visibility": "repo-public",
     "distribution": "local-bundle",

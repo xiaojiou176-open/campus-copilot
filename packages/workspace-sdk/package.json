@@ -1,10 +1,10 @@
 {
-  "name": "@campus-copilot/workspace-sdk",
+  "name": "@opencampus/workspace-sdk",
   "version": "0.1.0",
   "private": false,
   "description": "Read-only workspace derivation helpers for Campus Copilot imported snapshots.",
   "license": "MIT",
-  "keywords": ["campus-copilot", "workspace-sdk", "local-first", "read-only", "snapshot"],
+  "keywords": ["opencampus", "workspace-sdk", "local-first", "read-only", "snapshot"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/workspace-sdk",
   "bugs": {
     "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
@@ -30,10 +30,10 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@campus-copilot/ai": "workspace:*",
-    "@campus-copilot/exporter": "workspace:*",
-    "@campus-copilot/schema": "workspace:*",
-    "@campus-copilot/storage": "workspace:*",
+    "@opencampus/ai": "workspace:*",
+    "@opencampus/exporter": "workspace:*",
+    "@opencampus/schema": "workspace:*",
+    "@opencampus/storage": "workspace:*",
     "esbuild": "^0.28.0",
     "fake-indexeddb": "^6.1.0"
   }

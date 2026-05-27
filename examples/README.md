@@ -10,7 +10,7 @@ If you want the exact repo-side publication truth behind those same surfaces, pa
 
 | If you are using | Start with | Then open | Why this is the right first hop | Fast proof that you are on the right path |
 | :-- | :-- | :-- | :-- | :-- |
-| Codex | [`integrations/codex-mcp.example.json`](integrations/codex-mcp.example.json) | [`codex/campus-copilot-mcp.json`](codex/campus-copilot-mcp.json) | generic stdio MCP path over the local BFF plus imported snapshots when repo-root launch or `cwd` is available | [`current-view-triage-example.md`](current-view-triage-example.md) |
+| Codex | [`integrations/codex-mcp.example.json`](integrations/codex-mcp.example.json) | [`codex/opencampus-mcp.json`](codex/opencampus-mcp.json) | generic stdio MCP path over the local BFF plus imported snapshots when repo-root launch or `cwd` is available | [`current-view-triage-example.md`](current-view-triage-example.md) |
 | Codex without `cwd` support | [`integrations/codex-mcp-shell.example.json`](integrations/codex-mcp-shell.example.json) | [`integrations/README.md`](integrations/README.md) | safest copy-paste wrapper when your client needs an explicit repo-root shell hop | [`current-view-triage-example.md`](current-view-triage-example.md) |
 | Claude Code / Claude Desktop | [`integrations/claude-code-mcp.example.json`](integrations/claude-code-mcp.example.json) | [`mcp/claude-desktop.example.json`](mcp/claude-desktop.example.json) | same read-only MCP surface, with either the generic server or site sidecars | [`site-overview-audit-example.md`](site-overview-audit-example.md) |
 | Claude Code without `cwd` support | [`integrations/claude-code-mcp-shell.example.json`](integrations/claude-code-mcp-shell.example.json) | [`integrations/README.md`](integrations/README.md) | same repo-root wrapper path for a client that cannot set `cwd` | [`site-overview-audit-example.md`](site-overview-audit-example.md) |
@@ -31,12 +31,12 @@ If you want the exact repo-side publication truth behind those same surfaces, pa
 ## Example commands
 
 ```bash
-node packages/cli/bin/campus-copilot.mjs --help
-node packages/cli/bin/campus-copilot.mjs status
-node packages/cli/bin/campus-copilot.mjs provider-status
-node packages/cli/bin/campus-copilot.mjs summary --snapshot examples/imported-workspace.snapshot.json
-node packages/cli/bin/campus-copilot.mjs site --snapshot examples/imported-workspace.snapshot.json --site canvas
-node packages/cli/bin/campus-copilot.mjs ask --provider auto --question "What should I do first?"
+node packages/cli/bin/opencampus.mjs --help
+node packages/cli/bin/opencampus.mjs status
+node packages/cli/bin/opencampus.mjs provider-status
+node packages/cli/bin/opencampus.mjs summary --snapshot examples/imported-workspace.snapshot.json
+node packages/cli/bin/opencampus.mjs site --snapshot examples/imported-workspace.snapshot.json --site canvas
+node packages/cli/bin/opencampus.mjs ask --provider auto --question "What should I do first?"
 ```
 
 ## MCP preview
@@ -51,7 +51,7 @@ The server exposes:
 
 - `campus_health`
 - `providers_status`
-- `ask_campus_copilot`
+- `ask_opencampus`
 - `canvas_snapshot_view`
 - `gradescope_snapshot_view`
 - `edstem_snapshot_view`
@@ -71,7 +71,7 @@ The server exposes:
 - [`mcp/codex-repo-root.example.json`](mcp/codex-repo-root.example.json)
 - [`mcp/claude-desktop.example.json`](mcp/claude-desktop.example.json)
 - [`mcp/claude-desktop-repo-root.example.json`](mcp/claude-desktop-repo-root.example.json)
-- [`codex/campus-copilot-mcp.json`](codex/campus-copilot-mcp.json)
+- [`codex/opencampus-mcp.json`](codex/opencampus-mcp.json)
 - [`openclaw-readonly.md`](openclaw-readonly.md)
 - [`../skills/README.md`](../skills/README.md) for the matching read-only skills
 - [`../skills/openclaw-readonly-consumer/SKILL.md`](../skills/openclaw-readonly-consumer/SKILL.md) for the most direct OpenClaw-style local-runtime route

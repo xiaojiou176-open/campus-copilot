@@ -2,7 +2,7 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@campus-copilot/ai';
+} from '@opencampus/ai';
 import { getAcademicAiCallerGuardrails } from './academic-safety-guards';
 import { AiStructuredAnswerSchema } from './ai-answer-resolution';
 import { getAiSitePolicyOverlay } from './ai-site-policy';

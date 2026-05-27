@@ -7,30 +7,30 @@ const latestJsonPath = join(outputDir, 'latest.json');
 const latestMarkdownPath = join(outputDir, 'latest.md');
 
 const publicPackageNames = [
-  '@campus-copilot/cli',
-  '@campus-copilot/mcp-server',
-  '@campus-copilot/mcp',
-  '@campus-copilot/mcp-readonly',
-  '@campus-copilot/sdk',
-  '@campus-copilot/workspace-sdk',
-  '@campus-copilot/site-sdk',
-  '@campus-copilot/provider-runtime',
-  '@campus-copilot/gradescope-api',
-  '@campus-copilot/edstem-api',
-  '@campus-copilot/myuw-api',
+  '@opencampus/cli',
+  '@opencampus/mcp-server',
+  '@opencampus/mcp',
+  '@opencampus/mcp-readonly',
+  '@opencampus/sdk',
+  '@opencampus/workspace-sdk',
+  '@opencampus/site-sdk',
+  '@opencampus/provider-runtime',
+  '@opencampus/gradescope-api',
+  '@opencampus/edstem-api',
+  '@opencampus/myuw-api',
 ];
 
 const bundleSurfaces = [
   {
     surface: 'Codex bundle',
-    installPath: 'scripts/consumer/campus-copilot-mcp.sh',
+    installPath: 'scripts/consumer/opencampus-mcp.sh',
     proof: 'pnpm proof:public',
     docs: 'examples/integrations/plugin-bundles.md',
     sample: 'examples/integrations/codex-mcp-shell.example.json',
   },
   {
     surface: 'Claude Code bundle',
-    installPath: 'scripts/consumer/campus-copilot-mcp.sh',
+    installPath: 'scripts/consumer/opencampus-mcp.sh',
     proof: 'pnpm proof:public',
     docs: 'examples/integrations/plugin-bundles.md',
     sample: 'examples/integrations/claude-code-mcp-shell.example.json',
@@ -81,7 +81,7 @@ const supportingSurfaces = [
     surface: 'API container',
     currentStateWhenReady: 'container-ready (repo-local)',
     registryReadiness: 'owner-side publish later',
-    installPath: 'docker compose up -d campus-copilot-api',
+    installPath: 'docker compose up -d opencampus-api',
     proof: 'pnpm check:container-surface && pnpm smoke:docker:api',
     docs: 'DISTRIBUTION.md',
     sample: 'Dockerfile',
@@ -110,45 +110,45 @@ const containerRuntimeBlocker = process.env.CAMPUS_COPILOT_CONTAINER_RUNTIME_BLO
 const containerRuntimeBlockerDetail = process.env.CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER_DETAIL;
 
 const packageReadmeByName = {
-  '@campus-copilot/sdk': 'packages/sdk/README.md',
-  '@campus-copilot/workspace-sdk': 'packages/workspace-sdk/README.md',
-  '@campus-copilot/site-sdk': 'packages/site-sdk/README.md',
-  '@campus-copilot/cli': 'packages/cli/README.md',
-  '@campus-copilot/mcp': 'packages/mcp/README.md',
-  '@campus-copilot/mcp-readonly': 'packages/mcp-readonly/README.md',
-  '@campus-copilot/mcp-server': 'packages/mcp-server/README.md',
-  '@campus-copilot/provider-runtime': 'packages/provider-runtime/README.md',
-  '@campus-copilot/gradescope-api': 'packages/gradescope-api/README.md',
-  '@campus-copilot/edstem-api': 'packages/edstem-api/README.md',
-  '@campus-copilot/myuw-api': 'packages/myuw-api/README.md',
+  '@opencampus/sdk': 'packages/sdk/README.md',
+  '@opencampus/workspace-sdk': 'packages/workspace-sdk/README.md',
+  '@opencampus/site-sdk': 'packages/site-sdk/README.md',
+  '@opencampus/cli': 'packages/cli/README.md',
+  '@opencampus/mcp': 'packages/mcp/README.md',
+  '@opencampus/mcp-readonly': 'packages/mcp-readonly/README.md',
+  '@opencampus/mcp-server': 'packages/mcp-server/README.md',
+  '@opencampus/provider-runtime': 'packages/provider-runtime/README.md',
+  '@opencampus/gradescope-api': 'packages/gradescope-api/README.md',
+  '@opencampus/edstem-api': 'packages/edstem-api/README.md',
+  '@opencampus/myuw-api': 'packages/myuw-api/README.md',
 };
 
 const sampleByName = {
-  '@campus-copilot/sdk': 'examples/sdk-usage.ts',
-  '@campus-copilot/workspace-sdk': 'examples/sdk-usage.ts',
-  '@campus-copilot/site-sdk': 'examples/sdk-usage.ts',
-  '@campus-copilot/cli': 'examples/cli-usage.md',
-  '@campus-copilot/mcp': 'examples/integrations/README.md',
-  '@campus-copilot/mcp-readonly': 'examples/mcp/README.md',
-  '@campus-copilot/mcp-server': 'examples/integrations/codex-mcp.example.json',
-  '@campus-copilot/provider-runtime': 'examples/provider-runtime-switchyard.ts',
-  '@campus-copilot/gradescope-api': 'examples/gradescope-api-usage.ts',
-  '@campus-copilot/edstem-api': 'examples/edstem-api-usage.ts',
-  '@campus-copilot/myuw-api': 'examples/myuw-api-usage.ts',
+  '@opencampus/sdk': 'examples/sdk-usage.ts',
+  '@opencampus/workspace-sdk': 'examples/sdk-usage.ts',
+  '@opencampus/site-sdk': 'examples/sdk-usage.ts',
+  '@opencampus/cli': 'examples/cli-usage.md',
+  '@opencampus/mcp': 'examples/integrations/README.md',
+  '@opencampus/mcp-readonly': 'examples/mcp/README.md',
+  '@opencampus/mcp-server': 'examples/integrations/codex-mcp.example.json',
+  '@opencampus/provider-runtime': 'examples/provider-runtime-switchyard.ts',
+  '@opencampus/gradescope-api': 'examples/gradescope-api-usage.ts',
+  '@opencampus/edstem-api': 'examples/edstem-api-usage.ts',
+  '@opencampus/myuw-api': 'examples/myuw-api-usage.ts',
 };
 
 const proofByName = {
-  '@campus-copilot/sdk': 'pnpm --filter @campus-copilot/sdk test',
-  '@campus-copilot/workspace-sdk': 'pnpm --filter @campus-copilot/workspace-sdk test',
-  '@campus-copilot/site-sdk': 'pnpm --filter @campus-copilot/site-sdk test',
-  '@campus-copilot/cli': 'pnpm --filter @campus-copilot/cli test',
-  '@campus-copilot/mcp': 'pnpm --filter @campus-copilot/mcp test',
-  '@campus-copilot/mcp-readonly': 'pnpm --filter @campus-copilot/mcp-readonly build && pnpm --filter @campus-copilot/mcp-readonly test',
-  '@campus-copilot/mcp-server': 'pnpm --filter @campus-copilot/mcp-server build && pnpm --filter @campus-copilot/mcp-server test',
-  '@campus-copilot/provider-runtime': 'pnpm --filter @campus-copilot/provider-runtime build && pnpm --filter @campus-copilot/provider-runtime test',
-  '@campus-copilot/gradescope-api': 'pnpm --filter @campus-copilot/gradescope-api build && pnpm --filter @campus-copilot/gradescope-api test',
-  '@campus-copilot/edstem-api': 'pnpm --filter @campus-copilot/edstem-api build && pnpm --filter @campus-copilot/edstem-api test',
-  '@campus-copilot/myuw-api': 'pnpm --filter @campus-copilot/myuw-api build && pnpm --filter @campus-copilot/myuw-api test',
+  '@opencampus/sdk': 'pnpm --filter @opencampus/sdk test',
+  '@opencampus/workspace-sdk': 'pnpm --filter @opencampus/workspace-sdk test',
+  '@opencampus/site-sdk': 'pnpm --filter @opencampus/site-sdk test',
+  '@opencampus/cli': 'pnpm --filter @opencampus/cli test',
+  '@opencampus/mcp': 'pnpm --filter @opencampus/mcp test',
+  '@opencampus/mcp-readonly': 'pnpm --filter @opencampus/mcp-readonly build && pnpm --filter @opencampus/mcp-readonly test',
+  '@opencampus/mcp-server': 'pnpm --filter @opencampus/mcp-server build && pnpm --filter @opencampus/mcp-server test',
+  '@opencampus/provider-runtime': 'pnpm --filter @opencampus/provider-runtime build && pnpm --filter @opencampus/provider-runtime test',
+  '@opencampus/gradescope-api': 'pnpm --filter @opencampus/gradescope-api build && pnpm --filter @opencampus/gradescope-api test',
+  '@opencampus/edstem-api': 'pnpm --filter @opencampus/edstem-api build && pnpm --filter @opencampus/edstem-api test',
+  '@opencampus/myuw-api': 'pnpm --filter @opencampus/myuw-api build && pnpm --filter @opencampus/myuw-api test',
 };
 
 const previewOnlyRepoLocalStates = new Set();
@@ -173,7 +173,7 @@ for (const name of publicPackageNames) {
 }
 
 function readRegistrySubmissionStatus(packageName) {
-  if (packageName !== '@campus-copilot/mcp-server') {
+  if (packageName !== '@opencampus/mcp-server') {
     return undefined;
   }
 
@@ -207,7 +207,7 @@ function listRegistryIssues(packageName, seen = new Set()) {
   };
 
   for (const dep of Object.keys(deps)) {
-    if (!dep.startsWith('@campus-copilot/')) {
+    if (!dep.startsWith('@opencampus/')) {
       continue;
     }
 

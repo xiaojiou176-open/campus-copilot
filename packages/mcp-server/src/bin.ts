@@ -8,9 +8,9 @@ const args = process.argv[2] === '--' ? process.argv.slice(3) : process.argv.sli
 if (args.includes('--help') || args.includes('-h')) {
   console.log(
     [
-      'campus-copilot-mcp starts the unified read-only Campus Copilot MCP server.',
+      'opencampus-mcp starts the unified read-only Campus Copilot MCP server.',
       '',
-      'Usage: campus-copilot-mcp [--help] [--version]',
+      'Usage: opencampus-mcp [--help] [--version]',
       '',
       'This server stays local-first, snapshot-first or thin-BFF-first, and read-only.',
     ].join('\n'),

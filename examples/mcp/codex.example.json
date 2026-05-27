@@ -1,13 +1,13 @@
 {
   "mcpServers": {
-    "campus-copilot-canvas": {
-      "command": "campus-copilot-mcp-canvas",
+    "opencampus-canvas": {
+      "command": "opencampus-mcp-canvas",
       "env": {
         "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     },
-    "campus-copilot-edstem": {
-      "command": "campus-copilot-mcp-edstem",
+    "opencampus-edstem": {
+      "command": "opencampus-mcp-edstem",
       "env": {
         "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }

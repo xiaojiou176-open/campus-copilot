@@ -29,7 +29,7 @@ If neither is true, use the repo-owned shell wrapper instead of rewriting the co
 Repo-owned wrapper path:
 
 ```bash
-bash /absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-mcp.sh
+bash /absolute/path/to/opencampus/scripts/consumer/opencampus-mcp.sh
 ```
 
 Use the same wrapper pattern for Codex/Claude-style generic-server consumers when `cwd` is unavailable.

@@ -117,12 +117,12 @@ describe('ai runtime contracts', () => {
     expect(
       HealthPayloadSchema.parse({
         ok: true,
-        service: 'campus-copilot-bff',
+        service: 'opencampus-bff',
         mode: 'thin-bff',
       }),
     ).toEqual({
       ok: true,
-      service: 'campus-copilot-bff',
+      service: 'opencampus-bff',
       mode: 'thin-bff',
     });
 

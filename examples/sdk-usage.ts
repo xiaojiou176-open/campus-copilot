@@ -1,4 +1,4 @@
-import { CampusCopilotClient, readImportedWorkbenchSnapshot, buildSnapshotSiteView } from '@campus-copilot/sdk';
+import { CampusCopilotClient, readImportedWorkbenchSnapshot, buildSnapshotSiteView } from '@opencampus/sdk';
 
 async function main() {
   const client = new CampusCopilotClient();

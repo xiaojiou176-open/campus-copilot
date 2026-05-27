@@ -1,5 +1,5 @@
 {
-  "name": "@campus-copilot/core",
+  "name": "@opencampus/core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,11 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@campus-copilot/adapters-base": "workspace:*",
-    "@campus-copilot/ai": "workspace:*",
-    "@campus-copilot/exporter": "workspace:*",
-    "@campus-copilot/schema": "workspace:*",
-    "@campus-copilot/storage": "workspace:*",
+    "@opencampus/adapters-base": "workspace:*",
+    "@opencampus/ai": "workspace:*",
+    "@opencampus/exporter": "workspace:*",
+    "@opencampus/schema": "workspace:*",
+    "@opencampus/storage": "workspace:*",
     "zod": "^4.1.5"
   }
 }

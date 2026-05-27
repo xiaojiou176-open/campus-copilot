@@ -1,4 +1,4 @@
-import type { SiteSyncOutcome } from '@campus-copilot/core';
+import type { SiteSyncOutcome } from '@opencampus/core';
 import {
   deriveMyPlanPromotionState,
   MYPLAN_EXACT_BLOCKERS,
@@ -10,7 +10,7 @@ import {
   getLatestPlanningSubstrateBySource,
   replacePlanningSubstratesBySource,
   type PlanningSubstrateOwner,
-} from '@campus-copilot/storage';
+} from '@opencampus/storage';
 import { extractPageHtml, getActiveTabContext, getTabContextsByUrlPatterns, type ActiveTabContext, type SyncTargetOverride } from './background-tab-context';
 
 type PlanningCaptureKind = 'plan' | 'audit';
