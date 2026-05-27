@@ -1,12 +1,12 @@
 import Dexie from 'dexie';
 import { indexedDB, IDBKeyRange } from 'fake-indexeddb';
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { Announcement, Assignment, Course, Event, Grade, Message } from '@opencampus/schema';
+import type { Announcement, Assignment, Course, Event, Grade, Message } from '@campus-copilot/schema';
 import * as storage from './index';
 import { WorkItemClusterSchema } from './contracts';
 import {
   clearLocalEntityOverlayField,
-  createOpenCampusDb,
+  createCampusCopilotDb,
   getAllAnnouncements,
   getFocusQueue,
   getLatestSyncRuns,
@@ -42,7 +42,7 @@ const source = {
 };
 
 describe('storage package', () => {
-  const db = createOpenCampusDb('opencampus-test');
+  const db = createCampusCopilotDb('campus-copilot-test');
 
   beforeEach(async () => {
     await db.delete();

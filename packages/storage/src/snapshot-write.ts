@@ -14,8 +14,8 @@ import {
   type Message,
   type Resource,
   type Site,
-} from '@opencampus/schema';
-import { openCampusDb, type OpenCampusDB } from './db.ts';
+} from '@campus-copilot/schema';
+import { openCampusDb, type CampusCopilotDB } from './db.ts';
 import {
   SyncRunSchema,
   SyncStateSchema,
@@ -57,7 +57,7 @@ function parseSiteSnapshotPayload(payload: SiteSnapshotPayload): SiteSnapshotRec
   };
 }
 
-async function readExistingSiteSnapshot(site: Site, payload: SiteSnapshotPayload, db: OpenCampusDB) {
+async function readExistingSiteSnapshot(site: Site, payload: SiteSnapshotPayload, db: CampusCopilotDB) {
   const existingSnapshot = buildEmptySiteSnapshot();
 
   if (Object.prototype.hasOwnProperty.call(payload, 'courses')) {

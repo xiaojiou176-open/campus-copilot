@@ -1,6 +1,6 @@
 ---
 name: current-view-triage
-description: Turn one OpenCampus snapshot or MCP-backed current view into a plain-language what-to-do-first answer for a student.
+description: Turn one CampusCopilot snapshot or MCP-backed current view into a plain-language what-to-do-first answer for a student.
 ---
 
 # Current View Triage
@@ -13,14 +13,14 @@ Treat it like a **read-only triage plugin card** over one imported workspace sna
 
 ## What this skill teaches
 
-- how to prefer read-only OpenCampus MCP or snapshot surfaces first
+- how to prefer read-only CampusCopilot MCP or snapshot surfaces first
 - how to turn Focus Queue and recent changes into one concrete next action
 - how to answer with evidence and trust gaps instead of inventing missing facts
 
 ## Runtime you need
 
 - one imported snapshot path or one current-view export
-- or one connected OpenCampus MCP server
+- or one connected CampusCopilot MCP server
 - use `references/INSTALL.md` if the MCP server still needs to be connected
 - use `references/DEMO.md` for the first-success walkthrough
 - use `references/TROUBLESHOOTING.md` if setup or input truth is still unclear
@@ -29,7 +29,7 @@ Treat it like a **read-only triage plugin card** over one imported workspace sna
 
 - `campus_health`
 - `providers_status`
-- `ask_opencampus`
+- `ask_campus-copilot`
 - the four `*_snapshot_view` tools
 - `export_snapshot_artifact`
 

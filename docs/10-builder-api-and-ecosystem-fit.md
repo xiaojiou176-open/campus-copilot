@@ -10,7 +10,7 @@ It answers one narrow question:
 
 ## Current Truth
 
-OpenCampus already has a real but secondary read-side integration spine:
+CampusCopilot already has a real but secondary read-side integration spine:
 
 - a thin local HTTP edge in `apps/api`
 - shared contracts in `packages/schema`

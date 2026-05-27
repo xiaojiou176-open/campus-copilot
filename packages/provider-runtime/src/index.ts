@@ -108,7 +108,7 @@ export const HealthResponseSchema = z
   .object({
     requestId: z.string().min(1),
     ok: z.literal(true),
-    service: z.literal('opencampus-bff'),
+    service: z.literal('campus-copilot-bff'),
     mode: z.literal('thin-bff'),
   })
   .strict();

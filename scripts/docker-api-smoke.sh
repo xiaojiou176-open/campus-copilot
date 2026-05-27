@@ -14,19 +14,19 @@ s.close()
 PY
 }
 
-PORT="${OPENCAMPUS_DOCKER_API_PORT:-$(pick_port)}"
-PROJECT_NAME="opencampus-smoke-$$"
+PORT="${CAMPUS_COPILOT_DOCKER_API_PORT:-$(pick_port)}"
+PROJECT_NAME="campus-copilot-smoke-$$"
 HEALTH_URL="http://127.0.0.1:${PORT}/health"
 STATUS_URL="http://127.0.0.1:${PORT}/api/providers/status"
 
 cleanup() {
-  OPENCAMPUS_DOCKER_API_PORT="$PORT" docker compose -f compose.yaml -p "$PROJECT_NAME" down --remove-orphans >/dev/null 2>&1 || true
+  CAMPUS_COPILOT_DOCKER_API_PORT="$PORT" docker compose -f compose.yaml -p "$PROJECT_NAME" down --remove-orphans >/dev/null 2>&1 || true
 }
 
 trap cleanup EXIT
 
-# Canonical compose path: docker compose -f compose.yaml up -d --build opencampus-api
-OPENCAMPUS_DOCKER_API_PORT="$PORT" docker compose -f compose.yaml -p "$PROJECT_NAME" up -d --build opencampus-api
+# Canonical compose path: docker compose -f compose.yaml up -d --build campus-copilot-api
+CAMPUS_COPILOT_DOCKER_API_PORT="$PORT" docker compose -f compose.yaml -p "$PROJECT_NAME" up -d --build campus-copilot-api
 
 for _ in $(seq 1 30); do
   if curl -fsS "$HEALTH_URL" >/dev/null; then

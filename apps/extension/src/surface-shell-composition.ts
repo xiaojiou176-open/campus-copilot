@@ -6,8 +6,8 @@ import {
   type ExportPackagingMetadata,
   type ExportPreset,
   type ExportScopeMetadata,
-} from '@opencampus/exporter';
-import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, TimelineEntry } from '@opencampus/schema';
+} from '@campus-copilot/exporter';
+import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, TimelineEntry } from '@campus-copilot/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
@@ -21,13 +21,13 @@ import type {
   WeeklyLoadEntry,
   WorkItemCluster,
   WorkbenchFilter,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 import type {
   AdvancedMaterialAnalysisRequest,
   ProviderId,
   SwitchyardLane,
   SwitchyardRuntimeProvider,
-} from '@opencampus/ai';
+} from '@campus-copilot/ai';
 import { buildAiProxyRequest } from './ai-request';
 import { buildWorkbenchExportInput } from './export-input';
 import type { ResolvedUiLanguage } from './i18n';

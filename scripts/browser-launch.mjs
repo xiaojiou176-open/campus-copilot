@@ -22,8 +22,8 @@ const CANONICAL_CAMPUS_URLS = {
   edstem: 'https://edstem.org/us/dashboard',
   myuw: 'https://my.uw.edu/',
 };
-const BROWSER_LAUNCH_MODE_ENV = 'OPENCAMPUS_BROWSER_LAUNCH_MODE';
-const BROWSER_LAUNCH_REASON_ENV = 'OPENCAMPUS_BROWSER_LAUNCH_REASON';
+const BROWSER_LAUNCH_MODE_ENV = 'CAMPUS_COPILOT_BROWSER_LAUNCH_MODE';
+const BROWSER_LAUNCH_REASON_ENV = 'CAMPUS_COPILOT_BROWSER_LAUNCH_REASON';
 const OPERATOR_MANUAL_LAUNCH_MODE = 'operator-manual';
 
 function getDetachedLaunchGuard() {

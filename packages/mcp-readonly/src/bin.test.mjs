@@ -15,7 +15,7 @@ test('site sidecar bins expose a help surface without requiring a snapshot', () 
   );
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /Usage: opencampus-mcp-canvas/);
+  assert.match(result.stdout, /Usage: campus-copilot-mcp-canvas/);
   assert.match(result.stdout, /--snapshot <path>/);
 });
 

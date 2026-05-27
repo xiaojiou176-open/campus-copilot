@@ -1,7 +1,7 @@
 import { browser } from 'wxt/browser';
 import { useMemo, type Dispatch, type SetStateAction } from 'react';
-import type { ExportFormat, ExportPreset, ExportProvenanceEntry } from '@opencampus/exporter';
-import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, Site } from '@opencampus/schema';
+import type { ExportFormat, ExportPreset, ExportProvenanceEntry } from '@campus-copilot/exporter';
+import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, Site } from '@campus-copilot/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
@@ -13,8 +13,8 @@ import type {
   WeeklyLoadEntry,
   WorkItemCluster,
   WorkbenchFilter,
-} from '@opencampus/storage';
-import { useWorkbenchView } from '@opencampus/storage';
+} from '@campus-copilot/storage';
+import { useWorkbenchView } from '@campus-copilot/storage';
 import type { ExtensionConfig } from './config';
 import { formatAuthorizationStatusLabel, type ResolvedUiLanguage } from './i18n';
 import type { ExportFamilyKind } from './sidepanel-mode-copy';

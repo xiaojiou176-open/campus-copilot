@@ -2,7 +2,7 @@
 
 Use this page when the question is:
 
-> How do I plug OpenCampus into local builder workflows without overclaiming hosted or marketplace status?
+> How do I plug CampusCopilot into local builder workflows without overclaiming hosted or marketplace status?
 
 ## Start Here
 
@@ -40,7 +40,7 @@ They are **not**:
 
 ## Boundary Reminder
 
-OpenCampus stays:
+CampusCopilot stays:
 
 - a local-first academic decision workspace
 - a read-only context provider

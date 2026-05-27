@@ -1,6 +1,6 @@
 # Security, Privacy, And Compliance Brief
 
-OpenCampus should remain a reviewable study workspace, not a high-permission black-box collector.
+CampusCopilot should remain a reviewable study workspace, not a high-permission black-box collector.
 
 ## Core Security Rules
 

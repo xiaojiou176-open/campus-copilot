@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const base = process.env.OPENCAMPUS_WEB_BASE ?? '/';
+const base = process.env.CAMPUS_COPILOT_WEB_BASE ?? '/';
 
 function workspaceManualChunks(id: string) {
   if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {

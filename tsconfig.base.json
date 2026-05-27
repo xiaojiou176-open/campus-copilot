@@ -19,12 +19,12 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@opencampus/sdk": ["packages/sdk/src/index.ts"],
-      "@opencampus/sdk/api": ["packages/sdk/src/api.ts"],
-      "@opencampus/sdk/snapshot": ["packages/sdk/src/snapshot.ts"],
-      "@opencampus/sdk/sites": ["packages/sdk/src/sites.ts"],
-      "@opencampus/workspace-sdk": ["packages/workspace-sdk/src/index.ts"],
-      "@opencampus/site-sdk": ["packages/site-sdk/src/index.ts"]
+      "@campus-copilot/sdk": ["packages/sdk/src/index.ts"],
+      "@campus-copilot/sdk/api": ["packages/sdk/src/api.ts"],
+      "@campus-copilot/sdk/snapshot": ["packages/sdk/src/snapshot.ts"],
+      "@campus-copilot/sdk/sites": ["packages/sdk/src/sites.ts"],
+      "@campus-copilot/workspace-sdk": ["packages/workspace-sdk/src/index.ts"],
+      "@campus-copilot/site-sdk": ["packages/site-sdk/src/index.ts"]
     }
   }
 }

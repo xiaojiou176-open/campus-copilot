@@ -21,4 +21,4 @@ esac
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
-exec pnpm --filter @opencampus/mcp-readonly "start:$SITE" "$@"
+exec pnpm --filter @campus-copilot/mcp-readonly "start:$SITE" "$@"

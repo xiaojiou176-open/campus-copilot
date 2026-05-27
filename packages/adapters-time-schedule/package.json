@@ -1,5 +1,5 @@
 {
-  "name": "@opencampus/adapters-time-schedule",
+  "name": "@campus-copilot/adapters-time-schedule",
   "version": "0.0.0",
   "private": true,
   "type": "module",

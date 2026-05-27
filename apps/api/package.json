@@ -1,5 +1,5 @@
 {
-  "name": "@opencampus/api",
+  "name": "@campus-copilot/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@opencampus/ai": "workspace:*",
+    "@campus-copilot/ai": "workspace:*",
     "zod": "^4.1.5"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
-import { getAiSitePolicyOverlay, type AiStructuredAnswer, type ProviderId, type SwitchyardLane, type SwitchyardRuntimeProvider } from '@opencampus/ai';
-import type { ExportArtifact } from '@opencampus/exporter';
-import type { Site } from '@opencampus/schema';
+import { getAiSitePolicyOverlay, type AiStructuredAnswer, type ProviderId, type SwitchyardLane, type SwitchyardRuntimeProvider } from '@campus-copilot/ai';
+import type { ExportArtifact } from '@campus-copilot/exporter';
+import type { Site } from '@campus-copilot/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
@@ -16,7 +16,7 @@ import type {
   TodaySnapshot,
   WeeklyLoadEntry,
   WorkItemCluster,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 import type { ImportedArtifactEnvelope } from './import-export-snapshot';
 import { LoadingStatValue, ReadyStateBlock, formatDateTime, formatWeeklyLoadSummary, getResourceActionLabel } from './web-view-helpers';
 import { humanizeUiSummary } from '../../extension/src/surface-shell-view-helpers';

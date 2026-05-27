@@ -2,16 +2,16 @@
   <img src="https://em-content.zobj.net/source/apple/391/graduation-cap_1f393.png" width="120" alt="graduation cap" />
 </p>
 
-<h1 align="center">OpenCampus</h1>
+<h1 align="center">CampusCopilot</h1>
 
 <p align="center">
   <strong>Canvas + Gradescope + EdStem on one calm desk</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/xiaojiou176-open/OpenCampus/stargazers"><img src="https://img.shields.io/github/stars/xiaojiou176-open/OpenCampus?style=flat&color=yellow" alt="Stars"></a>
-  <a href="https://github.com/xiaojiou176-open/OpenCampus/commits/main"><img src="https://img.shields.io/github/last-commit/xiaojiou176-open/OpenCampus?style=flat" alt="Last Commit"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/xiaojiou176-open/OpenCampus?style=flat" alt="License"></a>
+  <a href="https://github.com/xiaojiou176-open/campus-copilot/stargazers"><img src="https://img.shields.io/github/stars/xiaojiou176-open/campus-copilot?style=flat&color=yellow" alt="Stars"></a>
+  <a href="https://github.com/xiaojiou176-open/campus-copilot/commits/main"><img src="https://img.shields.io/github/last-commit/xiaojiou176-open/campus-copilot?style=flat" alt="Last Commit"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/xiaojiou176-open/campus-copilot?style=flat" alt="License"></a>
 </p>
 
 <p align="center">
@@ -23,7 +23,7 @@
 
 ---
 
-OpenCampus pulls every academic surface — Canvas, Gradescope, EdStem, MyUW, MyPlan — into one local-first read-only desk. See what changed, what is due, what to ask. Nothing leaves your laptop.
+CampusCopilot pulls every academic surface — Canvas, Gradescope, EdStem, MyUW, MyPlan — into one local-first read-only desk. See what changed, what is due, what to ask. Nothing leaves your laptop.
 
 ```
 ┌──────────────────────────────────────┐
@@ -41,7 +41,7 @@ OpenCampus pulls every academic surface — Canvas, Gradescope, EdStem, MyUW, My
 
 | Surface | What |
 |---|---|
-| `opencampus apps` | Web workbench plus the school-specific browser extension. |
+| `campus-copilot apps` | Web workbench plus the school-specific browser extension. |
 | `packages` | 24 adapters for the SIS / LMS / grading systems schools actually use. |
 | `design system` | Calm-desk visual baseline. Built for students, not dashboards. |
 | `public skills` | Drop into Claude/Codex/OpenClaw. Ask one bounded question per case. |
@@ -53,14 +53,14 @@ OpenCampus pulls every academic surface — Canvas, Gradescope, EdStem, MyUW, My
 ## Install
 
 ```bash
-git clone https://github.com/xiaojiou176-open/OpenCampus.git
-cd OpenCampus
+git clone https://github.com/xiaojiou176-open/campus-copilot.git
+cd CampusCopilot
 # follow the per-stack quickstart in INSTALL.md or docs/
 ```
 
 Three commands. No `curl | sh`. No login. Read what you run.
 
-Install break? Open your favorite agent and say *"Read AGENTS.md and bootstrap OpenCampus for me."* Agent fix own brain. Long version: [`docs/`](./docs/).
+Install break? Open your favorite agent and say *"Read AGENTS.md and bootstrap CampusCopilot for me."* Agent fix own brain. Long version: [`docs/`](./docs/).
 
 ## How It Work
 
@@ -69,7 +69,7 @@ The repo is seven layers — exactly the seven commits in `git log`. New work go
 | Layer | What |
 |---|---|
 | `chore: scaffold` | License, governance, hygiene gates, CI scaffolding. |
-| `feat(core)` | The primary engine. The reason OpenCampus exists. |
+| `feat(core)` | The primary engine. The reason CampusCopilot exists. |
 | `feat(modules)` | Packages, adapters, services, plugins. The second floor. |
 | `feat(contracts)` | Schemas, configs, public boundaries. Other code talks here. |
 | `test:` | Receipts. Everything in this layer must run. |
@@ -80,11 +80,11 @@ The repo is seven layers — exactly the seven commits in `git log`. New work go
 
 ## Ecosystem
 
-OpenCampus lives in the **open family**: three open platforms. local-first, source-first, builder-first.
+CampusCopilot lives in the **open family**: three open platforms. local-first, source-first, builder-first.
 
 | Repo | What |
 |---|---|
-| [**OpenCampus**](https://github.com/xiaojiou176-open/OpenCampus) *(you here)* | Canvas + Gradescope + EdStem on one calm desk |
+| [**CampusCopilot**](https://github.com/xiaojiou176-open/campus-copilot) *(you here)* | Canvas + Gradescope + EdStem on one calm desk |
 | [**OpenVibeCoding**](https://github.com/xiaojiou176-open/OpenVibeCoding) | AI codes overnight, you ship in the morning |
 | [**OpenUIStudio**](https://github.com/xiaojiou176-open/OpenUIStudio) | brief in, React + shadcn out, proof attached |
 
@@ -96,9 +96,9 @@ Cross-family taste:
 
 ## Star This Repo
 
-If OpenCampus saves you a click, an hour, or a headache — star costs zero. Fair trade. ⭐
+If CampusCopilot saves you a click, an hour, or a headache — star costs zero. Fair trade. ⭐
 
-[![Star History Chart](https://api.star-history.com/svg?repos=xiaojiou176-open/OpenCampus&type=Date)](https://star-history.com/#xiaojiou176-open/OpenCampus&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=xiaojiou176-open/campus-copilot&type=Date)](https://star-history.com/#xiaojiou176-open/campus-copilot&Date)
 
 ## Also by Yifeng[Terry] Yu
 

@@ -64,7 +64,7 @@ export function buildHarLikeArchive(state) {
     log: {
       version: '1.2',
       creator: {
-        name: 'opencampus',
+        name: 'campus-copilot',
         version: '0.1.0',
       },
       pages: [

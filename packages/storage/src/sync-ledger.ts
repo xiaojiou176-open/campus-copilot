@@ -1,5 +1,5 @@
-import type { Announcement, Assignment, Course, Event, Grade, Message, Resource, Site } from '@opencampus/schema';
-import { openCampusDb, type OpenCampusDB } from './db.ts';
+import type { Announcement, Assignment, Course, Event, Grade, Message, Resource, Site } from '@campus-copilot/schema';
+import { openCampusDb, type CampusCopilotDB } from './db.ts';
 import {
   ChangeEventSchema,
   EntityStateSchema,
@@ -347,7 +347,7 @@ export async function recordSiteSyncError(
   });
 }
 
-export async function putSyncState(record: SyncState, db: OpenCampusDB = openCampusDb) {
+export async function putSyncState(record: SyncState, db: CampusCopilotDB = openCampusDb) {
   await db.sync_state.put(SyncStateSchema.parse(record));
 }
 

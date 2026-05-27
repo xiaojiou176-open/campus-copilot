@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { createOpenCampusApiServer, loadApiEnv } from './index';
+import { createCampusCopilotApiServer, loadApiEnv } from './index';
 
 const servers: Array<import('node:http').Server> = [];
 const TRANSIENT_LOOPBACK_RETRY_COUNT = 3;
@@ -49,7 +49,7 @@ afterEach(async () => {
 
 describe('api server runtime', () => {
   it('starts a real HTTP server and serves health', async () => {
-    const server = createOpenCampusApiServer(
+    const server = createCampusCopilotApiServer(
       loadApiEnv({
         PORT: '0',
       }),
@@ -76,6 +76,6 @@ describe('api server runtime', () => {
 
     expect(response.status).toBe(200);
     expect(payload.ok).toBe(true);
-    expect(payload.service).toBe('opencampus-bff');
+    expect(payload.service).toBe('campus-copilot-bff');
   });
 });

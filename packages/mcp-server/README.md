@@ -1,6 +1,6 @@
-# @opencampus/mcp-server
+# @campus-copilot/mcp-server
 
-Read-only MCP server for the local OpenCampus BFF and imported workspace snapshots.
+Read-only MCP server for the local CampusCopilot BFF and imported workspace snapshots.
 
 This is the generic MCP entry point used by the integration examples under `examples/integrations/`.
 
@@ -16,7 +16,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @opencampus/mcp-server build
+pnpm --filter @campus-copilot/mcp-server build
 pnpm start:mcp
 ```
 
@@ -29,7 +29,7 @@ pnpm proof:public
 First command to try:
 
 ```bash
-pnpm --filter @opencampus/mcp-server start
+pnpm --filter @campus-copilot/mcp-server start
 ```
 
 Registry-unblock progress in this repo:
@@ -70,13 +70,13 @@ That split is on purpose:
 
 - the stdio MCP server stays the local read-only MCP entrypoint
 - the Docker path gives the repo one truthful HTTP and health-check surface
-- together they keep the product local-first instead of pretending OpenCampus is a hosted MCP service
+- together they keep the product local-first instead of pretending CampusCopilot is a hosted MCP service
 
 Build the containerized BFF from the repo root:
 
 ```bash
-docker build -t opencampus-api:local .
-docker compose up -d opencampus-api
+docker build -t campus-copilot-api:local .
+docker compose up -d campus-copilot-api
 ```
 
 Use the container path when you need a local HTTP surface or container-friendly
@@ -87,14 +87,14 @@ If you want the shortest rule in one sentence: pair it with the local stdio MCP 
 You can also launch the local container directly without Compose:
 
 ```bash
-docker run --rm -p 8787:8787 opencampus-api:local
+docker run --rm -p 8787:8787 campus-copilot-api:local
 ```
 
 ## Current tools
 
 - `campus_health`
 - `providers_status`
-- `ask_opencampus`
+- `ask_campus-copilot`
 - `canvas_snapshot_view`
 - `gradescope_snapshot_view`
 - `edstem_snapshot_view`

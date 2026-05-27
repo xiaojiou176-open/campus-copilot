@@ -11,38 +11,38 @@ import {
 
 test('lists the five supported site MCP entrypoints', () => {
   assert.deepEqual(listSupportedSiteMcpServers(), ['canvas', 'gradescope', 'edstem', 'myuw', 'time-schedule']);
-  assert.equal(SITE_MCP_BINARIES.canvas, 'opencampus-mcp-canvas');
+  assert.equal(SITE_MCP_BINARIES.canvas, 'campus-copilot-mcp-canvas');
 });
 
 test('builds a snapshot-backed MCP config for one site', () => {
   const config = createSiteMcpConfig('canvas', '/tmp/workspace-snapshot.json');
 
   assert.deepEqual(config, {
-    command: 'opencampus-mcp-canvas',
+    command: 'campus-copilot-mcp-canvas',
     env: {
-      OPENCAMPUS_SNAPSHOT: '/tmp/workspace-snapshot.json',
+      CAMPUS_COPILOT_SNAPSHOT: '/tmp/workspace-snapshot.json',
     },
   });
 });
 
 test('builds a repo-root runnable site MCP config for one site', () => {
-  const config = createRepoRootSiteMcpConfig('canvas', '/tmp/workspace-snapshot.json', '/repo/opencampus');
+  const config = createRepoRootSiteMcpConfig('canvas', '/tmp/workspace-snapshot.json', '/repo/campus-copilot');
 
   assert.equal(SITE_MCP_START_SCRIPTS.canvas, 'start:canvas');
   assert.deepEqual(config, {
     command: 'pnpm',
-    args: ['--dir', '/repo/opencampus', '--filter', '@opencampus/mcp-readonly', 'start:canvas'],
+    args: ['--dir', '/repo/campus-copilot', '--filter', '@campus-copilot/mcp-readonly', 'start:canvas'],
     env: {
-      OPENCAMPUS_SNAPSHOT: '/tmp/workspace-snapshot.json',
+      CAMPUS_COPILOT_SNAPSHOT: '/tmp/workspace-snapshot.json',
     },
   });
 });
 
 test('builds a repo-root runnable combined MCP server config', () => {
-  const config = createRepoRootMcpServerConfig('/repo/opencampus');
+  const config = createRepoRootMcpServerConfig('/repo/campus-copilot');
 
   assert.deepEqual(config, {
     command: 'pnpm',
-    args: ['--dir', '/repo/opencampus', '--filter', '@opencampus/mcp-server', 'start'],
+    args: ['--dir', '/repo/campus-copilot', '--filter', '@campus-copilot/mcp-server', 'start'],
   });
 });

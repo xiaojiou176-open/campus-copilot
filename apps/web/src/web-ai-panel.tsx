@@ -5,8 +5,8 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@opencampus/ai';
-import type { ExportArtifact } from '@opencampus/exporter';
+} from '@campus-copilot/ai';
+import type { ExportArtifact } from '@campus-copilot/exporter';
 import type { ImportedArtifactEnvelope } from './import-export-snapshot';
 
 export function WebAiPanel(props: {

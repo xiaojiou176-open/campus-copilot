@@ -1,4 +1,4 @@
-import type { ImportanceLevel, PriorityReasonCode } from '@opencampus/schema';
+import type { ImportanceLevel, PriorityReasonCode } from '@campus-copilot/schema';
 
 export const UI_LANGUAGE_PREFERENCES = ['auto', 'en', 'zh-CN'] as const;
 export type UiLanguagePreference = (typeof UI_LANGUAGE_PREFERENCES)[number];
@@ -618,22 +618,22 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       changeJournal: 'Export change journal',
     },
     exportTitles: {
-      home: 'OpenCampus Home',
+      home: 'CampusCopilot Home',
       currentView: (site) => `${site} current view`,
       changeJournal: (site) => `${site} change journal`,
       focusQueue: (site) => `${site} focus queue`,
       weeklyLoad: (site) => `${site} weekly load`,
     },
     hero: {
-      sidepanelEyebrow: 'OpenCampus Sidepanel',
+      sidepanelEyebrow: 'CampusCopilot Sidepanel',
       sidepanelTitle: 'Trust-first campus desk',
       sidepanelDescription:
         'Keep today\'s academic work, administrative signals, and workspace state in one place before you ask, export, or go deeper.',
-      popupEyebrow: 'OpenCampus Popup',
+      popupEyebrow: 'CampusCopilot Popup',
       popupTitle: 'Quick pulse',
       popupDescription:
         'Check sync and the highest-signal numbers before deciding whether to open the full workbench.',
-      optionsEyebrow: 'OpenCampus Options',
+      optionsEyebrow: 'CampusCopilot Options',
       optionsTitle: 'Trust center',
       optionsDescription:
         'Check what the product may read, what AI may analyze, and which local AI route is ready without turning this page into a second desk.',
@@ -808,7 +808,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       blockedByEnvironmentOrRuntime: 'Needs setup before review',
       noBlockers: 'No obvious blockers are active right now.',
       exportJson: 'Export diagnostics JSON',
-      reportReady: 'opencampus-diagnostics.json is ready to download.',
+      reportReady: 'campus-copilot-diagnostics.json is ready to download.',
     },
     priorityAlerts: {
       title: 'Priority Alerts',
@@ -909,7 +909,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       advancedMaterialDescription:
         'Raw course files, lecture slides, instructor-authored notes, exams, quizzes, assignment PDFs, and solution documents stay outside the default AI path unless a later per-course opt-in contract explicitly promotes them.',
       advancedMaterialOptInSummary:
-        'The only supported advanced path is a course-scoped opt-in with a user-pasted excerpt. OpenCampus still does not fetch or upload raw files for you.',
+        'The only supported advanced path is a course-scoped opt-in with a user-pasted excerpt. CampusCopilot still does not fetch or upload raw files for you.',
       advancedMaterialEnableLabel: 'Enable excerpt analysis for one course',
       advancedMaterialCourseLabel: 'Opt-in course',
       advancedMaterialCoursePlaceholder: 'Select one visible course',
@@ -1251,20 +1251,20 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       changeJournal: '导出变化账本',
     },
     exportTitles: {
-      home: 'OpenCampus 首页',
+      home: 'CampusCopilot 首页',
       currentView: (site) => `${site} 当前视图`,
       changeJournal: (site) => `${site} 变化账本`,
       focusQueue: (site) => `${site} 专注队列`,
       weeklyLoad: (site) => `${site} 本周负荷`,
     },
     hero: {
-      sidepanelEyebrow: 'OpenCampus 侧边栏',
+      sidepanelEyebrow: 'CampusCopilot 侧边栏',
       sidepanelTitle: '学习工作台',
       sidepanelDescription: '先看今天的学业任务、行政信号和工作台状态，再决定要不要提问、导出或继续下钻。',
-      popupEyebrow: 'OpenCampus 弹窗',
+      popupEyebrow: 'CampusCopilot 弹窗',
       popupTitle: '轻量速览',
       popupDescription: '先看同步有没有到位，再决定要不要立刻打开主工作台。',
-      optionsEyebrow: 'OpenCampus 设置',
+      optionsEyebrow: 'CampusCopilot 设置',
       optionsTitle: '信任中心',
       optionsDescription: '先看清产品能读什么、AI 能分析什么、当前连的是哪条本地 AI 路线；更深设置留在下层，不把这页做成第二张桌面。',
     },
@@ -1438,7 +1438,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       blockedByEnvironmentOrRuntime: '被环境或运行时阻塞',
       noBlockers: '当前没有明显运行时阻塞，可以继续做更深一层的真实验收。',
       exportJson: '导出诊断 JSON',
-      reportReady: 'opencampus-diagnostics.json 已准备下载。',
+      reportReady: 'campus-copilot-diagnostics.json 已准备下载。',
     },
     priorityAlerts: {
       title: '优先提醒',
@@ -1539,7 +1539,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       advancedMaterialDescription:
         'raw course files、lecture slides、instructor-authored notes、exams、quizzes、assignment PDFs 和 solution documents 默认都不会进入 AI 路径；除非后续合同把它们提升成按课程显式 opt-in 的独立能力。',
       advancedMaterialOptInSummary:
-        '当前唯一允许的高级路径，是你自己按课程显式开启，并手工粘贴一段摘录给 AI。OpenCampus 仍然不会替你抓原始文件或上传 raw materials。',
+        '当前唯一允许的高级路径，是你自己按课程显式开启，并手工粘贴一段摘录给 AI。CampusCopilot 仍然不会替你抓原始文件或上传 raw materials。',
       advancedMaterialEnableLabel: '为单门课程开启摘录分析',
       advancedMaterialCourseLabel: '选择要 opt-in 的课程',
       advancedMaterialCoursePlaceholder: '先选择一门当前可见课程',

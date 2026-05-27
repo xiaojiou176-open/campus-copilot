@@ -1,6 +1,6 @@
-# @opencampus/workspace-sdk
+# @campus-copilot/workspace-sdk
 
-Read-only workspace derivation helpers for imported OpenCampus snapshots.
+Read-only workspace derivation helpers for imported CampusCopilot snapshots.
 
 Use this package when you want the same decision-layer state the product uses, without opening the extension UI.
 
@@ -16,7 +16,7 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @opencampus/workspace-sdk test
+pnpm --filter @campus-copilot/workspace-sdk test
 ```
 
 Shared public-preview proof loop from the repo root:

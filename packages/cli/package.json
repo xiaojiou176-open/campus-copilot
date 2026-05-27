@@ -1,17 +1,17 @@
 {
-  "name": "@opencampus/cli",
+  "name": "@campus-copilot/cli",
   "version": "0.1.0",
   "private": false,
-  "description": "Read-only CLI for OpenCampus snapshot and local BFF workflows.",
+  "description": "Read-only CLI for CampusCopilot snapshot and local BFF workflows.",
   "license": "MIT",
-  "keywords": ["opencampus", "cli", "local-first", "read-only", "mcp"],
-  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/cli",
+  "keywords": ["campus-copilot", "cli", "local-first", "read-only", "mcp"],
+  "homepage": "https://github.com/xiaojiou176-open/campus-copilot/tree/main/packages/cli",
   "bugs": {
-    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
+    "url": "https://github.com/xiaojiou176-open/campus-copilot/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
+    "url": "https://github.com/xiaojiou176-open/campus-copilot.git",
     "directory": "packages/cli"
   },
   "publishConfig": {
@@ -20,18 +20,18 @@
   "type": "module",
   "files": ["README.md", "dist"],
   "bin": {
-    "opencampus": "./dist/bin-entry.mjs"
+    "campus-copilot": "./dist/bin-entry.mjs"
   },
   "scripts": {
     "build": "rm -rf dist && pnpm exec esbuild ./src/index.mjs ./src/bin-entry.mjs --bundle --platform=node --format=esm --target=node20 --legal-comments=none --outdir=dist --out-extension:.js=.mjs",
     "pretest": "pnpm build",
     "prepack": "pnpm build",
     "start": "pnpm build && node ./dist/bin-entry.mjs",
-    "test": "node --test ./bin/opencampus.test.mjs"
+    "test": "node --test ./bin/campus-copilot.test.mjs"
   },
   "dependencies": {},
   "devDependencies": {
-    "@opencampus/sdk": "workspace:*",
+    "@campus-copilot/sdk": "workspace:*",
     "esbuild": "^0.28.0"
   }
 }

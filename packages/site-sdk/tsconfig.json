@@ -5,7 +5,7 @@
     "types": ["node"],
     "allowImportingTsExtensions": true,
     "paths": {
-      "@opencampus/workspace-sdk": ["packages/workspace-sdk/src/index.ts"]
+      "@campus-copilot/workspace-sdk": ["packages/workspace-sdk/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts"]

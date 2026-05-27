@@ -1,4 +1,4 @@
-import type { ProviderId } from '@opencampus/ai';
+import type { ProviderId } from '@campus-copilot/ai';
 import { getUiText, type ResolvedUiLanguage } from './i18n';
 
 export interface ProviderStatusLike {

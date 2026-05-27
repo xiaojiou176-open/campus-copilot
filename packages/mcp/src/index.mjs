@@ -1,9 +1,9 @@
 export const SITE_MCP_BINARIES = {
-  canvas: 'opencampus-mcp-canvas',
-  gradescope: 'opencampus-mcp-gradescope',
-  edstem: 'opencampus-mcp-edstem',
-  myuw: 'opencampus-mcp-myuw',
-  'time-schedule': 'opencampus-mcp-time-schedule',
+  canvas: 'campus-copilot-mcp-canvas',
+  gradescope: 'campus-copilot-mcp-gradescope',
+  edstem: 'campus-copilot-mcp-edstem',
+  myuw: 'campus-copilot-mcp-myuw',
+  'time-schedule': 'campus-copilot-mcp-time-schedule',
 };
 
 export const SITE_MCP_START_SCRIPTS = {
@@ -20,7 +20,7 @@ export function listSupportedSiteMcpServers() {
 
 export function createSnapshotEnv(snapshotPath) {
   return {
-    OPENCAMPUS_SNAPSHOT: snapshotPath,
+    CAMPUS_COPILOT_SNAPSHOT: snapshotPath,
   };
 }
 
@@ -44,7 +44,7 @@ export function createRepoRootSiteMcpConfig(site, snapshotPath, repoRoot) {
 
   return {
     command: 'pnpm',
-    args: ['--dir', repoRoot, '--filter', '@opencampus/mcp-readonly', script],
+    args: ['--dir', repoRoot, '--filter', '@campus-copilot/mcp-readonly', script],
     env: createSnapshotEnv(snapshotPath),
   };
 }
@@ -52,6 +52,6 @@ export function createRepoRootSiteMcpConfig(site, snapshotPath, repoRoot) {
 export function createRepoRootMcpServerConfig(repoRoot) {
   return {
     command: 'pnpm',
-    args: ['--dir', repoRoot, '--filter', '@opencampus/mcp-server', 'start'],
+    args: ['--dir', repoRoot, '--filter', '@campus-copilot/mcp-server', 'start'],
   };
 }

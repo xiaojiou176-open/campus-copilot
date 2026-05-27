@@ -1,6 +1,6 @@
-# @opencampus/provider-runtime
+# @campus-copilot/provider-runtime
 
-Read-only seam helpers for the OpenCampus provider/runtime contract.
+Read-only seam helpers for the CampusCopilot provider/runtime contract.
 
 This package exists to keep Campus-owned semantics stable while the runtime path moves toward `Switchyard-first`.
 
@@ -16,8 +16,8 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @opencampus/provider-runtime build
-pnpm --filter @opencampus/provider-runtime test
+pnpm --filter @campus-copilot/provider-runtime build
+pnpm --filter @campus-copilot/provider-runtime test
 ```
 
 First file to try:
@@ -47,8 +47,8 @@ First file to try:
 1. Verify the package contract:
 
 ```bash
-pnpm --filter @opencampus/provider-runtime build
-pnpm --filter @opencampus/provider-runtime test
+pnpm --filter @campus-copilot/provider-runtime build
+pnpm --filter @campus-copilot/provider-runtime test
 ```
 
 2. Verify the repo-owned thin-BFF seam still exposes the same runtime-facing routes:

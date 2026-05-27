@@ -93,7 +93,7 @@ async function waitForHealthy(url, attempts = 40, validate) {
 function validateBffHealth({ body }) {
   try {
     const payload = JSON.parse(body);
-    return payload?.ok === true && payload?.service === 'opencampus-bff' && payload?.mode === 'thin-bff';
+    return payload?.ok === true && payload?.service === 'campus-copilot-bff' && payload?.mode === 'thin-bff';
   } catch {
     return false;
   }
@@ -156,7 +156,7 @@ async function resolveOwnedPort(preferredPort, label) {
 }
 
 function validateSidepanelHealth({ body }) {
-  return body.includes('OpenCampus Sidepanel') && body.includes('surface-shell');
+  return body.includes('CampusCopilot Sidepanel') && body.includes('surface-shell');
 }
 
 function validateProviderStatusHealth({ body }) {
@@ -328,7 +328,7 @@ async function seedPublicScreenshotData(page) {
   const fixture = buildPublicScreenshotFixture();
   await page.evaluate(async ({ fixture }) => {
     const openDb = await new Promise((resolve, reject) => {
-      const request = indexedDB.open('opencampus');
+      const request = indexedDB.open('campus-copilot');
       request.onerror = () => reject(new Error('open_indexeddb_failed'));
       request.onsuccess = () => resolve(request.result);
     });

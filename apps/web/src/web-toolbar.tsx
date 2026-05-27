@@ -1,6 +1,6 @@
-import type { ExportFormat } from '@opencampus/exporter';
-import type { Site } from '@opencampus/schema';
-import type { SyncRun, WorkbenchFilter } from '@opencampus/storage';
+import type { ExportFormat } from '@campus-copilot/exporter';
+import type { Site } from '@campus-copilot/schema';
+import type { SyncRun, WorkbenchFilter } from '@campus-copilot/storage';
 import { formatRelativeTime } from './web-view-helpers';
 
 type WebToolbarBaseProps = {
@@ -115,7 +115,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
     <section className="hero hero--orientation">
       <div className="hero-copy">
         <p className="eyebrow">Next up</p>
-        <h1>OpenCampus workbench</h1>
+        <h1>CampusCopilot workbench</h1>
         <p className="lede">
           One local desk for academic work, administrative signals, and the next decision.
         </p>

@@ -18,7 +18,7 @@ This is the narrowest skill for one-site snapshot inspection.
 
 ## Steps
 
-1. Load the site overview from `@opencampus/site-sdk`, `@opencampus/mcp-server`, or one of the site-scoped `@opencampus/mcp-readonly` sidecars.
+1. Load the site overview from `@campus-copilot/site-sdk`, `@campus-copilot/mcp-server`, or one of the site-scoped `@campus-copilot/mcp-readonly` sidecars.
 2. Report counts, the top assignments/messages/events, and current recent updates.
 3. Keep the output read-only and grounded in normalized entities.
 

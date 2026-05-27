@@ -1,12 +1,12 @@
-import { buildWorkbenchExportInput as buildSharedWorkbenchExportInput } from '@opencampus/core';
+import { buildWorkbenchExportInput as buildSharedWorkbenchExportInput } from '@campus-copilot/core';
 import type {
   AuthorizationState,
   ExportInput,
   ExportPackagingMetadata,
   ExportPreset,
   ExportScopeMetadata,
-} from '@opencampus/exporter';
-import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource } from '@opencampus/schema';
+} from '@campus-copilot/exporter';
+import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource } from '@campus-copilot/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
@@ -19,7 +19,7 @@ import type {
   WeeklyLoadEntry,
   WorkItemCluster,
   WorkbenchFilter,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 import { getUiText, type ResolvedUiLanguage } from './i18n';
 import { SITE_LABELS } from './surface-shell-model';
 import {

@@ -1,5 +1,5 @@
 {
-  "name": "@opencampus/adapters-base",
+  "name": "@campus-copilot/adapters-base",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,6 +11,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@opencampus/schema": "workspace:*"
+    "@campus-copilot/schema": "workspace:*"
   }
 }

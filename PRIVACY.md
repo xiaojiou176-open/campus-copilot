@@ -1,6 +1,6 @@
 # Privacy
 
-OpenCampus is designed to stay **local-first** and **read-only**.
+CampusCopilot is designed to stay **local-first** and **read-only**.
 
 This page exists so contributors, reviewers, and browser-store reviewers can quickly understand the privacy posture without reading the whole repository.
 
@@ -8,7 +8,7 @@ This page exists so contributors, reviewers, and browser-store reviewers can qui
 
 - your study context is meant to stay local by default
 - the formal product path is read-only
-- OpenCampus does not require `cookies` permission
+- CampusCopilot does not require `cookies` permission
 - AI runs **after structure** over normalized workspace results, not over raw campus pages or raw cookies
 - AI does not default to reading raw course files, instructor-authored materials, or exams just because the browser can see them
 
@@ -33,7 +33,7 @@ Current host permissions are limited to:
 
 ## What The Product Does Not Claim
 
-OpenCampus does **not** currently claim:
+CampusCopilot does **not** currently claim:
 
 - write-capable campus-site automation
 - background cookie harvesting

@@ -1,14 +1,14 @@
 {
   "manifest_version": "0.2",
-  "name": "OpenCampus MCP",
+  "name": "CampusCopilot MCP",
   "version": "0.1.1",
-  "description": "Read-only MCP server for the local OpenCampus BFF and imported workspace snapshots.",
+  "description": "Read-only MCP server for the local CampusCopilot BFF and imported workspace snapshots.",
   "author": {
     "name": "xiaojiou176-open",
-    "url": "https://github.com/xiaojiou176-open/OpenCampus"
+    "url": "https://github.com/xiaojiou176-open/campus-copilot"
   },
-  "homepage": "https://github.com/xiaojiou176-open/OpenCampus",
-  "support": "https://github.com/xiaojiou176-open/OpenCampus/issues",
+  "homepage": "https://github.com/xiaojiou176-open/campus-copilot",
+  "support": "https://github.com/xiaojiou176-open/campus-copilot/issues",
   "server": {
     "type": "node",
     "entry_point": "dist/bin.mjs",
@@ -27,7 +27,7 @@
     }
   ],
   "keywords": [
-    "opencampus",
+    "campus-copilot",
     "mcp",
     "server",
     "read-only",
@@ -36,6 +36,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xiaojiou176-open/OpenCampus"
+    "url": "https://github.com/xiaojiou176-open/campus-copilot"
   }
 }

@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
-import type { ExportFormat, ExportPreset } from '@opencampus/exporter';
+import type { ExportFormat, ExportPreset } from '@campus-copilot/exporter';
 import {
   CAPTURE_PLANNING_SUBSTRATE_COMMAND,
   GET_SITE_SYNC_STATUS_COMMAND,
@@ -10,8 +10,8 @@ import {
   type LocalBffResolution,
   type SiteSyncOutcome,
   type SyncSiteCommandResponse,
-} from '@opencampus/core';
-import type { EntityKind, Resource, Site } from '@opencampus/schema';
+} from '@campus-copilot/core';
+import type { EntityKind, Resource, Site } from '@campus-copilot/schema';
 import {
   clearLocalEntityOverlayField,
   markEntitiesSeen,
@@ -28,7 +28,7 @@ import {
   useTodaySnapshot,
   useWeeklyLoad,
   useWorkbenchView,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 import {
   buildNextConfig,
   getDefaultExtensionConfig,
@@ -654,7 +654,7 @@ export function SurfaceShell({ surface }: { surface: SurfaceKind }) {
     try {
       await browser.downloads.download({
         url,
-        filename: 'opencampus-diagnostics.json',
+        filename: 'campus-copilot-diagnostics.json',
         saveAs: surface !== 'popup',
       });
       setExportFeedback(text.diagnostics.reportReady);

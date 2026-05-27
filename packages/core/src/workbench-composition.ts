@@ -8,7 +8,7 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@opencampus/ai';
+} from '@campus-copilot/ai';
 import type {
   AuthorizationState,
   ExportArtifact,
@@ -16,8 +16,8 @@ import type {
   ExportPackagingMetadata,
   ExportPreset,
   ExportScopeMetadata,
-} from '@opencampus/exporter';
-import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, TimelineEntry } from '@opencampus/schema';
+} from '@campus-copilot/exporter';
+import type { Alert, Announcement, Assignment, Event, Grade, Message, Resource, TimelineEntry } from '@campus-copilot/schema';
 import type {
   AdministrativeSummary,
   ChangeEvent,
@@ -31,7 +31,7 @@ import type {
   WorkItemCluster,
   WorkbenchFilter,
   WorkbenchView,
-} from '@opencampus/storage';
+} from '@campus-copilot/storage';
 
 export interface WorkbenchPresentationOverrides {
   viewTitle?: string;
@@ -126,7 +126,7 @@ function buildDefaultViewTitle(preset: ExportPreset, filters: WorkbenchFilter) {
     case 'all_deadlines':
       return 'All deadlines';
     default:
-      return 'OpenCampus workbench';
+      return 'CampusCopilot workbench';
   }
 }
 

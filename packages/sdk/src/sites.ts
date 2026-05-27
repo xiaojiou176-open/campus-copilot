@@ -1,4 +1,4 @@
-import type { Site } from '@opencampus/schema';
+import type { Site } from '@campus-copilot/schema';
 import type { ImportedWorkbenchSnapshot } from './snapshot.ts';
 import { selectSiteSnapshot } from './snapshot.ts';
 

@@ -8,7 +8,7 @@
     "bundles": "https://docs.openclaw.ai/plugins/bundles"
   },
   "pack": {
-    "name": "opencampus-public-skills",
+    "name": "campus-copilot-public-skills",
     "version": "0.1.0",
     "scope": "read-only",
     "sourceRoot": "skills",
@@ -36,7 +36,7 @@
       "tags": [
         "latest"
       ],
-      "summary": "Summarize what is open, what changed, what is due soon, and which site is carrying the workload from a OpenCampus snapshot."
+      "summary": "Summarize what is open, what changed, what is due soon, and which site is carrying the workload from a CampusCopilot snapshot."
     },
     {
       "id": "read-only-workspace-audit",
@@ -69,7 +69,7 @@
       "tags": [
         "latest"
       ],
-      "summary": "Guide an OpenClaw-style local runtime onto the snapshot-first or thin-BFF-first read-only OpenCampus path."
+      "summary": "Guide an OpenClaw-style local runtime onto the snapshot-first or thin-BFF-first read-only CampusCopilot path."
     },
     {
       "id": "site-mcp-consumer",
@@ -113,7 +113,7 @@
       "tags": [
         "latest"
       ],
-      "summary": "Verify the optional local Switchyard runtime seam while preserving OpenCampus answer semantics."
+      "summary": "Verify the optional local Switchyard runtime seam while preserving CampusCopilot answer semantics."
     }
   ]
 }

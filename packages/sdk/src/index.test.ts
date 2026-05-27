@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ImportedWorkbenchSnapshot } from '@opencampus/storage';
+import type { ImportedWorkbenchSnapshot } from '@campus-copilot/storage';
 import {
   buildExportInputFromSnapshot,
   buildSnapshotSiteView,
@@ -99,7 +99,7 @@ const FIXTURE: ImportedWorkbenchSnapshot = {
   changeEvents: [],
 };
 
-describe('@opencampus/sdk', () => {
+describe('@campus-copilot/sdk', () => {
   it('parses both direct and wrapped imported snapshots', () => {
     const direct = parseImportedWorkbenchSnapshot(JSON.stringify(FIXTURE));
     const wrapped = parseImportedWorkbenchSnapshot(

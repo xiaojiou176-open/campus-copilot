@@ -7,4 +7,4 @@ cd "$ROOT_DIR"
 pnpm verify:hosted
 pnpm test:coverage
 pnpm proof:public
-pnpm --filter @opencampus/web test:interaction
+pnpm --filter @campus-copilot/web test:interaction

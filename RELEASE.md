@@ -6,7 +6,7 @@ It exists so that `CHANGELOG.md`, tags, and any future release automation do not
 
 ## Current Release Posture
 
-OpenCampus is currently a source-first public repository.
+CampusCopilot is currently a source-first public repository.
 
 That means:
 

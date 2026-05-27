@@ -1,14 +1,14 @@
 import { browser } from 'wxt/browser';
 import { z } from 'zod';
-import type { ProviderId, SwitchyardLane, SwitchyardRuntimeProvider } from '@opencampus/ai';
-import type { EdStemPathConfig } from '@opencampus/adapters-edstem';
+import type { ProviderId, SwitchyardLane, SwitchyardRuntimeProvider } from '@campus-copilot/ai';
+import type { EdStemPathConfig } from '@campus-copilot/adapters-edstem';
 import {
   AUTHORIZATION_LAYERS,
   AUTHORIZATION_STATUSES,
   EXPORT_SCOPE_TYPES,
   type AuthorizationState,
   type ExportFormat,
-} from '@opencampus/exporter';
+} from '@campus-copilot/exporter';
 import { UI_LANGUAGE_PREFERENCES, type UiLanguagePreference } from './i18n';
 
 const EXTENSION_CONFIG_KEY = 'openCampusConfig';

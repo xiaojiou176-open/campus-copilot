@@ -1,6 +1,6 @@
-import type { FetchMode, Site } from '@opencampus/schema';
-import type { SiteSyncOutcome } from '@opencampus/core';
-import { SyncResourceFailureSchema, type SyncResourceFailure } from '@opencampus/storage';
+import type { FetchMode, Site } from '@campus-copilot/schema';
+import type { SiteSyncOutcome } from '@campus-copilot/core';
+import { SyncResourceFailureSchema, type SyncResourceFailure } from '@campus-copilot/storage';
 import { getUiText, type ResolvedUiLanguage } from './i18n';
 
 const RESOURCE_NAMES = ['courses', 'resources', 'assignments', 'announcements', 'grades', 'messages', 'events'] as const;

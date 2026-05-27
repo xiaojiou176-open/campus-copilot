@@ -10,11 +10,11 @@ If you want the exact repo-side publication truth behind those same surfaces, pa
 
 | If you are using | Start with | Then open | Why this is the right first hop | Fast proof that you are on the right path |
 | :-- | :-- | :-- | :-- | :-- |
-| Codex | [`integrations/codex-mcp.example.json`](integrations/codex-mcp.example.json) | [`codex/opencampus-mcp.json`](codex/opencampus-mcp.json) | generic stdio MCP path over the local BFF plus imported snapshots when repo-root launch or `cwd` is available | [`current-view-triage-example.md`](current-view-triage-example.md) |
+| Codex | [`integrations/codex-mcp.example.json`](integrations/codex-mcp.example.json) | [`codex/campus-copilot-mcp.json`](codex/campus-copilot-mcp.json) | generic stdio MCP path over the local BFF plus imported snapshots when repo-root launch or `cwd` is available | [`current-view-triage-example.md`](current-view-triage-example.md) |
 | Codex without `cwd` support | [`integrations/codex-mcp-shell.example.json`](integrations/codex-mcp-shell.example.json) | [`integrations/README.md`](integrations/README.md) | safest copy-paste wrapper when your client needs an explicit repo-root shell hop | [`current-view-triage-example.md`](current-view-triage-example.md) |
 | Claude Code / Claude Desktop | [`integrations/claude-code-mcp.example.json`](integrations/claude-code-mcp.example.json) | [`mcp/claude-desktop.example.json`](mcp/claude-desktop.example.json) | same read-only MCP surface, with either the generic server or site sidecars | [`site-overview-audit-example.md`](site-overview-audit-example.md) |
 | Claude Code without `cwd` support | [`integrations/claude-code-mcp-shell.example.json`](integrations/claude-code-mcp-shell.example.json) | [`integrations/README.md`](integrations/README.md) | same repo-root wrapper path for a client that cannot set `cwd` | [`site-overview-audit-example.md`](site-overview-audit-example.md) |
-| OpenClaw-style local runtimes | [`openclaw-readonly.md`](openclaw-readonly.md) | `mcp/*.json` only if your runtime explicitly accepts the same `mcpServers` shape | command-first, inference-safe onboarding without pretending OpenCampus is an official plugin | [`current-view-triage-example.md`](current-view-triage-example.md) |
+| OpenClaw-style local runtimes | [`openclaw-readonly.md`](openclaw-readonly.md) | `mcp/*.json` only if your runtime explicitly accepts the same `mcpServers` shape | command-first, inference-safe onboarding without pretending CampusCopilot is an official plugin | [`current-view-triage-example.md`](current-view-triage-example.md) |
 | CLI consumers | [`cli-usage.md`](cli-usage.md) | [`workspace-snapshot.sample.json`](workspace-snapshot.sample.json) | quickest local-first status/export path with no live browser dependency | [`workspace-snapshot.sample.json`](workspace-snapshot.sample.json) |
 | SDK consumers | [`sdk-usage.ts`](sdk-usage.ts) | [`workspace-snapshot.sample.json`](workspace-snapshot.sample.json) | fastest way to reuse the shared read-side contract in code | [`workspace-snapshot.sample.json`](workspace-snapshot.sample.json) |
 | Runtime seam consumers | [`../packages/provider-runtime/README.md`](../packages/provider-runtime/README.md) | [`integrations/plugin-bundles.md`](integrations/plugin-bundles.md) | smallest public-ready repo-local surface for the Campus-to-provider contract and optional Switchyard bridge | [`workspace-snapshot.sample.json`](workspace-snapshot.sample.json) |
@@ -31,12 +31,12 @@ If you want the exact repo-side publication truth behind those same surfaces, pa
 ## Example commands
 
 ```bash
-node packages/cli/bin/opencampus.mjs --help
-node packages/cli/bin/opencampus.mjs status
-node packages/cli/bin/opencampus.mjs provider-status
-node packages/cli/bin/opencampus.mjs summary --snapshot examples/imported-workspace.snapshot.json
-node packages/cli/bin/opencampus.mjs site --snapshot examples/imported-workspace.snapshot.json --site canvas
-node packages/cli/bin/opencampus.mjs ask --provider auto --question "What should I do first?"
+node packages/cli/bin/campus-copilot.mjs --help
+node packages/cli/bin/campus-copilot.mjs status
+node packages/cli/bin/campus-copilot.mjs provider-status
+node packages/cli/bin/campus-copilot.mjs summary --snapshot examples/imported-workspace.snapshot.json
+node packages/cli/bin/campus-copilot.mjs site --snapshot examples/imported-workspace.snapshot.json --site canvas
+node packages/cli/bin/campus-copilot.mjs ask --provider auto --question "What should I do first?"
 ```
 
 ## MCP preview
@@ -51,7 +51,7 @@ The server exposes:
 
 - `campus_health`
 - `providers_status`
-- `ask_opencampus`
+- `ask_campus-copilot`
 - `canvas_snapshot_view`
 - `gradescope_snapshot_view`
 - `edstem_snapshot_view`
@@ -71,7 +71,7 @@ The server exposes:
 - [`mcp/codex-repo-root.example.json`](mcp/codex-repo-root.example.json)
 - [`mcp/claude-desktop.example.json`](mcp/claude-desktop.example.json)
 - [`mcp/claude-desktop-repo-root.example.json`](mcp/claude-desktop-repo-root.example.json)
-- [`codex/opencampus-mcp.json`](codex/opencampus-mcp.json)
+- [`codex/campus-copilot-mcp.json`](codex/campus-copilot-mcp.json)
 - [`openclaw-readonly.md`](openclaw-readonly.md)
 - [`../skills/README.md`](../skills/README.md) for the matching read-only skills
 - [`../skills/openclaw-readonly-consumer/SKILL.md`](../skills/openclaw-readonly-consumer/SKILL.md) for the most direct OpenClaw-style local-runtime route
@@ -103,7 +103,7 @@ Use `integrations/README.md` when you need the shortest truthful prerequisite li
 
 - **Codex**: start with `integrations/codex-mcp.example.json` if your client can launch from the repo root or supports `cwd`; otherwise use `integrations/codex-mcp-shell.example.json`. Pair it with `../skills/read-only-workspace-audit/SKILL.md`.
 - **Claude Code / Claude Desktop**: start with `integrations/claude-code-mcp.example.json` or `mcp/claude-desktop.example.json`; if your Claude-style client cannot set `cwd`, use `integrations/claude-code-mcp-shell.example.json`. Pair it with `../skills/site-mcp-consumer/SKILL.md`.
-- **OpenClaw-style local operator runtimes**: start with `openclaw-readonly.md`, then pair it with `../skills/openclaw-readonly-consumer/SKILL.md`. Keep the integration snapshot-first / read-only / local-first instead of treating OpenCampus as a browser-control plugin. If your runtime explicitly understands the same `mcpServers` JSON shape, adapt the Codex/Claude examples; otherwise use the command snippets directly.
+- **OpenClaw-style local operator runtimes**: start with `openclaw-readonly.md`, then pair it with `../skills/openclaw-readonly-consumer/SKILL.md`. Keep the integration snapshot-first / read-only / local-first instead of treating CampusCopilot as a browser-control plugin. If your runtime explicitly understands the same `mcpServers` JSON shape, adapt the Codex/Claude examples; otherwise use the command snippets directly.
 - **Need the current plugin-grade repo bundle router first?** Start with `integrations/plugin-bundles.md`.
 - **Need the fastest “which surface should I pick?” answer before you touch a package?** Start with `toolbox-chooser.md`.
 - **Need site-scoped sidecars that still run from the repo root?** Start with `mcp/README.md`, then choose `codex-repo-root.example.json` or `claude-desktop-repo-root.example.json`.
@@ -129,7 +129,7 @@ Use these two files as the fastest plain-language “did I wire the right surfac
 | CLI | local snapshot summaries and export commands stay usable without an MCP host | release-channel packaging or remote service behavior |
 | SDK | the shared snapshot contract is consumable from code | a public hosted SDK platform |
 | Provider runtime seam | the Campus-to-provider contract is reusable as a local preview package | a hosted runtime platform or public Switchyard service |
-| OpenClaw-style Markdown guide | there is a truthful local operator-style integration path | that OpenCampus ships an official OpenClaw plugin or config standard |
+| OpenClaw-style Markdown guide | there is a truthful local operator-style integration path | that CampusCopilot ships an official OpenClaw plugin or config standard |
 
 ## Guardrails
 

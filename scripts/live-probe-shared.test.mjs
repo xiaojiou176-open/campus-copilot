@@ -36,8 +36,8 @@ import {
 
 const MOCK_HOME = '/mock-home';
 const MOCK_CHROME_ROOT = `${MOCK_HOME}/Library/Application Support/Google/Chrome`;
-const MOCK_REPO_BROWSER_ROOT = `${MOCK_HOME}/.cache/opencampus/browser/chrome-user-data`;
-const MOCK_CLONE_ROOT = `${MOCK_HOME}/.opencampus-profile13-clone`;
+const MOCK_REPO_BROWSER_ROOT = `${MOCK_HOME}/.cache/campus-copilot/browser/chrome-user-data`;
+const MOCK_CLONE_ROOT = `${MOCK_HOME}/.campus-copilot-profile13-clone`;
 const MOCK_DEBUG_ROOT = `${MOCK_HOME}/.chrome-debug-profile`;
 const MOCK_SWITCHYARD_BROWSER_ROOT = `${MOCK_HOME}/Documents/VS Code/1_Personal_Project/开源/Switchyard/.runtime-cache/switchyard-web-auth-browser`;
 const MOCK_OTHER_PROFILE_ROOT = `${MOCK_HOME}/some-other-profile`;
@@ -138,7 +138,7 @@ test('parseDevToolsActivePort parses websocket metadata', () => {
 
 test('readDevToolsActivePortHint only inspects the configured repo-owned browser root', () => {
   const homeDir = mkdtempSync(join(tmpdir(), 'campus-live-probe-'));
-  const chromeUserDataDir = join(homeDir, '.cache/opencampus/browser/chrome-user-data');
+  const chromeUserDataDir = join(homeDir, '.cache/campus-copilot/browser/chrome-user-data');
   const activePortFile = join(chromeUserDataDir, 'DevToolsActivePort');
   mkdirSync(chromeUserDataDir, { recursive: true });
   writeFileSync(activePortFile, '9222\n/devtools/browser/example\n', { encoding: 'utf8' });
@@ -163,7 +163,7 @@ test('readDevToolsActivePortHint only inspects the configured repo-owned browser
 
 test('readDevToolsActivePortHint keeps the first real hint when requested port misses on the repo-owned root', () => {
   const homeDir = mkdtempSync(join(tmpdir(), 'campus-live-probe-'));
-  const chromeUserDataDir = join(homeDir, '.cache/opencampus/browser/chrome-user-data');
+  const chromeUserDataDir = join(homeDir, '.cache/campus-copilot/browser/chrome-user-data');
   const activePortFile = join(chromeUserDataDir, 'DevToolsActivePort');
   mkdirSync(chromeUserDataDir, { recursive: true });
   writeFileSync(activePortFile, '9222\n/devtools/browser/example\n', { encoding: 'utf8' });
@@ -627,12 +627,12 @@ test('buildProfileAlignmentRecommendation emits copy-ready commands for the acti
   const recommendation = buildProfileAlignmentRecommendation({
     pid: 9617,
     userDataDir: MOCK_CLONE_ROOT,
-    userDataDirLabel: '.opencampus-profile13-clone',
+    userDataDirLabel: '.campus-copilot-profile13-clone',
     profileDirectory: 'Profile 13',
   });
 
   assert.equal(recommendation?.profileName, 'Profile 13');
-  assert.match(recommendation?.probeCommand ?? '', /CHROME_USER_DATA_DIR="\/mock-home\/\.opencampus-profile13-clone"/);
+  assert.match(recommendation?.probeCommand ?? '', /CHROME_USER_DATA_DIR="\/mock-home\/\.campus-copilot-profile13-clone"/);
   assert.match(recommendation?.probeCommand ?? '', /CHROME_PROFILE_NAME="Profile 13"/);
   assert.match(recommendation?.diagnoseCommand ?? '', /pnpm diagnose:live$/);
 });

@@ -37,10 +37,10 @@ export default defineConfig({
     },
   },
   manifest: {
-    name: 'OpenCampus for UW',
-    short_name: 'OpenCampus',
+    name: 'CampusCopilot for UW',
+    short_name: 'CampusCopilot',
     description:
-      'OpenCampus for UW: a local-first academic decision workspace with cited AI over Canvas, Gradescope, EdStem, and MyUW.',
+      'CampusCopilot for UW: a local-first academic decision workspace with cited AI over Canvas, Gradescope, EdStem, and MyUW.',
     icons: {
       16: 'icon-16.png',
       32: 'icon-32.png',

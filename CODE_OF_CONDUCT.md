@@ -2,7 +2,7 @@
 
 ## Our Commitment
 
-We want OpenCampus to be a repository where contributors can discuss ideas, report issues, and review changes without being attacked, mocked, or pushed out of the conversation.
+We want CampusCopilot to be a repository where contributors can discuss ideas, report issues, and review changes without being attacked, mocked, or pushed out of the conversation.
 
 ## Expected Behavior
 

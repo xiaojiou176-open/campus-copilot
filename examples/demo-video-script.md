@@ -10,7 +10,7 @@ Keep it short, truthful, and product-first.
 
 ## Opening
 
-“OpenCampus keeps Canvas, Gradescope, EdStem, and MyUW on one local-first desk. OpenCampus is the first shipped workspace in that family, and it lets cited AI explain the structured result instead of scraping the web directly.”
+“CampusCopilot keeps Canvas, Gradescope, EdStem, and MyUW on one local-first desk. CampusCopilot is the first shipped workspace in that family, and it lets cited AI explain the structured result instead of scraping the web directly.”
 
 ## Scene 1 — Product identity
 
@@ -22,7 +22,7 @@ Show:
 
 Say:
 
-“Both surfaces now point at the same product truth. This is not a generic chatbot shell. It is a read-only student decision workspace inside OpenCampus.”
+“Both surfaces now point at the same product truth. This is not a generic chatbot shell. It is a read-only student decision workspace inside CampusCopilot.”
 
 ## Scene 2 — Decision surfaces
 
@@ -68,4 +68,4 @@ Say:
 
 ## Closing
 
-“OpenCampus now shows a real local-first workspace, a truthful proof layer, and a growing technical appendix. What comes next is better proof capture, richer media polish, owner-side publishing, and any further live-session continuation.”
+“CampusCopilot now shows a real local-first workspace, a truthful proof layer, and a growing technical appendix. What comes next is better proof capture, richer media polish, owner-side publishing, and any further live-session continuation.”

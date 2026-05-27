@@ -28,8 +28,8 @@ const requiredFiles = [
   'scripts/check-mcp-registry-preflight.mjs',
   'scripts/check-skill-catalog.mjs',
   'scripts/render-social-preview.sh',
-  'scripts/consumer/opencampus-mcp.sh',
-  'scripts/consumer/opencampus-site-sidecar.sh',
+  'scripts/consumer/campus-copilot-mcp.sh',
+  'scripts/consumer/campus-copilot-site-sidecar.sh',
   'scripts/docker-api-smoke.sh',
   'skills/README.md',
   'skills/catalog.json',
@@ -80,7 +80,7 @@ const exampleJsonFiles = [
   'examples/mcp/claude-desktop.example.json',
   'examples/mcp/codex-repo-root.example.json',
   'examples/mcp/claude-desktop-repo-root.example.json',
-  'examples/codex/opencampus-mcp.json',
+  'examples/codex/campus-copilot-mcp.json',
 ];
 
 const publicSkillFiles = [
@@ -94,9 +94,9 @@ const publicSkillFiles = [
   'skills/switchyard-runtime-check/SKILL.md',
 ];
 
-const expectedRepositoryUrl = 'https://github.com/xiaojiou176-open/OpenCampus.git';
-const expectedIssuesUrl = 'https://github.com/xiaojiou176-open/OpenCampus/issues';
-const expectedRootHomepage = 'https://xiaojiou176-open.github.io/OpenCampus/';
+const expectedRepositoryUrl = 'https://github.com/xiaojiou176-open/campus-copilot.git';
+const expectedIssuesUrl = 'https://github.com/xiaojiou176-open/campus-copilot/issues';
+const expectedRootHomepage = 'https://xiaojiou176-open.github.io/campus-copilot/';
 
 const failures = [];
 
@@ -205,7 +205,7 @@ if (existsSync('package.json')) {
   ) {
     failures.push('root_package_description_not_source_first');
   }
-  if (!Array.isArray(rootPackage.keywords) || !rootPackage.keywords.includes('opencampus')) {
+  if (!Array.isArray(rootPackage.keywords) || !rootPackage.keywords.includes('campus-copilot')) {
     failures.push('root_package_keywords_missing_canonical_tag');
   }
   if (rootPackage.scripts?.['render:social-preview'] !== 'bash scripts/render-social-preview.sh') {
@@ -398,7 +398,7 @@ for (const manifestPath of publicPackageManifests) {
   if (typeof pkg.description !== 'string' || pkg.description.trim().length === 0) {
     failures.push(`public_package_description_missing:${manifestPath}`);
   }
-  if (typeof pkg.homepage !== 'string' || !pkg.homepage.includes('github.com/xiaojiou176-open/OpenCampus/tree/main/')) {
+  if (typeof pkg.homepage !== 'string' || !pkg.homepage.includes('github.com/xiaojiou176-open/campus-copilot/tree/main/')) {
     failures.push(`public_package_homepage_missing:${manifestPath}`);
   }
   if (
@@ -415,7 +415,7 @@ for (const manifestPath of publicPackageManifests) {
   }
   if (!Array.isArray(pkg.keywords) || pkg.keywords.length < 3) {
     failures.push(`public_package_keywords_missing:${manifestPath}`);
-  } else if (!pkg.keywords.includes('opencampus')) {
+  } else if (!pkg.keywords.includes('campus-copilot')) {
     failures.push(`public_package_keywords_incomplete:${manifestPath}`);
   }
   if (typeof pkg.version !== 'string' || pkg.version === '0.0.0') {
@@ -436,7 +436,7 @@ for (const manifestPath of publicPackageManifests) {
   }
 
   if (manifestPath === 'packages/mcp-server/package.json') {
-    if (pkg.mcpName !== 'io.github.xiaojiou176-open/opencampus-mcp') {
+    if (pkg.mcpName !== 'io.github.xiaojiou176-open/campus-copilot-mcp') {
       failures.push(`public_package_mcp_name_missing:${manifestPath}`);
     }
 
@@ -445,7 +445,7 @@ for (const manifestPath of publicPackageManifests) {
       failures.push(`public_package_server_metadata_missing:${serverMetadataPath}`);
     } else {
       const metadata = JSON.parse(readFileSync(serverMetadataPath, 'utf8'));
-      const expectedBundleUrl = `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v${pkg.version}/opencampus-mcp-${pkg.version}.mcpb`;
+      const expectedBundleUrl = `https://github.com/xiaojiou176-open/campus-copilot/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
       if (metadata.name !== pkg.mcpName) {
         failures.push(`public_package_server_metadata_name_mismatch:${serverMetadataPath}`);
       }

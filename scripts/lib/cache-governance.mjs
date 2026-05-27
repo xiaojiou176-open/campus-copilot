@@ -31,7 +31,7 @@ export const DEFAULT_SUPPORT_BUNDLE_RETENTION_COUNT = 3;
 export const LEGACY_BROWSER_ROOTS = [
   {
     label: 'clone_profile13',
-    pathSuffix: '.opencampus-profile13-clone',
+    pathSuffix: '.campus-copilot-profile13-clone',
     notes:
       'Legacy clone-lane Chrome user-data-dir. Keep it as a migration candidate only; do not treat it as the default live lane.',
   },
@@ -84,7 +84,7 @@ export function getManagedCacheHome(env = process.env, options = {}) {
     : join(homeDir, '.cache');
 
   return normalizeDirectoryPath(
-    env.OPENCAMPUS_CACHE_HOME?.trim() || join(xdgCacheHome, 'opencampus'),
+    env.CAMPUS_COPILOT_CACHE_HOME?.trim() || join(xdgCacheHome, 'campus-copilot'),
   );
 }
 
@@ -92,26 +92,26 @@ export function getBrowserBootstrapPlan(env = process.env, options = {}) {
   const homeDir = options.homeDir ?? getHomeDir(env);
   const cacheHome = getManagedCacheHome(env, { homeDir });
   const managedExternalCacheRoot = normalizeDirectoryPath(
-    env.OPENCAMPUS_MANAGED_EXTERNAL_CACHE_ROOT?.trim() || join(cacheHome, 'cache'),
+    env.CAMPUS_COPILOT_MANAGED_EXTERNAL_CACHE_ROOT?.trim() || join(cacheHome, 'cache'),
   );
   const browserStateRoot = normalizeDirectoryPath(
-    env.OPENCAMPUS_BROWSER_STATE_ROOT?.trim() || join(cacheHome, 'browser'),
+    env.CAMPUS_COPILOT_BROWSER_STATE_ROOT?.trim() || join(cacheHome, 'browser'),
   );
   const targetUserDataRoot = normalizeDirectoryPath(
-    env.OPENCAMPUS_BROWSER_ROOT?.trim() ||
+    env.CAMPUS_COPILOT_BROWSER_ROOT?.trim() ||
       join(cacheHome, DEFAULT_REPO_OWNED_CHROME_USER_DATA_SUBPATH),
   );
   const sourceChromeRoot = normalizeDirectoryPath(
-    env.OPENCAMPUS_SOURCE_CHROME_ROOT?.trim() || join(homeDir, DEFAULT_SOURCE_CHROME_ROOT_SUBPATH),
+    env.CAMPUS_COPILOT_SOURCE_CHROME_ROOT?.trim() || join(homeDir, DEFAULT_SOURCE_CHROME_ROOT_SUBPATH),
   );
   const sourceProfileDirectory =
-    env.OPENCAMPUS_SOURCE_PROFILE_DIRECTORY?.trim() || DEFAULT_SOURCE_CHROME_PROFILE_DIRECTORY;
+    env.CAMPUS_COPILOT_SOURCE_PROFILE_DIRECTORY?.trim() || DEFAULT_SOURCE_CHROME_PROFILE_DIRECTORY;
   const targetProfileDirectory =
-    env.OPENCAMPUS_BROWSER_PROFILE_DIRECTORY?.trim() || CANONICAL_CHROME_PROFILE_DIRECTORY;
+    env.CAMPUS_COPILOT_BROWSER_PROFILE_DIRECTORY?.trim() || CANONICAL_CHROME_PROFILE_DIRECTORY;
   const profileDisplayName =
-    env.OPENCAMPUS_BROWSER_PROFILE_DISPLAY_NAME?.trim() || CANONICAL_CHROME_PROFILE_DISPLAY_NAME;
+    env.CAMPUS_COPILOT_BROWSER_PROFILE_DISPLAY_NAME?.trim() || CANONICAL_CHROME_PROFILE_DISPLAY_NAME;
   const browserCdpPort = parsePositiveInt(
-    env.OPENCAMPUS_BROWSER_CDP_PORT,
+    env.CAMPUS_COPILOT_BROWSER_CDP_PORT,
     DEFAULT_BROWSER_CDP_PORT,
   );
 
@@ -316,7 +316,7 @@ export function trimSupportBundles(runtimeCacheRoot, keepLatestCount) {
   }
 
   const supportBundles = readdirSync(runtimeCacheRoot)
-    .filter((entry) => entry.startsWith('opencampus-support-bundle-') && entry.endsWith('.json'))
+    .filter((entry) => entry.startsWith('campus-copilot-support-bundle-') && entry.endsWith('.json'))
     .sort();
 
   for (const entry of supportBundles.slice(0, Math.max(0, supportBundles.length - keepLatestCount))) {
@@ -428,8 +428,8 @@ function collectTempRoots(env = process.env) {
     });
   }
 
-  if (env.OPENCAMPUS_TEMP_ROOTS?.trim()) {
-    for (const value of env.OPENCAMPUS_TEMP_ROOTS.split(':')) {
+  if (env.CAMPUS_COPILOT_TEMP_ROOTS?.trim()) {
+    for (const value of env.CAMPUS_COPILOT_TEMP_ROOTS.split(':')) {
       push(value, 'env_override');
     }
     return roots;
@@ -483,12 +483,12 @@ export function resolveCacheGovernancePolicy(env = process.env, options = {}) {
     runtimeBrowserIdentityRoot: join(repoRoot, '.runtime-cache', 'browser-identity'),
     runtimeCoverageRoot: join(repoRoot, '.runtime-cache', 'coverage'),
     runtimeRawRoot: join(repoRoot, '.runtime-cache', 'raw'),
-    runtimeCleanupMode: env.OPENCAMPUS_RUNTIME_CLEAN_LEVEL?.trim().toLowerCase() === 'closeout' ? 'closeout' : 'standard',
-    externalCacheTtlHours: parsePositiveInt(env.OPENCAMPUS_CACHE_TTL_HOURS, DEFAULT_EXTERNAL_CACHE_TTL_HOURS),
-    externalCacheMaxMb: parsePositiveInt(env.OPENCAMPUS_CACHE_MAX_MB, DEFAULT_EXTERNAL_CACHE_MAX_MB),
-    runtimeTempTtlHours: parsePositiveInt(env.OPENCAMPUS_RUNTIME_TEMP_TTL_HOURS, DEFAULT_RUNTIME_TEMP_TTL_HOURS),
-    runtimeEvidenceTtlHours: parsePositiveInt(env.OPENCAMPUS_RUNTIME_EVIDENCE_TTL_HOURS, DEFAULT_RUNTIME_EVIDENCE_TTL_HOURS),
-    supportBundleRetentionCount: parsePositiveInt(env.OPENCAMPUS_SUPPORT_BUNDLE_KEEP, DEFAULT_SUPPORT_BUNDLE_RETENTION_COUNT),
+    runtimeCleanupMode: env.CAMPUS_COPILOT_RUNTIME_CLEAN_LEVEL?.trim().toLowerCase() === 'closeout' ? 'closeout' : 'standard',
+    externalCacheTtlHours: parsePositiveInt(env.CAMPUS_COPILOT_CACHE_TTL_HOURS, DEFAULT_EXTERNAL_CACHE_TTL_HOURS),
+    externalCacheMaxMb: parsePositiveInt(env.CAMPUS_COPILOT_CACHE_MAX_MB, DEFAULT_EXTERNAL_CACHE_MAX_MB),
+    runtimeTempTtlHours: parsePositiveInt(env.CAMPUS_COPILOT_RUNTIME_TEMP_TTL_HOURS, DEFAULT_RUNTIME_TEMP_TTL_HOURS),
+    runtimeEvidenceTtlHours: parsePositiveInt(env.CAMPUS_COPILOT_RUNTIME_EVIDENCE_TTL_HOURS, DEFAULT_RUNTIME_EVIDENCE_TTL_HOURS),
+    supportBundleRetentionCount: parsePositiveInt(env.CAMPUS_COPILOT_SUPPORT_BUNDLE_KEEP, DEFAULT_SUPPORT_BUNDLE_RETENTION_COUNT),
     tempRoots: collectTempRoots(env),
   };
 }
@@ -527,7 +527,7 @@ export function cleanupRepoNamedTempResidues(policy) {
       continue;
     }
     for (const entry of readdirSync(tempRoot.path)) {
-      if (!entry.startsWith('opencampus-')) {
+      if (!entry.startsWith('campus-copilot-')) {
         continue;
       }
       const path = join(tempRoot.path, entry);

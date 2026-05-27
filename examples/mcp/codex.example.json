@@ -1,15 +1,15 @@
 {
   "mcpServers": {
-    "opencampus-canvas": {
-      "command": "opencampus-mcp-canvas",
+    "campus-copilot-canvas": {
+      "command": "campus-copilot-mcp-canvas",
       "env": {
-        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     },
-    "opencampus-edstem": {
-      "command": "opencampus-mcp-edstem",
+    "campus-copilot-edstem": {
+      "command": "campus-copilot-mcp-edstem",
       "env": {
-        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     }
   }

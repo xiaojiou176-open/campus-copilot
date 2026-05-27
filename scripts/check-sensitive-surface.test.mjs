@@ -82,7 +82,7 @@ test('skips binary tracked files', () => {
 
 test('skips tracked files that are already deleted from the working tree', () => {
   const failures = collectSensitiveSurfaceFailures({
-    trackedFiles: ['design-system/opencampus/MASTER.md'],
+    trackedFiles: ['design-system/campus-copilot/MASTER.md'],
     readTrackedFile: () => undefined,
   });
 

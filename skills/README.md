@@ -1,6 +1,6 @@
 # Public Skills
 
-These are public, read-only helper skills for builder workflows around OpenCampus.
+These are public, read-only helper skills for builder workflows around CampusCopilot.
 
 Treat them like prompt recipes for local consumers, not installed plugins or browser operators.
 
@@ -61,14 +61,14 @@ See [`../docs/07-security-privacy-compliance.md`](../docs/07-security-privacy-co
 | :-- | :-- | :-- | :-- |
 | Codex | `read-only-workspace-audit` or `current-view-triage` | `examples/integrations/codex-mcp.example.json` | quickest generic MCP entry over the local BFF and imported snapshots, plus one-step triage when you want a plain-language first answer |
 | Claude Code / Claude Desktop | `site-mcp-consumer` | `examples/integrations/claude-code-mcp.example.json` or `examples/mcp/claude-desktop.example.json` | best when you want site-scoped sidecars or a generic stdio MCP server |
-| OpenClaw-style local consumers | `openclaw-readonly-consumer` | `examples/openclaw-readonly.md` | safest path when OpenCampus should stay a read-only context provider instead of a browser plugin |
+| OpenClaw-style local consumers | `openclaw-readonly-consumer` | `examples/openclaw-readonly.md` | safest path when CampusCopilot should stay a read-only context provider instead of a browser plugin |
 | SDK/CLI builders | `site-snapshot-review` or `site-overview-audit` | `examples/sdk-usage.ts` or `examples/cli-usage.md` | good when you want the same decision-layer data without MCP first, or one site-specific audit card |
 
 ## Start Here By Consumer
 
 - **Codex**: start with `read-only-workspace-audit`, then pair it with `examples/integrations/codex-mcp.example.json`.
 - **Claude Code**: start with `site-mcp-consumer`, then pair it with `examples/integrations/claude-code-mcp.example.json` or `examples/mcp/claude-desktop.example.json`.
-- **OpenClaw-style local consumers**: start with `openclaw-readonly-consumer`, then pair it with `examples/openclaw-readonly.md` and keep OpenCampus on the snapshot/BFF/read-only side instead of treating it as a browser-control plugin.
+- **OpenClaw-style local consumers**: start with `openclaw-readonly-consumer`, then pair it with `examples/openclaw-readonly.md` and keep CampusCopilot on the snapshot/BFF/read-only side instead of treating it as a browser-control plugin.
 - **Need the fastest chooser before you even pick a package or skill?** Start with `examples/toolbox-chooser.md`.
 
 ## Start Here By Job

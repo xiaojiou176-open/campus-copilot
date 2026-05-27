@@ -287,10 +287,10 @@ const OpeningScene: React.FC = () => {
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
           <div style={{ ...textStyles.eyebrow, ...entrance(frame, 0) }}>
-            OPENCAMPUS
+            CAMPUS_COPILOT
           </div>
           <div style={{ ...entrance(frame, 4) }}>
-            <Badge>OpenCampus is shipping today</Badge>
+            <Badge>CampusCopilot is shipping today</Badge>
           </div>
           <div style={{ ...textStyles.headline, ...entrance(frame, 8) }}>
             One local desk
@@ -317,7 +317,7 @@ const OpeningScene: React.FC = () => {
           }}
         >
           <div style={{ ...textStyles.eyebrow, fontSize: 16 }}>AVAILABLE NOW</div>
-          <Badge>OpenCampus for UW</Badge>
+          <Badge>CampusCopilot for UW</Badge>
           <div style={{ display: "grid", gap: 14 }}>
             {sitePills.map((pill, index) => (
               <div
@@ -360,7 +360,7 @@ const SidepanelScene: React.FC = () => {
         <div style={{ ...entrance(frame, 6) }}>
           <ScreenshotPanel
             shot={sidepanelShot}
-            label="OpenCampus for UW"
+            label="CampusCopilot for UW"
             title="The student workspace stays visible."
             body="The extension is the fastest way into the product today. It keeps the student workspace visible, puts Export and Trust Center in plain sight, and avoids turning the first fold into a builder dashboard."
           />
@@ -390,7 +390,7 @@ const WebWorkbenchScene: React.FC = () => {
         <div style={{ ...entrance(frame, 6) }}>
           <ScreenshotPanel
             shot={webWorkbenchShot}
-            label="OpenCampus workbench"
+            label="CampusCopilot workbench"
             title="The same workspace, with more room."
             body="The local web workbench keeps the same product contract while making the broader decision workspace easier to scan. It is still read-only, still local-first, and still built around what changed and what comes first."
           />
@@ -415,14 +415,14 @@ const AskAiScene: React.FC = () => {
         }}
       >
         <div style={{ ...textStyles.eyebrow, ...entrance(frame, 0) }}>
-          OPENCAMPUS
+          CAMPUS_COPILOT
         </div>
         <div style={{ ...entrance(frame, 6) }}>
           <ScreenshotPanel
             shot={askAiShot}
-            label="OpenCampus for UW"
+            label="CampusCopilot for UW"
             title="Ask from the same desk."
-            body="Inside OpenCampus, OpenCampus keeps the AI lane anchored to the visible workspace. When the desk is still thin, students get sent back to workspace or export before a blank chat pretends to know enough."
+            body="Inside CampusCopilot, CampusCopilot keeps the AI lane anchored to the visible workspace. When the desk is still thin, students get sent back to workspace or export before a blank chat pretends to know enough."
           />
         </div>
       </div>
@@ -537,7 +537,7 @@ const ClosingScene: React.FC = () => {
 
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ ...textStyles.eyebrow, color: "#CFE2FB", ...entrance(frame, 0) }}>
-            OPENCAMPUS
+            CAMPUS_COPILOT
           </div>
           <div
             style={{
@@ -549,7 +549,7 @@ const ClosingScene: React.FC = () => {
               ...entrance(frame, 6),
             }}
           >
-            OpenCampus is the
+            CampusCopilot is the
             <br />
             public story.
           </div>
@@ -564,7 +564,7 @@ const ClosingScene: React.FC = () => {
               ...entrance(frame, 12),
             }}
           >
-            OpenCampus is the first workspace people can try today:
+            CampusCopilot is the first workspace people can try today:
             local-first, read-only, and grounded in one student decision desk.
           </div>
         </div>
@@ -596,7 +596,7 @@ const ClosingScene: React.FC = () => {
   );
 };
 
-export const OpenCampusWalkthrough: React.FC = () => {
+export const CampusCopilotWalkthrough: React.FC = () => {
   return (
     <AbsoluteFill style={sceneShell}>
       <Sequence durationInFrames={150}>

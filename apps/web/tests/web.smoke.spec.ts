@@ -15,14 +15,14 @@ test('shows the standalone workbench and exports the current view', async ({ pag
     await expect(firstStatCard.getByText('—')).toBeVisible();
     await expect(loadingWorkbenchHeading).toBeHidden();
   }
-  await expect(page.getByRole('heading', { name: 'OpenCampus workbench' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'CampusCopilot workbench' })).toBeVisible();
   await expect(
     page.getByText('One local desk for academic work, administrative signals, and the next decision.'),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Focus Queue' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Weekly Load' })).toBeVisible();
   await expect(page.getByText('Light load: 1 calendar item.')).toBeVisible();
-  const orientationHeading = page.getByRole('heading', { name: 'OpenCampus workbench' });
+  const orientationHeading = page.getByRole('heading', { name: 'CampusCopilot workbench' });
   const focusQueueHeading = page.getByRole('heading', { name: 'Focus Queue' });
   const weeklyLoadHeading = page.getByRole('heading', { name: 'Weekly Load' });
   const trustSummaryHeading = page.getByRole('heading', { name: 'Why this desk is trustworthy' });

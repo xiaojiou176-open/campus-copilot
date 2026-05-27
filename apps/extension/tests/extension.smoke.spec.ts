@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
 const CONFIG_KEY = 'openCampusConfig';
-const SITE_STATE_KEY = '__opencampus_mock_site_states__';
-const DOWNLOAD_KEY = '__opencampus_last_download__';
+const SITE_STATE_KEY = '__campus-copilot_mock_site_states__';
+const DOWNLOAD_KEY = '__campus-copilot_last_download__';
 const SMOKE_CAPTURE_DIR = process.env.EXTENSION_SMOKE_CAPTURE_DIR;
 
 function resolveSmokeBaseUrl(baseURL?: string) {
@@ -161,13 +161,13 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
         window.localStorage.setItem(key, JSON.stringify(value));
       };
 
-      const seededKey = '__opencampus_smoke_seeded__';
+      const seededKey = '__campus-copilot_smoke_seeded__';
       if (!window.sessionStorage.getItem(seededKey)) {
         // Reset the fixture once per test context, while preserving state across in-test navigations.
         writeJson('__extension_storage__', defaultConfig);
         writeJson(siteStateKey, defaultStates);
         window.localStorage.removeItem(downloadKey);
-        window.localStorage.removeItem('__opencampus_opened_options__');
+        window.localStorage.removeItem('__campus-copilot_opened_options__');
         window.sessionStorage.setItem(seededKey, '1');
       }
 
@@ -291,7 +291,7 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
           addListener() {},
         },
         async openOptionsPage() {
-          window.localStorage.setItem('__opencampus_opened_options__', 'true');
+          window.localStorage.setItem('__campus-copilot_opened_options__', 'true');
         },
       };
 
@@ -374,7 +374,7 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
             JSON.stringify({
               ok: true,
               answerText: JSON.stringify({
-                summary: 'OpenCampus AI answer',
+                summary: 'CampusCopilot AI answer',
                 bullets: ['Homework 5 is still due soon', 'Canvas still shows it as open'],
                 citations: [
                   {
@@ -387,7 +387,7 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
                 ],
               }),
               structuredAnswer: {
-                summary: 'OpenCampus AI answer',
+                summary: 'CampusCopilot AI answer',
                 bullets: ['Homework 5 is still due soon', 'Canvas still shows it as open'],
                 citations: [
                   {
@@ -658,7 +658,7 @@ test('opens the built sidepanel and shows four site status cards', async ({ page
   await page.getByRole('button', { name: 'Export diagnostics JSON' }).click();
   await page.waitForFunction((downloadKey) => Boolean(localStorage.getItem(downloadKey)), DOWNLOAD_KEY);
   const diagnosticsPayload = await page.evaluate((downloadKey) => localStorage.getItem(downloadKey), DOWNLOAD_KEY);
-  expect(diagnosticsPayload).toContain('opencampus-diagnostics.json');
+  expect(diagnosticsPayload).toContain('campus-copilot-diagnostics.json');
   await expect(page.getByRole('heading', { name: 'Site Status' })).toBeVisible();
   await maybeCaptureSmokeScreenshot(page, 'extension-sidepanel-overview');
   await expect(page.getByRole('button', { name: 'Sync Canvas' })).toBeVisible();
@@ -699,14 +699,14 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   await page.getByRole('button', { name: 'Sync EdStem' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'EdStem sync succeeded' })).toBeVisible();
   await page.evaluate(async () => {
-    const openOpenCampusDb = () =>
+    const openCampusCopilotDb = () =>
       new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('opencampus');
+        const request = indexedDB.open('campus-copilot');
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
       });
 
-    const db = await openOpenCampusDb();
+    const db = await openCampusCopilotDb();
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(['courses', 'messages', 'sync_state'], 'readwrite');
       tx.objectStore('courses').put({
@@ -866,7 +866,7 @@ test('asks ai after the current workspace envelope is explicitly allowed', async
   await page.getByLabel('Question').fill('What should I pay attention to right now?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
-  await expect(page.getByText('OpenCampus AI answer')).toBeVisible();
+  await expect(page.getByText('CampusCopilot AI answer')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Key points' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Citations' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Homework 5' })).toBeVisible();

@@ -16,7 +16,7 @@ import {
   type Message,
   type Resource,
   type TimelineEntry,
-} from '@opencampus/schema';
+} from '@campus-copilot/schema';
 
 export type ExportPreset =
   | 'weekly_assignments'
@@ -2372,7 +2372,7 @@ function renderIcs(dataset: ExportDataset) {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//OpenCampus//Exporter//EN',
+    'PRODID:-//CampusCopilot//Exporter//EN',
     'CALSCALE:GREGORIAN',
     `X-CAMPUS-COPILOT-GENERATED-AT:${escapeIcsText(dataset.generatedAt)}`,
     `X-CAMPUS-COPILOT-SCOPE-TYPE:${escapeIcsText(dataset.scope.scopeType)}`,
@@ -2391,7 +2391,7 @@ function renderIcs(dataset: ExportDataset) {
 
 function buildFilename(preset: ExportPreset, format: ExportFormat, generatedAt: string) {
   const datePart = generatedAt.slice(0, 10);
-  return `opencampus-${PRESET_LABELS[preset]}-${datePart}.${format}`;
+  return `campus-copilot-${PRESET_LABELS[preset]}-${datePart}.${format}`;
 }
 
 export function createExportArtifact(request: {

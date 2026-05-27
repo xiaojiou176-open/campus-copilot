@@ -1,5 +1,5 @@
 {
-  "name": "@opencampus/web",
+  "name": "@campus-copilot/web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,11 +13,11 @@
     "test:interaction": "unset NO_COLOR; pnpm build && playwright test -c playwright.config.ts"
   },
   "dependencies": {
-    "@opencampus/ai": "workspace:*",
-    "@opencampus/core": "workspace:*",
-    "@opencampus/exporter": "workspace:*",
-    "@opencampus/schema": "workspace:*",
-    "@opencampus/storage": "workspace:*",
+    "@campus-copilot/ai": "workspace:*",
+    "@campus-copilot/core": "workspace:*",
+    "@campus-copilot/exporter": "workspace:*",
+    "@campus-copilot/schema": "workspace:*",
+    "@campus-copilot/storage": "workspace:*",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "zod": "^4.1.5"

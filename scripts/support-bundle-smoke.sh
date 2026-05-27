@@ -15,14 +15,14 @@ mkdir -p "$TEMP_DIR"
 # summaries when SSO redirect tabs linger in the same profile.
 # Use a support-bundle-specific override key instead of inheriting ambient
 # `CHROME_ATTACH_MODE`, which may still point at weaker diagnostic lanes.
-: "${OPENCAMPUS_BROWSER_ROOT:=$HOME/.cache/opencampus/browser/chrome-user-data}"
-: "${CHROME_USER_DATA_DIR:=$OPENCAMPUS_BROWSER_ROOT}"
+: "${CAMPUS_COPILOT_BROWSER_ROOT:=$HOME/.cache/campus-copilot/browser/chrome-user-data}"
+: "${CHROME_USER_DATA_DIR:=$CAMPUS_COPILOT_BROWSER_ROOT}"
 : "${CHROME_PROFILE_NAME:=Profile 1}"
-: "${OPENCAMPUS_BROWSER_CDP_PORT:=9334}"
-: "${CHROME_CDP_URL:=http://127.0.0.1:$OPENCAMPUS_BROWSER_CDP_PORT}"
+: "${CAMPUS_COPILOT_BROWSER_CDP_PORT:=9334}"
+: "${CHROME_CDP_URL:=http://127.0.0.1:$CAMPUS_COPILOT_BROWSER_CDP_PORT}"
 : "${SUPPORT_BUNDLE_ATTACH_MODE:=page}"
 CHROME_ATTACH_MODE="$SUPPORT_BUNDLE_ATTACH_MODE"
-export OPENCAMPUS_BROWSER_ROOT OPENCAMPUS_BROWSER_CDP_PORT
+export CAMPUS_COPILOT_BROWSER_ROOT CAMPUS_COPILOT_BROWSER_CDP_PORT
 export CHROME_USER_DATA_DIR CHROME_PROFILE_NAME CHROME_CDP_URL CHROME_ATTACH_MODE SUPPORT_BUNDLE_ATTACH_MODE
 
 RAW_OUTPUT_FILE="$(mktemp "$TEMP_DIR/support-bundle-smoke.XXXXXX")"

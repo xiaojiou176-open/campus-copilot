@@ -7,7 +7,7 @@ import {
   resolveAiAnswer,
   type CampusAiAskRequest,
   type SwitchyardRuntimeProvider,
-} from '@opencampus/ai';
+} from '@campus-copilot/ai';
 
 const ProviderProxyPayloadSchema = z.object({
   provider: z.enum(['openai', 'gemini']),
@@ -77,7 +77,7 @@ export function loadApiEnv(source: NodeJS.ProcessEnv = process.env): ApiEnv {
 export function createHealthPayload() {
   return {
     ok: true,
-    service: 'opencampus-bff',
+    service: 'campus-copilot-bff',
     mode: 'thin-bff',
   };
 }
@@ -121,7 +121,7 @@ function jsonResponse(status: number, body: unknown, requestId: string = randomU
       'access-control-allow-origin': '*',
       'access-control-allow-methods': 'GET,POST,OPTIONS',
       'access-control-allow-headers': 'content-type',
-      'x-opencampus-request-id': requestId,
+      'x-campus-copilot-request-id': requestId,
     },
     body: JSON.stringify(withRequestId(body, requestId)),
   };
@@ -502,7 +502,7 @@ export async function handleApiRequest(
   });
 }
 
-export function createOpenCampusApiServer(env: ApiEnv = loadApiEnv(), fetchImpl: FetchLike = fetch) {
+export function createCampusCopilotApiServer(env: ApiEnv = loadApiEnv(), fetchImpl: FetchLike = fetch) {
   return createServer(async (req: IncomingMessage, res: ServerResponse) => {
     try {
       const response = await handleApiRequest(req, env, fetchImpl);

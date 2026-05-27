@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 const repoRoot = process.cwd();
 
 test('redact-live-adapter-fixture keeps campus URLs but strips foreign absolute URLs and user identifiers', () => {
-  const tempDir = mkdtempSync(join(tmpdir(), 'opencampus-redact-'));
+  const tempDir = mkdtempSync(join(tmpdir(), 'campus-copilot-redact-'));
   try {
     const inputPath = join(tempDir, 'input.json');
     const outputPath = join(tempDir, 'output.json');

@@ -1,15 +1,15 @@
 {
   "mcpServers": {
-    "opencampus-gradescope": {
-      "command": "opencampus-mcp-gradescope",
+    "campus-copilot-gradescope": {
+      "command": "campus-copilot-mcp-gradescope",
       "env": {
-        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     },
-    "opencampus-myuw": {
-      "command": "opencampus-mcp-myuw",
+    "campus-copilot-myuw": {
+      "command": "campus-copilot-mcp-myuw",
       "env": {
-        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     }
   }

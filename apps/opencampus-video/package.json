@@ -1,7 +1,7 @@
 {
-  "name": "@opencampus/opencampus-video",
+  "name": "@campus-copilot/campus-copilot-video",
   "version": "1.0.0",
-  "description": "OpenCampus walkthrough video built with Remotion",
+  "description": "CampusCopilot walkthrough video built with Remotion",
   "repository": {},
   "license": "UNLICENSED",
   "private": true,
@@ -24,8 +24,8 @@
   "scripts": {
     "dev": "remotion studio",
     "build": "remotion bundle",
-    "render:still": "remotion still OpenCampusWalkthrough out/opencampus-walkthrough-still.png --frame=360",
-    "render:video": "remotion render OpenCampusWalkthrough out/opencampus-walkthrough.mp4",
+    "render:still": "remotion still CampusCopilotWalkthrough out/campus-copilot-walkthrough-still.png --frame=360",
+    "render:video": "remotion render CampusCopilotWalkthrough out/campus-copilot-walkthrough.mp4",
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc"
   },

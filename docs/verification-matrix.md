@@ -28,19 +28,19 @@ Use this split before you decide where a new check belongs:
 | `pnpm test` | deterministic repo gate | contributor / CI | Yes | repository tests across packages, including local overlay, decision read models, citation-aware AI contract, structured export behavior, repo-public package pack-readiness smoke, lockfile-level dependency security guards such as patched `defu` resolution, and runtime-cleanup race guards around repo-owned support-bundle artifacts | real authenticated browser sessions |
 | `pnpm test:coverage` | optional local coverage audit | local developer | No | aggregated workspace Vitest coverage summary for repo-local code paths, plus automated test-pyramid context counts for workspace Vitest, repo `node:test`, and extension Playwright smoke | live site behavior or a guaranteed full-system coverage percentage |
 | `pnpm smoke:api` | deterministic local smoke | contributor / CI | Yes | local BFF health and provider status endpoint wiring | real provider round-trip |
-| `pnpm --filter @opencampus/extension build` | deterministic repo gate | contributor / CI | Yes | extension can build | real extension install/use |
-| `pnpm --filter @opencampus/extension exec playwright test` | deterministic hosted browser smoke | contributor / CI | Yes | built extension UI contract under controlled mocks, including decision surfaces and citation-aware answer rendering on the repo-owned headless Chromium lane | real site sync, the maintainer's real Chrome profile, or full extension E2E |
+| `pnpm --filter @campus-copilot/extension build` | deterministic repo gate | contributor / CI | Yes | extension can build | real extension install/use |
+| `pnpm --filter @campus-copilot/extension exec playwright test` | deterministic hosted browser smoke | contributor / CI | Yes | built extension UI contract under controlled mocks, including decision surfaces and citation-aware answer rendering on the repo-owned headless Chromium lane | real site sync, the maintainer's real Chrome profile, or full extension E2E |
 | `pnpm verify` | deterministic local default gate | contributor | No | governance, typecheck, repository tests, local BFF health smoke, web build, and extension build on the current machine | hosted-only browser smoke, manual live proofs, or provider-dependent smoke |
 | `pnpm verify:hosted` | deterministic hosted gate | CI | Yes | the full required PR gate on GitHub-hosted runners, including the default local gate plus extension Playwright smoke after managed browser install | manual live or provider proofs not explicitly promoted into hosted CI |
 | `pnpm verify:nightly` | deterministic scheduled gate | CI | No | hosted verify plus coverage audit, repo-public proof, and standalone web interaction smoke on managed Chromium | live/browser/provider/manual evidence or owner-only publication steps |
 | `pnpm smoke:provider` | environment-dependent smoke | local developer | No | current environment can complete a provider round-trip | stable provider coverage or required CI proof |
 | `pnpm smoke:sidepanel` | environment-dependent smoke | local developer | No | built sidepanel page can talk to current BFF/provider path | full extension E2E |
-| `pnpm --filter @opencampus/web build` | deterministic repo gate | contributor / CI | Yes | standalone web surface bundles on the same workspace contract | real user interaction or live browser/session behavior |
-| `pnpm --filter @opencampus/web test` | deterministic local test | local developer | No | standalone web helper and import logic stay parseable | full browser interaction |
-| `pnpm --filter @opencampus/web test:interaction` | deterministic local interaction smoke | local developer | No | standalone web surface can render the read-only workbench and perform a basic interaction on local demo/imported data | live campus-site sync or required CI proof |
-| `pnpm --filter @opencampus/sdk test` | deterministic local test | contributor / CI | No | repo-public SDK helpers stay parseable | live BFF or published package behavior |
-| `pnpm --filter @opencampus/cli test` | deterministic local test | contributor / CI | No | repo-public CLI snapshot tooling stays working | release-channel packaging |
-| `pnpm --filter @opencampus/mcp test` | deterministic local test | contributor / CI | No | repo-public MCP preview keeps its tool contract | hosted/public MCP service behavior |
+| `pnpm --filter @campus-copilot/web build` | deterministic repo gate | contributor / CI | Yes | standalone web surface bundles on the same workspace contract | real user interaction or live browser/session behavior |
+| `pnpm --filter @campus-copilot/web test` | deterministic local test | local developer | No | standalone web helper and import logic stay parseable | full browser interaction |
+| `pnpm --filter @campus-copilot/web test:interaction` | deterministic local interaction smoke | local developer | No | standalone web surface can render the read-only workbench and perform a basic interaction on local demo/imported data | live campus-site sync or required CI proof |
+| `pnpm --filter @campus-copilot/sdk test` | deterministic local test | contributor / CI | No | repo-public SDK helpers stay parseable | live BFF or published package behavior |
+| `pnpm --filter @campus-copilot/cli test` | deterministic local test | contributor / CI | No | repo-public CLI snapshot tooling stays working | release-channel packaging |
+| `pnpm --filter @campus-copilot/mcp test` | deterministic local test | contributor / CI | No | repo-public MCP preview keeps its tool contract | hosted/public MCP service behavior |
 | `pnpm proof:public` | optional local distribution proof | local developer | No | repo-public builder/package surfaces still line up, public entrypoints still expose help, and each public package can complete a dry-run pack step | registry publication, official listing, marketplace listing, or hosted distribution |
 | `pnpm smoke:support` | local diagnostics smoke | local developer | No | support bundle generation still works on the repo-owned browser-root contract | product-path correctness |
 | `pnpm preflight:live` | manual environment probe | local developer | No | current machine/session readiness for live validation, including repo-owned browser root bootstrap, single-instance attach requirements, and deterministic auth-boundary blockers | site adapter correctness |
@@ -108,14 +108,14 @@ Manual means:
 
 The repository must not claim that `pnpm verify` covers:
 
-- `pnpm --filter @opencampus/extension exec playwright test`
+- `pnpm --filter @campus-copilot/extension exec playwright test`
 - `pnpm smoke:provider`
 - `pnpm smoke:sidepanel`
 - `pnpm smoke:support`
 - `pnpm check:consumer-surfaces`
-- `pnpm --filter @opencampus/sdk test`
-- `pnpm --filter @opencampus/cli test`
-- `pnpm --filter @opencampus/mcp test`
+- `pnpm --filter @campus-copilot/sdk test`
+- `pnpm --filter @campus-copilot/cli test`
+- `pnpm --filter @campus-copilot/mcp test`
 - `pnpm test:coverage`
 - `pnpm preflight:live`
 - `pnpm diagnose:live`
