@@ -51,7 +51,7 @@ describe('api thin bff', () => {
   it('returns a health payload without touching providers', () => {
     expect(createHealthPayload()).toEqual({
       ok: true,
-      service: 'campus-copilot-bff',
+      service: 'opencampus-bff',
       mode: 'thin-bff',
     });
   });
@@ -101,7 +101,7 @@ describe('api thin bff', () => {
     expect(response.status).toBe(204);
     expect(response.headers['access-control-allow-origin']).toBe('*');
     expect(response.headers['access-control-allow-methods']).toContain('OPTIONS');
-    expect(response.headers['x-campus-copilot-request-id']).toBeTruthy();
+    expect(response.headers['x-opencampus-request-id']).toBeTruthy();
   });
 
   it('serves provider readiness over HTTP', async () => {

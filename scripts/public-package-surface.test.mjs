@@ -53,7 +53,7 @@ function resolvePackageManagerCommand(binaryName) {
 
 const pnpmCommand = resolvePackageManagerCommand('pnpm');
 const npmCommand = resolvePackageManagerCommand('npm');
-const npmConfigSandboxDir = mkdtempSync(join(tmpdir(), 'campus-copilot-npm-config-'));
+const npmConfigSandboxDir = mkdtempSync(join(tmpdir(), 'opencampus-npm-config-'));
 const sandboxedNpmUserConfig = join(npmConfigSandboxDir, 'user.npmrc');
 const sandboxedNpmGlobalConfig = join(npmConfigSandboxDir, 'global.npmrc');
 writeFileSync(sandboxedNpmUserConfig, '', 'utf8');
@@ -173,9 +173,9 @@ serialTest('repo-public preview packages stay packable with explicit file invent
   }
 });
 
-serialTest('@campus-copilot/mcp tarball installs and imports in a fresh temp workspace', () => {
-  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-mcp-pack-'));
-  const workspaceDir = createTempWorkspace('campus-copilot-mcp-proof-');
+serialTest('@opencampus/mcp tarball installs and imports in a fresh temp workspace', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'opencampus-mcp-pack-'));
+  const workspaceDir = createTempWorkspace('opencampus-mcp-proof-');
 
   try {
     const tarballPath = packTarball('packages/mcp', packDir);
@@ -183,7 +183,7 @@ serialTest('@campus-copilot/mcp tarball installs and imports in a fresh temp wor
 
     const stdout = execFileSync(
       'node',
-      ['-e', "import('@campus-copilot/mcp').then((m)=>{console.log(Object.keys(m).sort().join(','))})"],
+      ['-e', "import('@opencampus/mcp').then((m)=>{console.log(Object.keys(m).sort().join(','))})"],
       {
         cwd: workspaceDir,
         encoding: 'utf8',
@@ -200,21 +200,21 @@ serialTest('@campus-copilot/mcp tarball installs and imports in a fresh temp wor
   }
 });
 
-serialTest('@campus-copilot/mcp-readonly tarball installs and exposes a runnable help surface', () => {
-  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-mcp-readonly-pack-'));
-  const workspaceDir = createTempWorkspace('campus-copilot-mcp-readonly-proof-');
+serialTest('@opencampus/mcp-readonly tarball installs and exposes a runnable help surface', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'opencampus-mcp-readonly-pack-'));
+  const workspaceDir = createTempWorkspace('opencampus-mcp-readonly-proof-');
 
   try {
     const tarballPath = packTarball('packages/mcp-readonly', packDir);
     installTarball(workspaceDir, tarballPath);
 
-    const stdout = execPnpm(['exec', 'campus-copilot-mcp-canvas', '--help'], {
+    const stdout = execPnpm(['exec', 'opencampus-mcp-canvas', '--help'], {
       cwd: workspaceDir,
       encoding: 'utf8',
       stdio: 'pipe',
     });
 
-    assert.match(stdout, /Usage: campus-copilot-mcp-canvas/);
+    assert.match(stdout, /Usage: opencampus-mcp-canvas/);
     assert.match(stdout, /read-only/);
   } finally {
     rmSync(packDir, { force: true, recursive: true });
@@ -222,21 +222,21 @@ serialTest('@campus-copilot/mcp-readonly tarball installs and exposes a runnable
   }
 });
 
-serialTest('@campus-copilot/mcp-server tarball installs and exposes a runnable help surface', () => {
-  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-mcp-server-pack-'));
-  const workspaceDir = createTempWorkspace('campus-copilot-mcp-server-proof-');
+serialTest('@opencampus/mcp-server tarball installs and exposes a runnable help surface', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'opencampus-mcp-server-pack-'));
+  const workspaceDir = createTempWorkspace('opencampus-mcp-server-proof-');
 
   try {
     const tarballPath = packTarball('packages/mcp-server', packDir);
     installTarball(workspaceDir, tarballPath);
 
-    const stdout = execPnpm(['exec', 'campus-copilot-mcp', '--help'], {
+    const stdout = execPnpm(['exec', 'opencampus-mcp', '--help'], {
       cwd: workspaceDir,
       encoding: 'utf8',
       stdio: 'pipe',
     });
 
-    assert.match(stdout, /Usage: campus-copilot-mcp/);
+    assert.match(stdout, /Usage: opencampus-mcp/);
     assert.match(stdout, /read-only/);
   } finally {
     rmSync(packDir, { force: true, recursive: true });
@@ -249,9 +249,9 @@ serialTest('mcp-server preregistry metadata stays aligned with package.json', ()
   const bundleManifest = JSON.parse(readFileSync('packages/mcp-server/mcpb.manifest.json', 'utf8'));
   const metadata = JSON.parse(readFileSync('packages/mcp-server/server.json', 'utf8'));
   const packet = JSON.parse(readFileSync('packages/mcp-server/registry-submission.packet.json', 'utf8'));
-  const expectedBundleUrl = `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v${pkg.version}/campus-copilot-mcp-${pkg.version}.mcpb`;
+  const expectedBundleUrl = `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v${pkg.version}/opencampus-mcp-${pkg.version}.mcpb`;
 
-  assert.equal(pkg.mcpName, 'io.github.xiaojiou176-open/campus-copilot-mcp');
+  assert.equal(pkg.mcpName, 'io.github.xiaojiou176-open/opencampus-mcp');
   assert.equal(bundleManifest.version, pkg.version);
   assert.equal(bundleManifest.server.type, 'node');
   assert.equal(bundleManifest.server.entry_point, 'dist/bin.mjs');
@@ -286,12 +286,12 @@ serialTest('audit promotes mcp-readonly to a registry candidate once no private 
     stdio: 'pipe',
   });
 
-  assert.match(stdout, /@campus-copilot\/mcp-readonly \| public-ready \(repo-local\) \| registry candidate/);
+  assert.match(stdout, /@opencampus\/mcp-readonly \| public-ready \(repo-local\) \| registry candidate/);
 });
 
-serialTest('@campus-copilot/sdk tarball installs and exposes bundled runtime entrypoints', () => {
-  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-sdk-pack-'));
-  const workspaceDir = createTempWorkspace('campus-copilot-sdk-proof-');
+serialTest('@opencampus/sdk tarball installs and exposes bundled runtime entrypoints', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'opencampus-sdk-pack-'));
+  const workspaceDir = createTempWorkspace('opencampus-sdk-proof-');
 
   try {
     const tarballPath = packTarball('packages/sdk', packDir);
@@ -302,10 +302,10 @@ serialTest('@campus-copilot/sdk tarball installs and exposes bundled runtime ent
       [
         '-e',
         `Promise.all([
-          import('@campus-copilot/sdk'),
-          import('@campus-copilot/sdk/api'),
-          import('@campus-copilot/sdk/snapshot'),
-          import('@campus-copilot/sdk/sites'),
+          import('@opencampus/sdk'),
+          import('@opencampus/sdk/api'),
+          import('@opencampus/sdk/snapshot'),
+          import('@opencampus/sdk/sites'),
         ]).then(([sdk, apiMod, snapshotMod, sitesMod]) => {
           const snapshot = sdk.parseImportedWorkbenchSnapshot(JSON.stringify({
             generatedAt: '2026-04-03T09:00:00-07:00',
@@ -349,9 +349,9 @@ serialTest('@campus-copilot/sdk tarball installs and exposes bundled runtime ent
   }
 });
 
-serialTest('@campus-copilot/workspace-sdk tarball installs and derives workspace state without private deps', () => {
-  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-workspace-sdk-pack-'));
-  const workspaceDir = createTempWorkspace('campus-copilot-workspace-sdk-proof-');
+serialTest('@opencampus/workspace-sdk tarball installs and derives workspace state without private deps', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'opencampus-workspace-sdk-pack-'));
+  const workspaceDir = createTempWorkspace('opencampus-workspace-sdk-proof-');
 
   try {
     const tarballPath = packTarball('packages/workspace-sdk', packDir);
@@ -361,7 +361,7 @@ serialTest('@campus-copilot/workspace-sdk tarball installs and derives workspace
       'node',
       [
         '-e',
-        `import('@campus-copilot/workspace-sdk').then(async (workspaceSdk) => {
+        `import('@opencampus/workspace-sdk').then(async (workspaceSdk) => {
           const snapshot = workspaceSdk.parseWorkspaceSnapshot(JSON.stringify({
             generatedAt: '2026-04-03T09:00:00-07:00',
             resources: [],
@@ -420,9 +420,9 @@ serialTest('@campus-copilot/workspace-sdk tarball installs and derives workspace
   }
 });
 
-serialTest('@campus-copilot/site-sdk tarball installs and returns per-site overview helpers', () => {
-  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-site-sdk-pack-'));
-  const workspaceDir = createTempWorkspace('campus-copilot-site-sdk-proof-');
+serialTest('@opencampus/site-sdk tarball installs and returns per-site overview helpers', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'opencampus-site-sdk-pack-'));
+  const workspaceDir = createTempWorkspace('opencampus-site-sdk-proof-');
 
   try {
     const tarballPath = packTarball('packages/site-sdk', packDir);
@@ -432,7 +432,7 @@ serialTest('@campus-copilot/site-sdk tarball installs and returns per-site overv
       'node',
       [
         '-e',
-        `import('@campus-copilot/site-sdk').then(async (siteSdk) => {
+        `import('@opencampus/site-sdk').then(async (siteSdk) => {
           const snapshot = {
             generatedAt: '2026-04-03T09:00:00-07:00',
             resources: [],
@@ -474,9 +474,9 @@ serialTest('@campus-copilot/site-sdk tarball installs and returns per-site overv
   }
 });
 
-serialTest('@campus-copilot/provider-runtime tarball installs and imports in a fresh temp workspace', () => {
-  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-provider-runtime-pack-'));
-  const workspaceDir = createTempWorkspace('campus-copilot-provider-runtime-proof-');
+serialTest('@opencampus/provider-runtime tarball installs and imports in a fresh temp workspace', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'opencampus-provider-runtime-pack-'));
+  const workspaceDir = createTempWorkspace('opencampus-provider-runtime-proof-');
 
   try {
     const tarballPath = packTarball('packages/provider-runtime', packDir);
@@ -486,7 +486,7 @@ serialTest('@campus-copilot/provider-runtime tarball installs and imports in a f
       'node',
       [
         '-e',
-        "import('@campus-copilot/provider-runtime').then((m)=>{console.log([typeof m.ProviderStatusResponseSchema, typeof m.buildSwitchyardInput].join(','))})",
+        "import('@opencampus/provider-runtime').then((m)=>{console.log([typeof m.ProviderStatusResponseSchema, typeof m.buildSwitchyardInput].join(','))})",
       ],
       {
         cwd: workspaceDir,
@@ -502,22 +502,22 @@ serialTest('@campus-copilot/provider-runtime tarball installs and imports in a f
   }
 });
 
-serialTest('@campus-copilot/cli tarball installs and runs in a fresh temp workspace', () => {
-  const packDir = mkdtempSync(join(tmpdir(), 'campus-copilot-cli-pack-'));
-  const workspaceDir = createTempWorkspace('campus-copilot-cli-proof-');
+serialTest('@opencampus/cli tarball installs and runs in a fresh temp workspace', () => {
+  const packDir = mkdtempSync(join(tmpdir(), 'opencampus-cli-pack-'));
+  const workspaceDir = createTempWorkspace('opencampus-cli-proof-');
 
   try {
     const tarballPath = packTarball('packages/cli', packDir);
     installTarball(workspaceDir, tarballPath);
     const installedManifest = JSON.parse(
-      readFileSync(join(workspaceDir, 'node_modules', '@campus-copilot', 'cli', 'package.json'), 'utf8'),
+      readFileSync(join(workspaceDir, 'node_modules', '@opencampus', 'cli', 'package.json'), 'utf8'),
     );
     const cliEntrypoint = join(
       workspaceDir,
       'node_modules',
-      '@campus-copilot',
+      '@opencampus',
       'cli',
-      installedManifest.bin['campus-copilot'],
+      installedManifest.bin['opencampus'],
     );
 
     const stdout = execFileSync(process.execPath, [cliEntrypoint, 'help'], {
@@ -526,7 +526,7 @@ serialTest('@campus-copilot/cli tarball installs and runs in a fresh temp worksp
       stdio: 'pipe',
     });
 
-    assert.match(stdout, /campus-copilot <command> \[--flags\]/);
+    assert.match(stdout, /opencampus <command> \[--flags\]/);
     assert.match(stdout, /snapshot export/);
   } finally {
     rmSync(packDir, { force: true, recursive: true });

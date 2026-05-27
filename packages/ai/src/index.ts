@@ -287,7 +287,7 @@ export type AiCitationCoverage = z.infer<typeof AiCitationCoverageSchema>;
 export const HealthPayloadSchema = z
   .object({
     ok: z.literal(true),
-    service: z.literal('campus-copilot-bff'),
+    service: z.literal('opencampus-bff'),
     mode: z.literal('thin-bff'),
     requestId: z.string().optional(),
   })

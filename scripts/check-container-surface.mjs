@@ -38,7 +38,7 @@ export function validateContainerSurface() {
     : '';
 
   const dockerfileSnippets = [
-    'pnpm --filter @campus-copilot/api',
+    'pnpm --filter @opencampus/api',
     'EXPOSE 8787',
     'HEALTHCHECK',
     'ARG CAMPUS_COPILOT_VERSION=0.1.0',
@@ -63,9 +63,9 @@ export function validateContainerSurface() {
   }
 
   const readmeSnippets = [
-    'docker compose up -d campus-copilot-api',
-    'docker build -t campus-copilot-api:local .',
-    'docker run --rm -p 8787:8787 campus-copilot-api:local',
+    'docker compose up -d opencampus-api',
+    'docker build -t opencampus-api:local .',
+    'docker run --rm -p 8787:8787 opencampus-api:local',
     'not a hosted API',
     'pair it with the local stdio MCP server',
   ];
@@ -76,13 +76,13 @@ export function validateContainerSurface() {
     }
   }
 
-  if (!compose.includes('campus-copilot-api')) {
+  if (!compose.includes('opencampus-api')) {
     failures.push('compose_missing_api_service');
   }
   if (!compose.includes('healthcheck')) {
     failures.push('compose_missing_healthcheck');
   }
-  if (!smokeScript.includes('docker compose -f compose.yaml up -d --build campus-copilot-api')) {
+  if (!smokeScript.includes('docker compose -f compose.yaml up -d --build opencampus-api')) {
     failures.push('docker_smoke_missing_compose_up');
   }
   if (!smokeScript.includes('/health')) {
@@ -95,13 +95,13 @@ export function validateContainerSurface() {
   if (!distribution.includes('compose.yaml') || !distribution.includes('pnpm smoke:docker:api')) {
     failures.push('distribution_missing_compose_reference');
   }
-  if (!distribution.includes('ghcr.io/xiaojiou176-open/campus-copilot-api')) {
+  if (!distribution.includes('ghcr.io/xiaojiou176-open/opencampus-api')) {
     failures.push('distribution_missing_canonical_public_image');
   }
   if (!readme.includes('run a local Docker path with health checks')) {
     failures.push('root_readme_missing_container_entry');
   }
-  if (!distribution.includes('campus-copilot-api:local')) {
+  if (!distribution.includes('opencampus-api:local')) {
     failures.push('distribution_missing_local_image_tag');
   }
 

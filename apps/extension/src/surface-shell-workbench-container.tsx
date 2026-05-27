@@ -1,4 +1,4 @@
-import { useWorkbenchView } from '@campus-copilot/storage';
+import { useWorkbenchView } from '@opencampus/storage';
 import type { WorkbenchPanelsProps } from './workbench-panels-props';
 import { WorkbenchPanels } from './workbench-panels';
 

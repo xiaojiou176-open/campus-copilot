@@ -2,23 +2,23 @@ import {
   CanvasApiClient,
   createCanvasAdapter,
   type CanvasSyncResult,
-} from '@campus-copilot/adapters-canvas';
+} from '@opencampus/adapters-canvas';
 import {
   createEdStemAdapter,
   EdStemApiClient,
   type EdStemSyncResult,
-} from '@campus-copilot/adapters-edstem';
+} from '@opencampus/adapters-edstem';
 import {
   GradescopeApiClient,
   createGradescopeAdapter,
   type GradescopePathConfig,
   type GradescopeSyncResult,
-} from '@campus-copilot/adapters-gradescope';
+} from '@opencampus/adapters-gradescope';
 import {
   createMyUWAdapter,
   MyUWApiClient,
   type MyUWSyncResult,
-} from '@campus-copilot/adapters-myuw';
+} from '@opencampus/adapters-myuw';
 import {
   createCourseSitesAdapter,
   type CourseSiteAnnouncement,
@@ -29,7 +29,7 @@ import {
   type CourseSiteResource,
   type CourseSiteSnapshot,
   type CourseSitesSyncResult,
-} from '@campus-copilot/adapters-course-sites';
+} from '@opencampus/adapters-course-sites';
 import {
   extractTimeScheduleSectionDetailPage,
   TIME_SCHEDULE_EXACT_BLOCKERS,
@@ -41,7 +41,7 @@ import {
   type SiteSyncStatusView,
   type SyncSiteCommandResponse,
   SYNC_SITE_COMMAND,
-} from '@campus-copilot/core';
+} from '@opencampus/core';
 import {
   campusCopilotDb,
   getLatestPlanningSubstrateBySource,
@@ -53,8 +53,8 @@ import {
   replaceSiteSnapshot,
   type SiteSnapshotPayload,
   upsertAdminCarriers,
-} from '@campus-copilot/storage';
-import { HealthStatusSchema, type Site } from '@campus-copilot/schema';
+} from '@opencampus/storage';
+import { HealthStatusSchema, type Site } from '@opencampus/schema';
 import {
   buildDefaultEdStemPathConfig,
   createCanvasTabRequestExecutor,

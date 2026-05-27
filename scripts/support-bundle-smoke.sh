@@ -15,7 +15,7 @@ mkdir -p "$TEMP_DIR"
 # summaries when SSO redirect tabs linger in the same profile.
 # Use a support-bundle-specific override key instead of inheriting ambient
 # `CHROME_ATTACH_MODE`, which may still point at weaker diagnostic lanes.
-: "${CAMPUS_COPILOT_BROWSER_ROOT:=$HOME/.cache/campus-copilot/browser/chrome-user-data}"
+: "${CAMPUS_COPILOT_BROWSER_ROOT:=$HOME/.cache/opencampus/browser/chrome-user-data}"
 : "${CHROME_USER_DATA_DIR:=$CAMPUS_COPILOT_BROWSER_ROOT}"
 : "${CHROME_PROFILE_NAME:=Profile 1}"
 : "${CAMPUS_COPILOT_BROWSER_CDP_PORT:=9334}"

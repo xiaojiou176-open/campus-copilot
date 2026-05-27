@@ -1,4 +1,4 @@
-# @campus-copilot/provider-runtime
+# @opencampus/provider-runtime
 
 Read-only seam helpers for the Campus Copilot provider/runtime contract.
 
@@ -16,8 +16,8 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/provider-runtime build
-pnpm --filter @campus-copilot/provider-runtime test
+pnpm --filter @opencampus/provider-runtime build
+pnpm --filter @opencampus/provider-runtime test
 ```
 
 First file to try:
@@ -47,8 +47,8 @@ First file to try:
 1. Verify the package contract:
 
 ```bash
-pnpm --filter @campus-copilot/provider-runtime build
-pnpm --filter @campus-copilot/provider-runtime test
+pnpm --filter @opencampus/provider-runtime build
+pnpm --filter @opencampus/provider-runtime test
 ```
 
 2. Verify the repo-owned thin-BFF seam still exposes the same runtime-facing routes:

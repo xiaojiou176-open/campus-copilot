@@ -42,7 +42,7 @@ jobs:
           pnpm check:english-canonical
           pnpm check:actions-pinning
           pnpm check:docs:ssot
-          pnpm --filter @campus-copilot/web test:interaction
+          pnpm --filter @opencampus/web test:interaction
           pnpm render:social-preview
 
       - name: Manual follow-up reminder

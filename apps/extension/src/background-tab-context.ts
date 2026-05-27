@@ -1,8 +1,8 @@
 import { browser } from 'wxt/browser';
-import type { CanvasRequestExecutor } from '@campus-copilot/adapters-canvas';
-import type { EdStemPathConfig, EdStemRequestExecutor } from '@campus-copilot/adapters-edstem';
-import type { GradescopeRequestExecutor } from '@campus-copilot/adapters-gradescope';
-import type { MyUWRequestExecutor } from '@campus-copilot/adapters-myuw';
+import type { CanvasRequestExecutor } from '@opencampus/adapters-canvas';
+import type { EdStemPathConfig, EdStemRequestExecutor } from '@opencampus/adapters-edstem';
+import type { GradescopeRequestExecutor } from '@opencampus/adapters-gradescope';
+import type { MyUWRequestExecutor } from '@opencampus/adapters-myuw';
 import { extractPageHtmlInPage, extractMyUWPageContextInPage, type MyUWPageContext } from './background-runtime';
 
 export type InjectedRequestResponse =

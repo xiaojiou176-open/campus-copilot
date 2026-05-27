@@ -5,7 +5,7 @@ import {
   type ProviderId,
   type SwitchyardLane,
   type SwitchyardRuntimeProvider,
-} from '@campus-copilot/ai';
+} from '@opencampus/ai';
 
 export interface CampusCopilotHealthPayload {
   ok: true;

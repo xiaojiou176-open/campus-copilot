@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { Announcement, Assignment, Course, Event, Grade, Message, Resource } from '@campus-copilot/schema';
+import type { Announcement, Assignment, Course, Event, Grade, Message, Resource } from '@opencampus/schema';
 import type {
   AdminCarrierRecord,
   AdministrativeSummary,
@@ -36,7 +36,7 @@ export class CampusCopilotDB extends Dexie {
   sync_runs!: Table<SyncRun, string>;
   change_events!: Table<ChangeEvent, string>;
 
-  constructor(name = 'campus-copilot') {
+  constructor(name = 'opencampus') {
     super(name);
     this.version(1).stores({
       courses: '&id, site, title, code',

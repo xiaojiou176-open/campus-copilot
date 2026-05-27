@@ -1,5 +1,5 @@
 {
-  "name": "@campus-copilot/exporter",
+  "name": "@opencampus/exporter",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,6 +11,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@campus-copilot/schema": "workspace:*"
+    "@opencampus/schema": "workspace:*"
   }
 }

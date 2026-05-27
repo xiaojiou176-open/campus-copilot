@@ -31,7 +31,7 @@ export const DEFAULT_SUPPORT_BUNDLE_RETENTION_COUNT = 3;
 export const LEGACY_BROWSER_ROOTS = [
   {
     label: 'clone_profile13',
-    pathSuffix: '.campus-copilot-profile13-clone',
+    pathSuffix: '.opencampus-profile13-clone',
     notes:
       'Legacy clone-lane Chrome user-data-dir. Keep it as a migration candidate only; do not treat it as the default live lane.',
   },
@@ -84,7 +84,7 @@ export function getManagedCacheHome(env = process.env, options = {}) {
     : join(homeDir, '.cache');
 
   return normalizeDirectoryPath(
-    env.CAMPUS_COPILOT_CACHE_HOME?.trim() || join(xdgCacheHome, 'campus-copilot'),
+    env.CAMPUS_COPILOT_CACHE_HOME?.trim() || join(xdgCacheHome, 'opencampus'),
   );
 }
 
@@ -316,7 +316,7 @@ export function trimSupportBundles(runtimeCacheRoot, keepLatestCount) {
   }
 
   const supportBundles = readdirSync(runtimeCacheRoot)
-    .filter((entry) => entry.startsWith('campus-copilot-support-bundle-') && entry.endsWith('.json'))
+    .filter((entry) => entry.startsWith('opencampus-support-bundle-') && entry.endsWith('.json'))
     .sort();
 
   for (const entry of supportBundles.slice(0, Math.max(0, supportBundles.length - keepLatestCount))) {
@@ -527,7 +527,7 @@ export function cleanupRepoNamedTempResidues(policy) {
       continue;
     }
     for (const entry of readdirSync(tempRoot.path)) {
-      if (!entry.startsWith('campus-copilot-')) {
+      if (!entry.startsWith('opencampus-')) {
         continue;
       }
       const path = join(tempRoot.path, entry);

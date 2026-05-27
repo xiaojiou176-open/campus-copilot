@@ -9,8 +9,8 @@ Use this skill when you want to wire one of the site-scoped read-only MCP sideca
 
 ## Pick the right surface first
 
-- If you need cross-site health, provider status, `ask_campus_copilot`, or export tools, start with the generic server examples under `examples/integrations/` instead of a site sidecar.
-- If you only need one site's records from a snapshot, keep using this skill and `@campus-copilot/mcp-readonly`.
+- If you need cross-site health, provider status, `ask_opencampus`, or export tools, start with the generic server examples under `examples/integrations/` instead of a site sidecar.
+- If you only need one site's records from a snapshot, keep using this skill and `@opencampus/mcp-readonly`.
 
 ## Inputs
 
@@ -21,12 +21,12 @@ Use this skill when you want to wire one of the site-scoped read-only MCP sideca
 ## Steps
 
 1. Choose one site MCP binary:
-   - `campus-copilot-mcp-canvas`
-   - `campus-copilot-mcp-gradescope`
-   - `campus-copilot-mcp-edstem`
-   - `campus-copilot-mcp-myuw`
+   - `opencampus-mcp-canvas`
+   - `opencampus-mcp-gradescope`
+   - `opencampus-mcp-edstem`
+   - `opencampus-mcp-myuw`
 2. Point `CAMPUS_COPILOT_SNAPSHOT` at a snapshot JSON file.
-3. Run the sidecar with `pnpm --filter @campus-copilot/mcp-readonly start:<site>`.
+3. Run the sidecar with `pnpm --filter @opencampus/mcp-readonly start:<site>`.
 4. Start with `get_site_overview`, then move to the site-specific list tools.
 5. If your consumer wants a JSON config example, reuse:
    - `examples/mcp/codex.example.json`

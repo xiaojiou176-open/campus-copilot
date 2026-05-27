@@ -1,4 +1,4 @@
-# @campus-copilot/mcp-readonly
+# @opencampus/mcp-readonly
 
 Read-only MCP sidecars for Campus Copilot snapshot workflows.
 
@@ -14,8 +14,8 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/mcp-readonly build
-pnpm --filter @campus-copilot/mcp-readonly test
+pnpm --filter @opencampus/mcp-readonly build
+pnpm --filter @opencampus/mcp-readonly test
 ```
 
 Shared public-preview proof loop from the repo root:
@@ -32,7 +32,7 @@ Repo-root runnable sidecar:
 
 ```bash
 export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
-pnpm --filter @campus-copilot/mcp-readonly start:canvas
+pnpm --filter @opencampus/mcp-readonly start:canvas
 ```
 
 Registry-unblock progress in this repo:
@@ -43,10 +43,10 @@ Registry-unblock progress in this repo:
 
 Each binary exposes site-filtered tools over an exported Campus Copilot workspace snapshot:
 
-- `campus-copilot-mcp-canvas`
-- `campus-copilot-mcp-gradescope`
-- `campus-copilot-mcp-edstem`
-- `campus-copilot-mcp-myuw`
+- `opencampus-mcp-canvas`
+- `opencampus-mcp-gradescope`
+- `opencampus-mcp-edstem`
+- `opencampus-mcp-myuw`
 
 The MCP surface is intentionally narrow:
 

@@ -1,4 +1,4 @@
-import type { AdminCarrierRecord } from '@campus-copilot/storage';
+import type { AdminCarrierRecord } from '@opencampus/storage';
 
 function stripHtml(value: string | undefined) {
   return (value ?? '')

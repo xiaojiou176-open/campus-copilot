@@ -5,7 +5,7 @@ import type {
   Grade,
   Message,
   PriorityReason,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 import {
   ChangeEventSchema,
   FocusQueueItemSchema,

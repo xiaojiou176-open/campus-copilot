@@ -4,7 +4,7 @@ import {
   SwitchyardChatResponseSchema,
   SwitchyardProxyPayloadSchema,
   buildSwitchyardInput,
-} from '@campus-copilot/provider-runtime';
+} from '@opencampus/provider-runtime';
 
 const payload = SwitchyardProxyPayloadSchema.parse({
   provider: DEFAULT_SWITCHYARD_RUNTIME.provider,

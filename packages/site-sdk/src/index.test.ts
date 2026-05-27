@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ImportedWorkbenchSnapshot } from '@campus-copilot/storage';
+import type { ImportedWorkbenchSnapshot } from '@opencampus/storage';
 import { getCanvasOverview, getEdstemOverview, SITE_TOOLBOX_ORDER } from './index';
 
 const snapshot: ImportedWorkbenchSnapshot = {

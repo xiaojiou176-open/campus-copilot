@@ -1,4 +1,4 @@
-import type { Announcement, Assignment, Course, Event, Grade, Message, Resource, Site } from '@campus-copilot/schema';
+import type { Announcement, Assignment, Course, Event, Grade, Message, Resource, Site } from '@opencampus/schema';
 import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
 import {
   ChangeEventSchema,

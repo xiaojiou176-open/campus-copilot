@@ -16,9 +16,9 @@ Think of Campus Copilot as the labeled binder on the desk:
 ## Start with the narrowest path
 
 1. If you need cross-site health, provider readiness, read-only ask, or export tools, start with:
-   - `pnpm --filter @campus-copilot/mcp-server start`
+   - `pnpm --filter @opencampus/mcp-server start`
 2. If you only need one site's snapshot records, use:
-   - `pnpm --filter @campus-copilot/mcp-readonly start:<site>`
+   - `pnpm --filter @opencampus/mcp-readonly start:<site>`
 3. If you only need local provider status or cited-AI chat on the Campus semantic contract, use:
    - `pnpm start:api`
 

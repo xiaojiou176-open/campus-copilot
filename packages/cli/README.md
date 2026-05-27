@@ -1,4 +1,4 @@
-# @campus-copilot/cli
+# @opencampus/cli
 
 Read-only CLI for Campus Copilot builder workflows.
 
@@ -14,13 +14,13 @@ From the repo root:
 
 ```bash
 pnpm install
-pnpm --filter @campus-copilot/cli start help
+pnpm --filter @opencampus/cli start help
 ```
 
 First command to try:
 
 ```bash
-pnpm --filter @campus-copilot/cli start status
+pnpm --filter @opencampus/cli start status
 ```
 
 Shared public-preview proof loop from the repo root:

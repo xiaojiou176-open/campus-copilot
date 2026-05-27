@@ -76,6 +76,6 @@ describe('api server runtime', () => {
 
     expect(response.status).toBe(200);
     expect(payload.ok).toBe(true);
-    expect(payload.service).toBe('campus-copilot-bff');
+    expect(payload.service).toBe('opencampus-bff');
   });
 });

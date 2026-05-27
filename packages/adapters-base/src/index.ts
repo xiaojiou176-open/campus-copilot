@@ -11,7 +11,7 @@ import type {
   Message,
   Resource,
   Site,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 
 export const RESOURCE_NAMES = ['courses', 'resources', 'assignments', 'announcements', 'grades', 'messages', 'events'] as const;
 export type ResourceName = (typeof RESOURCE_NAMES)[number];

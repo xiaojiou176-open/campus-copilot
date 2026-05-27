@@ -6,7 +6,7 @@ const genericConfigs = [
   'examples/integrations/codex-mcp-shell.example.json',
   'examples/integrations/claude-code-mcp.example.json',
   'examples/integrations/claude-code-mcp-shell.example.json',
-  'examples/codex/campus-copilot-mcp.json',
+  'examples/codex/opencampus-mcp.json',
 ];
 
 const sidecarConfigs = [
@@ -17,10 +17,10 @@ const sidecarConfigs = [
 ];
 
 const sidecarCommands = new Set([
-  'campus-copilot-mcp-canvas',
-  'campus-copilot-mcp-gradescope',
-  'campus-copilot-mcp-edstem',
-  'campus-copilot-mcp-myuw',
+  'opencampus-mcp-canvas',
+  'opencampus-mcp-gradescope',
+  'opencampus-mcp-edstem',
+  'opencampus-mcp-myuw',
 ]);
 
 const packageReadmeExpectations = [
@@ -95,20 +95,20 @@ export function validateGenericConfig(path, json) {
 
   const failures = [];
   for (const [name, config] of Object.entries(servers)) {
-    if (name !== 'campus-copilot') {
+    if (name !== 'opencampus') {
       failures.push(`unexpected_generic_server_name:${path}:${name}`);
     }
     const args = Array.isArray(config.args) ? config.args : [];
     const joined = args.join(' ');
     if (config.command === 'pnpm') {
       if (
-        !joined.includes('@campus-copilot/mcp-server') ||
-        (!joined.includes('campus-copilot-mcp') && !joined.includes('start'))
+        !joined.includes('@opencampus/mcp-server') ||
+        (!joined.includes('opencampus-mcp') && !joined.includes('start'))
       ) {
         failures.push(`unexpected_generic_args:${path}`);
       }
     } else if (config.command === 'bash') {
-      if (!joined.includes('/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-mcp.sh')) {
+      if (!joined.includes('/absolute/path/to/opencampus/scripts/consumer/opencampus-mcp.sh')) {
         failures.push(`unexpected_shell_wrapper_args:${path}`);
       }
     } else {
@@ -127,7 +127,7 @@ export function validateSidecarConfig(path, json) {
 
   const failures = [];
   for (const [name, config] of Object.entries(servers)) {
-    if (!name.startsWith('campus-copilot-')) {
+    if (!name.startsWith('opencampus-')) {
       failures.push(`unexpected_sidecar_server_name:${path}:${name}`);
     }
     const args = Array.isArray(config.args) ? config.args : [];
@@ -135,11 +135,11 @@ export function validateSidecarConfig(path, json) {
     if (sidecarCommands.has(config.command)) {
       // bare sidecar binaries are valid as-is
     } else if (config.command === 'pnpm') {
-      if (!joined.includes('@campus-copilot/mcp-readonly') || !joined.includes('--dir') || !joined.includes('/absolute/path/to/campus-copilot')) {
+      if (!joined.includes('@opencampus/mcp-readonly') || !joined.includes('--dir') || !joined.includes('/absolute/path/to/opencampus')) {
         failures.push(`unexpected_repo_root_sidecar_args:${path}:${name}`);
       }
     } else if (config.command === 'bash') {
-      if (!joined.includes('/absolute/path/to/campus-copilot/scripts/consumer/campus-copilot-site-sidecar.sh')) {
+      if (!joined.includes('/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh')) {
         failures.push(`unexpected_repo_root_sidecar_args:${path}:${name}`);
       }
     } else {

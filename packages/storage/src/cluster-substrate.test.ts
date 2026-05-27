@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 
 import { describe, expect, it } from 'vitest';
-import type { Announcement, Assignment, Course, Event, Resource } from '@campus-copilot/schema';
+import type { Announcement, Assignment, Course, Event, Resource } from '@opencampus/schema';
 import { createCampusCopilotDb } from './db.ts';
 import { upsertAdminCarriers } from './admin-high-sensitivity-substrate.ts';
 import { replaceSiteSnapshot } from './snapshot-write.ts';

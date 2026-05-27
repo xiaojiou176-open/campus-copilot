@@ -34,7 +34,7 @@ paths:
               example:
                 requestId: 0e0a7acb-6d81-4744-a234-3460910c3e36
                 ok: true
-                service: campus-copilot-bff
+                service: opencampus-bff
                 mode: thin-bff
   /api/providers/status:
     get:
@@ -285,7 +285,7 @@ components:
           const: true
         service:
           type: string
-          const: campus-copilot-bff
+          const: opencampus-bff
         mode:
           type: string
           const: thin-bff

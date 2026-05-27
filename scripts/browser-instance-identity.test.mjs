@@ -13,7 +13,7 @@ import {
 const tempRoots = new Set();
 
 function makeTempRoot() {
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'campus-copilot-browser-identity-'));
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'opencampus-browser-identity-'));
   tempRoots.add(tempRoot);
   return tempRoot;
 }
@@ -27,12 +27,12 @@ test.afterEach(() => {
 
 test('browser identity html renders the core repo identity fields', () => {
   const html = buildBrowserIdentityPageHtml({
-    repoLabel: 'campus-copilot',
-    repoRoot: '/tmp/campus-copilot',
+    repoLabel: 'opencampus',
+    repoRoot: '/tmp/opencampus',
     cdpUrl: 'http://127.0.0.1:9334',
     cdpPort: 9334,
     userDataDir: '/tmp/browser-root',
-    profileDisplayName: 'campus-copilot',
+    profileDisplayName: 'opencampus',
     profileDirectory: 'Profile 1',
     accent: '#0f766e',
     monogram: 'CC',
@@ -40,7 +40,7 @@ test('browser identity html renders the core repo identity fields', () => {
     attachSummary: 'repo-owned Chrome single-instance attach lane',
   });
 
-  assert.match(html, /campus-copilot/);
+  assert.match(html, /opencampus/);
   assert.match(html, /http:\/\/127\.0\.0\.1:9334/);
   assert.match(html, /\/tmp\/browser-root/);
   assert.match(html, /Profile 1/);
@@ -60,7 +60,7 @@ test('browser identity helper writes under .runtime-cache/browser-identity and r
     cdpUrl: 'http://127.0.0.1:9334',
     browserProfile: {
       userDataDir: '/tmp/browser-root',
-      profileDisplayName: 'campus-copilot',
+      profileDisplayName: 'opencampus',
       profileDirectory: 'Profile 1',
     },
     primarySiteUrl: 'https://canvas.uw.edu/',

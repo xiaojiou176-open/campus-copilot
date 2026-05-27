@@ -12,8 +12,8 @@ import {
   type Message,
   type Resource,
   type Site,
-} from '@campus-copilot/schema';
-import { IsoDateTimeSchema } from '@campus-copilot/schema';
+} from '@opencampus/schema';
+import { IsoDateTimeSchema } from '@opencampus/schema';
 import {
   ChangeEventSchema,
   EntityStateSchema,

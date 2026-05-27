@@ -1,10 +1,10 @@
 {
-  "name": "@campus-copilot/mcp",
+  "name": "@opencampus/mcp",
   "version": "0.1.0",
   "private": false,
   "description": "Config helpers for Campus Copilot read-only site MCP sidecars.",
   "license": "MIT",
-  "keywords": ["campus-copilot", "mcp", "config", "read-only", "snapshot"],
+  "keywords": ["opencampus", "mcp", "config", "read-only", "snapshot"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/mcp",
   "bugs": {
     "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"

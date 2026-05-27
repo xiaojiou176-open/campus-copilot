@@ -3,7 +3,7 @@ import {
   RESOURCE_NAMES,
   SITE_SYNC_OUTCOMES,
   type SiteSyncOutcome,
-} from '@campus-copilot/adapters-base';
+} from '@opencampus/adapters-base';
 import {
   AlertSchema,
   AnnouncementSchema,
@@ -27,7 +27,7 @@ import {
   type Message,
   type Event,
   type Resource,
-} from '@campus-copilot/schema';
+} from '@opencampus/schema';
 
 export const SyncResourceFailureSchema = z
   .object({

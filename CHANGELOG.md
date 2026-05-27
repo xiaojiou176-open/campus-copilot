@@ -28,7 +28,7 @@ The format is inspired by Keep a Changelog.
 
 ### Changed
 
-- Reworked distribution and publication wording so repo-local proof no longer overclaims a live npm publication for `@campus-copilot/mcp`, and so stdio MCP, container HTTP, browser extension, skill pack, and plugin-grade bundle paths are split more explicitly.
+- Reworked distribution and publication wording so repo-local proof no longer overclaims a live npm publication for `@opencampus/mcp`, and so stdio MCP, container HTTP, browser extension, skill pack, and plugin-grade bundle paths are split more explicitly.
 - Reworked the root package metadata so it reads as an intentional source-first public monorepo entry instead of an accidental publish target.
 - Reworked the README and builder-fit docs so the builder/toolbox story is no longer only future-facing; it is now described as a truthful read-only preview.
 - Reworked the Campus ↔ Switchyard runtime language so Campus keeps student-facing explanation semantics while Switchyard remains behind the runtime seam.

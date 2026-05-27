@@ -25,7 +25,7 @@ vi.mock('wxt/browser', () => ({
 
 import { SITE_SYNC_HANDLERS } from '../entrypoints/background';
 import { getDefaultExtensionConfig } from './config';
-import { campusCopilotDb, getAdminCarriers, getPlanningSubstratesBySource, replaceSiteSnapshot } from '@campus-copilot/storage';
+import { campusCopilotDb, getAdminCarriers, getPlanningSubstratesBySource, replaceSiteSnapshot } from '@opencampus/storage';
 
 type ExecuteScriptMockResult = Array<{ result: unknown }>;
 

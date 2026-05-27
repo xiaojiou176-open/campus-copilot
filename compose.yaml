@@ -1,9 +1,9 @@
 services:
-  campus-copilot-api:
+  opencampus-api:
     build:
       context: .
       dockerfile: Dockerfile
-    image: campus-copilot-api:local
+    image: opencampus-api:local
     init: true
     environment:
       PORT: "8787"

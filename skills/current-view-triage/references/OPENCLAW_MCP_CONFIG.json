@@ -1,10 +1,10 @@
 {
   "mcp": {
     "servers": {
-      "campus-copilot": {
+      "opencampus": {
         "command": "pnpm",
-        "args": ["--filter", "@campus-copilot/mcp-server", "start"],
-        "cwd": "/ABSOLUTE/PATH/TO/campus-copilot"
+        "args": ["--filter", "@opencampus/mcp-server", "start"],
+        "cwd": "/ABSOLUTE/PATH/TO/opencampus"
       }
     }
   }

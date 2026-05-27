@@ -1,5 +1,5 @@
-import type { ProviderId } from '@campus-copilot/ai';
-import type { Site } from '@campus-copilot/schema';
+import type { ProviderId } from '@opencampus/ai';
+import type { Site } from '@opencampus/schema';
 import {
   buildDiagnosticsSummary,
   type DiagnosticsSummary,

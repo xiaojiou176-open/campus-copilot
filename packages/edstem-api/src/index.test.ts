@@ -5,7 +5,7 @@ function parseImportedWorkbenchSnapshot(raw: string) {
   return JSON.parse(raw);
 }
 
-describe('@campus-copilot/edstem-api', () => {
+describe('@opencampus/edstem-api', () => {
   it('returns a read-only EdStem snapshot view', () => {
     const snapshot = parseImportedWorkbenchSnapshot(
       JSON.stringify({

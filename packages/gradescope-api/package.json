@@ -1,10 +1,10 @@
 {
-  "name": "@campus-copilot/gradescope-api",
+  "name": "@opencampus/gradescope-api",
   "version": "0.1.0",
   "private": false,
   "description": "Read-only Gradescope snapshot helpers for Campus Copilot preview tooling.",
   "license": "MIT",
-  "keywords": ["campus-copilot", "gradescope", "read-only", "snapshot", "preview"],
+  "keywords": ["opencampus", "gradescope", "read-only", "snapshot", "preview"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/gradescope-api",
   "bugs": {
     "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
@@ -32,6 +32,6 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@campus-copilot/sdk": "workspace:*"
+    "@opencampus/sdk": "workspace:*"
   }
 }

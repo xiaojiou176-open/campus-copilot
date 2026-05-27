@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type SetStateAction } from 'react';
-import { type ProviderId } from '@campus-copilot/ai';
-import type { ExportFormat, ExportPreset } from '@campus-copilot/exporter';
+import { type ProviderId } from '@opencampus/ai';
+import type { ExportFormat, ExportPreset } from '@opencampus/exporter';
 import { getAiSitePolicyOverlay } from './ai-site-policy';
 import {
   ADMIN_HIGH_SENSITIVITY_FAMILY_DESCRIPTORS,

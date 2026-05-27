@@ -1,4 +1,4 @@
-import type { EntityRef } from '@campus-copilot/schema';
+import type { EntityRef } from '@opencampus/schema';
 import { WeeklyLoadEntrySchema, type WeeklyLoadEntry } from './contracts.ts';
 import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
 import { getAllWorkItemClusters } from './cluster-substrate.ts';

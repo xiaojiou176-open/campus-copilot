@@ -1,6 +1,6 @@
-import type { ExportFormat } from '@campus-copilot/exporter';
-import type { Site } from '@campus-copilot/schema';
-import type { SyncRun, WorkbenchFilter } from '@campus-copilot/storage';
+import type { ExportFormat } from '@opencampus/exporter';
+import type { Site } from '@opencampus/schema';
+import type { SyncRun, WorkbenchFilter } from '@opencampus/storage';
 import { formatRelativeTime } from './web-view-helpers';
 
 type WebToolbarBaseProps = {

@@ -7,7 +7,7 @@ import { CAMPUS_MCP_SERVER_TOOL_NAMES, createCampusCopilotMcpServer } from '../d
 test('mcp-server registers the expected read-only tool surface', async () => {
   const server = createCampusCopilotMcpServer();
   const client = new Client({
-    name: 'campus-copilot-mcp-server-test-client',
+    name: 'opencampus-mcp-server-test-client',
     version: '0.1.1',
   });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();

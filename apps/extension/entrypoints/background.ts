@@ -9,7 +9,7 @@ import {
   type CapturePlanningSubstrateCommandResponse,
   type GetCanvasSyncStatusResponse,
   type SyncCanvasCommandResponse,
-} from '@campus-copilot/core';
+} from '@opencampus/core';
 import { asCanvasSyncStatusView, handleGetSiteSyncStatus, handleSyncSite, SITE_SYNC_HANDLERS } from '../src/background-site-sync';
 import { capturePlanningSubstrateFromActiveTab } from '../src/background-planning-substrate';
 

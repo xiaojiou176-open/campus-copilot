@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import type { Site } from '@campus-copilot/schema';
+import type { Site } from '@opencampus/schema';
 import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
 import type { WorkbenchFilter } from './contracts.ts';
 import {

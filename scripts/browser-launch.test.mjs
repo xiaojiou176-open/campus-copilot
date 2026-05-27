@@ -15,11 +15,11 @@ test('browser launch payload includes identity page information for the canonica
     identityPage: {
       identityPath: '/repo/.runtime-cache/browser-identity/index.html',
       identityUrl: 'file:///repo/.runtime-cache/browser-identity/index.html',
-      title: 'campus-copilot · 9334 · browser lane',
+      title: 'opencampus · 9334 · browser lane',
     },
     currentTabs: [
       {
-        title: 'campus-copilot · 9334 · browser lane',
+        title: 'opencampus · 9334 · browser lane',
         url: 'file:///repo/.runtime-cache/browser-identity/index.html',
         identityAnchor: true,
       },

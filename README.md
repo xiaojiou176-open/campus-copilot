@@ -180,7 +180,7 @@ pnpm build:extension
 ### 2b. Build the standalone web workbench
 
 ```bash
-pnpm --filter @campus-copilot/web build
+pnpm --filter @opencampus/web build
 ```
 
 ### 3. Load the unpacked extension

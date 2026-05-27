@@ -1,4 +1,4 @@
-import type { ImportanceLevel, PriorityReasonCode } from '@campus-copilot/schema';
+import type { ImportanceLevel, PriorityReasonCode } from '@opencampus/schema';
 
 export const UI_LANGUAGE_PREFERENCES = ['auto', 'en', 'zh-CN'] as const;
 export type UiLanguagePreference = (typeof UI_LANGUAGE_PREFERENCES)[number];
@@ -808,7 +808,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       blockedByEnvironmentOrRuntime: 'Needs setup before review',
       noBlockers: 'No obvious blockers are active right now.',
       exportJson: 'Export diagnostics JSON',
-      reportReady: 'campus-copilot-diagnostics.json is ready to download.',
+      reportReady: 'opencampus-diagnostics.json is ready to download.',
     },
     priorityAlerts: {
       title: 'Priority Alerts',
@@ -1438,7 +1438,7 @@ const TEXT: Record<ResolvedUiLanguage, UiText> = {
       blockedByEnvironmentOrRuntime: '被环境或运行时阻塞',
       noBlockers: '当前没有明显运行时阻塞，可以继续做更深一层的真实验收。',
       exportJson: '导出诊断 JSON',
-      reportReady: 'campus-copilot-diagnostics.json 已准备下载。',
+      reportReady: 'opencampus-diagnostics.json 已准备下载。',
     },
     priorityAlerts: {
       title: '优先提醒',
