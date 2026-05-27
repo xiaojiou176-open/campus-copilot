@@ -1,6 +1,6 @@
 # @opencampus/cli
 
-Read-only CLI for Campus Copilot builder workflows.
+Read-only CLI for OpenCampus builder workflows.
 
 Use this package when you want one terminal-first entry point for snapshot summaries, provider readiness, export, or cited-AI checks without starting from MCP first.
 

@@ -442,7 +442,7 @@ const payload = {
       patterns: ['docker-ci', 'clean-room', 'runner-temp', 'batch-auth-run-service'],
       currentRepoDeclared: false,
       notes:
-        'Do not attribute machine-wide temp residues with these names to Campus Copilot unless separate process or source evidence links them.',
+        'Do not attribute machine-wide temp residues with these names to OpenCampus unless separate process or source evidence links them.',
     },
     {
       label: 'chrome_code_sign_clone',

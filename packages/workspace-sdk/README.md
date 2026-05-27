@@ -1,6 +1,6 @@
 # @opencampus/workspace-sdk
 
-Read-only workspace derivation helpers for imported Campus Copilot snapshots.
+Read-only workspace derivation helpers for imported OpenCampus snapshots.
 
 Use this package when you want the same decision-layer state the product uses, without opening the extension UI.
 

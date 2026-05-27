@@ -1,5 +1,5 @@
 import {
-  CampusCopilotClient,
+  OpenCampusClient,
   buildWorkspaceSummary,
   parseImportedSnapshot,
   loadImportedSnapshotFile,
@@ -43,7 +43,7 @@ function createExportArtifactFromSnapshot({ snapshot, preset, format, site = 'al
       };
 
   const sections = [
-    `# Campus Copilot snapshot export`,
+    `# OpenCampus snapshot export`,
     ``,
     `generatedAt: ${scoped.generatedAt}`,
     `preset: ${preset}`,
@@ -191,7 +191,7 @@ export async function runCli(argv, io, fetchImpl = fetch) {
     throw new Error(`Unknown snapshot subcommand: ${subcommand}`);
   }
 
-  const client = new CampusCopilotClient({
+  const client = new OpenCampusClient({
     baseUrl: flags['base-url'] ?? 'http://127.0.0.1:8787',
     fetchImpl,
   });

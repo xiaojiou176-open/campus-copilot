@@ -16,7 +16,7 @@ import {
 } from '@opencampus/exporter';
 import type { Site } from '@opencampus/schema';
 import {
-  createCampusCopilotDb,
+  createOpenCampusDb,
   getAllSiteEntityCounts,
   getFocusQueue,
   getLatestSyncRuns,
@@ -128,9 +128,9 @@ function normalizeImportedSnapshot(candidate: unknown): ImportedWorkbenchSnapsho
 async function withLoadedSnapshot<T>(
   snapshot: ImportedWorkbenchSnapshot,
   options: WorkspaceDeriveOptions,
-  callback: (db: ReturnType<typeof createCampusCopilotDb>, now: string, filters: WorkbenchFilter) => Promise<T>,
+  callback: (db: ReturnType<typeof createOpenCampusDb>, now: string, filters: WorkbenchFilter) => Promise<T>,
 ) {
-  const db = createCampusCopilotDb(`opencampus-workspace-sdk-${randomUUID()}`);
+  const db = createOpenCampusDb(`opencampus-workspace-sdk-${randomUUID()}`);
   const now = options.now ?? snapshot.generatedAt;
   const filters = options.filters ?? DEFAULT_FILTERS;
 

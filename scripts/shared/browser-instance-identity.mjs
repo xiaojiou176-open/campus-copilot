@@ -241,7 +241,7 @@ export function buildBrowserIdentityPageHtml({
           <h1>${escapeHtml(repoLabel)}</h1>
           <p class="lede">
             This is the repo-owned browser lane identity tab. Keep it visible as the human-facing anchor so this
-            Campus Copilot Chrome window stays easy to spot when several repos are open at once.
+            OpenCampus Chrome window stays easy to spot when several repos are open at once.
           </p>
           <p class="callout">
             Manual one-time polish: pin this tab if you want a tighter visual anchor. Browser avatar/theme changes
@@ -306,7 +306,7 @@ export function buildBrowserIdentityPageHtml({
             </div>
             <div class="kv">
               <label>Purpose</label>
-              <code>Human-facing badge for the canonical Campus Copilot browser lane.</code>
+              <code>Human-facing badge for the canonical OpenCampus browser lane.</code>
             </div>
           </div>
         </article>
@@ -325,11 +325,11 @@ export function writeBrowserIdentityPage({
   primarySiteUrl,
   attachSummary = 'repo-owned Chrome single-instance attach lane',
 }) {
-  const repoLabel = env.CAMPUS_COPILOT_BROWSER_IDENTITY_LABEL?.trim() || path.basename(repoRoot);
+  const repoLabel = env.OPENCAMPUS_BROWSER_IDENTITY_LABEL?.trim() || path.basename(repoRoot);
   const accent =
-    env.CAMPUS_COPILOT_BROWSER_IDENTITY_ACCENT?.trim() &&
-    HEX_COLOR_PATTERN.test(env.CAMPUS_COPILOT_BROWSER_IDENTITY_ACCENT.trim())
-      ? env.CAMPUS_COPILOT_BROWSER_IDENTITY_ACCENT.trim()
+    env.OPENCAMPUS_BROWSER_IDENTITY_ACCENT?.trim() &&
+    HEX_COLOR_PATTERN.test(env.OPENCAMPUS_BROWSER_IDENTITY_ACCENT.trim())
+      ? env.OPENCAMPUS_BROWSER_IDENTITY_ACCENT.trim()
       : deriveIdentityAccent(repoLabel);
   const monogram = deriveIdentityMonogram(repoLabel);
   const identityDir = path.join(repoRoot, '.runtime-cache', BROWSER_IDENTITY_RUNTIME_DIRNAME);

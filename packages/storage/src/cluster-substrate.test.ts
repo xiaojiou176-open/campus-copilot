@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 
 import { describe, expect, it } from 'vitest';
 import type { Announcement, Assignment, Course, Event, Resource } from '@opencampus/schema';
-import { createCampusCopilotDb } from './db.ts';
+import { createOpenCampusDb } from './db.ts';
 import { upsertAdminCarriers } from './admin-high-sensitivity-substrate.ts';
 import { replaceSiteSnapshot } from './snapshot-write.ts';
 import { replacePlanningSubstratesBySource } from './planning-substrate.ts';
@@ -20,7 +20,7 @@ const canvasSource = {
 
 describe('cluster substrate', () => {
   it('recomputes course/work-item clusters and administrative summaries from shared site facts', async () => {
-    const db = createCampusCopilotDb('cluster-substrate-test');
+    const db = createOpenCampusDb('cluster-substrate-test');
 
     const canvasCourse: Course = {
       id: 'canvas:course:cse312',
@@ -432,7 +432,7 @@ describe('cluster substrate', () => {
   });
 
   it('persists local cluster review decisions and projects them back onto the shared surface', async () => {
-    const db = createCampusCopilotDb('cluster-substrate-review-override-test');
+    const db = createOpenCampusDb('cluster-substrate-review-override-test');
 
     const canvasCourse: Course = {
       id: 'canvas:course:seminar',
@@ -508,7 +508,7 @@ describe('cluster substrate', () => {
   });
 
   it('does not count locally dismissed clusters as merged health', async () => {
-    const db = createCampusCopilotDb('cluster-substrate-review-dismissed-test');
+    const db = createOpenCampusDb('cluster-substrate-review-dismissed-test');
 
     const canvasCourse: Course = {
       id: 'canvas:course:seminar',
@@ -574,7 +574,7 @@ describe('cluster substrate', () => {
   });
 
   it('emits exact blocker summaries for admin families that still have no landed carrier', async () => {
-    const db = createCampusCopilotDb('cluster-substrate-admin-blocker-test');
+    const db = createOpenCampusDb('cluster-substrate-admin-blocker-test');
 
     await replaceSiteSnapshot(
       'myuw',

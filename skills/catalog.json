@@ -8,13 +8,13 @@
     "officialListing": "not_listed",
     "scope": "read-only",
     "readme": "README.md",
-    "description": "Repo-owned catalog for Campus Copilot public read-only skills. This is a local bundle surface, not an upstream marketplace manifest."
+    "description": "Repo-owned catalog for OpenCampus public read-only skills. This is a local bundle surface, not an upstream marketplace manifest."
   },
   "skills": [
     {
       "id": "read-only-workspace-analysis",
       "entrypoint": "read-only-workspace-analysis/SKILL.md",
-      "summary": "Summarize what is open, what changed, what is due soon, and which site is carrying the workload from a Campus Copilot snapshot.",
+      "summary": "Summarize what is open, what changed, what is due soon, and which site is carrying the workload from a OpenCampus snapshot.",
       "scope": "read-only",
       "consumerRoutes": [
         "codex",
@@ -64,7 +64,7 @@
     {
       "id": "openclaw-readonly-consumer",
       "entrypoint": "openclaw-readonly-consumer/SKILL.md",
-      "summary": "Guide an OpenClaw-style local runtime onto the snapshot-first or thin-BFF-first read-only Campus Copilot path.",
+      "summary": "Guide an OpenClaw-style local runtime onto the snapshot-first or thin-BFF-first read-only OpenCampus path.",
       "scope": "read-only",
       "consumerRoutes": [
         "openclaw-style-local-runtime"
@@ -126,7 +126,7 @@
     {
       "id": "switchyard-runtime-check",
       "entrypoint": "switchyard-runtime-check/SKILL.md",
-      "summary": "Verify the optional local Switchyard runtime seam while preserving Campus Copilot answer semantics.",
+      "summary": "Verify the optional local Switchyard runtime seam while preserving OpenCampus answer semantics.",
       "scope": "read-only",
       "consumerRoutes": [
         "codex",

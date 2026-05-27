@@ -1,4 +1,4 @@
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import {
   LocalEntityOverlayFieldSchema,
   LocalEntityOverlayInputSchema,
@@ -45,7 +45,7 @@ function normalizeOverlay(
   return LocalEntityOverlaySchema.parse(nextOverlay);
 }
 
-export async function upsertLocalEntityOverlay(input: LocalEntityOverlayInput, db = campusCopilotDb) {
+export async function upsertLocalEntityOverlay(input: LocalEntityOverlayInput, db = openCampusDb) {
   const parsedInput = LocalEntityOverlayInputSchema.parse(input);
   const existing = await db.local_entity_overlay.get(parsedInput.entityId);
   const nextOverlay = normalizeOverlay(existing, parsedInput);
@@ -62,7 +62,7 @@ export async function upsertLocalEntityOverlay(input: LocalEntityOverlayInput, d
 export async function clearLocalEntityOverlayField(
   entityId: string,
   field: LocalEntityOverlayField,
-  db: CampusCopilotDB = campusCopilotDb,
+  db: OpenCampusDB = openCampusDb,
 ) {
   const parsedField = LocalEntityOverlayFieldSchema.parse(field);
   const existing = await db.local_entity_overlay.get(entityId);
@@ -90,7 +90,7 @@ export async function clearLocalEntityOverlayField(
 export async function pinEntity(
   entity: Pick<LocalEntityOverlayInput, 'entityId' | 'site' | 'kind'>,
   pinned: boolean,
-  db = campusCopilotDb,
+  db = openCampusDb,
 ) {
   return upsertLocalEntityOverlay(
     {
@@ -104,7 +104,7 @@ export async function pinEntity(
 export async function snoozeEntity(
   entity: Pick<LocalEntityOverlayInput, 'entityId' | 'site' | 'kind'>,
   snoozeUntil: string | undefined,
-  db = campusCopilotDb,
+  db = openCampusDb,
 ) {
   return upsertLocalEntityOverlay(
     {
@@ -118,7 +118,7 @@ export async function snoozeEntity(
 export async function dismissEntity(
   entity: Pick<LocalEntityOverlayInput, 'entityId' | 'site' | 'kind'>,
   dismissUntil: string | undefined,
-  db = campusCopilotDb,
+  db = openCampusDb,
 ) {
   return upsertLocalEntityOverlay(
     {
@@ -132,7 +132,7 @@ export async function dismissEntity(
 export async function saveEntityNote(
   entity: Pick<LocalEntityOverlayInput, 'entityId' | 'site' | 'kind'>,
   note: string | undefined,
-  db = campusCopilotDb,
+  db = openCampusDb,
 ) {
   return upsertLocalEntityOverlay(
     {
@@ -143,7 +143,7 @@ export async function saveEntityNote(
   );
 }
 
-export async function getLocalEntityOverlayByEntityIds(entityIds: string[], db: CampusCopilotDB = campusCopilotDb) {
+export async function getLocalEntityOverlayByEntityIds(entityIds: string[], db: OpenCampusDB = openCampusDb) {
   const overlays = entityIds.length > 0 ? await db.local_entity_overlay.bulkGet(entityIds) : [];
   return overlays.filter((overlay): overlay is LocalEntityOverlay => Boolean(overlay));
 }

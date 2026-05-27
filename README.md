@@ -2,13 +2,13 @@
 
 > OpenCampus keeps Canvas, Gradescope, EdStem, MyUW, and the current shipped read-only planning/admin desk on one local-first surface so students can see what changed, what matters first, and what to export or ask next.
 
-> Campus Copilot is the first shipped workspace in that family. Today it is available as the `Campus Copilot for UW` browser extension plus a matching local web workbench.
+> OpenCampus is the first shipped workspace in that family. Today it is available as the `OpenCampus for UW` browser extension plus a matching local web workbench.
 
 [Docs](docs/README.md) · [Quickstart](#quickstart) · [User Surfaces](docs/06-export-and-user-surfaces.md) · [Security](SECURITY.md) · [Privacy](PRIVACY.md) · [Distribution](DISTRIBUTION.md)
 
 ## What You Can Try Today
 
-- `Campus Copilot for UW` as the school-specific browser extension surface
+- `OpenCampus for UW` as the school-specific browser extension surface
 - one local web workbench over the same read-only workspace
 - manual sync, structured export, and cited AI after structure
 - shipped read-only planning/admin surfaces for `MyPlan`, `DARS`, `Transcript`, `Financial aid`, `Accounts`, `Tuition detail`, `Profile`, and `Time Schedule`
@@ -22,18 +22,18 @@ Real product proof, not concept art:
 These are public-proof crops of the current shipped surfaces.
 They do not replace the deeper local installed-state or manual live review lane that stays documented in [`docs/storefront-assets.md`](docs/storefront-assets.md) and [`docs/live-validation-runbook.md`](docs/live-validation-runbook.md).
 
-![Campus Copilot sidepanel overview](docs/assets/sidepanel-overview.png)
+![OpenCampus sidepanel overview](docs/assets/sidepanel-overview.png)
 Extension proof: the current student-facing sidepanel with explicit `Export` and `Trust center` paths.
 
-![Campus Copilot Ask AI evidence-first overview](docs/assets/ask-ai-evidence-first.png)
+![OpenCampus Ask AI evidence-first overview](docs/assets/ask-ai-evidence-first.png)
 Ask AI proof: the AI lane still starts from the same desk, and empty desks route students back to workspace or export before a blank chat pretends to know enough.
 
-![Campus Copilot Ask AI answer proof](docs/assets/ask-ai-answer-proof.png)
+![OpenCampus Ask AI answer proof](docs/assets/ask-ai-answer-proof.png)
 Ask AI answer proof: the answer card still stays on the same desk, with citations/provenance visible instead of pretending the chat lane became a second source of truth.
 
 Standalone web workbench proof:
 
-![Campus Copilot web workbench overview](docs/assets/web-workbench-overview.png)
+![OpenCampus web workbench overview](docs/assets/web-workbench-overview.png)
 Web proof: the broader read-only workbench that stays on the same local workspace contract.
 
 ## Start Here In 60 Seconds
@@ -50,7 +50,7 @@ This repo is not a blank chat shell. It is a **student-first desk**: structure f
 
 Students should not have to rebuild the same mental map across multiple campus sites before they can think.
 
-Campus Copilot exists to:
+OpenCampus exists to:
 
 - normalize site facts into one shared schema
 - keep the workspace local-first and read-only by default
@@ -95,8 +95,8 @@ If you are new, follow this order:
 Use the names in this order:
 
 - **OpenCampus** when you mean the repo-level public story
-- **Campus Copilot** when you mean the current student workspace
-- **Campus Copilot for UW** only when the school-specific extension label needs to stay explicit
+- **OpenCampus** when you mean the current student workspace
+- **OpenCampus for UW** only when the school-specific extension label needs to stay explicit
 
 ## Current Product Shape
 
@@ -122,7 +122,7 @@ The honest split is:
 
 ## Product Map
 
-![Campus Copilot hero overview](docs/assets/hero-workbench-overview.svg)
+![OpenCampus hero overview](docs/assets/hero-workbench-overview.svg)
 
 This illustration is the orientation map, not the proof lane. Keep using the screenshots and receipts above when you want evidence of the current shipped surface.
 
@@ -191,7 +191,7 @@ Load this directory in Chrome:
 apps/extension/dist/chrome-mv3
 ```
 
-If you want AI responses from the sidepanel, Campus Copilot now first checks the usual local loopback addresses automatically:
+If you want AI responses from the sidepanel, OpenCampus now first checks the usual local loopback addresses automatically:
 
 ```text
 http://127.0.0.1:8787

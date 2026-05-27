@@ -6,7 +6,7 @@ import {
   type WorkbenchFilter,
   type WorkbenchView,
 } from './contracts.ts';
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import { getPriorityAlerts, getRecentUpdates } from './derived-alerts-and-updates.ts';
 import {
   isAssignmentOpen,
@@ -18,7 +18,7 @@ import {
 import { getAllPlanningSubstrates } from './planning-substrate.ts';
 import { getAdministrativeSummaries, getAllCourseClusters, getAllWorkItemClusters, getMergeHealthSummary } from './cluster-substrate.ts';
 
-export async function getTodaySnapshot(now: string, db: CampusCopilotDB = campusCopilotDb): Promise<TodaySnapshot> {
+export async function getTodaySnapshot(now: string, db: OpenCampusDB = openCampusDb): Promise<TodaySnapshot> {
   const [assignments, grades, syncStates, recentUpdates, alerts] = await Promise.all([
     db.assignments.toArray(),
     db.grades.toArray(),
@@ -45,7 +45,7 @@ export async function getTodaySnapshot(now: string, db: CampusCopilotDB = campus
 export async function getWorkbenchView(
   now: string,
   filters: WorkbenchFilter,
-  db: CampusCopilotDB = campusCopilotDb,
+  db: OpenCampusDB = openCampusDb,
 ): Promise<WorkbenchView> {
   const parsedFilters = WorkbenchFilterSchema.parse(filters);
   const [

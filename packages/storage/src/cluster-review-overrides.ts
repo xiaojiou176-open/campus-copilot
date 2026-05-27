@@ -1,4 +1,4 @@
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import {
   ClusterReviewDecisionSchema,
   ClusterReviewOverrideSchema,
@@ -13,7 +13,7 @@ function makeOverrideId(targetKind: ClusterReviewTargetKind, targetId: string) {
   return `cluster-review:${targetKind}:${targetId}`;
 }
 
-export async function getClusterReviewOverrides(db: CampusCopilotDB = campusCopilotDb) {
+export async function getClusterReviewOverrides(db: OpenCampusDB = openCampusDb) {
   return db.cluster_review_overrides.toArray();
 }
 
@@ -23,7 +23,7 @@ export async function setClusterReviewDecision(
     targetId: string;
     decision: ClusterReviewDecision;
   },
-  db: CampusCopilotDB = campusCopilotDb,
+  db: OpenCampusDB = openCampusDb,
 ) {
   const targetKind = ClusterReviewTargetKindSchema.parse(input.targetKind);
   const decision = ClusterReviewDecisionSchema.parse(input.decision);
@@ -45,7 +45,7 @@ export async function clearClusterReviewDecision(
     targetKind: ClusterReviewTargetKind;
     targetId: string;
   },
-  db: CampusCopilotDB = campusCopilotDb,
+  db: OpenCampusDB = openCampusDb,
 ) {
   const targetKind = ClusterReviewTargetKindSchema.parse(input.targetKind);
   await db.cluster_review_overrides.delete(makeOverrideId(targetKind, input.targetId));

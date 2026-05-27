@@ -16,7 +16,7 @@ import {
 } from '@opencampus/exporter';
 import type { Course, Site } from '@opencampus/schema';
 import {
-  campusCopilotDb,
+  openCampusDb,
   replaceImportedWorkbenchSnapshot,
   setClusterReviewDecision,
   type ClusterReviewDecision,
@@ -171,9 +171,9 @@ export function App() {
       }
 
       const existingCount =
-        (await campusCopilotDb.assignments.count()) +
-        (await campusCopilotDb.messages.count()) +
-        (await campusCopilotDb.events.count());
+        (await openCampusDb.assignments.count()) +
+        (await openCampusDb.messages.count()) +
+        (await openCampusDb.events.count());
 
       if (existingCount === 0) {
         await replaceImportedWorkbenchSnapshot(DEMO_IMPORTED_SNAPSHOT);

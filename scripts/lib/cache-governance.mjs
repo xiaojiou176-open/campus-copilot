@@ -84,7 +84,7 @@ export function getManagedCacheHome(env = process.env, options = {}) {
     : join(homeDir, '.cache');
 
   return normalizeDirectoryPath(
-    env.CAMPUS_COPILOT_CACHE_HOME?.trim() || join(xdgCacheHome, 'opencampus'),
+    env.OPENCAMPUS_CACHE_HOME?.trim() || join(xdgCacheHome, 'opencampus'),
   );
 }
 
@@ -92,26 +92,26 @@ export function getBrowserBootstrapPlan(env = process.env, options = {}) {
   const homeDir = options.homeDir ?? getHomeDir(env);
   const cacheHome = getManagedCacheHome(env, { homeDir });
   const managedExternalCacheRoot = normalizeDirectoryPath(
-    env.CAMPUS_COPILOT_MANAGED_EXTERNAL_CACHE_ROOT?.trim() || join(cacheHome, 'cache'),
+    env.OPENCAMPUS_MANAGED_EXTERNAL_CACHE_ROOT?.trim() || join(cacheHome, 'cache'),
   );
   const browserStateRoot = normalizeDirectoryPath(
-    env.CAMPUS_COPILOT_BROWSER_STATE_ROOT?.trim() || join(cacheHome, 'browser'),
+    env.OPENCAMPUS_BROWSER_STATE_ROOT?.trim() || join(cacheHome, 'browser'),
   );
   const targetUserDataRoot = normalizeDirectoryPath(
-    env.CAMPUS_COPILOT_BROWSER_ROOT?.trim() ||
+    env.OPENCAMPUS_BROWSER_ROOT?.trim() ||
       join(cacheHome, DEFAULT_REPO_OWNED_CHROME_USER_DATA_SUBPATH),
   );
   const sourceChromeRoot = normalizeDirectoryPath(
-    env.CAMPUS_COPILOT_SOURCE_CHROME_ROOT?.trim() || join(homeDir, DEFAULT_SOURCE_CHROME_ROOT_SUBPATH),
+    env.OPENCAMPUS_SOURCE_CHROME_ROOT?.trim() || join(homeDir, DEFAULT_SOURCE_CHROME_ROOT_SUBPATH),
   );
   const sourceProfileDirectory =
-    env.CAMPUS_COPILOT_SOURCE_PROFILE_DIRECTORY?.trim() || DEFAULT_SOURCE_CHROME_PROFILE_DIRECTORY;
+    env.OPENCAMPUS_SOURCE_PROFILE_DIRECTORY?.trim() || DEFAULT_SOURCE_CHROME_PROFILE_DIRECTORY;
   const targetProfileDirectory =
-    env.CAMPUS_COPILOT_BROWSER_PROFILE_DIRECTORY?.trim() || CANONICAL_CHROME_PROFILE_DIRECTORY;
+    env.OPENCAMPUS_BROWSER_PROFILE_DIRECTORY?.trim() || CANONICAL_CHROME_PROFILE_DIRECTORY;
   const profileDisplayName =
-    env.CAMPUS_COPILOT_BROWSER_PROFILE_DISPLAY_NAME?.trim() || CANONICAL_CHROME_PROFILE_DISPLAY_NAME;
+    env.OPENCAMPUS_BROWSER_PROFILE_DISPLAY_NAME?.trim() || CANONICAL_CHROME_PROFILE_DISPLAY_NAME;
   const browserCdpPort = parsePositiveInt(
-    env.CAMPUS_COPILOT_BROWSER_CDP_PORT,
+    env.OPENCAMPUS_BROWSER_CDP_PORT,
     DEFAULT_BROWSER_CDP_PORT,
   );
 
@@ -428,8 +428,8 @@ function collectTempRoots(env = process.env) {
     });
   }
 
-  if (env.CAMPUS_COPILOT_TEMP_ROOTS?.trim()) {
-    for (const value of env.CAMPUS_COPILOT_TEMP_ROOTS.split(':')) {
+  if (env.OPENCAMPUS_TEMP_ROOTS?.trim()) {
+    for (const value of env.OPENCAMPUS_TEMP_ROOTS.split(':')) {
       push(value, 'env_override');
     }
     return roots;
@@ -483,12 +483,12 @@ export function resolveCacheGovernancePolicy(env = process.env, options = {}) {
     runtimeBrowserIdentityRoot: join(repoRoot, '.runtime-cache', 'browser-identity'),
     runtimeCoverageRoot: join(repoRoot, '.runtime-cache', 'coverage'),
     runtimeRawRoot: join(repoRoot, '.runtime-cache', 'raw'),
-    runtimeCleanupMode: env.CAMPUS_COPILOT_RUNTIME_CLEAN_LEVEL?.trim().toLowerCase() === 'closeout' ? 'closeout' : 'standard',
-    externalCacheTtlHours: parsePositiveInt(env.CAMPUS_COPILOT_CACHE_TTL_HOURS, DEFAULT_EXTERNAL_CACHE_TTL_HOURS),
-    externalCacheMaxMb: parsePositiveInt(env.CAMPUS_COPILOT_CACHE_MAX_MB, DEFAULT_EXTERNAL_CACHE_MAX_MB),
-    runtimeTempTtlHours: parsePositiveInt(env.CAMPUS_COPILOT_RUNTIME_TEMP_TTL_HOURS, DEFAULT_RUNTIME_TEMP_TTL_HOURS),
-    runtimeEvidenceTtlHours: parsePositiveInt(env.CAMPUS_COPILOT_RUNTIME_EVIDENCE_TTL_HOURS, DEFAULT_RUNTIME_EVIDENCE_TTL_HOURS),
-    supportBundleRetentionCount: parsePositiveInt(env.CAMPUS_COPILOT_SUPPORT_BUNDLE_KEEP, DEFAULT_SUPPORT_BUNDLE_RETENTION_COUNT),
+    runtimeCleanupMode: env.OPENCAMPUS_RUNTIME_CLEAN_LEVEL?.trim().toLowerCase() === 'closeout' ? 'closeout' : 'standard',
+    externalCacheTtlHours: parsePositiveInt(env.OPENCAMPUS_CACHE_TTL_HOURS, DEFAULT_EXTERNAL_CACHE_TTL_HOURS),
+    externalCacheMaxMb: parsePositiveInt(env.OPENCAMPUS_CACHE_MAX_MB, DEFAULT_EXTERNAL_CACHE_MAX_MB),
+    runtimeTempTtlHours: parsePositiveInt(env.OPENCAMPUS_RUNTIME_TEMP_TTL_HOURS, DEFAULT_RUNTIME_TEMP_TTL_HOURS),
+    runtimeEvidenceTtlHours: parsePositiveInt(env.OPENCAMPUS_RUNTIME_EVIDENCE_TTL_HOURS, DEFAULT_RUNTIME_EVIDENCE_TTL_HOURS),
+    supportBundleRetentionCount: parsePositiveInt(env.OPENCAMPUS_SUPPORT_BUNDLE_KEEP, DEFAULT_SUPPORT_BUNDLE_RETENTION_COUNT),
     tempRoots: collectTempRoots(env),
   };
 }

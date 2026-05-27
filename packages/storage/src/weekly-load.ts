@@ -1,6 +1,6 @@
 import type { EntityRef } from '@opencampus/schema';
 import { WeeklyLoadEntrySchema, type WeeklyLoadEntry } from './contracts.ts';
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import { getAllWorkItemClusters } from './cluster-substrate.ts';
 import {
   endOfUtcDay,
@@ -15,7 +15,7 @@ import {
   toEntityRef,
 } from './storage-shared.ts';
 
-export async function getWeeklyLoad(now: string, db: CampusCopilotDB = campusCopilotDb): Promise<WeeklyLoadEntry[]> {
+export async function getWeeklyLoad(now: string, db: OpenCampusDB = openCampusDb): Promise<WeeklyLoadEntry[]> {
   const [assignments, events, overlays, workItemClusters] = await Promise.all([
     db.assignments.toArray(),
     db.events.toArray(),

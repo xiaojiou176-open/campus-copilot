@@ -262,7 +262,7 @@ export function buildExportInputFromSnapshot(
   const siteLabel = site === 'all' ? 'All sites' : site;
   return {
     generatedAt: snapshot.generatedAt,
-    viewTitle: `Campus Copilot snapshot (${siteLabel})`,
+    viewTitle: `OpenCampus snapshot (${siteLabel})`,
     planningSubstrates: snapshot.planningSubstrates ?? [],
     resources: filterBySite(snapshot.resources, site),
     assignments: filterBySite(snapshot.assignments, site),
@@ -288,7 +288,7 @@ export function createExportArtifactFromSnapshot(input: {
   });
 }
 
-export class CampusCopilotClient {
+export class OpenCampusClient {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
 
@@ -375,7 +375,7 @@ export class CampusCopilotClient {
   }
 }
 
-export { CampusCopilotApiClient } from './api.ts';
+export { OpenCampusApiClient } from './api.ts';
 export { buildWorkspaceSummary, loadImportedSnapshotFile, parseImportedSnapshot } from './snapshot.ts';
 export {
   getCanvasAssignments,

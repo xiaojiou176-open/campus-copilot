@@ -5,7 +5,7 @@ description: Review one supported site's exported snapshot records without reope
 
 # Site Snapshot Review
 
-Use this skill when you have an exported Campus Copilot workspace snapshot and want a read-only review of one site's current records.
+Use this skill when you have an exported OpenCampus workspace snapshot and want a read-only review of one site's current records.
 
 ## Steps
 

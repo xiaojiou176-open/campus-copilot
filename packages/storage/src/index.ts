@@ -82,7 +82,7 @@ export {
   type WorkbenchFilter,
   type WorkbenchView,
 } from './contracts.ts';
-export { CampusCopilotDB, campusCopilotDb, createCampusCopilotDb } from './db.ts';
+export { OpenCampusDB, openCampusDb, createOpenCampusDb } from './db.ts';
 export { getAdminCarriers, upsertAdminCarriers } from './admin-high-sensitivity-substrate.ts';
 export {
   applySiteSnapshotWithLedger,

@@ -1,17 +1,17 @@
 ---
 name: openclaw-readonly-consumer
-description: Keep an OpenClaw-style local runtime on the snapshot-first, thin-BFF-first, read-only Campus Copilot path.
+description: Keep an OpenClaw-style local runtime on the snapshot-first, thin-BFF-first, read-only OpenCampus path.
 ---
 
 # OpenClaw-Style Read-Only Consumer
 
-Use this skill when your local operator/runtime behaves like an OpenClaw-style shell and you want Campus Copilot to stay on the **snapshot-first / thin-BFF-first / read-only** side.
+Use this skill when your local operator/runtime behaves like an OpenClaw-style shell and you want OpenCampus to stay on the **snapshot-first / thin-BFF-first / read-only** side.
 
-Think of Campus Copilot as the labeled binder on the desk:
+Think of OpenCampus as the labeled binder on the desk:
 
-- Campus Copilot provides structured academic context
+- OpenCampus provides structured academic context
 - your local runtime decides how to consume that context
-- Campus Copilot does **not** become a browser-control plugin or write-capable operator loop
+- OpenCampus does **not** become a browser-control plugin or write-capable operator loop
 
 ## Start with the narrowest path
 
@@ -31,7 +31,7 @@ Think of Campus Copilot as the labeled binder on the desk:
 ## Recommended flow
 
 1. Export a safe snapshot path:
-   - `export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"`
+   - `export OPENCAMPUS_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"`
 2. Start with the generic MCP server unless you already know you only need one site.
 3. If your runtime explicitly accepts the same `mcpServers` JSON shape, adapt:
    - `examples/integrations/codex-mcp.example.json`

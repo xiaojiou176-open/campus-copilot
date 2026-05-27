@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, it } from 'vitest';
-import { createCampusCopilotDb } from './db';
+import { createOpenCampusDb } from './db';
 import { getFocusQueue } from './focus-queue';
 import { replaceImportedWorkbenchSnapshot } from './imported-workbench';
 import { getRecentChangeEvents } from './sync-ledger';
@@ -8,7 +8,7 @@ import { getWeeklyLoad } from './weekly-load';
 
 describe('replaceImportedWorkbenchSnapshot', () => {
   it('hydrates the shared storage contract for a read-only web surface', async () => {
-    const db = createCampusCopilotDb(`opencampus-import-${Date.now()}`);
+    const db = createOpenCampusDb(`opencampus-import-${Date.now()}`);
     await replaceImportedWorkbenchSnapshot(
       {
         generatedAt: '2026-04-03T09:00:00-07:00',

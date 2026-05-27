@@ -133,8 +133,8 @@ for (const { command, args, cwd, optionalFailureKind } of commands) {
 const auditEnv = buildSanitizedChildEnv(
   optionalRuntimeBlocker
     ? {
-        CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER: optionalRuntimeBlocker.code,
-        CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER_DETAIL: optionalRuntimeBlocker.detail,
+        OPENCAMPUS_CONTAINER_RUNTIME_BLOCKER: optionalRuntimeBlocker.code,
+        OPENCAMPUS_CONTAINER_RUNTIME_BLOCKER_DETAIL: optionalRuntimeBlocker.detail,
       }
     : {},
 );

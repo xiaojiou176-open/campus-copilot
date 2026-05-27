@@ -1,12 +1,12 @@
 # OpenClaw-Style Read-Only Consumer
 
-Use this path only when your local operator/runtime can launch a **stdio MCP server** or a **site-scoped MCP sidecar** and you want Campus Copilot to act as a **read-only academic context provider**.
+Use this path only when your local operator/runtime can launch a **stdio MCP server** or a **site-scoped MCP sidecar** and you want OpenCampus to act as a **read-only academic context provider**.
 
 This is the safe mental model:
 
-- Campus Copilot supplies structured study context
+- OpenCampus supplies structured study context
 - your local runtime decides how to consume that context
-- Campus Copilot does **not** become a browser-control provider or write-capable operator plugin
+- OpenCampus does **not** become a browser-control provider or write-capable operator plugin
 
 ## Choose the narrowest path first
 
@@ -35,7 +35,7 @@ Use this when you want:
 ### 2. Use site-scoped sidecars when you only need one site's snapshot
 
 ```bash
-export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
+export OPENCAMPUS_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
 pnpm --filter @opencampus/mcp-readonly start:canvas
 ```
 
@@ -73,7 +73,7 @@ If it does **not** support that exact shape, stay with the command snippets in t
 If you only need a safe public fixture, start with:
 
 ```bash
-export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
+export OPENCAMPUS_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
 ```
 
 ## Suggested first tools
@@ -99,7 +99,7 @@ These are the safest starting points when you want OpenClaw-style consumers to s
 
 - reading the current decision layer from a local snapshot
 - exporting artifacts for another local tool to inspect
-- keeping Campus semantics inside Campus Copilot while your runtime stays outside it
+- keeping Campus semantics inside OpenCampus while your runtime stays outside it
 
 ## What this path still does not mean
 

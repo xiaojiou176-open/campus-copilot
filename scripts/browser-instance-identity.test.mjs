@@ -53,8 +53,8 @@ test('browser identity helper writes under .runtime-cache/browser-identity and r
   const result = writeBrowserIdentityPage({
     repoRoot,
     env: {
-      CAMPUS_COPILOT_BROWSER_IDENTITY_LABEL: 'Campus Copilot Browser',
-      CAMPUS_COPILOT_BROWSER_IDENTITY_ACCENT: '#2563eb',
+      OPENCAMPUS_BROWSER_IDENTITY_LABEL: 'OpenCampus Browser',
+      OPENCAMPUS_BROWSER_IDENTITY_ACCENT: '#2563eb',
     },
     cdpPort: 9334,
     cdpUrl: 'http://127.0.0.1:9334',
@@ -72,6 +72,6 @@ test('browser identity helper writes under .runtime-cache/browser-identity and r
   );
   assert.equal(fs.existsSync(result.identityPath), true);
   assert.equal(fileURLToPath(result.identityUrl), result.identityPath);
-  assert.equal(result.repoLabel, 'Campus Copilot Browser');
+  assert.equal(result.repoLabel, 'OpenCampus Browser');
   assert.equal(result.accent, '#2563eb');
 });

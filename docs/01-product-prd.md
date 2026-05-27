@@ -1,6 +1,6 @@
 # Product Brief
 
-Campus Copilot is an academic decision workspace for students who need one structured place to understand work across:
+OpenCampus is an academic decision workspace for students who need one structured place to understand work across:
 
 - Canvas
 - Gradescope

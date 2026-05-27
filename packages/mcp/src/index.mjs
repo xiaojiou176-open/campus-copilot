@@ -20,7 +20,7 @@ export function listSupportedSiteMcpServers() {
 
 export function createSnapshotEnv(snapshotPath) {
   return {
-    CAMPUS_COPILOT_SNAPSHOT: snapshotPath,
+    OPENCAMPUS_SNAPSHOT: snapshotPath,
   };
 }
 

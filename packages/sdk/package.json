@@ -2,7 +2,7 @@
   "name": "@opencampus/sdk",
   "version": "0.1.0",
   "private": false,
-  "description": "Read-only SDK for Campus Copilot local BFF and imported workspace snapshots.",
+  "description": "Read-only SDK for OpenCampus local BFF and imported workspace snapshots.",
   "license": "MIT",
   "keywords": ["opencampus", "sdk", "local-first", "read-only", "snapshot"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/sdk",

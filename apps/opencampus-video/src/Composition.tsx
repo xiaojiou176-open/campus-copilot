@@ -290,7 +290,7 @@ const OpeningScene: React.FC = () => {
             OPENCAMPUS
           </div>
           <div style={{ ...entrance(frame, 4) }}>
-            <Badge>Campus Copilot is shipping today</Badge>
+            <Badge>OpenCampus is shipping today</Badge>
           </div>
           <div style={{ ...textStyles.headline, ...entrance(frame, 8) }}>
             One local desk
@@ -317,7 +317,7 @@ const OpeningScene: React.FC = () => {
           }}
         >
           <div style={{ ...textStyles.eyebrow, fontSize: 16 }}>AVAILABLE NOW</div>
-          <Badge>Campus Copilot for UW</Badge>
+          <Badge>OpenCampus for UW</Badge>
           <div style={{ display: "grid", gap: 14 }}>
             {sitePills.map((pill, index) => (
               <div
@@ -360,7 +360,7 @@ const SidepanelScene: React.FC = () => {
         <div style={{ ...entrance(frame, 6) }}>
           <ScreenshotPanel
             shot={sidepanelShot}
-            label="Campus Copilot for UW"
+            label="OpenCampus for UW"
             title="The student workspace stays visible."
             body="The extension is the fastest way into the product today. It keeps the student workspace visible, puts Export and Trust Center in plain sight, and avoids turning the first fold into a builder dashboard."
           />
@@ -420,9 +420,9 @@ const AskAiScene: React.FC = () => {
         <div style={{ ...entrance(frame, 6) }}>
           <ScreenshotPanel
             shot={askAiShot}
-            label="Campus Copilot for UW"
+            label="OpenCampus for UW"
             title="Ask from the same desk."
-            body="Inside OpenCampus, Campus Copilot keeps the AI lane anchored to the visible workspace. When the desk is still thin, students get sent back to workspace or export before a blank chat pretends to know enough."
+            body="Inside OpenCampus, OpenCampus keeps the AI lane anchored to the visible workspace. When the desk is still thin, students get sent back to workspace or export before a blank chat pretends to know enough."
           />
         </div>
       </div>
@@ -564,7 +564,7 @@ const ClosingScene: React.FC = () => {
               ...entrance(frame, 12),
             }}
           >
-            Campus Copilot is the first workspace people can try today:
+            OpenCampus is the first workspace people can try today:
             local-first, read-only, and grounded in one student decision desk.
           </div>
         </div>

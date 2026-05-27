@@ -1,8 +1,8 @@
 {
   "manifest_version": "0.2",
-  "name": "Campus Copilot MCP",
+  "name": "OpenCampus MCP",
   "version": "0.1.1",
-  "description": "Read-only MCP server for the local Campus Copilot BFF and imported workspace snapshots.",
+  "description": "Read-only MCP server for the local OpenCampus BFF and imported workspace snapshots.",
   "author": {
     "name": "xiaojiou176-open",
     "url": "https://github.com/xiaojiou176-open/OpenCampus"

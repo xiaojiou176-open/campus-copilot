@@ -115,5 +115,5 @@ test('buildHarLikeArchive emits HAR-like entries for successful and failed reque
   assert.equal(har.log.entries[0]?.request.url, 'https://my.uw.edu/api/v1/notices');
   assert.equal(har.log.entries[0]?.response.status, 200);
   assert.equal(har.log.entries[1]?.response.status, 0);
-  assert.equal(har.log.entries[1]?._campusCopilot.failure.errorText, 'blocked_by_client');
+  assert.equal(har.log.entries[1]?._openCampus.failure.errorText, 'blocked_by_client');
 });

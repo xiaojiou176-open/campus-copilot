@@ -15,7 +15,7 @@ import type {
   WorkItemCluster,
 } from './contracts.ts';
 
-export class CampusCopilotDB extends Dexie {
+export class OpenCampusDB extends Dexie {
   courses!: Table<Course, string>;
   resources!: Table<Resource, string>;
   assignments!: Table<Assignment, string>;
@@ -200,8 +200,8 @@ export class CampusCopilotDB extends Dexie {
   }
 }
 
-export function createCampusCopilotDb(name?: string) {
-  return new CampusCopilotDB(name);
+export function createOpenCampusDb(name?: string) {
+  return new OpenCampusDB(name);
 }
 
-export const campusCopilotDb = createCampusCopilotDb();
+export const openCampusDb = createOpenCampusDb();

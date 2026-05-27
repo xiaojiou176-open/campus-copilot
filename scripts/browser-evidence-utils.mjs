@@ -123,7 +123,7 @@ export function buildHarLikeArchive(state) {
             },
         cache: {},
         timings: {},
-        _campusCopilot: {
+        _openCampus: {
           resourceType: entry.request.resourceType,
           failure: entry.failure,
           finalUrl: entry.response?.url,

@@ -2,7 +2,7 @@
   "name": "@opencampus/mcp-server",
   "version": "0.1.1",
   "private": false,
-  "description": "Unified read-only MCP stdio server for Campus Copilot builder workflows.",
+  "description": "Unified read-only MCP stdio server for OpenCampus builder workflows.",
   "license": "MIT",
   "keywords": [
     "opencampus",

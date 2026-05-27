@@ -9,8 +9,8 @@ Use it to answer three questions:
 - where do I go next if I want proof or builder detail?
 
 OpenCampus is the public repo story.
-Campus Copilot is the current student workspace inside it.
-Use **Campus Copilot for UW** only when the school-specific extension label needs to stay explicit.
+OpenCampus is the current student workspace inside it.
+Use **OpenCampus for UW** only when the school-specific extension label needs to stay explicit.
 
 ## Start Here By Intent
 

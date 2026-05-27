@@ -26,7 +26,7 @@ export interface AdapterRegistryPort {
   getCapabilities(site: Site): Promise<AdapterCapabilities | undefined>;
 }
 
-export interface CampusCopilotCommandMap {
+export interface OpenCampusCommandMap {
   loadSurface: {
     surface: SurfaceName;
   };

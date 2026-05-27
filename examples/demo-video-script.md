@@ -10,7 +10,7 @@ Keep it short, truthful, and product-first.
 
 ## Opening
 
-“OpenCampus keeps Canvas, Gradescope, EdStem, and MyUW on one local-first desk. Campus Copilot is the first shipped workspace in that family, and it lets cited AI explain the structured result instead of scraping the web directly.”
+“OpenCampus keeps Canvas, Gradescope, EdStem, and MyUW on one local-first desk. OpenCampus is the first shipped workspace in that family, and it lets cited AI explain the structured result instead of scraping the web directly.”
 
 ## Scene 1 — Product identity
 

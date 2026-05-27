@@ -1,6 +1,6 @@
 # System Architecture Brief
 
-Campus Copilot is not a browser-extension shell with a few page scrapers attached.
+OpenCampus is not a browser-extension shell with a few page scrapers attached.
 
 Its current architecture is:
 

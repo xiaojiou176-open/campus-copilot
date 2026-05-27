@@ -106,8 +106,8 @@ const openClawCompatibleLayoutPaths = [
   'settings.json',
 ];
 
-const containerRuntimeBlocker = process.env.CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER;
-const containerRuntimeBlockerDetail = process.env.CAMPUS_COPILOT_CONTAINER_RUNTIME_BLOCKER_DETAIL;
+const containerRuntimeBlocker = process.env.OPENCAMPUS_CONTAINER_RUNTIME_BLOCKER;
+const containerRuntimeBlockerDetail = process.env.OPENCAMPUS_CONTAINER_RUNTIME_BLOCKER_DETAIL;
 
 const packageReadmeByName = {
   '@opencampus/sdk': 'packages/sdk/README.md',

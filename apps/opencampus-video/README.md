@@ -6,7 +6,7 @@ surface.
 Current goal:
 
 - keep the public narrative aligned with `OpenCampus` first
-- show `Campus Copilot` as the first shipped workspace
+- show `OpenCampus` as the first shipped workspace
 - use real repo proof assets instead of generic motion filler
 - keep the Ask AI lane visibly evidence-first, not chat-shell-first
 

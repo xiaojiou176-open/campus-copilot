@@ -1,11 +1,11 @@
 ---
 name: read-only-workspace-analysis
-description: Summarize what is open, what changed, and what is due soon from a Campus Copilot snapshot.
+description: Summarize what is open, what changed, and what is due soon from a OpenCampus snapshot.
 ---
 
 # Read-Only Workspace Analysis
 
-Use this skill when you have a Campus Copilot snapshot and want to answer:
+Use this skill when you have a OpenCampus snapshot and want to answer:
 
 - what is open
 - what changed

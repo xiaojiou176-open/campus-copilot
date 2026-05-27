@@ -36,7 +36,7 @@
       "tags": [
         "latest"
       ],
-      "summary": "Summarize what is open, what changed, what is due soon, and which site is carrying the workload from a Campus Copilot snapshot."
+      "summary": "Summarize what is open, what changed, what is due soon, and which site is carrying the workload from a OpenCampus snapshot."
     },
     {
       "id": "read-only-workspace-audit",
@@ -69,7 +69,7 @@
       "tags": [
         "latest"
       ],
-      "summary": "Guide an OpenClaw-style local runtime onto the snapshot-first or thin-BFF-first read-only Campus Copilot path."
+      "summary": "Guide an OpenClaw-style local runtime onto the snapshot-first or thin-BFF-first read-only OpenCampus path."
     },
     {
       "id": "site-mcp-consumer",
@@ -113,7 +113,7 @@
       "tags": [
         "latest"
       ],
-      "summary": "Verify the optional local Switchyard runtime seam while preserving Campus Copilot answer semantics."
+      "summary": "Verify the optional local Switchyard runtime seam while preserving OpenCampus answer semantics."
     }
   ]
 }

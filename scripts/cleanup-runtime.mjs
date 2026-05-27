@@ -9,7 +9,7 @@ import {
   summarizeCachePolicy,
 } from './lib/cache-governance.mjs';
 
-const repoRoot = process.env.CAMPUS_COPILOT_REPO_ROOT ?? process.cwd();
+const repoRoot = process.env.OPENCAMPUS_REPO_ROOT ?? process.cwd();
 process.chdir(repoRoot);
 
 function collectChromeProcessList() {

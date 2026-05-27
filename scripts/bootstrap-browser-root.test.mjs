@@ -31,7 +31,7 @@ test('browser bootstrap dry-run reports source and target without mutating targe
       profile: {
         info_cache: {
           'Profile 13': {
-            name: 'Campus Copilot',
+            name: 'OpenCampus',
           },
         },
       },
@@ -69,8 +69,8 @@ test('browser bootstrap apply copies only Local State and one profile into Profi
       profile: {
         info_cache: {
           'Profile 13': {
-            name: 'Campus Copilot',
-            shortcut_name: 'Campus Copilot',
+            name: 'OpenCampus',
+            shortcut_name: 'OpenCampus',
           },
         },
       },

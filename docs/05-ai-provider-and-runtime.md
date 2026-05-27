@@ -46,7 +46,7 @@ It is **not** currently:
 Today the repository already has a real integration spine:
 
 - `apps/api` is the public-facing thin HTTP layer for formal provider calls
-- `apps/api` can bridge to a local `Switchyard` runtime without turning Campus Copilot into a generic orchestration shell
+- `apps/api` can bridge to a local `Switchyard` runtime without turning OpenCampus into a generic orchestration shell
 - extension and standalone web both speak the same `Switchyard` consumer seam while keeping Campus-owned explanation semantics
 - `packages/schema` is the shared contract layer
 - `packages/storage` is the decision/read-model layer
@@ -61,8 +61,8 @@ The current shipped path still works through direct `OpenAI` / `Gemini` API-key 
 But the endgame direction is now explicit:
 
 - Wave 5 must make the runtime seam **Switchyard-first**
-- Campus Copilot should stop growing its own long-term provider transport matrix
-- Campus Copilot must still keep:
+- OpenCampus should stop growing its own long-term provider transport matrix
+- OpenCampus must still keep:
   - `messages[]`
   - `answerText` / `structuredAnswer`
   - citations
@@ -106,7 +106,7 @@ Current honest status:
 
 So the correct wording is:
 
-> Campus Copilot now has a repo-public read-only MCP preview because it already has structured contracts, auditable read models, and a thin HTTP edge, but MCP is still not a hosted public platform surface.
+> OpenCampus now has a repo-public read-only MCP preview because it already has structured contracts, auditable read models, and a thin HTTP edge, but MCP is still not a hosted public platform surface.
 
 ## Ecosystem Fit
 
@@ -144,7 +144,7 @@ The repo is less appropriate to market today as:
 - AI does not read raw DOM, raw HTML, raw adapter payloads, or cookies
 - AI consumes structured workbench outputs and export-ready data
 - provider-specific transport logic stays behind the thin BFF boundary
-- when `Switchyard` is used, Campus Copilot still talks to one local service boundary instead of owning provider transport itself
+- when `Switchyard` is used, OpenCampus still talks to one local service boundary instead of owning provider transport itself
 - `.env.example` exposes formal provider API-key env vars plus optional base-URL overrides
 - `.env.example` also includes manual live-validation `CHROME_*` overrides, but those belong to the manual live lane and not to the formal AI runtime entry
 - reserved OAuth-style env placeholders are not part of the default runtime entry

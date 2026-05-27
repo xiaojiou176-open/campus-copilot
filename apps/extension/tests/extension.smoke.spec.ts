@@ -2,7 +2,7 @@ import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
-const CONFIG_KEY = 'campusCopilotConfig';
+const CONFIG_KEY = 'openCampusConfig';
 const SITE_STATE_KEY = '__opencampus_mock_site_states__';
 const DOWNLOAD_KEY = '__opencampus_last_download__';
 const SMOKE_CAPTURE_DIR = process.env.EXTENSION_SMOKE_CAPTURE_DIR;
@@ -374,7 +374,7 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
             JSON.stringify({
               ok: true,
               answerText: JSON.stringify({
-                summary: 'Campus Copilot AI answer',
+                summary: 'OpenCampus AI answer',
                 bullets: ['Homework 5 is still due soon', 'Canvas still shows it as open'],
                 citations: [
                   {
@@ -387,7 +387,7 @@ async function installExtensionMocks(page: import('@playwright/test').Page) {
                 ],
               }),
               structuredAnswer: {
-                summary: 'Campus Copilot AI answer',
+                summary: 'OpenCampus AI answer',
                 bullets: ['Homework 5 is still due soon', 'Canvas still shows it as open'],
                 citations: [
                   {
@@ -699,14 +699,14 @@ test('saves settings/auth center changes, syncs edstem, and records export downl
   await page.getByRole('button', { name: 'Sync EdStem' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'EdStem sync succeeded' })).toBeVisible();
   await page.evaluate(async () => {
-    const openCampusCopilotDb = () =>
+    const openOpenCampusDb = () =>
       new Promise<IDBDatabase>((resolve, reject) => {
         const request = indexedDB.open('opencampus');
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
       });
 
-    const db = await openCampusCopilotDb();
+    const db = await openOpenCampusDb();
     await new Promise<void>((resolve, reject) => {
       const tx = db.transaction(['courses', 'messages', 'sync_state'], 'readwrite');
       tx.objectStore('courses').put({
@@ -866,7 +866,7 @@ test('asks ai after the current workspace envelope is explicitly allowed', async
   await page.getByLabel('Question').fill('What should I pay attention to right now?');
   await page.getByRole('button', { name: 'Ask AI' }).click();
 
-  await expect(page.getByText('Campus Copilot AI answer')).toBeVisible();
+  await expect(page.getByText('OpenCampus AI answer')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Key points' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Citations' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Homework 5' })).toBeVisible();

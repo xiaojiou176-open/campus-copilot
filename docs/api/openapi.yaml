@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Campus Copilot Local BFF
+  title: OpenCampus Local BFF
   version: 0.1.0
   summary: Thin local HTTP edge for formal provider calls and provider readiness.
   description: >
@@ -67,7 +67,7 @@ paths:
       summary: Ask through the Campus consumer seam with switchyard-first compatibility
       operationId: postAiAsk
       description: >
-        This is the stable consumer-facing seam for Campus Copilot builder tools.
+        This is the stable consumer-facing seam for OpenCampus builder tools.
         It keeps Campus response semantics (`answerText`, optional `structuredAnswer`,
         citations/trust-gaps/next-actions) while preferring the local Switchyard runtime
         when the request and local configuration allow it.

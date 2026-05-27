@@ -1,6 +1,6 @@
 # Current View Triage Capability Map
 
-This skill only needs the read-only Campus Copilot surfaces.
+This skill only needs the read-only OpenCampus surfaces.
 
 ## Core tools
 

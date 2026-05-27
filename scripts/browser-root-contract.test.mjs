@@ -48,7 +48,7 @@ test('buildBootstrappedLocalState rewrites source profile metadata into Profile 
     profile: {
       info_cache: {
         'Profile 13': {
-          name: 'Campus Copilot',
+          name: 'OpenCampus',
           avatar_icon: 'foo',
         },
       },
@@ -103,7 +103,7 @@ test('cleanupExternalCache trims managed cache but never touches the browser sub
     const policy = getCacheGovernancePolicy(
       {
         HOME: sandbox.home,
-        CAMPUS_COPILOT_CACHE_HOME: join(sandbox.home, '.cache/opencampus'),
+        OPENCAMPUS_CACHE_HOME: join(sandbox.home, '.cache/opencampus'),
       },
       { homeDir: sandbox.home },
     );

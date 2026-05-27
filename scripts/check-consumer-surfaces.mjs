@@ -145,9 +145,9 @@ export function validateSidecarConfig(path, json) {
     } else {
       failures.push(`unexpected_sidecar_command:${path}:${config.command ?? 'missing'}`);
     }
-    if (!config.env || typeof config.env.CAMPUS_COPILOT_SNAPSHOT !== 'string') {
+    if (!config.env || typeof config.env.OPENCAMPUS_SNAPSHOT !== 'string') {
       failures.push(`missing_snapshot_env:${path}:${name}`);
-    } else if (!config.env.CAMPUS_COPILOT_SNAPSHOT.includes('/absolute/path/')) {
+    } else if (!config.env.OPENCAMPUS_SNAPSHOT.includes('/absolute/path/')) {
       failures.push(`snapshot_env_placeholder_drift:${path}:${name}`);
     }
   }

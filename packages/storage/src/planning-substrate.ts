@@ -1,4 +1,4 @@
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import { PlanningSubstrateOwnerSchema, type PlanningSubstrateOwner, type PlanningSubstrateSource } from './contracts.ts';
 import { recomputeClusterSubstrate } from './cluster-substrate.ts';
 
@@ -6,7 +6,7 @@ function parsePlanningSubstrates(records: PlanningSubstrateOwner[]) {
   return records.map((record) => PlanningSubstrateOwnerSchema.parse(record));
 }
 
-export async function putPlanningSubstrates(records: PlanningSubstrateOwner[], db: CampusCopilotDB = campusCopilotDb) {
+export async function putPlanningSubstrates(records: PlanningSubstrateOwner[], db: OpenCampusDB = openCampusDb) {
   await db.planning_substrates.bulkPut(parsePlanningSubstrates(records));
   await recomputeClusterSubstrate(db);
 }
@@ -14,7 +14,7 @@ export async function putPlanningSubstrates(records: PlanningSubstrateOwner[], d
 export async function replacePlanningSubstratesBySource(
   source: PlanningSubstrateSource,
   records: PlanningSubstrateOwner[],
-  db: CampusCopilotDB = campusCopilotDb,
+  db: OpenCampusDB = openCampusDb,
 ) {
   const parsed = parsePlanningSubstrates(records).filter((record) => record.source === source);
   await db.transaction('rw', [db.planning_substrates], async () => {
@@ -28,18 +28,18 @@ export async function replacePlanningSubstratesBySource(
 
 export async function getPlanningSubstratesBySource(
   source: PlanningSubstrateSource,
-  db: CampusCopilotDB = campusCopilotDb,
+  db: OpenCampusDB = openCampusDb,
 ) {
   return db.planning_substrates.where('source').equals(source).toArray();
 }
 
-export async function getAllPlanningSubstrates(db: CampusCopilotDB = campusCopilotDb) {
+export async function getAllPlanningSubstrates(db: OpenCampusDB = openCampusDb) {
   return db.planning_substrates.toArray();
 }
 
 export async function getLatestPlanningSubstrateBySource(
   source: PlanningSubstrateSource,
-  db: CampusCopilotDB = campusCopilotDb,
+  db: OpenCampusDB = openCampusDb,
 ) {
   const records = await getPlanningSubstratesBySource(source, db);
   return [...records].sort((left, right) => right.capturedAt.localeCompare(left.capturedAt))[0];

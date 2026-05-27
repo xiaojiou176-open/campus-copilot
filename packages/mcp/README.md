@@ -1,6 +1,6 @@
 # @opencampus/mcp
 
-Snapshot-first config helpers for the Campus Copilot read-only MCP preview.
+Snapshot-first config helpers for the OpenCampus read-only MCP preview.
 
 This package does **not** run the MCP server by itself.  
 It exists to make the repo-public MCP wiring explicit and truthful.

@@ -20,7 +20,7 @@ test('builds a snapshot-backed MCP config for one site', () => {
   assert.deepEqual(config, {
     command: 'opencampus-mcp-canvas',
     env: {
-      CAMPUS_COPILOT_SNAPSHOT: '/tmp/workspace-snapshot.json',
+      OPENCAMPUS_SNAPSHOT: '/tmp/workspace-snapshot.json',
     },
   });
 });
@@ -33,7 +33,7 @@ test('builds a repo-root runnable site MCP config for one site', () => {
     command: 'pnpm',
     args: ['--dir', '/repo/opencampus', '--filter', '@opencampus/mcp-readonly', 'start:canvas'],
     env: {
-      CAMPUS_COPILOT_SNAPSHOT: '/tmp/workspace-snapshot.json',
+      OPENCAMPUS_SNAPSHOT: '/tmp/workspace-snapshot.json',
     },
   });
 });

@@ -502,7 +502,7 @@ export async function handleApiRequest(
   });
 }
 
-export function createCampusCopilotApiServer(env: ApiEnv = loadApiEnv(), fetchImpl: FetchLike = fetch) {
+export function createOpenCampusApiServer(env: ApiEnv = loadApiEnv(), fetchImpl: FetchLike = fetch) {
   return createServer(async (req: IncomingMessage, res: ServerResponse) => {
     try {
       const response = await handleApiRequest(req, env, fetchImpl);

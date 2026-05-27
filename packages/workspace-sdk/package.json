@@ -2,7 +2,7 @@
   "name": "@opencampus/workspace-sdk",
   "version": "0.1.0",
   "private": false,
-  "description": "Read-only workspace derivation helpers for Campus Copilot imported snapshots.",
+  "description": "Read-only workspace derivation helpers for OpenCampus imported snapshots.",
   "license": "MIT",
   "keywords": ["opencampus", "workspace-sdk", "local-first", "read-only", "snapshot"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/workspace-sdk",

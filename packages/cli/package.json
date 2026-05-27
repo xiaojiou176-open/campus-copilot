@@ -2,7 +2,7 @@
   "name": "@opencampus/cli",
   "version": "0.1.0",
   "private": false,
-  "description": "Read-only CLI for Campus Copilot snapshot and local BFF workflows.",
+  "description": "Read-only CLI for OpenCampus snapshot and local BFF workflows.",
   "license": "MIT",
   "keywords": ["opencampus", "cli", "local-first", "read-only", "mcp"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/cli",

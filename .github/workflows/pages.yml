@@ -45,7 +45,7 @@ jobs:
 
       - name: Build web workbench for Pages
         env:
-          CAMPUS_COPILOT_WEB_BASE: /opencampus/
+          OPENCAMPUS_WEB_BASE: /opencampus/
         run: pnpm --filter @opencampus/web build
 
       - name: Upload Pages artifact

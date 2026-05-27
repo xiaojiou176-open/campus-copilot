@@ -25,7 +25,7 @@ vi.mock('wxt/browser', () => ({
 
 import { SITE_SYNC_HANDLERS } from '../entrypoints/background';
 import { getDefaultExtensionConfig } from './config';
-import { campusCopilotDb, getAdminCarriers, getPlanningSubstratesBySource, replaceSiteSnapshot } from '@opencampus/storage';
+import { openCampusDb, getAdminCarriers, getPlanningSubstratesBySource, replaceSiteSnapshot } from '@opencampus/storage';
 
 type ExecuteScriptMockResult = Array<{ result: unknown }>;
 
@@ -169,7 +169,7 @@ describe('background site dispatch', () => {
           status: 'success',
           lastSyncedAt: '2026-04-11T12:00:00-07:00',
         },
-        campusCopilotDb,
+        openCampusDb,
       );
     }
 
@@ -254,7 +254,7 @@ describe('background site dispatch', () => {
       );
     }
 
-    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', openCampusDb);
     expect(storedPlanning[0]).toEqual(
       expect.objectContaining({
         source: 'time-schedule',
@@ -354,7 +354,7 @@ describe('background site dispatch', () => {
       expect(result.snapshot.events?.[0]?.detail).toContain('Restriction: No credit after CSE 142');
     }
 
-    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', openCampusDb);
     expect(storedPlanning[0]).toEqual(
       expect.objectContaining({
         source: 'time-schedule',
@@ -380,7 +380,7 @@ describe('background site dispatch', () => {
   });
 
   it('keeps the broader public Time Schedule lane when an SLN detail fallback is captured later', async () => {
-    await campusCopilotDb.planning_substrates.clear();
+    await openCampusDb.planning_substrates.clear();
 
     const executeScriptMock = vi.spyOn(
       browser.scripting as {
@@ -407,7 +407,7 @@ describe('background site dispatch', () => {
       config: getDefaultExtensionConfig(),
     });
 
-    const beforeDetail = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    const beforeDetail = await getPlanningSubstratesBySource('time-schedule', openCampusDb);
     const broaderPlannedCourseCount = beforeDetail[0]?.plannedCourseCount ?? 0;
     const broaderScheduleOptionCount = beforeDetail[0]?.scheduleOptionCount ?? 0;
 
@@ -429,7 +429,7 @@ describe('background site dispatch', () => {
       config: getDefaultExtensionConfig(),
     });
 
-    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', openCampusDb);
     expect(storedPlanning[0]?.plannedCourseCount).toBe(broaderPlannedCourseCount);
     expect(storedPlanning[0]?.scheduleOptionCount).toBe(broaderScheduleOptionCount);
     expect(storedPlanning[0]?.runtimePosture).toBe('public_course_offerings_planning_lane_with_sln_detail');
@@ -439,7 +439,7 @@ describe('background site dispatch', () => {
   });
 
   it('promotes Time Schedule into the authenticated full-schedule lane when a richer NetID page is captured', async () => {
-    await campusCopilotDb.planning_substrates.clear();
+    await openCampusDb.planning_substrates.clear();
     const executeScriptMock = vi.spyOn(
       browser.scripting as {
         executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
@@ -463,7 +463,7 @@ describe('background site dispatch', () => {
 
     expect(result.ok).toBe(true);
 
-    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', openCampusDb);
     expect(storedPlanning[0]?.runtimePosture).toBe('authenticated_full_schedule_planning_lane');
     expect(storedPlanning[0]?.currentTruth).toContain('authenticated full-schedule lane');
     expect(storedPlanning[0]?.exactBlockers.map((blocker) => blocker.id)).not.toContain('netid_richer_schedule_view');
@@ -471,7 +471,7 @@ describe('background site dispatch', () => {
   });
 
   it('clears all Time Schedule promotion blockers when an authenticated full schedule page and SLN detail companion are both available', async () => {
-    await campusCopilotDb.planning_substrates.clear();
+    await openCampusDb.planning_substrates.clear();
 
     (browser.tabs.query as unknown as { mockResolvedValue: (value: unknown) => void }).mockResolvedValue([
       {
@@ -515,14 +515,14 @@ describe('background site dispatch', () => {
 
     expect(result.ok).toBe(true);
 
-    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', openCampusDb);
     expect(storedPlanning[0]?.runtimePosture).toBe('authenticated_full_schedule_planning_lane_with_sln_detail');
     expect(storedPlanning[0]?.exactBlockers).toHaveLength(0);
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('Authenticated SLN detail was captured');
   });
 
   it('auto-merges an open SLN detail companion tab into the public Time Schedule sync lane', async () => {
-    await campusCopilotDb.planning_substrates.clear();
+    await openCampusDb.planning_substrates.clear();
 
     (browser.tabs.query as unknown as { mockResolvedValue: (value: unknown) => void }).mockResolvedValue([
       {
@@ -575,7 +575,7 @@ describe('background site dispatch', () => {
       expect(result.snapshot.events?.find((event) => event.title === 'CSE 121 A')?.detail).toContain('89 seats available');
     }
 
-    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', campusCopilotDb);
+    const storedPlanning = await getPlanningSubstratesBySource('time-schedule', openCampusDb);
     expect(storedPlanning[0]?.runtimePosture).toBe('public_course_offerings_planning_lane_with_sln_detail');
     expect(storedPlanning[0]?.exactBlockers.map((blocker) => blocker.id)).not.toContain('dom_sln_detail_fallback');
     expect(storedPlanning[0]?.terms[0]?.summary).toContain('Authenticated SLN detail was captured');
@@ -1506,7 +1506,7 @@ describe('background site dispatch', () => {
   });
 
   it('returns partial_success when a MyUW admin tuition page yields only admin high-sensitivity summaries', async () => {
-    await campusCopilotDb.admin_carriers.clear();
+    await openCampusDb.admin_carriers.clear();
     const executeScriptMock = vi.spyOn(
       browser.scripting as {
         executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
@@ -1574,7 +1574,7 @@ describe('background site dispatch', () => {
   });
 
   it('returns partial_success and stores a transcript admin carrier when the MyUW transcript page only yields admin summaries', async () => {
-    await campusCopilotDb.admin_carriers.clear();
+    await openCampusDb.admin_carriers.clear();
     const executeScriptMock = vi.spyOn(
       browser.scripting as {
         executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
@@ -1610,7 +1610,7 @@ describe('background site dispatch', () => {
       expect(result.health.reason).toBe('admin_high_sensitivity_summary_captured');
     }
 
-    const stored = await getAdminCarriers(campusCopilotDb);
+    const stored = await getAdminCarriers(openCampusDb);
     expect(stored).toHaveLength(1);
     expect(stored[0]).toEqual(
       expect.objectContaining({
@@ -1626,7 +1626,7 @@ describe('background site dispatch', () => {
   });
 
   it('returns partial_success and stores a financial-aid admin carrier when the MyUW finaid page only yields admin summaries', async () => {
-    await campusCopilotDb.admin_carriers.clear();
+    await openCampusDb.admin_carriers.clear();
     const executeScriptMock = vi.spyOn(
       browser.scripting as {
         executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
@@ -1660,7 +1660,7 @@ describe('background site dispatch', () => {
       expect(result.health.reason).toBe('admin_high_sensitivity_summary_captured');
     }
 
-    const stored = await getAdminCarriers(campusCopilotDb);
+    const stored = await getAdminCarriers(openCampusDb);
     expect(stored).toHaveLength(1);
     expect(stored[0]).toEqual(
       expect.objectContaining({
@@ -1676,7 +1676,7 @@ describe('background site dispatch', () => {
   });
 
   it('returns partial_success and stores accounts plus tuition handoff carriers when the MyUW accounts page only yields admin summaries', async () => {
-    await campusCopilotDb.admin_carriers.clear();
+    await openCampusDb.admin_carriers.clear();
     const executeScriptMock = vi.spyOn(
       browser.scripting as {
         executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
@@ -1711,7 +1711,7 @@ describe('background site dispatch', () => {
       expect(result.health.reason).toBe('admin_high_sensitivity_summary_captured');
     }
 
-    const stored = await getAdminCarriers(campusCopilotDb);
+    const stored = await getAdminCarriers(openCampusDb);
     expect(stored.map((record) => record.family).sort()).toEqual(['accounts', 'tuition_detail']);
     expect(stored).toEqual(
       expect.arrayContaining([
@@ -1736,7 +1736,7 @@ describe('background site dispatch', () => {
   });
 
   it('returns partial_success and stores a profile admin carrier when the MyUW profile page only yields admin summaries', async () => {
-    await campusCopilotDb.admin_carriers.clear();
+    await openCampusDb.admin_carriers.clear();
     const executeScriptMock = vi.spyOn(
       browser.scripting as {
         executeScript: (...args: unknown[]) => Promise<ExecuteScriptMockResult>;
@@ -1773,7 +1773,7 @@ describe('background site dispatch', () => {
       expect(result.health.reason).toBe('admin_high_sensitivity_summary_captured');
     }
 
-    const stored = await getAdminCarriers(campusCopilotDb);
+    const stored = await getAdminCarriers(openCampusDb);
     expect(stored).toHaveLength(1);
     expect(stored[0]).toEqual(
       expect.objectContaining({

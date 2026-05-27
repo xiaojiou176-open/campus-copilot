@@ -1,6 +1,6 @@
 # @opencampus/mcp-server
 
-Read-only MCP server for the local Campus Copilot BFF and imported workspace snapshots.
+Read-only MCP server for the local OpenCampus BFF and imported workspace snapshots.
 
 This is the generic MCP entry point used by the integration examples under `examples/integrations/`.
 
@@ -70,7 +70,7 @@ That split is on purpose:
 
 - the stdio MCP server stays the local read-only MCP entrypoint
 - the Docker path gives the repo one truthful HTTP and health-check surface
-- together they keep the product local-first instead of pretending Campus Copilot is a hosted MCP service
+- together they keep the product local-first instead of pretending OpenCampus is a hosted MCP service
 
 Build the containerized BFF from the repo root:
 

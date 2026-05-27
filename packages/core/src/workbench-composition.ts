@@ -126,7 +126,7 @@ function buildDefaultViewTitle(preset: ExportPreset, filters: WorkbenchFilter) {
     case 'all_deadlines':
       return 'All deadlines';
     default:
-      return 'Campus Copilot workbench';
+      return 'OpenCampus workbench';
   }
 }
 

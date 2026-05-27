@@ -3,7 +3,7 @@ import { z } from 'zod';
 import {
   CAMPUS_PROVIDER_PRIORITY,
   CampusClientProviderSchema,
-  CampusCopilotClient,
+  OpenCampusClient,
   SnapshotSiteSchema,
   buildSnapshotSiteView,
   createExportArtifactFromSnapshot,
@@ -20,7 +20,7 @@ export const CAMPUS_MCP_SERVER_TOOL_NAMES = [
   'export_snapshot_artifact',
 ] as const;
 
-export function createCampusCopilotMcpServer() {
+export function createOpenCampusMcpServer() {
   const server = new McpServer({
     name: 'opencampus-mcp',
     version: '0.1.1',
@@ -30,13 +30,13 @@ export function createCampusCopilotMcpServer() {
     'campus_health',
     {
       title: 'Campus health',
-      description: 'Read the local Campus Copilot BFF health status.',
+      description: 'Read the local OpenCampus BFF health status.',
       inputSchema: {
         baseUrl: z.string().url().optional(),
       },
     },
     async ({ baseUrl }) => {
-      const client = new CampusCopilotClient({ baseUrl });
+      const client = new OpenCampusClient({ baseUrl });
       const health = await client.getHealth();
       return {
         content: [{ type: 'text', text: JSON.stringify(health, null, 2) }],
@@ -55,7 +55,7 @@ export function createCampusCopilotMcpServer() {
       },
     },
     async ({ baseUrl }) => {
-      const client = new CampusCopilotClient({ baseUrl });
+      const client = new OpenCampusClient({ baseUrl });
       const status = await client.getProviderStatus();
       return {
         content: [
@@ -82,9 +82,9 @@ export function createCampusCopilotMcpServer() {
   server.registerTool(
     'ask_opencampus',
     {
-      title: 'Ask Campus Copilot',
+      title: 'Ask OpenCampus',
       description:
-        'Send a read-only question to the local Campus Copilot BFF. Provider defaults to auto and resolves Switchyard-first when available.',
+        'Send a read-only question to the local OpenCampus BFF. Provider defaults to auto and resolves Switchyard-first when available.',
       inputSchema: {
         baseUrl: z.string().url().optional(),
         question: z.string().min(1),
@@ -95,7 +95,7 @@ export function createCampusCopilotMcpServer() {
       },
     },
     async ({ baseUrl, question, provider, model, switchyardProvider, switchyardLane }) => {
-      const client = new CampusCopilotClient({ baseUrl });
+      const client = new OpenCampusClient({ baseUrl });
       const answer = await client.chat({
         provider,
         model,

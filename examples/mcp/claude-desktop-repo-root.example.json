@@ -7,7 +7,7 @@
         "gradescope"
       ],
       "env": {
-        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     },
     "opencampus-myuw": {
@@ -17,7 +17,7 @@
         "myuw"
       ],
       "env": {
-        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     }
   }

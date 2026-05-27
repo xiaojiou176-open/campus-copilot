@@ -329,7 +329,7 @@ serialTest('@opencampus/sdk tarball installs and exposes bundled runtime entrypo
           const summary = snapshotMod.buildWorkspaceSummary(snapshot);
           const siteRecords = sitesMod.getCanvasAssignments(snapshot);
           console.log([
-            typeof apiMod.CampusCopilotApiClient,
+            typeof apiMod.OpenCampusApiClient,
             summary.totals.assignments,
             siteRecords.length,
           ].join(','));

@@ -56,7 +56,7 @@ function createToolDefinitions(site) {
   return [
     {
       name: 'get_site_overview',
-      description: `Return a read-only overview for ${site} from an exported Campus Copilot workspace snapshot.`,
+      description: `Return a read-only overview for ${site} from an exported OpenCampus workspace snapshot.`,
       inputSchema: {
         type: 'object',
         additionalProperties: false,

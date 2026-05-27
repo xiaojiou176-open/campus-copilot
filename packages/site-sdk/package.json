@@ -2,7 +2,7 @@
   "name": "@opencampus/site-sdk",
   "version": "0.1.0",
   "private": false,
-  "description": "Read-only per-site snapshot helpers for Campus Copilot builder workflows.",
+  "description": "Read-only per-site snapshot helpers for OpenCampus builder workflows.",
   "license": "MIT",
   "keywords": ["opencampus", "site-sdk", "local-first", "read-only", "snapshot"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/site-sdk",

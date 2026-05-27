@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file is the public AI collaborator contract for Campus Copilot.
+This file is the public AI collaborator contract for OpenCampus.
 
 Use it together with:
 
@@ -13,7 +13,7 @@ Use it together with:
 
 ## Repository Identity
 
-Campus Copilot is a local-first study workspace for `Canvas`, `Gradescope`, `EdStem`, and `MyUW`.
+OpenCampus is a local-first study workspace for `Canvas`, `Gradescope`, `EdStem`, and `MyUW`.
 
 Its order of operations is fixed:
 

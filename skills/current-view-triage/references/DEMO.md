@@ -5,7 +5,7 @@ triage work instead of only existing as prose.
 
 ## Demo prompt
 
-Use Campus Copilot to tell the student what to do first right now. Start with
+Use OpenCampus to tell the student what to do first right now. Start with
 `campus_health`. Then inspect the strongest available snapshot/current-view
 surface. If a student question exists, answer it through `ask_opencampus`.
 Return `top_action`, `why_now`, `evidence_used`, and `trust_gaps`.

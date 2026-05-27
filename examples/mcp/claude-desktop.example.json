@@ -3,13 +3,13 @@
     "opencampus-gradescope": {
       "command": "opencampus-mcp-gradescope",
       "env": {
-        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     },
     "opencampus-myuw": {
       "command": "opencampus-mcp-myuw",
       "env": {
-        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     }
   }

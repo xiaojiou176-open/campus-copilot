@@ -2,7 +2,7 @@
 
 ## Fastest local setup
 
-From the Campus Copilot repo root:
+From the OpenCampus repo root:
 
 ```bash
 pnpm install
@@ -18,5 +18,5 @@ pnpm --filter @opencampus/mcp-server start
 ## Minimum handoff to the agent
 
 - one imported snapshot or current-view export path
-- whether Campus Copilot MCP is already connected
+- whether OpenCampus MCP is already connected
 - optional student question

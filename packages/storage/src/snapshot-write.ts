@@ -15,7 +15,7 @@ import {
   type Resource,
   type Site,
 } from '@opencampus/schema';
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import {
   SyncRunSchema,
   SyncStateSchema,
@@ -57,7 +57,7 @@ function parseSiteSnapshotPayload(payload: SiteSnapshotPayload): SiteSnapshotRec
   };
 }
 
-async function readExistingSiteSnapshot(site: Site, payload: SiteSnapshotPayload, db: CampusCopilotDB) {
+async function readExistingSiteSnapshot(site: Site, payload: SiteSnapshotPayload, db: OpenCampusDB) {
   const existingSnapshot = buildEmptySiteSnapshot();
 
   if (Object.prototype.hasOwnProperty.call(payload, 'courses')) {
@@ -85,31 +85,31 @@ async function readExistingSiteSnapshot(site: Site, payload: SiteSnapshotPayload
   return existingSnapshot;
 }
 
-export async function putCourses(records: Course[], db = campusCopilotDb) {
+export async function putCourses(records: Course[], db = openCampusDb) {
   await db.courses.bulkPut(parseArray(CourseSchema, records));
 }
 
-export async function putResources(records: Resource[], db = campusCopilotDb) {
+export async function putResources(records: Resource[], db = openCampusDb) {
   await db.resources.bulkPut(parseArray(ResourceSchema, records));
 }
 
-export async function putAssignments(records: Assignment[], db = campusCopilotDb) {
+export async function putAssignments(records: Assignment[], db = openCampusDb) {
   await db.assignments.bulkPut(parseArray(AssignmentSchema, records));
 }
 
-export async function putAnnouncements(records: Announcement[], db = campusCopilotDb) {
+export async function putAnnouncements(records: Announcement[], db = openCampusDb) {
   await db.announcements.bulkPut(parseArray(AnnouncementSchema, records));
 }
 
-export async function putGrades(records: Grade[], db = campusCopilotDb) {
+export async function putGrades(records: Grade[], db = openCampusDb) {
   await db.grades.bulkPut(parseArray(GradeSchema, records));
 }
 
-export async function putMessages(records: Message[], db = campusCopilotDb) {
+export async function putMessages(records: Message[], db = openCampusDb) {
   await db.messages.bulkPut(parseArray(MessageSchema, records));
 }
 
-export async function putEvents(records: Event[], db = campusCopilotDb) {
+export async function putEvents(records: Event[], db = openCampusDb) {
   await db.events.bulkPut(parseArray(EventSchema, records));
 }
 
@@ -118,7 +118,7 @@ export async function applySiteSnapshotWithLedger(
   payload: SiteSnapshotPayload,
   syncState: Omit<SyncState, 'key' | 'site'>,
   options: ApplySiteSnapshotWithLedgerOptions = {},
-  db = campusCopilotDb,
+  db = openCampusDb,
 ) {
   const hasCourses = Object.prototype.hasOwnProperty.call(payload, 'courses');
   const hasResources = Object.prototype.hasOwnProperty.call(payload, 'resources');
@@ -250,7 +250,7 @@ export async function replaceSiteSnapshot(
   site: Site,
   payload: SiteSnapshotPayload,
   syncState: Omit<SyncState, 'key' | 'site'>,
-  db = campusCopilotDb,
+  db = openCampusDb,
 ) {
   return applySiteSnapshotWithLedger(site, payload, syncState, {}, db);
 }

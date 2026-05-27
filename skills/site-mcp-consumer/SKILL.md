@@ -1,11 +1,11 @@
 ---
 name: site-mcp-consumer
-description: Wire one site-scoped read-only MCP sidecar to a local Campus Copilot snapshot.
+description: Wire one site-scoped read-only MCP sidecar to a local OpenCampus snapshot.
 ---
 
 # Site MCP Consumer
 
-Use this skill when you want to wire one of the site-scoped read-only MCP sidecars into Codex, Claude Code, Claude Desktop, or another **local** MCP-capable runtime that should keep Campus Copilot on the snapshot-first side.
+Use this skill when you want to wire one of the site-scoped read-only MCP sidecars into Codex, Claude Code, Claude Desktop, or another **local** MCP-capable runtime that should keep OpenCampus on the snapshot-first side.
 
 ## Pick the right surface first
 
@@ -25,7 +25,7 @@ Use this skill when you want to wire one of the site-scoped read-only MCP sideca
    - `opencampus-mcp-gradescope`
    - `opencampus-mcp-edstem`
    - `opencampus-mcp-myuw`
-2. Point `CAMPUS_COPILOT_SNAPSHOT` at a snapshot JSON file.
+2. Point `OPENCAMPUS_SNAPSHOT` at a snapshot JSON file.
 3. Run the sidecar with `pnpm --filter @opencampus/mcp-readonly start:<site>`.
 4. Start with `get_site_overview`, then move to the site-specific list tools.
 5. If your consumer wants a JSON config example, reuse:

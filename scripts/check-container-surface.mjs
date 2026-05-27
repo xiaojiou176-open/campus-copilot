@@ -41,7 +41,7 @@ export function validateContainerSurface() {
     'pnpm --filter @opencampus/api',
     'EXPOSE 8787',
     'HEALTHCHECK',
-    'ARG CAMPUS_COPILOT_VERSION=0.1.0',
+    'ARG OPENCAMPUS_VERSION=0.1.0',
     'ARG VCS_REF=unknown',
     'ARG BUILD_DATE=unknown',
     'org.opencontainers.image.title=',

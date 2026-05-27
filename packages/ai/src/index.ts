@@ -741,7 +741,7 @@ export function buildAiRuntimeMessages(input: z.input<typeof AiRuntimeRequestSch
 
   return {
     systemPrompt: [
-      'You are Campus Copilot AI.',
+      'You are OpenCampus AI.',
       'You operate strictly after structure: use only unified schema, read-model, and export results.',
       'Never request raw DOM, raw HTML, cookies, or site-specific payloads.',
       ...advancedMaterialPromptLines,

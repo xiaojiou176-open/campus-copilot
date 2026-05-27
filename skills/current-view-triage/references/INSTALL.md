@@ -1,6 +1,6 @@
-# Campus Copilot MCP Setup
+# OpenCampus MCP Setup
 
-Use this when the host runtime does not already have Campus Copilot MCP
+Use this when the host runtime does not already have OpenCampus MCP
 connected.
 
 ## Quickest local setup
@@ -30,7 +30,7 @@ pnpm --filter @opencampus/mcp-server start
 
 ## If your host supports MCP Bundles
 
-Campus Copilot also ships a release-hosted MCP bundle:
+OpenCampus also ships a release-hosted MCP bundle:
 
 - registry name: `io.github.xiaojiou176-open/opencampus-mcp`
 - release asset: `https://github.com/xiaojiou176-open/OpenCampus/releases/download/v0.1.0/opencampus-mcp-0.1.0.mcpb`

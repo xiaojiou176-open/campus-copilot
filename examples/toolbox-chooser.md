@@ -1,6 +1,6 @@
 # Toolbox Chooser
 
-Use this page when you already know you want a **builder-facing Campus Copilot surface**, but you do not yet know **which one to pick**.
+Use this page when you already know you want a **builder-facing OpenCampus surface**, but you do not yet know **which one to pick**.
 
 Think of it like the sign at a train station:
 

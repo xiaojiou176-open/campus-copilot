@@ -124,7 +124,7 @@ test('audit:disk inventories the explicit clone lane, temp roots, and shared pnp
         PATH: `${sandbox.bin}:${process.env.PATH}`,
         FAKE_PNPM_STORE_DIR: storeRoot,
         FAKE_PNPM_STORE_PATH: storePath,
-        CAMPUS_COPILOT_TEMP_ROOTS: `${tmpOne}:${tmpTwo}`,
+        OPENCAMPUS_TEMP_ROOTS: `${tmpOne}:${tmpTwo}`,
       },
     });
 
@@ -188,7 +188,7 @@ test('audit:disk keeps clone lane output stable when the clone directory is abse
         PATH: `${sandbox.bin}:${process.env.PATH}`,
         FAKE_PNPM_STORE_DIR: storeRoot,
         FAKE_PNPM_STORE_PATH: storePath,
-        CAMPUS_COPILOT_TEMP_ROOTS: join(sandbox.root, 'tmp-only'),
+        OPENCAMPUS_TEMP_ROOTS: join(sandbox.root, 'tmp-only'),
       },
     });
 
@@ -279,10 +279,10 @@ test('cleanup:runtime removes repo-named temp residues across configured temp ro
       cwd: sandbox.repo,
       env: {
         HOME: sandbox.home,
-        CAMPUS_COPILOT_REPO_ROOT: sandbox.repo,
-        CAMPUS_COPILOT_TEMP_ROOTS: `${tmpOne}:${tmpTwo}`,
-        CAMPUS_COPILOT_CACHE_HOME: externalCacheHome,
-        CAMPUS_COPILOT_MANAGED_EXTERNAL_CACHE_ROOT: managedExternalCacheRoot,
+        OPENCAMPUS_REPO_ROOT: sandbox.repo,
+        OPENCAMPUS_TEMP_ROOTS: `${tmpOne}:${tmpTwo}`,
+        OPENCAMPUS_CACHE_HOME: externalCacheHome,
+        OPENCAMPUS_MANAGED_EXTERNAL_CACHE_ROOT: managedExternalCacheRoot,
       },
     });
 
@@ -379,9 +379,9 @@ test('cleanup:runtime closeout mode removes fresh sensitive runtime residue with
       cwd: sandbox.repo,
       env: {
         HOME: sandbox.home,
-        CAMPUS_COPILOT_REPO_ROOT: sandbox.repo,
-        CAMPUS_COPILOT_CACHE_HOME: externalCacheHome,
-        CAMPUS_COPILOT_RUNTIME_CLEAN_LEVEL: 'closeout',
+        OPENCAMPUS_REPO_ROOT: sandbox.repo,
+        OPENCAMPUS_CACHE_HOME: externalCacheHome,
+        OPENCAMPUS_RUNTIME_CLEAN_LEVEL: 'closeout',
       },
     });
 

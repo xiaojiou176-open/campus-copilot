@@ -1,12 +1,12 @@
 # Current View Triage
 
-This skill is the compact read-only triage card for Campus Copilot.
+This skill is the compact read-only triage card for OpenCampus.
 
 It is designed to work like a lightweight plugin bundle:
 
 - one skill prompt that tells the agent what job to do
 - one install/config pack that tells the operator how to connect the runtime
-- one capability map that explains which Campus Copilot tools are exposed
+- one capability map that explains which OpenCampus tools are exposed
 - one demo path that shows the shortest first-success flow
 - one troubleshooting page that explains where the first failures usually live
 - one manifest so the folder can travel into review-driven skill registries
@@ -32,7 +32,7 @@ Use it when you want the shortest truthful answer to:
 - `references/OPENCLAW_MCP_CONFIG.json`
   - a ready-to-edit `mcp.servers` snippet
 - `references/CAPABILITIES.md`
-  - the read-only Campus Copilot tool surface
+  - the read-only OpenCampus tool surface
 - `references/DEMO.md`
   - the first-success walkthrough and expected output shape
 - `references/TROUBLESHOOTING.md`

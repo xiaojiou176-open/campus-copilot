@@ -2372,7 +2372,7 @@ function renderIcs(dataset: ExportDataset) {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Campus Copilot//Exporter//EN',
+    'PRODID:-//OpenCampus//Exporter//EN',
     'CALSCALE:GREGORIAN',
     `X-CAMPUS-COPILOT-GENERATED-AT:${escapeIcsText(dataset.generatedAt)}`,
     `X-CAMPUS-COPILOT-SCOPE-TYPE:${escapeIcsText(dataset.scope.scopeType)}`,

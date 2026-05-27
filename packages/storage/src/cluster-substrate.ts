@@ -1,5 +1,5 @@
 import type { Announcement, Assignment, Course, Event, Grade, Resource, Site } from '@opencampus/schema';
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import {
   type AdminCarrierRecord,
   AdministrativeSummarySchema,
@@ -1420,7 +1420,7 @@ function buildAdministrativeSummaries(
   return summaries;
 }
 
-export async function recomputeClusterSubstrate(db: CampusCopilotDB = campusCopilotDb) {
+export async function recomputeClusterSubstrate(db: OpenCampusDB = openCampusDb) {
   const [courses, assignments, resources, grades, events, planningSubstrates, announcements, adminCarriers, reviewOverrides] =
     await Promise.all([
       db.courses.toArray(),
@@ -1486,19 +1486,19 @@ export async function recomputeClusterSubstrate(db: CampusCopilotDB = campusCopi
   };
 }
 
-export async function getAllCourseClusters(db: CampusCopilotDB = campusCopilotDb) {
+export async function getAllCourseClusters(db: OpenCampusDB = openCampusDb) {
   return db.course_clusters.toArray();
 }
 
-export async function getAllWorkItemClusters(db: CampusCopilotDB = campusCopilotDb) {
+export async function getAllWorkItemClusters(db: OpenCampusDB = openCampusDb) {
   return db.work_item_clusters.toArray();
 }
 
-export async function getAdministrativeSummaries(db: CampusCopilotDB = campusCopilotDb) {
+export async function getAdministrativeSummaries(db: OpenCampusDB = openCampusDb) {
   return db.administrative_summaries.toArray();
 }
 
-export async function getMergeHealthSummary(db: CampusCopilotDB = campusCopilotDb): Promise<MergeHealthSummary> {
+export async function getMergeHealthSummary(db: OpenCampusDB = openCampusDb): Promise<MergeHealthSummary> {
   const [courseClusters, workItemClusters] = await Promise.all([
     db.course_clusters.toArray(),
     db.work_item_clusters.toArray(),

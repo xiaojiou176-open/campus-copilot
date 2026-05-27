@@ -3,7 +3,7 @@
 Use one of the site-scoped MCP binaries with a snapshot:
 
 ```bash
-export CAMPUS_COPILOT_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
+export OPENCAMPUS_SNAPSHOT="$PWD/examples/workspace-snapshot.sample.json"
 pnpm --filter @opencampus/mcp-readonly start:canvas
 ```
 

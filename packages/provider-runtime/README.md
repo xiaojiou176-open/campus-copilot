@@ -1,6 +1,6 @@
 # @opencampus/provider-runtime
 
-Read-only seam helpers for the Campus Copilot provider/runtime contract.
+Read-only seam helpers for the OpenCampus provider/runtime contract.
 
 This package exists to keep Campus-owned semantics stable while the runtime path moves toward `Switchyard-first`.
 

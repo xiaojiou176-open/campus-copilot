@@ -1,6 +1,6 @@
 # Contributing
 
-Campus Copilot is a local-first study workspace, not a generic chatbot demo.
+OpenCampus is a local-first study workspace, not a generic chatbot demo.
 
 That means contributions must protect this ordering:
 
@@ -57,7 +57,7 @@ That hosted lane keeps the deterministic extension Playwright smoke on managed C
 
 ## Repo-owned Browser Identity
 
-`pnpm browser:launch` now opens or reuses the canonical Campus Copilot browser lane with a generated local identity tab under:
+`pnpm browser:launch` now opens or reuses the canonical OpenCampus browser lane with a generated local identity tab under:
 
 ```text
 .runtime-cache/browser-identity/index.html
@@ -77,8 +77,8 @@ Use it as the left-most anchor when possible, and pin it manually once if you wa
 You can override the displayed label and accent with:
 
 ```bash
-CAMPUS_COPILOT_BROWSER_IDENTITY_LABEL=
-CAMPUS_COPILOT_BROWSER_IDENTITY_ACCENT=
+OPENCAMPUS_BROWSER_IDENTITY_LABEL=
+OPENCAMPUS_BROWSER_IDENTITY_ACCENT=
 ```
 
 Do not automate Chrome-private avatar/theme/pinned-tab state as part of the normal repo bootstrap. Keep those as manual one-time polish only.

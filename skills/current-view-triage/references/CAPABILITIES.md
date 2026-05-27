@@ -1,6 +1,6 @@
-# Campus Copilot Capability Map
+# OpenCampus Capability Map
 
-This skill intentionally stays on the read-only Campus Copilot surfaces.
+This skill intentionally stays on the read-only OpenCampus surfaces.
 
 ## Core MCP tools
 

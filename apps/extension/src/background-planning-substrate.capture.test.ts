@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { campusCopilotDb, getLatestPlanningSubstrateBySource } from '@opencampus/storage';
+import { openCampusDb, getLatestPlanningSubstrateBySource } from '@opencampus/storage';
 
 vi.mock('./background-tab-context', () => ({
   getActiveTabContext: vi.fn(),
@@ -14,7 +14,7 @@ import { extractPageHtml, getActiveTabContext, getTabContextsByUrlPatterns } fro
 describe('capturePlanningSubstrateFromActiveTab', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    await campusCopilotDb.planning_substrates.clear();
+    await openCampusDb.planning_substrates.clear();
     vi.mocked(getTabContextsByUrlPatterns).mockResolvedValue([]);
   });
 
@@ -47,7 +47,7 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
       expect(result.planLabel).toBe('Spring 2026');
     }
 
-    const stored = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
+    const stored = await getLatestPlanningSubstrateBySource('myplan', openCampusDb);
     expect(stored?.termCount).toBe(1);
     expect(stored?.plannedCourseCount).toBe(2);
     expect(stored?.currentStage).toBe('partial_shared_landing');
@@ -117,7 +117,7 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
       expect(result.planLabel).toBe('Bachelor of Science (Computer Science)');
     }
 
-    const stored = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
+    const stored = await getLatestPlanningSubstrateBySource('myplan', openCampusDb);
     expect(stored?.planLabel).toBe('Bachelor of Science (Computer Science)');
     expect(stored?.termCount).toBe(1);
     expect(stored?.requirementGroupCount).toBe(2);
@@ -180,7 +180,7 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
     const result = await capturePlanningSubstrateFromActiveTab('2026-04-11T12:08:00-07:00');
 
     expect(result.ok).toBe(true);
-    const stored = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
+    const stored = await getLatestPlanningSubstrateBySource('myplan', openCampusDb);
     expect(stored?.plannedCourseCount).toBe(2);
     expect(stored?.terms[0]?.summary).toContain('2 visible planned/issue course card(s)');
   });
@@ -273,7 +273,7 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
       expect(result.planLabel).toBe('Computer Science transfer plan');
     }
 
-    const stored = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
+    const stored = await getLatestPlanningSubstrateBySource('myplan', openCampusDb);
     expect(stored?.termCount).toBe(2);
     expect(stored?.plannedCourseCount).toBe(3);
     expect(stored?.backupCourseCount).toBe(1);
@@ -408,7 +408,7 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
     const result = await capturePlanningSubstrateFromActiveTab('2026-04-21T09:00:00-07:00');
 
     expect(result.ok).toBe(true);
-    const stored = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
+    const stored = await getLatestPlanningSubstrateBySource('myplan', openCampusDb);
     expect(stored?.planLabel).toBe('Academic Year 2025-2026');
     expect(stored?.plannedCourseCount).toBe(3);
     expect(stored?.terms[0]?.summary).toContain('3 visible planned/issue course card(s) captured from the MyPlan planning page.');
@@ -463,7 +463,7 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
 
     await capturePlanningSubstrateFromActiveTab('2026-04-21T09:05:00-07:00');
 
-    const stored = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
+    const stored = await getLatestPlanningSubstrateBySource('myplan', openCampusDb);
     expect(stored?.plannedCourseCount).toBe(1);
     expect(stored?.terms[0]?.summary).toContain('1 visible planned/issue course card(s) captured from the MyPlan planning page.');
   });
@@ -530,7 +530,7 @@ describe('capturePlanningSubstrateFromActiveTab', () => {
       expect(result.message).toContain('with both MyPlan plan and DARS audit context');
     }
 
-    const stored = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
+    const stored = await getLatestPlanningSubstrateBySource('myplan', openCampusDb);
     expect(stored?.plannedCourseCount).toBe(1);
     expect(stored?.requirementGroupCount).toBe(1);
     expect(stored?.exactBlockers).toHaveLength(0);

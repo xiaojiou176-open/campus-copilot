@@ -62,7 +62,7 @@ const FORBIDDEN_RULES = [
   },
   {
     id: 'host_safety_global_tab_fallback',
-    pattern: /CAMPUS_COPILOT_ALLOW_GLOBAL_TAB_FALLBACK/,
+    pattern: /OPENCAMPUS_ALLOW_GLOBAL_TAB_FALLBACK/,
     description: 'live probe must not fall back to arbitrary desktop Chrome tabs',
   },
 ];

@@ -11,7 +11,7 @@ import {
 } from '@opencampus/exporter';
 import { UI_LANGUAGE_PREFERENCES, type UiLanguagePreference } from './i18n';
 
-const EXTENSION_CONFIG_KEY = 'campusCopilotConfig';
+const EXTENSION_CONFIG_KEY = 'openCampusConfig';
 
 const ExportFormatSchema = z.enum(['markdown', 'csv', 'json', 'ics']);
 const ProviderConfigIdSchema = z.enum(['openai', 'gemini', 'switchyard']);

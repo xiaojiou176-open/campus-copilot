@@ -17,7 +17,7 @@ RUN pnpm install --frozen-lockfile --filter @opencampus/api...
 
 FROM base AS runtime
 
-ARG CAMPUS_COPILOT_VERSION=0.1.0
+ARG OPENCAMPUS_VERSION=0.1.0
 ARG VCS_REF=unknown
 ARG BUILD_DATE=unknown
 
@@ -25,14 +25,14 @@ ENV NODE_ENV=production
 ENV PORT=8787
 ENV HOST=0.0.0.0
 
-LABEL org.opencontainers.image.title="Campus Copilot API" \
-      org.opencontainers.image.description="Thin local HTTP BFF for Campus Copilot provider status, ask flows, and health checks." \
+LABEL org.opencontainers.image.title="OpenCampus API" \
+      org.opencontainers.image.description="Thin local HTTP BFF for OpenCampus provider status, ask flows, and health checks." \
       org.opencontainers.image.url="https://xiaojiou176-open.github.io/OpenCampus/" \
       org.opencontainers.image.documentation="https://github.com/xiaojiou176-open/OpenCampus/blob/main/DISTRIBUTION.md" \
       org.opencontainers.image.source="https://github.com/xiaojiou176-open/OpenCampus" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.vendor="Yifeng (Terry) Yu" \
-      org.opencontainers.image.version="${CAMPUS_COPILOT_VERSION}" \
+      org.opencontainers.image.version="${OPENCAMPUS_VERSION}" \
       org.opencontainers.image.revision="${VCS_REF}" \
       org.opencontainers.image.created="${BUILD_DATE}"
 

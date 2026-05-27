@@ -3,13 +3,13 @@
     "opencampus-canvas": {
       "command": "opencampus-mcp-canvas",
       "env": {
-        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     },
     "opencampus-edstem": {
       "command": "opencampus-mcp-edstem",
       "env": {
-        "CAMPUS_COPILOT_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
       }
     }
   }

@@ -5,7 +5,7 @@ description: Audit whether one imported workspace snapshot is rich enough for ex
 
 # Read-Only Workspace Audit
 
-Use this skill when you have an imported Campus Copilot workspace snapshot and need to answer:
+Use this skill when you have an imported OpenCampus workspace snapshot and need to answer:
 
 - what is currently open
 - which site carries which evidence
@@ -16,7 +16,7 @@ Rules:
 - stay read-only
 - operate on imported snapshots or exported current-view artifacts
 - do not claim live browser/session truth from snapshot-only evidence
-- keep Campus Copilot positioned as a local-first academic decision workspace
+- keep OpenCampus positioned as a local-first academic decision workspace
 
 Suggested toolchain:
 

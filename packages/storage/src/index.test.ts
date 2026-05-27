@@ -6,7 +6,7 @@ import * as storage from './index';
 import { WorkItemClusterSchema } from './contracts';
 import {
   clearLocalEntityOverlayField,
-  createCampusCopilotDb,
+  createOpenCampusDb,
   getAllAnnouncements,
   getFocusQueue,
   getLatestSyncRuns,
@@ -42,7 +42,7 @@ const source = {
 };
 
 describe('storage package', () => {
-  const db = createCampusCopilotDb('opencampus-test');
+  const db = createOpenCampusDb('opencampus-test');
 
   beforeEach(async () => {
     await db.delete();

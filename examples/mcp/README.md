@@ -39,7 +39,7 @@ If you are still deciding between the **generic MCP server** and **site sidecars
 
 All sidecar examples still require:
 
-- one absolute `CAMPUS_COPILOT_SNAPSHOT` path
+- one absolute `OPENCAMPUS_SNAPSHOT` path
 - one imported snapshot or current exported workspace artifact
 
 ## What this path proves

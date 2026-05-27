@@ -1,5 +1,5 @@
 import type { Announcement, Assignment, Course, Event, Grade, Message, Resource, Site } from '@opencampus/schema';
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import {
   ChangeEventSchema,
   EntityStateSchema,
@@ -318,7 +318,7 @@ export async function recordSiteSyncError(
   syncedAt: string,
   lastOutcome: FailedSiteSyncOutcome = 'request_failed',
   resourceFailures: SyncResourceFailure[] | undefined = undefined,
-  db = campusCopilotDb,
+  db = openCampusDb,
 ) {
   const syncState = SyncStateSchema.parse({
     key: site,
@@ -347,11 +347,11 @@ export async function recordSiteSyncError(
   });
 }
 
-export async function putSyncState(record: SyncState, db: CampusCopilotDB = campusCopilotDb) {
+export async function putSyncState(record: SyncState, db: OpenCampusDB = openCampusDb) {
   await db.sync_state.put(SyncStateSchema.parse(record));
 }
 
-export async function getLatestSyncState(db = campusCopilotDb) {
+export async function getLatestSyncState(db = openCampusDb) {
   const states = await db.sync_state.toArray();
   return states
     .filter((state) => state.lastSyncedAt)
@@ -360,22 +360,22 @@ export async function getLatestSyncState(db = campusCopilotDb) {
     })[0];
 }
 
-export async function getSyncStateBySite(site: Site, db = campusCopilotDb) {
+export async function getSyncStateBySite(site: Site, db = openCampusDb) {
   return db.sync_state.get(site);
 }
 
-export async function getLatestSyncRuns(limit = 8, db = campusCopilotDb) {
+export async function getLatestSyncRuns(limit = 8, db = openCampusDb) {
   const runs = await db.sync_runs.orderBy('completedAt').reverse().limit(limit).toArray();
   return runs.map((run) => SyncRunSchema.parse(run));
 }
 
-export async function getLatestSyncRunBySite(site: Site, db = campusCopilotDb) {
+export async function getLatestSyncRunBySite(site: Site, db = openCampusDb) {
   const runs = await db.sync_runs.where('site').equals(site).toArray();
   const latestRun = runs.sort((left, right) => compareNewest(left.completedAt, right.completedAt))[0];
   return latestRun ? SyncRunSchema.parse(latestRun) : undefined;
 }
 
-export async function getRecentChangeEvents(limit = 20, db = campusCopilotDb) {
+export async function getRecentChangeEvents(limit = 20, db = openCampusDb) {
   const [events, mergeLedger, courseClusters, workItemClusters] = await Promise.all([
     db.change_events.orderBy('occurredAt').reverse().limit(limit * 4).toArray(),
     db.merge_ledger.toArray(),
@@ -479,11 +479,11 @@ export async function getRecentChangeEvents(limit = 20, db = campusCopilotDb) {
     .slice(0, limit);
 }
 
-export async function getSiteSyncStates(db = campusCopilotDb) {
+export async function getSiteSyncStates(db = openCampusDb) {
   return db.sync_state.toArray();
 }
 
-export async function markEntitiesSeen(entityIds: string[], seenAt: string, db = campusCopilotDb) {
+export async function markEntitiesSeen(entityIds: string[], seenAt: string, db = openCampusDb) {
   if (entityIds.length === 0) {
     return;
   }

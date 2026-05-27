@@ -115,7 +115,7 @@ export function WebOrientationHeader(props: WebOrientationHeaderProps) {
     <section className="hero hero--orientation">
       <div className="hero-copy">
         <p className="eyebrow">Next up</p>
-        <h1>Campus Copilot workbench</h1>
+        <h1>OpenCampus workbench</h1>
         <p className="lede">
           One local desk for academic work, administrative signals, and the next decision.
         </p>

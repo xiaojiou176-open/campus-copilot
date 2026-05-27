@@ -156,7 +156,7 @@ async function resolveOwnedPort(preferredPort, label) {
 }
 
 function validateSidepanelHealth({ body }) {
-  return body.includes('Campus Copilot Sidepanel') && body.includes('surface-shell');
+  return body.includes('OpenCampus Sidepanel') && body.includes('surface-shell');
 }
 
 function validateProviderStatusHealth({ body }) {
@@ -543,7 +543,7 @@ async function collectFailureEvidence() {
 
 function buildChromeMocks() {
   return ({ baseUrl, bffBaseUrl, defaultProvider, defaultModel, uiLanguage, browserLanguage, screenshotMode }) => {
-    const CONFIG_KEY = 'campusCopilotConfig';
+    const CONFIG_KEY = 'openCampusConfig';
     const seededBffBaseUrl = bffBaseUrl;
     const defaultConfig = {
         [CONFIG_KEY]: {

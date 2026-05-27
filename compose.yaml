@@ -15,7 +15,7 @@ services:
       SWITCHYARD_BASE_URL: "${SWITCHYARD_BASE_URL:-}"
       SWITCHYARD_AUTH_TOKEN: "${SWITCHYARD_AUTH_TOKEN:-}"
     ports:
-      - "127.0.0.1:${CAMPUS_COPILOT_DOCKER_API_PORT:-18787}:8787"
+      - "127.0.0.1:${OPENCAMPUS_DOCKER_API_PORT:-18787}:8787"
     healthcheck:
       test:
         [

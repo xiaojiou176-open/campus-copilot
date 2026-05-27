@@ -6,7 +6,7 @@ import {
   MYPLAN_STAGE_UNDERSTANDING,
 } from '../../../packages/adapters-myplan/src/index.ts';
 import {
-  campusCopilotDb,
+  openCampusDb,
   getLatestPlanningSubstrateBySource,
   replacePlanningSubstratesBySource,
   type PlanningSubstrateOwner,
@@ -831,7 +831,7 @@ export async function capturePlanningSubstrateFromActiveTab(now: string, targetO
   }
 
   const firstCaptureKind = detectPlanningCaptureKind(activeTab.url);
-  const previous = await getLatestPlanningSubstrateBySource('myplan', campusCopilotDb);
+  const previous = await getLatestPlanningSubstrateBySource('myplan', openCampusDb);
   let next = await capturePlanningRecordFromTabContext(activeTab, now, previous);
   if (!next) {
     return {
@@ -867,7 +867,7 @@ export async function capturePlanningSubstrateFromActiveTab(now: string, targetO
     }
   }
 
-  await replacePlanningSubstratesBySource('myplan', [next], campusCopilotDb);
+  await replacePlanningSubstratesBySource('myplan', [next], openCampusDb);
 
   const hasPlanData = next.termCount > 0;
   const hasAuditData = Boolean(next.degreeProgressSummary) && next.requirementGroupCount > 0;

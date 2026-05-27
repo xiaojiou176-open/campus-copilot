@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Source-first public monorepo for Campus Copilot, the flagship local-first academic decision workspace inside the OpenCampus family.",
+  "description": "Source-first public monorepo for OpenCampus, the flagship local-first academic decision workspace inside the OpenCampus family.",
   "license": "MIT",
   "homepage": "https://xiaojiou176-open.github.io/OpenCampus/",
   "repository": {
@@ -69,7 +69,7 @@
     "test:coverage": "node scripts/test-coverage.mjs",
     "cleanup:repo:safe": "bash scripts/cleanup-repo-safe.sh",
     "cleanup:runtime": "bash scripts/cleanup-runtime.sh",
-    "cleanup:runtime:closeout": "CAMPUS_COPILOT_RUNTIME_CLEAN_LEVEL=closeout bash scripts/cleanup-runtime.sh",
+    "cleanup:runtime:closeout": "OPENCAMPUS_RUNTIME_CLEAN_LEVEL=closeout bash scripts/cleanup-runtime.sh",
     "preflight:live": "node scripts/run-node-with-env.mjs scripts/live-preflight.mjs",
     "diagnose:live": "pnpm cleanup:runtime && pnpm preflight:live",
     "support:bundle": "node scripts/run-node-with-env.mjs scripts/support-bundle.mjs",

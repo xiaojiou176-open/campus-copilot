@@ -7,7 +7,7 @@ It is not the main front-door narrative, and it is not the builder/example index
 Think of it like the evidence drawer behind the storefront window:
 
 - `README.md` and the docs hub explain what the product is
-- those front doors now explain **OpenCampus** first and then point to **Campus Copilot** as the workspace people can actually try today
+- those front doors now explain **OpenCampus** first and then point to **OpenCampus** as the workspace people can actually try today
 - this file inventories the small set of visuals and proof receipts that support that story in public
 - official listing or marketplace presence still depends on owner-controlled actions outside this file
 
@@ -16,21 +16,21 @@ The rule is simple:
 - every outward-facing asset should have an owner
 - every asset should have a purpose
 - every asset should be easy to review and replace
-- when the extension surface needs a school-specific label, that asset should say `Campus Copilot for UW` without turning the whole repo story into a school-only brand shell
+- when the extension surface needs a school-specific label, that asset should say `OpenCampus for UW` without turning the whole repo story into a school-only brand shell
 
 ## Role In The Public Story
 
 Use this file when you want to review or refresh the public proof layer after the product story is already clear.
 
-Do not use it as the first explanation of OpenCampus or of the Campus Copilot workspace.
+Do not use it as the first explanation of OpenCampus or of the OpenCampus workspace.
 Do not use it as the router for SDK / CLI / MCP examples; those live under [`10-builder-api-and-ecosystem-fit.md`](10-builder-api-and-ecosystem-fit.md) and [`../examples/README.md`](../examples/README.md).
 
 ## Asset Inventory
 
 | Asset | Purpose | Source | Update policy |
 | :-- | :-- | :-- | :-- |
-| `docs/assets/hero-workbench-overview.svg` | Give first-visit GitHub readers a simple OpenCampus-to-Campus-Copilot orientation without pretending to be proof | Maintainer-authored SVG overview backed by current formal product paths | Update when the public product shape, naming split, or first-screen promise changes materially |
-| `docs/assets/sidepanel-overview.png` | Show the `Campus Copilot for UW` extension shell in a clean, school-specific public-proof crop instead of an internal dashboard dump | Captured from the built sidepanel page with seeded fixture data, real provider readiness, explicit English UI mode, and a clipped public screenshot viewport | Re-capture when the main workbench layout, screenshot fixture, or public-facing English copy changes materially |
+| `docs/assets/hero-workbench-overview.svg` | Give first-visit GitHub readers a simple OpenCampus-to-OpenCampus orientation without pretending to be proof | Maintainer-authored SVG overview backed by current formal product paths | Update when the public product shape, naming split, or first-screen promise changes materially |
+| `docs/assets/sidepanel-overview.png` | Show the `OpenCampus for UW` extension shell in a clean, school-specific public-proof crop instead of an internal dashboard dump | Captured from the built sidepanel page with seeded fixture data, real provider readiness, explicit English UI mode, and a clipped public screenshot viewport | Re-capture when the main workbench layout, screenshot fixture, or public-facing English copy changes materially |
 | `docs/assets/ask-ai-evidence-first.png` | Show that Ask AI still starts from the same desk and does not collapse into a blank chat shell when the visible workspace is thin | Captured from the real installed-state extension surface in the repo-owned `Profile 1` lane after the current Ask AI empty-state and evidence-first review pass | Re-capture when the Ask AI first-screen wording, empty-state routing, or evidence-summary hierarchy changes materially |
 | `docs/assets/ask-ai-answer-proof.png` | Show the current Ask AI answer surface with citations/provenance still anchored to the same desk instead of an isolated chat shell | Captured from the built sidepanel proof lane with provider-ready seeded state and a public-proof crop of the current answer panel | Re-capture when the answer card hierarchy, citation strip, or public-facing Ask AI wording changes materially |
 | `docs/assets/web-workbench-overview.png` | Show the broader read-only workbench as a real OpenCampus surface, not as metadata or a concept card | Captured from the built web workbench through a local preview plus Playwright screenshot pass | Re-capture when the workbench first fold, public heading, or proof-facing web layout changes materially |

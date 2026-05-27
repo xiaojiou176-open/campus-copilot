@@ -14,7 +14,7 @@ import {
   type LocalEntityOverlay,
   type SyncState,
 } from './contracts.ts';
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import { getAdministrativeSummaries, getAllWorkItemClusters } from './cluster-substrate.ts';
 import {
   buildSiteSyncContext,
@@ -684,7 +684,7 @@ function buildSyncFocusItem(syncState: SyncState, now: string) {
   });
 }
 
-export async function getFocusQueue(now: string, db: CampusCopilotDB = campusCopilotDb): Promise<FocusQueueItem[]> {
+export async function getFocusQueue(now: string, db: OpenCampusDB = openCampusDb): Promise<FocusQueueItem[]> {
   const [assignments, announcements, messages, grades, events, syncStates, overlays, recentChangeEvents, workItemClusters, administrativeSummaries] = await Promise.all([
     db.assignments.toArray(),
     db.announcements.toArray(),

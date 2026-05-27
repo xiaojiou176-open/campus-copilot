@@ -1,4 +1,4 @@
-# Campus Copilot Repo Agent Notes
+# OpenCampus Repo Agent Notes
 
 这份文件是 **repo-local 工作边界**，用来补充全局 agent 规范。  
 它不重写根规则，只回答这个仓库里最容易写偏的地方。
@@ -130,8 +130,8 @@ bash scripts/api-healthcheck.sh
 - 如果当前需要新拉起 canonical Chrome lane：
   - 现在必须显式走 operator-manual 模式
   - 必须同时设置：
-    - `CAMPUS_COPILOT_BROWSER_LAUNCH_MODE=operator-manual`
-    - `CAMPUS_COPILOT_BROWSER_LAUNCH_REASON=<auditable reason>`
+    - `OPENCAMPUS_BROWSER_LAUNCH_MODE=operator-manual`
+    - `OPENCAMPUS_BROWSER_LAUNCH_REASON=<auditable reason>`
   - 没有这两个变量时，`scripts/browser-launch.mjs` 必须直接 fail closed，而不是默认 detached second-launch
 - 具体 canonical root：
   - `~/.cache/opencampus/browser/chrome-user-data/`
@@ -180,7 +180,7 @@ bash scripts/api-healthcheck.sh
 
 - 当前主战场仍然是 campus-site ingestion / read-model / student-facing workbench，不要让 `OpenAI Web` / `Gemini Web` 登录问题抢走主线。
 - 当前 repo 的正式 AI 路径仍然是 API-key based provider path；就当前阶段而言，优先继续使用 `.env` 中已经配置好的 `GEMINI_API_KEY`。
-- `Switchyard` 是后续可接入的本地 provider runtime 方向；在它完工并明确接入前，不要把 `OpenAI Web` / `Gemini Web` 网页登录当成当前 Campus Copilot 主线 blocker。
+- `Switchyard` 是后续可接入的本地 provider runtime 方向；在它完工并明确接入前，不要把 `OpenAI Web` / `Gemini Web` 网页登录当成当前 OpenCampus 主线 blocker。
 
 ## 外部账户写安全纪律
 
@@ -225,7 +225,7 @@ bash scripts/api-healthcheck.sh
 
 ### 1. 先把产品讲对，再谈别的
 
-- `Campus Copilot` 的正式身份始终是：**local-first academic decision workspace**。
+- `OpenCampus` 的正式身份始终是：**local-first academic decision workspace**。
 - 不要把它讲成 generic chatbot、空聊天框、广义 agent shell、hosted autonomy platform。
 - 正式主链始终是：
   - `Canvas / Gradescope / EdStem / MyUW`
@@ -326,7 +326,7 @@ bash scripts/api-healthcheck.sh
 - 当前主战场仍然是 campus-site ingestion / read-model / student-facing workbench。
 - `OpenAI Web` / `Gemini Web` 登录问题，不应抢走当前主线。
 - 当前正式 AI 路径仍然是 API-key based provider path；就当前阶段而言，优先继续使用 `.env` 中已经配置好的 `GEMINI_API_KEY`。
-- `Switchyard` 是后续可接入的本地 provider runtime 方向；在它完工并明确接入前，不要把 `OpenAI Web` / `Gemini Web` 网页登录当成当前 Campus Copilot 主线 blocker。
+- `Switchyard` 是后续可接入的本地 provider runtime 方向；在它完工并明确接入前，不要把 `OpenAI Web` / `Gemini Web` 网页登录当成当前 OpenCampus 主线 blocker。
 
 ### 8. private API / MCP / SDK 的位置
 

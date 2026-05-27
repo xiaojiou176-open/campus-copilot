@@ -43,7 +43,7 @@ import {
   SYNC_SITE_COMMAND,
 } from '@opencampus/core';
 import {
-  campusCopilotDb,
+  openCampusDb,
   getLatestPlanningSubstrateBySource,
   getSiteEntityCounts,
   getSyncStateBySite,
@@ -539,8 +539,8 @@ function isTimeScheduleAuthenticatedFullScheduleUrl(url: string) {
 
 async function readExistingTimeScheduleSnapshot(): Promise<SiteSnapshotPayload> {
   const [courses, events] = await Promise.all([
-    campusCopilotDb.courses.where('site').equals('time-schedule').toArray(),
-    campusCopilotDb.events.where('site').equals('time-schedule').toArray(),
+    openCampusDb.courses.where('site').equals('time-schedule').toArray(),
+    openCampusDb.events.where('site').equals('time-schedule').toArray(),
   ]);
 
   return {
@@ -741,13 +741,13 @@ function isCourseSiteEventFromFamily(
 
 async function readExistingCourseSiteSnapshot(): Promise<CourseSiteSnapshot> {
   const [courses, resources, assignments, announcements, grades, messages, events] = await Promise.all([
-    campusCopilotDb.courses.where('site').equals('course-sites').toArray() as Promise<CourseSiteCourse[]>,
-    campusCopilotDb.resources.where('site').equals('course-sites').toArray() as Promise<CourseSiteResource[]>,
-    campusCopilotDb.assignments.where('site').equals('course-sites').toArray() as Promise<CourseSiteAssignment[]>,
-    campusCopilotDb.announcements.where('site').equals('course-sites').toArray() as Promise<CourseSiteAnnouncement[]>,
-    campusCopilotDb.grades.where('site').equals('course-sites').toArray(),
-    campusCopilotDb.messages.where('site').equals('course-sites').toArray(),
-    campusCopilotDb.events.where('site').equals('course-sites').toArray() as Promise<CourseSiteEvent[]>,
+    openCampusDb.courses.where('site').equals('course-sites').toArray() as Promise<CourseSiteCourse[]>,
+    openCampusDb.resources.where('site').equals('course-sites').toArray() as Promise<CourseSiteResource[]>,
+    openCampusDb.assignments.where('site').equals('course-sites').toArray() as Promise<CourseSiteAssignment[]>,
+    openCampusDb.announcements.where('site').equals('course-sites').toArray() as Promise<CourseSiteAnnouncement[]>,
+    openCampusDb.grades.where('site').equals('course-sites').toArray(),
+    openCampusDb.messages.where('site').equals('course-sites').toArray(),
+    openCampusDb.events.where('site').equals('course-sites').toArray() as Promise<CourseSiteEvent[]>,
   ]);
 
   return {
@@ -795,8 +795,8 @@ function mergeCourseSiteSnapshotByFamily(input: {
 }
 
 async function buildSiteStatusView(site: Site): Promise<SiteSyncStatusView> {
-  const counts = await getSiteEntityCounts(site, campusCopilotDb);
-  const syncState = await getSyncStateBySite(site, campusCopilotDb);
+  const counts = await getSiteEntityCounts(site, openCampusDb);
+  const syncState = await getSyncStateBySite(site, openCampusDb);
 
   return {
     site,
@@ -824,7 +824,7 @@ async function persistSyncResult(site: Site, result: SiteSyncResult) {
         errorReason: lastOutcome === 'partial_success' ? result.health.reason : undefined,
         resourceFailures: resourceFailures.length > 0 ? resourceFailures : undefined,
       },
-      campusCopilotDb,
+      openCampusDb,
     );
   } else {
     await recordSiteSyncError(
@@ -833,7 +833,7 @@ async function persistSyncResult(site: Site, result: SiteSyncResult) {
       result.syncedAt,
       result.outcome,
       resourceFailures.length > 0 ? resourceFailures : undefined,
-      campusCopilotDb,
+      openCampusDb,
     );
   }
 }
@@ -890,7 +890,7 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
       now,
     });
     if (adminCarriers.length > 0) {
-      await upsertAdminCarriers(adminCarriers, campusCopilotDb);
+      await upsertAdminCarriers(adminCarriers, openCampusDb);
     }
 
     const result = await createMyUWAdapter(new MyUWApiClient(createMyUWTabRequestExecutor(activeTab.tabId))).sync({
@@ -1044,7 +1044,7 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
         publicOffering: activePublic ?? companionPublic,
         existing: activeDetail ? existingSnapshot : undefined,
       });
-      const previousPlanning = await getLatestPlanningSubstrateBySource('time-schedule', campusCopilotDb);
+      const previousPlanning = await getLatestPlanningSubstrateBySource('time-schedule', openCampusDb);
       const nextQuarterLabel = inferTimeScheduleQuarterLabel(snapshot);
       const nextTermCode = slugifyTimeScheduleQuarter(nextQuarterLabel) || 'current-quarter';
       const previousTerm = previousPlanning?.terms.find((term) => term.termCode === nextTermCode);
@@ -1061,7 +1061,7 @@ export const SITE_SYNC_HANDLERS: Record<Site, (input: SiteSyncDependencies) => P
             authenticatedScheduleCaptured,
           }),
         ],
-        campusCopilotDb,
+        openCampusDb,
       );
       return {
         ok: true,
@@ -1123,7 +1123,7 @@ export async function handleSyncSite(site: Site, targetOverride?: SyncTargetOver
   const activeTab = await getActiveTabContext(targetOverride);
 
   if (!activeTab) {
-    await recordSiteSyncError(site, 'unsupported_context', syncedAt, 'unsupported_context', undefined, campusCopilotDb);
+    await recordSiteSyncError(site, 'unsupported_context', syncedAt, 'unsupported_context', undefined, openCampusDb);
     return {
       type: SYNC_SITE_COMMAND,
       site,
@@ -1139,7 +1139,7 @@ export async function handleSyncSite(site: Site, targetOverride?: SyncTargetOver
       status: 'syncing',
       lastSyncedAt: syncedAt,
     },
-    campusCopilotDb,
+    openCampusDb,
   );
 
   const config = await loadExtensionConfig();

@@ -2,7 +2,7 @@
   "name": "@opencampus/myuw-api",
   "version": "0.1.0",
   "private": false,
-  "description": "Read-only MyUW snapshot helpers for Campus Copilot preview tooling.",
+  "description": "Read-only MyUW snapshot helpers for OpenCampus preview tooling.",
   "license": "MIT",
   "keywords": ["opencampus", "myuw", "read-only", "snapshot", "preview"],
   "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/myuw-api",

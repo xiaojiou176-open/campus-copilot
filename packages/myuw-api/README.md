@@ -1,6 +1,6 @@
 # @opencampus/myuw-api
 
-Read-only MyUW helpers over the current Campus Copilot snapshot contract.
+Read-only MyUW helpers over the current OpenCampus snapshot contract.
 
 If you are still choosing between this package, `@opencampus/site-sdk`, or the site-sidecar path, start with [`../../examples/toolbox-chooser.md`](../../examples/toolbox-chooser.md) first.
 

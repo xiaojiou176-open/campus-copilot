@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { createCampusCopilotApiServer, loadApiEnv } from './index';
+import { createOpenCampusApiServer, loadApiEnv } from './index';
 
 const servers: Array<import('node:http').Server> = [];
 const TRANSIENT_LOOPBACK_RETRY_COUNT = 3;
@@ -49,7 +49,7 @@ afterEach(async () => {
 
 describe('api server runtime', () => {
   it('starts a real HTTP server and serves health', async () => {
-    const server = createCampusCopilotApiServer(
+    const server = createOpenCampusApiServer(
       loadApiEnv({
         PORT: '0',
       }),

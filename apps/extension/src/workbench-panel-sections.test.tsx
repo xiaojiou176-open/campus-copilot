@@ -12,7 +12,7 @@ describe('workbench overview sections', () => {
     const html = renderToStaticMarkup(
       <WorkbenchOverviewSections
         copy={{
-          eyebrow: 'Campus Copilot',
+          eyebrow: 'OpenCampus',
           title: 'Local-first academic decision workspace',
           description: 'Read-only pulse for the current study surface.',
         }}

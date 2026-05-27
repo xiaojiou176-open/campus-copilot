@@ -26,7 +26,7 @@ import {
   type SyncRun,
   type SyncState,
 } from './contracts.ts';
-import { campusCopilotDb, type CampusCopilotDB } from './db.ts';
+import { openCampusDb, type OpenCampusDB } from './db.ts';
 import { recomputeClusterSubstrate } from './cluster-substrate.ts';
 
 type ImportedTrackedEntity = Resource | Assignment | Announcement | Message | Grade | Event;
@@ -106,7 +106,7 @@ function buildSyncStates(
 
 export async function replaceImportedWorkbenchSnapshot(
   snapshot: ImportedWorkbenchSnapshot,
-  db: CampusCopilotDB = campusCopilotDb,
+  db: OpenCampusDB = openCampusDb,
 ) {
   const importedAt = IsoDateTimeSchema.parse(snapshot.generatedAt);
   const planningSubstrates = (snapshot.planningSubstrates ?? []).map((item) => PlanningSubstrateOwnerSchema.parse(item));
