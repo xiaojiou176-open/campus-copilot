@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "ignoreDeprecations": "6.0",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node", "react", "react-dom/client"],
+    "paths": {
+      "@opencampus/ai": ["packages/ai/src/index.ts"],
+      "@opencampus/core": ["packages/core/src/index.ts"],
+      "@opencampus/exporter": ["packages/exporter/src/index.ts"],
+      "@opencampus/schema": ["packages/schema/src/index.ts"],
+      "@opencampus/storage": ["packages/storage/src/index.ts"]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@opencampus/web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4275",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4275",
+    "preview:test": "unset NO_COLOR; vite preview --host 127.0.0.1 --port 4275 --strictPort",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "test:interaction": "unset NO_COLOR; pnpm build && playwright test -c playwright.config.ts"
+  },
+  "dependencies": {
+    "@opencampus/ai": "workspace:*",
+    "@opencampus/core": "workspace:*",
+    "@opencampus/exporter": "workspace:*",
+    "@opencampus/schema": "workspace:*",
+    "@opencampus/storage": "workspace:*",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@vitejs/plugin-react": "^6.0.1",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.9"
+  }
+}

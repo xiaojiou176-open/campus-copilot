@@ -1,0 +1,115 @@
+{
+  "title": "Current view",
+  "generatedAt": "2026-04-03T09:00:00-07:00",
+  "data": {
+    "generatedAt": "2026-04-03T09:00:00-07:00",
+    "resources": [
+      {
+        "id": "edstem:resource:1",
+        "kind": "resource",
+        "site": "edstem",
+        "source": {
+          "site": "edstem",
+          "resourceId": "1",
+          "resourceType": "resource"
+        },
+        "courseId": "edstem:course:11",
+        "resourceKind": "file",
+        "title": "Week 8 review sheet",
+        "summary": "Homework",
+        "detail": "PDF · 452 KB",
+        "fileExtension": ".pdf",
+        "sizeBytes": 452000,
+        "releasedAt": "2026-04-02T09:00:00-07:00"
+      }
+    ],
+    "assignments": [
+      {
+        "id": "canvas:assignment:1",
+        "kind": "assignment",
+        "site": "canvas",
+        "source": {
+          "site": "canvas",
+          "resourceId": "1",
+          "resourceType": "assignment"
+        },
+        "title": "Homework 1",
+        "summary": "Graded · 95 / 100",
+        "detail": "Q1 48 / 50 · Mostly correct; Q2 47 / 50 · Minor deduction",
+        "dueAt": "2026-04-04T09:00:00-07:00",
+        "status": "graded",
+        "score": 95,
+        "maxScore": 100
+      }
+    ],
+    "announcements": [],
+    "messages": [
+      {
+        "id": "edstem:message:7",
+        "kind": "message",
+        "site": "edstem",
+        "source": {
+          "site": "edstem",
+          "resourceId": "7",
+          "resourceType": "thread"
+        },
+        "courseId": "edstem:course:11",
+        "messageKind": "thread",
+        "threadId": "7",
+        "title": "Project kickoff",
+        "summary": "general / logistics · Bring your draft architecture to section.",
+        "category": "general",
+        "subcategory": "logistics",
+        "createdAt": "2026-04-03T08:00:00-07:00",
+        "updatedAt": "2026-04-03T08:30:00-07:00",
+        "instructorAuthored": true,
+        "unread": true
+      }
+    ],
+    "grades": [],
+    "events": [
+      {
+        "id": "myuw:event:11111:final-exam",
+        "kind": "event",
+        "site": "myuw",
+        "source": {
+          "site": "myuw",
+          "resourceId": "11111:final-exam",
+          "resourceType": "schedule_final_exam"
+        },
+        "courseId": "myuw:course:11111",
+        "eventKind": "exam",
+        "title": "CSE 312 A final exam",
+        "summary": "FOUNDATIONS COMP II",
+        "location": "Kane Hall 130",
+        "startAt": "2026-04-05T13:30:00-07:00",
+        "endAt": "2026-04-05T15:20:00-07:00",
+        "detail": "final exam · Kane Hall 130"
+      }
+    ],
+    "syncRuns": [
+      {
+        "id": "sync:canvas:1",
+        "site": "canvas",
+        "status": "success",
+        "outcome": "success",
+        "startedAt": "2026-04-03T08:40:00-07:00",
+        "completedAt": "2026-04-03T08:41:00-07:00",
+        "changeCount": 2
+      }
+    ],
+    "changeEvents": [
+      {
+        "id": "change:canvas:1",
+        "runId": "sync:canvas:1",
+        "site": "canvas",
+        "changeType": "grade_released",
+        "occurredAt": "2026-04-03T08:41:00-07:00",
+        "title": "Homework 1 released a new grade",
+        "summary": "Canvas published a new score for Homework 1.",
+        "entityId": "canvas:assignment:1",
+        "entityKind": "assignment"
+      }
+    ]
+  }
+}

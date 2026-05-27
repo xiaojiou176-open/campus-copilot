@@ -1,0 +1,19 @@
+{
+  "name": "@opencampus/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm exec tsx watch src/server.ts",
+    "start": "pnpm exec tsx src/server.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@opencampus/ai": "workspace:*",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}

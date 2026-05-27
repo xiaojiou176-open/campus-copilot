@@ -1,0 +1,35 @@
+{
+  "name": "@opencampus/opencampus-video",
+  "version": "1.0.0",
+  "description": "OpenCampus walkthrough video built with Remotion",
+  "repository": {},
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@remotion/cli": "4.0.450",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "remotion": "4.0.450",
+    "@remotion/tailwind-v4": "4.0.450",
+    "tailwindcss": "4.2.4"
+  },
+  "devDependencies": {
+    "@remotion/eslint-config-flat": "4.0.450",
+    "@types/react": "19.2.14",
+    "@types/web": "0.0.347",
+    "eslint": "10.2.1",
+    "prettier": "3.8.3",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion bundle",
+    "render:still": "remotion still OpenCampusWalkthrough out/opencampus-walkthrough-still.png --frame=360",
+    "render:video": "remotion render OpenCampusWalkthrough out/opencampus-walkthrough.mp4",
+    "upgrade": "remotion upgrade",
+    "lint": "eslint src && tsc"
+  },
+  "sideEffects": [
+    "*.css"
+  ]
+}

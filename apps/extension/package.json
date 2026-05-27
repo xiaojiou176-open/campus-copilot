@@ -1,0 +1,34 @@
+{
+  "name": "@opencampus/extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt dev",
+    "build": "rm -rf .output dist/chrome-mv3 && wxt build --level error && bash ../../scripts/export-extension-build.sh",
+    "typecheck": "wxt prepare && tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --config vitest.config.ts --passWithNoTests",
+    "test:smoke": "bash ../../scripts/run-extension-smoke.sh"
+  },
+  "dependencies": {
+    "@opencampus/adapters-canvas": "workspace:*",
+    "@opencampus/adapters-course-sites": "workspace:*",
+    "@opencampus/adapters-edstem": "workspace:*",
+    "@opencampus/adapters-gradescope": "workspace:*",
+    "@opencampus/adapters-myplan": "workspace:*",
+    "@opencampus/adapters-time-schedule": "workspace:*",
+    "@opencampus/adapters-myuw": "workspace:*",
+    "@opencampus/ai": "workspace:*",
+    "@opencampus/core": "workspace:*",
+    "@opencampus/exporter": "workspace:*",
+    "@opencampus/schema": "workspace:*",
+    "@opencampus/storage": "workspace:*",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "wxt": "^0.21.0"
+  }
+}

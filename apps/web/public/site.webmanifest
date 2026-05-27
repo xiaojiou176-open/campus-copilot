@@ -1,0 +1,16 @@
+{
+  "name": "OpenCampus Workbench",
+  "short_name": "OpenCampus",
+  "description": "Read-only workbench for imported campus snapshots, decision views, exports, and cited AI review.",
+  "display": "standalone",
+  "background_color": "#edf5ef",
+  "theme_color": "#1f5d4b",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
