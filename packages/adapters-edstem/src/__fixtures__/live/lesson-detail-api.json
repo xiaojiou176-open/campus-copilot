@@ -1,0 +1,54 @@
+{
+  "lesson": {
+    "id": "redacted-lesson-a",
+    "course_id": 96846,
+    "module_id": "redacted-module",
+    "title": "[HW1 problem 7(a)] redacted lesson title",
+    "kind": "content",
+    "type": "python",
+    "status": "attempted",
+    "state": "scheduled",
+    "available_at": "2026-03-31T05:00:00+11:00",
+    "effective_available_at": "2026-03-31T05:00:00+11:00",
+    "due_at": "2026-04-09T16:59:00+10:00",
+    "effective_due_at": "2026-04-09T16:59:00+10:00",
+    "locked_at": "2026-04-12T16:59:00+10:00",
+    "effective_locked_at": "2026-04-12T16:59:00+10:00",
+    "effective_solutions_at": "2026-04-13T04:00:00+10:00",
+    "created_at": "2026-03-31T05:00:00+11:00",
+    "updated_at": "2026-04-08T12:00:00+10:00",
+    "attempt_id": null,
+    "attempts_remaining": null,
+    "late_submissions": true,
+    "slide_count": 3,
+    "slides": [
+      {
+        "id": "redacted-slide-1",
+        "lesson_id": "redacted-lesson-a",
+        "course_id": 96846,
+        "type": "document",
+        "title": "redacted slide title 1",
+        "index": 1,
+        "status": "completed"
+      },
+      {
+        "id": "redacted-slide-2",
+        "lesson_id": "redacted-lesson-a",
+        "course_id": 96846,
+        "type": "document",
+        "title": "redacted slide title 2",
+        "index": 2,
+        "status": "unseen"
+      },
+      {
+        "id": "redacted-slide-3",
+        "lesson_id": "redacted-lesson-a",
+        "course_id": 96846,
+        "type": "challenge",
+        "title": "redacted coding challenge",
+        "index": 3,
+        "status": "unseen"
+      }
+    ]
+  }
+}

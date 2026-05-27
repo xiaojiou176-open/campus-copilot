@@ -1,0 +1,31 @@
+{
+  "courses": [
+    {
+      "course": {
+        "id": 801,
+        "code": "redacted-course-code",
+        "name": "redacted-course-name"
+      },
+      "role": {
+        "student": false
+      },
+      "lab": null,
+      "last_active": "2026-03-29T13:27:51.622544+11:00"
+    },
+    {
+      "course": {
+        "id": 802,
+        "code": "redacted-course-code",
+        "name": "redacted-course-name"
+      },
+      "role": {
+        "student": false
+      },
+      "lab": null,
+      "last_active": "2026-03-28T08:00:00.000000+11:00"
+    }
+  ],
+  "user": {
+    "id": 101
+  }
+}

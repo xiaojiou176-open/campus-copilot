@@ -1,0 +1,61 @@
+{
+  "schoolKey": "green_river",
+  "schoolLabel": "Green River College",
+  "institutionCode": "WA100",
+  "publicFrontDoorUrls": [
+    "https://www.greenriver.edu/students/academics/class-schedules-catalog/",
+    "https://www.greenriver.edu/students/academics/running-start/current-running-start-students/running-start-registration.html"
+  ],
+  "publicFrontDoorStatements": [
+    "Green River public pages expose View Class Schedules and Class Finder in ctcLink.",
+    "Running Start guidance describes Class Finder as a public search tool by subject, time, and campus location."
+  ],
+  "publicCarrierClass": "public_page_behavior",
+  "publicUserFlowStability": "context_sensitive_public_flow",
+  "machineCarrierClass": "one_off_observation",
+  "machineDeepLinkStatus": "not_stable_for_stateless_fetch",
+  "machineEvidence": [
+    "WA100 stateless deep-link ended at cmd=login&errorPg=ckreq.",
+    "Historical Green River iScript observations remain corrected as one-off and must not be promoted into a stable anonymous carrier claim."
+  ],
+  "stableFields": [
+    "institution",
+    "subject",
+    "meeting_time_search",
+    "location_affordance"
+  ],
+  "deferredFields": [
+    "term",
+    "keyword",
+    "class_number_search",
+    "instructor_last_name_search",
+    "meeting_days_search",
+    "instruction_mode_search",
+    "open_classes_only_filter",
+    "availability_status",
+    "seat_counts",
+    "waitlist_counts",
+    "dom_row_schema",
+    "shared_schema_promotion",
+    "shared_storage_promotion",
+    "shared_core_promotion",
+    "registration_semantics",
+    "identity_finance_records"
+  ],
+  "forbiddenClaims": [
+    "stable_anonymous_json_api",
+    "statewide_stable_contract",
+    "current_shipped_support",
+    "registration_identity_finance_records_expansion",
+    "watcher_polling_or_seat_alert_semantics"
+  ],
+  "evidenceUrls": [
+    "https://www.greenriver.edu/students/academics/class-schedules-catalog/",
+    "https://www.greenriver.edu/students/academics/running-start/current-running-start-students/running-start-registration.html",
+    "https://ctclinkreferencecenter.ctclink.us/m/104239/l/1401792-class-search-hcx"
+  ],
+  "notes": [
+    "Green River remains the correction anchor rather than a locked machine carrier anchor.",
+    "Its public front door exists, but the downstream flow is still context-sensitive and excluded from the prototype bar."
+  ]
+}

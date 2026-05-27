@@ -1,0 +1,62 @@
+{
+  "schoolKey": "bellevue",
+  "schoolLabel": "Bellevue College",
+  "institutionCode": "WA080",
+  "publicFrontDoorUrls": [
+    "https://www.bellevuecollege.edu/ctclink/students/training/class-search/",
+    "https://www.bellevuecollege.edu/classes/"
+  ],
+  "publicFrontDoorStatements": [
+    "There are 3 ways to access the Class Search feature.",
+    "All methods redirect to the same place."
+  ],
+  "publicCarrierClass": "public_page_behavior",
+  "publicUserFlowStability": "stable_for_public_user_flow",
+  "machineCarrierClass": "not_proved",
+  "machineDeepLinkStatus": "not_stable_for_stateless_fetch",
+  "machineEvidence": [
+    "Bellevue public deep-link access hit Cloudflare 403 for stateless fetch.",
+    "wa080.ctclink.us inspection fell into cookies/login error."
+  ],
+  "stableFields": [
+    "institution",
+    "term",
+    "academic_organization_search",
+    "subject",
+    "keyword",
+    "class_number_search",
+    "instructor_last_name_search",
+    "meeting_days_search",
+    "meeting_time_search",
+    "instruction_mode_search",
+    "open_classes_only_filter",
+    "availability_status"
+  ],
+  "deferredFields": [
+    "location_affordance",
+    "seat_counts",
+    "waitlist_counts",
+    "dom_row_schema",
+    "shared_schema_promotion",
+    "shared_storage_promotion",
+    "shared_core_promotion",
+    "registration_semantics",
+    "identity_finance_records"
+  ],
+  "forbiddenClaims": [
+    "stable_anonymous_json_api",
+    "statewide_stable_contract",
+    "current_shipped_support",
+    "registration_identity_finance_records_expansion",
+    "watcher_polling_or_seat_alert_semantics"
+  ],
+  "evidenceUrls": [
+    "https://www.bellevuecollege.edu/ctclink/students/training/class-search/",
+    "https://ctclinkreferencecenter.ctclink.us/m/104239/l/1401792-class-search-hcx",
+    "https://ctclinkreferencecenter.ctclink.us/m/104239/l/1633531-access-multiple-institutions-hcx"
+  ],
+  "notes": [
+    "Bellevue is the strongest institution-recognized front-door anchor in the Wave 1A atlas.",
+    "The machine deep-link remains unproved and must not be written as a stable anonymous carrier."
+  ]
+}

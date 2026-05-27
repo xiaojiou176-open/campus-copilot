@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "baseUrl": "../..",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@opencampus/ai": ["packages/ai/src/index.ts"],
+      "@opencampus/exporter": ["packages/exporter/src/index.ts"],
+      "@opencampus/sdk": ["packages/sdk/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

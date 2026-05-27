@@ -1,0 +1,38 @@
+{
+  "name": "@opencampus/site-sdk",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Read-only per-site snapshot helpers for OpenCampus builder workflows.",
+  "license": "MIT",
+  "keywords": ["opencampus", "site-sdk", "local-first", "read-only", "snapshot"],
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/site-sdk",
+  "bugs": {
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
+    "directory": "packages/site-sdk"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "files": ["README.md", "dist"],
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "pnpm --filter @opencampus/workspace-sdk build && rm -rf dist && pnpm exec esbuild ./src/index.ts --bundle --platform=node --format=esm --target=node20 --legal-comments=none --outfile=dist/index.js",
+    "prepack": "pnpm build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@opencampus/schema": "workspace:*",
+    "@opencampus/storage": "workspace:*",
+    "@opencampus/workspace-sdk": "workspace:*",
+    "esbuild": "^0.28.0"
+  }
+}

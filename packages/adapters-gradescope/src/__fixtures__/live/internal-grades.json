@@ -1,0 +1,11 @@
+[
+  {
+    "assignment_id": 9,
+    "course_id": 17,
+    "title": "Problem Set 1",
+    "score": 92,
+    "max_score": 100,
+    "released_at": "2026-03-28T10:00:00-07:00",
+    "url": "https://gradescope.example.test/courses/course-17/assignments/assignment-9/submissions/submission-1"
+  }
+]

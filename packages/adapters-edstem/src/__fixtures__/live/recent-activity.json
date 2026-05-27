@@ -1,0 +1,11 @@
+[
+  {
+    "id": 9,
+    "thread_id": 7,
+    "course_id": 11,
+    "title": "redacted-activity-title",
+    "updated_at": "2026-03-24T11:00:00-07:00",
+    "instructor_authored": true,
+    "url": "https://edstem.example.test/us/courses/course-11/discussion/thread-7"
+  }
+]

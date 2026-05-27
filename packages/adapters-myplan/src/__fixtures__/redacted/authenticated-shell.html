@@ -1,0 +1,118 @@
+<main data-myplan-auth="authenticated" data-myplan-surface="planning">
+  <script id="myplan-bootstrap" type="application/json">
+    {
+      "authentication": {
+        "state": "authenticated",
+        "sessionKind": "netid"
+      },
+      "carrier": {
+        "kind": "authenticated_html_bootstrap",
+        "shellTitle": "MyPlan Academic Planner",
+        "capturedFrom": "https://myplan.example.test/student/plan"
+      },
+      "plan": {
+        "id": "plan-redacted-2026",
+        "label": "Computer Science transfer plan",
+        "lastUpdatedAt": "2026-04-08T16:42:00-07:00",
+        "terms": [
+          {
+            "termCode": "2026-autumn",
+            "termLabel": "Autumn 2026",
+            "plannedCourses": [
+              {
+                "id": "course-cse373",
+                "code": "CSE 373",
+                "title": "Data Structures and Algorithms",
+                "credits": 4
+              },
+              {
+                "id": "course-info340",
+                "code": "INFO 340",
+                "title": "Client-Side Development",
+                "credits": 5
+              }
+            ],
+            "backupCourses": [
+              {
+                "id": "course-math300",
+                "code": "MATH 300",
+                "title": "Mathematical Reasoning",
+                "credits": 3
+              }
+            ],
+            "scheduleOptions": [
+              {
+                "id": "balanced",
+                "label": "Balanced workload",
+                "plannedCourseIds": ["course-cse373", "course-info340"]
+              }
+            ]
+          },
+          {
+            "termCode": "2027-winter",
+            "termLabel": "Winter 2027",
+            "plannedCourses": [
+              {
+                "id": "course-cse374",
+                "code": "CSE 374",
+                "title": "Intermediate Programming Concepts and Tools",
+                "credits": 4
+              }
+            ],
+            "backupCourses": [],
+            "scheduleOptions": [
+              {
+                "id": "depth",
+                "label": "Systems-heavy option",
+                "plannedCourseIds": ["course-cse374"]
+              }
+            ]
+          }
+        ],
+        "degreeProgress": {
+          "summary": "90 of 180 credits complete",
+          "completedCredits": 90,
+          "remainingCredits": 90
+        },
+        "requirementGroups": [
+          {
+            "id": "core",
+            "label": "Core requirements",
+            "status": "in_progress",
+            "completedCount": 6,
+            "totalCount": 10,
+            "remainingCredits": 16
+          },
+          {
+            "id": "supporting-electives",
+            "label": "Supporting electives",
+            "status": "not_started",
+            "completedCount": 0,
+            "totalCount": 4,
+            "remainingCredits": 12
+          }
+        ],
+        "transferPlanningSummary": "Transfer pathway reviewed against UW prerequisite expectations.",
+        "programExplorationResults": [
+          {
+            "id": "informatics-bs",
+            "label": "Informatics B.S.",
+            "kind": "major",
+            "summary": "Backup planning path for HCI-heavy study plans."
+          }
+        ],
+        "registrationHandoff": {
+          "enabled": true,
+          "targetUrl": "https://myplan.example.test/student/hand-off"
+        },
+        "adviserShare": {
+          "enabled": true,
+          "lastSharedAt": "2026-04-08T10:20:00-07:00"
+        },
+        "collaboration": {
+          "enabled": false
+        }
+      }
+    }
+  </script>
+</main>

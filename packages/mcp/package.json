@@ -1,0 +1,28 @@
+{
+  "name": "@opencampus/mcp",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Config helpers for OpenCampus read-only site MCP sidecars.",
+  "license": "MIT",
+  "keywords": ["opencampus", "mcp", "config", "read-only", "snapshot"],
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/mcp",
+  "bugs": {
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
+    "directory": "packages/mcp"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "files": ["README.md", "src/index.mjs"],
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "scripts": {
+    "test": "node --test ./src/index.test.mjs"
+  }
+}

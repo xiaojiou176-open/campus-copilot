@@ -1,0 +1,37 @@
+{
+  "name": "@opencampus/edstem-api",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Read-only EdStem snapshot helpers for OpenCampus preview tooling.",
+  "license": "MIT",
+  "keywords": ["opencampus", "edstem", "read-only", "snapshot", "preview"],
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/edstem-api",
+  "bugs": {
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
+    "directory": "packages/edstem-api"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "files": ["README.md", "dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepack": "pnpm build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@opencampus/sdk": "workspace:*"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "@opencampus/provider-runtime",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Read-only Campus provider/runtime seam helpers, including local Switchyard bridging.",
+  "license": "MIT",
+  "keywords": ["opencampus", "provider-runtime", "switchyard", "read-only", "compat"],
+  "homepage": "https://github.com/xiaojiou176-open/OpenCampus/tree/main/packages/provider-runtime",
+  "bugs": {
+    "url": "https://github.com/xiaojiou176-open/OpenCampus/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xiaojiou176-open/OpenCampus.git",
+    "directory": "packages/provider-runtime"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "files": ["README.md", "dist"],
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepack": "pnpm build",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.1.5"
+  }
+}

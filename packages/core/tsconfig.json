@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@opencampus/adapters-base": ["packages/adapters-base/src/index.ts"],
+      "@opencampus/ai": ["packages/ai/src/index.ts"],
+      "@opencampus/exporter": ["packages/exporter/src/index.ts"],
+      "@opencampus/schema": ["packages/schema/src/index.ts"],
+      "@opencampus/storage": ["packages/storage/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

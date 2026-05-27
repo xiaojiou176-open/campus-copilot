@@ -1,0 +1,23 @@
+{
+  "name": "@opencampus/storage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts": "./src/contracts.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@opencampus/adapters-base": "workspace:*",
+    "@opencampus/schema": "workspace:*",
+    "dexie": "^4.4.2",
+    "dexie-react-hooks": "^4.4.0"
+  },
+  "devDependencies": {
+    "zod": "^4.1.5"
+  }
+}

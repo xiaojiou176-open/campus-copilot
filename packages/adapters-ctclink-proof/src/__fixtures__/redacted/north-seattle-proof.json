@@ -1,0 +1,63 @@
+{
+  "schoolKey": "north_seattle",
+  "schoolLabel": "North Seattle College",
+  "institutionCode": "WA063",
+  "publicFrontDoorUrls": [
+    "https://northseattle.edu/class-schedule",
+    "https://www.seattlecolleges.edu/academics/class-schedules",
+    "https://www.seattlecolleges.edu/ctclink/ctclink-students/ctclink-help-resources-students"
+  ],
+  "publicFrontDoorStatements": [
+    "North Spring Schedule and North Winter Schedule route directly to WA063 class search.",
+    "Students can enter Class Schedule from the school public pages before deciding whether to log in."
+  ],
+  "publicCarrierClass": "public_page_behavior",
+  "publicUserFlowStability": "stable_for_public_user_flow",
+  "machineCarrierClass": "not_proved",
+  "machineDeepLinkStatus": "not_stable_for_stateless_fetch",
+  "machineEvidence": [
+    "WA063 stateless deep-link redirected twice and ended at cmd=login&errorPg=ckreq.",
+    "The strongest proof is official public routing, not a stable anonymous machine carrier."
+  ],
+  "stableFields": [
+    "institution",
+    "term",
+    "subject",
+    "keyword",
+    "class_number_search",
+    "instructor_last_name_search",
+    "meeting_days_search",
+    "meeting_time_search",
+    "instruction_mode_search",
+    "open_classes_only_filter",
+    "location_affordance"
+  ],
+  "deferredFields": [
+    "availability_status",
+    "seat_counts",
+    "waitlist_counts",
+    "dom_row_schema",
+    "shared_schema_promotion",
+    "shared_storage_promotion",
+    "shared_core_promotion",
+    "registration_semantics",
+    "identity_finance_records"
+  ],
+  "forbiddenClaims": [
+    "stable_anonymous_json_api",
+    "statewide_stable_contract",
+    "current_shipped_support",
+    "registration_identity_finance_records_expansion",
+    "watcher_polling_or_seat_alert_semantics"
+  ],
+  "evidenceUrls": [
+    "https://northseattle.edu/class-schedule",
+    "https://www.seattlecolleges.edu/academics/class-schedules",
+    "https://www.seattlecolleges.edu/ctclink/ctclink-students/ctclink-help-resources-students",
+    "https://ctclinkreferencecenter.ctclink.us/m/104239/l/1401792-class-search-hcx"
+  ],
+  "notes": [
+    "North Seattle is the official class-schedule routing anchor in the Wave 1A atlas.",
+    "The school proves the same public page behavior carrier class as Bellevue while keeping deep-link carrier claims constrained."
+  ]
+}

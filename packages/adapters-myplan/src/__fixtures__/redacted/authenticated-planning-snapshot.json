@@ -1,0 +1,97 @@
+{
+  "fixtureId": "myplan-authenticated-planning-redacted",
+  "capturedAt": "2026-04-09T09:00:00-07:00",
+  "auth": {
+    "state": "authenticated",
+    "surface": "myplan",
+    "carrier": "authenticated_session_snapshot_candidate",
+    "redacted": true,
+    "capturedFrom": "https://myplan.example.test/student/plan"
+  },
+  "planTerms": [
+    {
+      "termId": "2026-spring",
+      "termLabel": "Spring 2026",
+      "planStatus": "draft",
+      "plannedCourses": [
+        {
+          "courseRef": "CSE 312",
+          "label": "Foundations of Computing II",
+          "credits": 4,
+          "note": "Primary option"
+        },
+        {
+          "courseRef": "INFO 340",
+          "label": "Client-Side Development",
+          "credits": 5,
+          "note": "Pairs with team project milestone"
+        }
+      ],
+      "backupOptions": [
+        {
+          "courseRef": "CSE 331",
+          "label": "Software Design and Implementation",
+          "credits": 4,
+          "reason": "Alternative if primary sequence conflicts"
+        }
+      ],
+      "scheduleOptions": [
+        {
+          "optionId": "spring-option-a",
+          "summary": "MWF morning planning block",
+          "courseRefs": ["CSE 312", "INFO 340"]
+        }
+      ]
+    }
+  ],
+  "degreeProgress": {
+    "programLabel": "BS Computer Science",
+    "summary": "64 earned credits and 8 planned credits against a 180-credit pathway.",
+    "percentComplete": 40,
+    "creditsEarned": 64,
+    "creditsPlanned": 8,
+    "creditsRequired": 180
+  },
+  "requirementSummaries": [
+    {
+      "requirementId": "math-core",
+      "title": "Mathematics Core",
+      "status": "in_progress",
+      "summary": "One calculus sequence course remains after Spring 2026.",
+      "completedCredits": 10,
+      "remainingCredits": 5
+    },
+    {
+      "requirementId": "additional-writing",
+      "title": "Additional Writing",
+      "status": "planned",
+      "summary": "Planned through the Spring 2026 term plan.",
+      "completedCredits": 0,
+      "remainingCredits": 5
+    }
+  ],
+  "transferPlanningSummary": "Imported transfer work stays in the planning lane until a later shared promotion contract exists.",
+  "programExplorationResults": [
+    {
+      "programId": "informatics-bs",
+      "label": "Informatics BS",
+      "kind": "major",
+      "summary": "Shares lower-division prerequisites with the current plan."
+    }
+  ],
+  "sanitizedEvidence": {
+    "excludedRiskFields": [
+      "registrationHandoff",
+      "adviserShare",
+      "collaborationActions",
+      "writeBackControls",
+      "rawAuditBlocks",
+      "plannedCourses.registerHref",
+      "plannedCourses.shoppingCartToken",
+      "backupOptions.sendToRegistration",
+      "degreeProgress.sendPlannedCoursesUrl",
+      "adviserSharing.sharePlanUrl",
+      "collaboration.inviteUrl"
+    ]
+  }
+}

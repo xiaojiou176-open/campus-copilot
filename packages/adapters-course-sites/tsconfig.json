@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@opencampus/adapters-base": ["../adapters-base/src/index.ts"],
+      "@opencampus/schema": ["../schema/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

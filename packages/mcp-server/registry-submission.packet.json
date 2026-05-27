@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0.0",
+  "kind": "repo-owned-mcp-registry-submission-packet",
+  "truthBoundary": "This packet records the repo-owned MCP Registry source of truth. It does not replace a fresh read-back of the public discovery page.",
+  "officialSources": {
+    "quickstart": "https://modelcontextprotocol.io/registry/quickstart",
+    "schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json"
+  },
+  "package": {
+    "name": "@opencampus/mcp-server",
+    "version": "0.1.1",
+    "mcpName": "io.github.xiaojiou176-open/opencampus-mcp",
+    "distributionType": "mcpb",
+    "publishConfigAccess": "public",
+    "releaseTag": "v0.1.1",
+    "releaseAsset": "opencampus-mcp-0.1.1.mcpb",
+    "releaseAssetUrl": "https://github.com/xiaojiou176-open/OpenCampus/releases/download/v0.1.1/opencampus-mcp-0.1.1.mcpb",
+    "fileSha256": "381a1bdf42cf83cd832039b6e1df7fa20f08f8ea2a6eb92329f64cde7bb61814",
+    "npmPublicationRequiredBeforeRegistrySubmit": false
+  },
+  "server": {
+    "schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name": "io.github.xiaojiou176-open/opencampus-mcp",
+    "title": "OpenCampus MCP",
+    "description": "Read-only MCP server for the local OpenCampus BFF and imported workspace snapshots.",
+    "repository": {
+      "url": "https://github.com/xiaojiou176-open/OpenCampus",
+      "source": "github",
+      "subfolder": "packages/mcp-server"
+    },
+    "transport": "stdio"
+  },
+  "docs": {
+    "readme": "packages/mcp-server/README.md",
+    "bundleManifest": "packages/mcp-server/mcpb.manifest.json",
+    "examples": [
+      "examples/integrations/README.md",
+      "examples/integrations/codex-mcp.example.json",
+      "examples/integrations/claude-code-mcp.example.json"
+    ],
+    "packetDoc": "DISTRIBUTION.md"
+  },
+  "ownerWorkflow": {
+    "buildLocalBundle": "pnpm --filter @opencampus/mcp-server build && node scripts/build-mcpb-bundle.mjs",
+    "uploadReleaseAsset": "gh release upload v0.1.1 opencampus-mcp-0.1.1.mcpb --repo xiaojiou176-open/OpenCampus --clobber",
+    "login": "mcp-publisher login github",
+    "publishMetadata": "mcp-publisher publish packages/mcp-server/server.json"
+  },
+  "currentRegistrySubmit": {
+    "submittedAt": "2026-04-08",
+    "submitCommand": "mcp-publisher publish packages/mcp-server/server.json",
+    "status": "accepted_by_registry"
+  }
+}

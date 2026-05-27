@@ -1,0 +1,142 @@
+{
+  "assignment": {
+    "id": 7101,
+    "title": "redacted-annotation-assignment",
+    "total_points": "15.0"
+  },
+  "assignment_submission": {
+    "id": 4101,
+    "score": "7.5"
+  },
+  "questions": [
+    {
+      "id": 6101,
+      "index": 1,
+      "full_index": "2.1",
+      "numbered_title": "redacted-numbered-title",
+      "title": "redacted-question-title",
+      "weight": "9.0"
+    },
+    {
+      "id": 6102,
+      "index": 2,
+      "full_index": "3.2",
+      "numbered_title": "redacted-numbered-title",
+      "title": "redacted-question-title",
+      "weight": "3.0"
+    },
+    {
+      "id": 6103,
+      "index": 3,
+      "full_index": "3.3",
+      "numbered_title": "redacted-numbered-title",
+      "title": "redacted-question-title",
+      "weight": "3.0"
+    }
+  ],
+  "question_submissions": [
+    {
+      "question_id": 6101,
+      "score": "3.0",
+      "active": true,
+      "evaluations": [],
+      "annotations": [
+        {
+          "id": 5101,
+          "page_number": 3,
+          "geometry_type": "text",
+          "content": "redacted-annotation-1",
+          "coordinates": [
+            [1892.761048771887, 2654.065673416958],
+            [1958.386048771887, 2757.190673416958]
+          ],
+          "annotatable_type": "Page",
+          "style": {},
+          "links": []
+        },
+        {
+          "id": 5102,
+          "page_number": 3,
+          "geometry_type": "text",
+          "content": "redacted-annotation-2",
+          "coordinates": [
+            [587.5125357837546, 2228.503247956932],
+            [653.1375357837546, 2331.628247956932]
+          ],
+          "annotatable_type": "Page",
+          "style": {},
+          "links": []
+        },
+        {
+          "id": 5103,
+          "page_number": 3,
+          "geometry_type": "text",
+          "content": "redacted-annotation-3",
+          "coordinates": [
+            [596.0809067661716, 2268.488979208209],
+            [661.7059067661716, 2371.613979208209]
+          ],
+          "annotatable_type": "Page",
+          "style": {},
+          "links": []
+        }
+      ]
+    },
+    {
+      "question_id": 6102,
+      "score": "1.5",
+      "active": true,
+      "evaluations": [],
+      "annotations": [
+        {
+          "id": 5201,
+          "page_number": 5,
+          "geometry_type": "text",
+          "content": null,
+          "coordinates": [
+            [2091.483155364765, 2471.212376641011],
+            [2157.108155364765, 2471.212376641011]
+          ],
+          "annotatable_type": "Page",
+          "style": {},
+          "links": [
+            {
+              "annotation_comments": {
+                "redacted-annotation-link": [
+                  "redacted-annotation-link",
+                  238919553,
+                  "RubricItem"
+                ]
+              },
+              "rubric_item": {
+                "description": "redacted-linked-rubric"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question_id": 6103,
+      "score": "3.0",
+      "active": true,
+      "evaluations": [],
+      "annotations": [
+        {
+          "id": 5301,
+          "page_number": 5,
+          "geometry_type": "text",
+          "content": "redacted-annotation-5",
+          "coordinates": [
+            [1134.245015406201, 2126.389262855471],
+            [1461.69706900612, 2681.434930712868]
+          ],
+          "annotatable_type": "Page",
+          "style": {},
+          "links": []
+        }
+      ]
+    }
+  ],
+  "rubric_items": []
+}
