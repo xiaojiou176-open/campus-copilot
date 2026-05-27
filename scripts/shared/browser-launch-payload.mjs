@@ -1,0 +1,31 @@
+export function buildBrowserLaunchPayload({
+  status,
+  mode,
+  cdpUrl,
+  browserUserDataRoot,
+  browserProfileDirectory,
+  browserProfileDisplayName,
+  pid,
+  targetUrl,
+  identityPage,
+  browserStatus,
+  sessionState,
+  currentTabs,
+  nextActions,
+}) {
+  return {
+    status,
+    mode,
+    ...(browserUserDataRoot ? { browserUserDataRoot } : {}),
+    ...(browserProfileDirectory ? { browserProfileDirectory } : {}),
+    ...(browserProfileDisplayName ? { browserProfileDisplayName } : {}),
+    ...(cdpUrl ? { cdpUrl } : {}),
+    ...(pid ? { pid } : {}),
+    ...(targetUrl ? { targetUrl } : {}),
+    ...(identityPage ? { identityPage } : {}),
+    ...(browserStatus ? { browserStatus } : {}),
+    ...(sessionState ? { sessionState } : {}),
+    ...(currentTabs ? { currentTabs } : {}),
+    ...(nextActions ? { nextActions } : {}),
+  };
+}

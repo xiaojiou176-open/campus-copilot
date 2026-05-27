@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "opencampus-gradescope": {
+      "command": "bash",
+      "args": [
+        "/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh",
+        "gradescope"
+      ],
+      "env": {
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+      }
+    },
+    "opencampus-myuw": {
+      "command": "bash",
+      "args": [
+        "/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh",
+        "myuw"
+      ],
+      "env": {
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+      }
+    }
+  }
+}

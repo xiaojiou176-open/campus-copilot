@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "opencampus-canvas": {
+      "command": "opencampus-mcp-canvas",
+      "env": {
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+      }
+    },
+    "opencampus-edstem": {
+      "command": "opencampus-mcp-edstem",
+      "env": {
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "opencampus-canvas": {
+      "command": "bash",
+      "args": [
+        "/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh",
+        "canvas"
+      ],
+      "env": {
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+      }
+    },
+    "opencampus-edstem": {
+      "command": "bash",
+      "args": [
+        "/absolute/path/to/opencampus/scripts/consumer/opencampus-site-sidecar.sh",
+        "edstem"
+      ],
+      "env": {
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+      }
+    }
+  }
+}

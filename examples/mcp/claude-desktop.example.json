@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "opencampus-gradescope": {
+      "command": "opencampus-mcp-gradescope",
+      "env": {
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+      }
+    },
+    "opencampus-myuw": {
+      "command": "opencampus-mcp-myuw",
+      "env": {
+        "OPENCAMPUS_SNAPSHOT": "/absolute/path/to/workspace-snapshot.json"
+      }
+    }
+  }
+}

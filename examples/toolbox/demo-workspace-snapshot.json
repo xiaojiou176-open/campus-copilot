@@ -1,0 +1,60 @@
+{
+  "generatedAt": "2026-04-03T09:00:00-07:00",
+  "assignments": [
+    {
+      "id": "canvas:assignment:hw5",
+      "kind": "assignment",
+      "site": "canvas",
+      "source": {
+        "site": "canvas",
+        "resourceId": "hw5",
+        "resourceType": "assignment"
+      },
+      "title": "Homework 5",
+      "courseId": "canvas:course:cse142",
+      "dueAt": "2026-04-04T23:59:00-07:00",
+      "status": "submitted"
+    }
+  ],
+  "messages": [
+    {
+      "id": "edstem:message:office-hours",
+      "kind": "message",
+      "site": "edstem",
+      "source": {
+        "site": "edstem",
+        "resourceId": "office-hours",
+        "resourceType": "thread"
+      },
+      "courseId": "edstem:course:cse312",
+      "messageKind": "thread",
+      "threadId": "office-hours",
+      "title": "Office hours follow-up",
+      "createdAt": "2026-04-03T07:40:00-07:00",
+      "unread": true
+    }
+  ],
+  "syncRuns": [
+    {
+      "id": "sync-run:canvas:1",
+      "site": "canvas",
+      "status": "success",
+      "outcome": "success",
+      "startedAt": "2026-04-03T08:00:00-07:00",
+      "completedAt": "2026-04-03T08:02:00-07:00",
+      "changeCount": 1
+    }
+  ],
+  "changeEvents": [
+    {
+      "id": "change-event:canvas:hw5",
+      "runId": "sync-run:canvas:1",
+      "site": "canvas",
+      "changeType": "status_changed",
+      "occurredAt": "2026-04-03T08:02:00-07:00",
+      "title": "Homework 5 status changed",
+      "summary": "Submitted draft is already in Canvas.",
+      "entityId": "canvas:assignment:hw5"
+    }
+  ]
+}

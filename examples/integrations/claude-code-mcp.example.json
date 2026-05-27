@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "opencampus": {
+      "command": "pnpm",
+      "args": [
+        "--filter",
+        "@opencampus/mcp-server",
+        "start"
+      ]
+    }
+  }
+}

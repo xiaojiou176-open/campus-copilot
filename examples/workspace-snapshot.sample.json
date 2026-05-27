@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-04-03T09:00:00-07:00",
+  "assignments": [
+    {
+      "id": "canvas:assignment:1",
+      "kind": "assignment",
+      "site": "canvas",
+      "source": {
+        "site": "canvas",
+        "resourceId": "1",
+        "resourceType": "assignment"
+      },
+      "title": "Homework 1",
+      "status": "graded"
+    }
+  ],
+  "messages": [
+    {
+      "id": "edstem:message:1",
+      "kind": "message",
+      "site": "edstem",
+      "source": {
+        "site": "edstem",
+        "resourceId": "1",
+        "resourceType": "thread"
+      },
+      "messageKind": "thread",
+      "title": "Office hours"
+    }
+  ],
+  "events": [
+    {
+      "id": "myuw:event:1",
+      "kind": "event",
+      "site": "myuw",
+      "source": {
+        "site": "myuw",
+        "resourceId": "1",
+        "resourceType": "schedule_meeting"
+      },
+      "eventKind": "class",
+      "title": "CSE 312 lecture"
+    }
+  ]
+}

@@ -1,0 +1,892 @@
+import { chromium } from '@playwright/test';
+import { spawn } from 'node:child_process';
+import { mkdirSync } from 'node:fs';
+import { createServer } from 'node:net';
+import { dirname } from 'node:path';
+
+const rootDir = process.cwd();
+const requestedBffPort = Number(process.env.SIDEPANEL_SMOKE_BFF_PORT ?? '8787');
+const requestedSidepanelPort = Number(process.env.SIDEPANEL_SMOKE_PORT ?? '4173');
+const defaultProvider = process.env.GEMINI_API_KEY
+  ? 'gemini'
+  : process.env.OPENAI_API_KEY
+    ? 'openai'
+    : undefined;
+const defaultModel = defaultProvider === 'gemini'
+  ? process.env.GEMINI_MODEL ?? 'gemini-2.5-flash'
+  : process.env.OPENAI_MODEL ?? 'gpt-4.1-mini';
+const screenshotPath = process.env.CAPTURE_SCREENSHOT_PATH;
+const answerScreenshotPath = process.env.CAPTURE_ANSWER_SCREENSHOT_PATH;
+const uiLanguage = process.env.SIDEPANEL_UI_LANGUAGE ?? (screenshotPath ? 'en' : 'auto');
+const browserLanguage = process.env.SIDEPANEL_BROWSER_LANGUAGE ?? 'en-US';
+const screenshotMode = screenshotPath ? 'public-proof' : 'runtime-smoke';
+const effectiveUiLanguage =
+  uiLanguage === 'auto'
+    ? browserLanguage.toLowerCase().startsWith('zh')
+      ? 'zh-CN'
+      : 'en'
+    : uiLanguage;
+const questionLabel = effectiveUiLanguage === 'zh-CN' ? '问题' : 'Question';
+const askAiLabel = effectiveUiLanguage === 'zh-CN' ? '问 AI' : 'Ask AI';
+const refreshProviderLabel = effectiveUiLanguage === 'zh-CN' ? '刷新 provider 状态' : 'Refresh provider status';
+const providerReadyStatusLabel = effectiveUiLanguage === 'zh-CN' ? '已就绪' : 'ready';
+const providerConfiguredReasonLabel = effectiveUiLanguage === 'zh-CN' ? '已配置' : 'configured';
+const assistantRouteModeLabel = effectiveUiLanguage === 'zh-CN' ? '自定义 AI 路线' : 'Custom AI route';
+const assistantReadySummaryLabel = effectiveUiLanguage === 'zh-CN' ? '可继续验证' : 'Ready to review';
+
+if (!defaultProvider) {
+  console.error(
+    JSON.stringify(
+      {
+        status: 'blocked',
+        reason: 'missing_provider_api_key',
+      },
+      null,
+      2,
+    ),
+  );
+  process.exit(2);
+}
+
+const startedProcesses = [];
+let browser;
+let page;
+let activeBffBaseUrl;
+let activeSidepanelUrl;
+
+function startProcess(command, args, options = {}) {
+  const child = spawn(command, args, {
+    stdio: 'pipe',
+    ...options,
+  });
+  child.stdout.on('data', (chunk) => process.stderr.write(chunk));
+  child.stderr.on('data', (chunk) => process.stderr.write(chunk));
+  startedProcesses.push(child);
+  return child;
+}
+
+function buildUrl(port, path) {
+  return `http://127.0.0.1:${port}${path}`;
+}
+
+async function waitForHealthy(url, attempts = 40, validate) {
+  for (let remaining = attempts; remaining > 0; remaining -= 1) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        if (!validate) {
+          return;
+        }
+
+        const body = await response.text();
+        if (validate({ response, body })) {
+          return;
+        }
+      }
+    } catch {}
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  throw new Error(`timeout_waiting_for_${url}`);
+}
+
+function validateBffHealth({ body }) {
+  try {
+    const payload = JSON.parse(body);
+    return payload?.ok === true && payload?.service === 'opencampus-bff' && payload?.mode === 'thin-bff';
+  } catch {
+    return false;
+  }
+}
+
+async function canListenOnPort(port) {
+  return new Promise((resolve) => {
+    const server = createServer();
+    server.once('error', () => {
+      resolve(false);
+    });
+    server.listen(port, '127.0.0.1', () => {
+      server.close(() => resolve(true));
+    });
+  });
+}
+
+async function findEphemeralPort() {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      const port = typeof address === 'object' && address ? address.port : undefined;
+      server.close(() => {
+        if (!port) {
+          reject(new Error('unable_to_resolve_ephemeral_port'));
+          return;
+        }
+        resolve(port);
+      });
+    });
+  });
+}
+
+async function resolvePreferredPort(preferredPort, healthPath, label, validate) {
+  const preferredUrl = buildUrl(preferredPort, healthPath);
+  try {
+    await waitForHealthy(preferredUrl, 2, validate);
+    return preferredPort;
+  } catch {}
+
+  if (await canListenOnPort(preferredPort)) {
+    return preferredPort;
+  }
+
+  const fallbackPort = await findEphemeralPort();
+  console.error(`${label}_port_remapped:${preferredPort}->${fallbackPort}`);
+  return fallbackPort;
+}
+
+async function resolveOwnedPort(preferredPort, label) {
+  if (await canListenOnPort(preferredPort)) {
+    return preferredPort;
+  }
+
+  const fallbackPort = await findEphemeralPort();
+  console.error(`${label}_port_remapped:${preferredPort}->${fallbackPort}`);
+  return fallbackPort;
+}
+
+function validateSidepanelHealth({ body }) {
+  return body.includes('OpenCampus Sidepanel') && body.includes('surface-shell');
+}
+
+function validateProviderStatusHealth({ body }) {
+  try {
+    const payload = JSON.parse(body);
+    return payload?.ok === true && payload?.providers && typeof payload.providers === 'object';
+  } catch {
+    return false;
+  }
+}
+
+function source(site, resourceId, resourceType) {
+  return {
+    site,
+    resourceId,
+    resourceType,
+  };
+}
+
+function buildPublicScreenshotFixture() {
+  const now = Date.now();
+  const minutes = (value) => value * 60 * 1000;
+  const hours = (value) => value * 60 * 60 * 1000;
+  const days = (value) => value * 24 * 60 * 60 * 1000;
+  const iso = (offset) => new Date(now + offset).toISOString();
+
+  const courses = [
+    {
+      id: 'canvas:course:cse142',
+      kind: 'course',
+      site: 'canvas',
+      source: source('canvas', 'cse142', 'course'),
+      title: 'CSE 142',
+    },
+    {
+      id: 'gradescope:course:math126',
+      kind: 'course',
+      site: 'gradescope',
+      source: source('gradescope', 'math126', 'course'),
+      title: 'MATH 126',
+    },
+  ];
+
+  const assignments = [
+    {
+      id: 'canvas:assignment:hw5',
+      kind: 'assignment',
+      site: 'canvas',
+      source: source('canvas', 'hw5', 'assignment'),
+      courseId: 'canvas:course:cse142',
+      title: 'Homework 5',
+      dueAt: iso(hours(26)),
+      createdAt: iso(-days(2)),
+      status: 'todo',
+      url: 'https://canvas.uw.edu/courses/cse142/assignments/hw5',
+    },
+    {
+      id: 'canvas:assignment:lab6',
+      kind: 'assignment',
+      site: 'canvas',
+      source: source('canvas', 'lab6', 'assignment'),
+      courseId: 'canvas:course:cse142',
+      title: 'Lab 6 reflection',
+      dueAt: iso(hours(8)),
+      createdAt: iso(-hours(18)),
+      status: 'todo',
+      url: 'https://canvas.uw.edu/courses/cse142/assignments/lab6',
+    },
+  ];
+
+  const announcements = [
+    {
+      id: 'canvas:announcement:checkpoint',
+      kind: 'announcement',
+      site: 'canvas',
+      source: source('canvas', 'checkpoint', 'announcement'),
+      courseId: 'canvas:course:cse142',
+      title: 'Project checkpoint updated',
+      postedAt: iso(-hours(5)),
+      url: 'https://canvas.uw.edu/courses/cse142/announcements/checkpoint',
+    },
+  ];
+
+  const grades = [
+    {
+      id: 'gradescope:grade:hw4',
+      kind: 'grade',
+      site: 'gradescope',
+      source: source('gradescope', 'hw4', 'grade'),
+      courseId: 'gradescope:course:math126',
+      assignmentId: 'gradescope:assignment:hw4',
+      title: 'Homework 4',
+      score: 95,
+      maxScore: 100,
+      releasedAt: iso(-hours(3)),
+      url: 'https://www.gradescope.com/courses/math126/assignments/hw4',
+    },
+  ];
+
+  const messages = [
+    {
+      id: 'edstem:message:lab5',
+      kind: 'message',
+      site: 'edstem',
+      source: source('edstem', 'lab5', 'thread'),
+      messageKind: 'thread',
+      title: 'Lab 5 clarification posted',
+      createdAt: iso(-hours(2)),
+      unread: true,
+      instructorAuthored: true,
+      url: 'https://edstem.org/us/courses/lab5/posts/clarification',
+    },
+  ];
+
+  const syncState = [
+    {
+      key: 'canvas',
+      site: 'canvas',
+      status: 'success',
+      lastSyncedAt: iso(-minutes(9)),
+      lastOutcome: 'success',
+    },
+    {
+      key: 'gradescope',
+      site: 'gradescope',
+      status: 'success',
+      lastSyncedAt: iso(-minutes(7)),
+      lastOutcome: 'success',
+    },
+    {
+      key: 'edstem',
+      site: 'edstem',
+      status: 'success',
+      lastSyncedAt: iso(-minutes(6)),
+      lastOutcome: 'success',
+    },
+    {
+      key: 'myuw',
+      site: 'myuw',
+      status: 'success',
+      lastSyncedAt: iso(-minutes(5)),
+      lastOutcome: 'success',
+    },
+  ];
+
+  const trackedEntities = [...courses, ...assignments, ...announcements, ...grades, ...messages];
+  const entityState = trackedEntities.map((entity) => ({
+    key: entity.id,
+    entityId: entity.id,
+    site: entity.site,
+    kind: entity.kind,
+    firstSeenAt: entity.createdAt ?? entity.postedAt ?? entity.releasedAt ?? iso(-hours(4)),
+    lastSyncedAt: iso(-minutes(4)),
+  }));
+
+  return {
+    courses,
+    assignments,
+    announcements,
+    grades,
+    messages,
+    events: [],
+    sync_state: syncState,
+    entity_state: entityState,
+  };
+}
+
+async function seedPublicScreenshotData(page) {
+  const fixture = buildPublicScreenshotFixture();
+  await page.evaluate(async ({ fixture }) => {
+    const openDb = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('opencampus');
+      request.onerror = () => reject(new Error('open_indexeddb_failed'));
+      request.onsuccess = () => resolve(request.result);
+    });
+
+    const storeNames = ['courses', 'assignments', 'announcements', 'grades', 'messages', 'events', 'sync_state', 'entity_state'];
+    const tx = openDb.transaction(storeNames, 'readwrite');
+
+    for (const name of storeNames) {
+      tx.objectStore(name).clear();
+    }
+
+    for (const [name, records] of Object.entries(fixture)) {
+      const store = tx.objectStore(name);
+      for (const record of records) {
+        store.put(record);
+      }
+    }
+
+    await new Promise((resolve, reject) => {
+      tx.onerror = () => reject(tx.error ?? new Error('seed_transaction_failed'));
+      tx.onabort = () => reject(tx.error ?? new Error('seed_transaction_aborted'));
+      tx.oncomplete = () => resolve();
+    });
+
+    openDb.close();
+  }, { fixture });
+}
+
+async function capturePublicProofScreenshot(page, path) {
+  await page.addStyleTag({
+    content: `
+      #public-proof-snapshot {
+        max-width: 1240px !important;
+        padding: 28px !important;
+        margin: 24px auto !important;
+        display: grid !important;
+        gap: 22px !important;
+        border: 1px solid rgba(226, 221, 214, 0.92) !important;
+        border-radius: 24px !important;
+        background: rgba(251, 250, 246, 0.98) !important;
+        box-shadow: 0 18px 40px rgba(39, 72, 61, 0.08) !important;
+      }
+      #public-proof-snapshot .surface__mode-bar {
+        position: static !important;
+        margin-bottom: 0 !important;
+      }
+      #public-proof-snapshot .surface__card {
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+      #public-proof-snapshot .surface__assistant-stage {
+        gap: 0 !important;
+      }
+      #public-proof-snapshot .surface__panel--companion {
+        min-height: auto !important;
+      }
+      #public-proof-snapshot .surface__workspace-detail,
+      #public-proof-snapshot .surface__diagnostics-detail,
+      #public-proof-snapshot .surface__panel:not(.surface__panel--companion),
+      #public-proof-snapshot .surface__copy,
+      #public-proof-snapshot .surface__feedback {
+        display: none !important;
+      }
+    `,
+  });
+
+  await page.evaluate(() => {
+    document.getElementById('public-proof-snapshot')?.remove();
+
+    const snapshot = document.createElement('section');
+    snapshot.id = 'public-proof-snapshot';
+    const sourceModeBar = document.querySelector('.surface__mode-bar');
+    const sourceCompanion = document.querySelector('.surface__assistant-stage');
+
+    if (!sourceModeBar || !sourceCompanion) {
+      throw new Error('public_proof_capture_blocks_missing');
+    }
+
+    snapshot.append(sourceModeBar.cloneNode(true), sourceCompanion.cloneNode(true));
+
+    document.body.append(snapshot);
+  });
+
+  await page.locator('#public-proof-snapshot').screenshot({
+    path,
+  });
+}
+
+async function captureAskAiAnswerProofScreenshot(page, path) {
+  await page.addStyleTag({
+    content: `
+      #ask-ai-proof-snapshot {
+        max-width: 1240px !important;
+        padding: 28px !important;
+        margin: 24px auto !important;
+        display: grid !important;
+        gap: 20px !important;
+        border: 1px solid rgba(226, 221, 214, 0.92) !important;
+        border-radius: 24px !important;
+        background: rgba(251, 250, 246, 0.98) !important;
+        box-shadow: 0 18px 40px rgba(39, 72, 61, 0.08) !important;
+      }
+      #ask-ai-proof-snapshot .surface__panel--ask-ai {
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+      #ask-ai-proof-snapshot .surface__advanced-settings,
+      #ask-ai-proof-snapshot .surface__feedback {
+        display: none !important;
+      }
+    `,
+  });
+
+  await page.evaluate(() => {
+    document.getElementById('ask-ai-proof-snapshot')?.remove();
+    const askAiPanel = Array.from(document.querySelectorAll('article.surface__panel')).find((node) =>
+      node.textContent?.includes('Ask AI about this workspace'),
+    );
+    if (!askAiPanel) {
+      throw new Error('ask_ai_proof_capture_panel_missing');
+    }
+    const snapshot = document.createElement('section');
+    snapshot.id = 'ask-ai-proof-snapshot';
+    snapshot.append(askAiPanel.cloneNode(true));
+    document.body.append(snapshot);
+  });
+
+  await page.locator('#ask-ai-proof-snapshot').screenshot({
+    path,
+  });
+}
+
+async function ensureServer(url, start, validate) {
+  try {
+    await waitForHealthy(url, 2, validate);
+    return false;
+  } catch {
+    start();
+    await waitForHealthy(url, 40, validate);
+    return true;
+  }
+}
+
+function startApiServer(port) {
+  return startProcess(
+    'pnpm',
+    ['exec', 'tsx', 'src/server.ts'],
+    {
+      cwd: `${rootDir}/apps/api`,
+      env: {
+        ...process.env,
+        PORT: String(port),
+      },
+    },
+  );
+}
+
+async function cleanup() {
+  for (const child of startedProcesses.reverse()) {
+    if (child.exitCode !== null) {
+      continue;
+    }
+    child.kill('SIGTERM');
+    await new Promise((resolve) => child.once('exit', resolve));
+  }
+}
+
+async function collectFailureEvidence() {
+  const evidence = {};
+
+  if (page) {
+    try {
+      const pageText = ((await page.textContent('body')) ?? '').replace(/\s+/g, ' ').trim();
+      if (pageText) {
+        evidence.pageTextPreview = pageText.slice(0, 1600);
+      }
+    } catch (error) {
+      evidence.pageTextPreviewError = error instanceof Error ? error.message : String(error);
+    }
+  }
+
+  if (activeBffBaseUrl) {
+    try {
+      const response = await fetch(`${activeBffBaseUrl}/api/providers/status`);
+      evidence.providerStatusHttp = {
+        status: response.status,
+        body: await response.text(),
+      };
+    } catch (error) {
+      evidence.providerStatusHttpError = error instanceof Error ? error.message : String(error);
+    }
+  }
+
+  if (activeSidepanelUrl) {
+    evidence.sidepanelUrl = activeSidepanelUrl;
+  }
+
+  if (activeBffBaseUrl) {
+    evidence.bffBaseUrl = activeBffBaseUrl;
+  }
+
+  return evidence;
+}
+
+function buildChromeMocks() {
+  return ({ baseUrl, bffBaseUrl, defaultProvider, defaultModel, uiLanguage, browserLanguage, screenshotMode }) => {
+    const CONFIG_KEY = 'openCampusConfig';
+    const seededBffBaseUrl = bffBaseUrl;
+    const defaultConfig = {
+        [CONFIG_KEY]: {
+          defaultExportFormat: 'markdown',
+          uiLanguage,
+          ai: {
+            bffBaseUrl: seededBffBaseUrl,
+            defaultProvider,
+          models: {
+            openai: defaultProvider === 'openai' ? defaultModel : 'gpt-4.1-mini',
+            gemini: defaultProvider === 'gemini' ? defaultModel : 'gemini-2.5-flash',
+          },
+        },
+        authorization: {
+          policyVersion: 'sidepanel-smoke',
+          updatedAt: new Date().toISOString(),
+          rules: [
+            {
+              id: 'global-layer1-read-export-workspace',
+              layer: 'layer1_read_export',
+              status: 'allowed',
+              resourceFamily: 'workspace_snapshot',
+              label: 'All sites structured read/export',
+            },
+            {
+              id: 'global-layer2-ai-read-workspace',
+              layer: 'layer2_ai_read_analysis',
+              status: 'allowed',
+              resourceFamily: 'workspace_snapshot',
+              label: 'All sites AI read/analysis status',
+            },
+          ],
+        },
+        sites: {
+          edstem: {},
+        },
+      },
+    };
+    const listeners = [];
+    const readJson = (key, fallback) => {
+      const raw = window.localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    };
+    const writeJson = (key, value) => {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    };
+
+    if (!window.localStorage.getItem('__extension_storage__')) {
+      writeJson('__extension_storage__', defaultConfig);
+    }
+
+    const getStorageState = () => readJson('__extension_storage__', defaultConfig);
+    const setStorageState = (nextState) => writeJson('__extension_storage__', nextState);
+    const emitChange = (changes) => listeners.forEach((listener) => listener(changes, 'local'));
+    const buildIdleCounts = (site) => ({
+      site,
+      courses: 0,
+      assignments: 0,
+      announcements: 0,
+      grades: 0,
+      messages: 0,
+      events: 0,
+    });
+
+    const chrome = {
+      storage: {
+        local: {
+          async get(keys) {
+            const state = getStorageState();
+            if (!keys) {
+              return state;
+            }
+            if (typeof keys === 'string') {
+              return { [keys]: state[keys] };
+            }
+            if (Array.isArray(keys)) {
+              return Object.fromEntries(keys.map((key) => [key, state[key]]));
+            }
+            return { ...keys, ...state };
+          },
+          async set(items) {
+            const state = getStorageState();
+            const changes = {};
+            for (const [key, value] of Object.entries(items)) {
+              changes[key] = {
+                oldValue: state[key],
+                newValue: value,
+              };
+              state[key] = value;
+            }
+            setStorageState(state);
+            emitChange(changes);
+          },
+        },
+        onChanged: {
+          addListener(listener) {
+            listeners.push(listener);
+          },
+          removeListener(listener) {
+            const index = listeners.indexOf(listener);
+            if (index >= 0) {
+              listeners.splice(index, 1);
+            }
+          },
+        },
+      },
+      runtime: {
+        async sendMessage(message) {
+          if (message?.type === 'getSiteSyncStatus') {
+            return {
+              type: 'getSiteSyncStatus',
+              site: message.site,
+              status: {
+                site: message.site,
+                status: 'idle',
+                counts: buildIdleCounts(message.site),
+              },
+            };
+          }
+          if (message?.type === 'syncSite') {
+            return {
+              type: 'syncSite',
+              site: message.site,
+              outcome: 'success',
+              status: {
+                site: message.site,
+                status: 'success',
+                lastOutcome: 'success',
+                lastSyncedAt: new Date().toISOString(),
+                counts: buildIdleCounts(message.site),
+              },
+            };
+          }
+          return undefined;
+        },
+        onMessage: {
+          addListener() {},
+        },
+        async openOptionsPage() {},
+      },
+      downloads: {
+        async download() {
+          return 1;
+        },
+      },
+      tabs: {
+        async query() {
+          return [{ id: 1, url: baseUrl }];
+        },
+      },
+      scripting: {
+        async executeScript() {
+          return [{ result: { pageHtml: '<main></main>', pageState: { notices: [], events: [] } } }];
+        },
+      },
+    };
+
+    Object.defineProperty(window.navigator, 'language', {
+      configurable: true,
+      get: () => browserLanguage,
+    });
+    Object.defineProperty(window.navigator, 'languages', {
+      configurable: true,
+      get: () => [browserLanguage],
+    });
+
+    Object.assign(window, { chrome, browser: chrome });
+  };
+}
+
+try {
+  const bffPort = await resolveOwnedPort(requestedBffPort, 'sidepanel_smoke_bff');
+  const sidepanelPort = await resolvePreferredPort(
+    requestedSidepanelPort,
+    '/sidepanel.html',
+    'sidepanel_smoke',
+    validateSidepanelHealth,
+  );
+  const bffBaseUrl = buildUrl(bffPort, '');
+  const sidepanelUrl = buildUrl(sidepanelPort, '/sidepanel.html');
+  activeBffBaseUrl = bffBaseUrl;
+  activeSidepanelUrl = sidepanelUrl;
+
+  await ensureServer(`${bffBaseUrl}/health`, () => {
+    startApiServer(bffPort);
+  }, validateBffHealth);
+  await waitForHealthy(`${bffBaseUrl}/api/providers/status`, 40, validateProviderStatusHealth);
+  await ensureServer(sidepanelUrl, () => {
+    startProcess('node', ['tests/smoke-server.mjs'], {
+      cwd: `${rootDir}/apps/extension`,
+      env: {
+        ...process.env,
+        EXTENSION_SMOKE_PORT: String(sidepanelPort),
+      },
+    });
+  }, validateSidepanelHealth);
+
+  browser = await chromium.launch({ headless: true });
+  page = await browser.newPage(
+    screenshotMode === 'public-proof'
+      ? {
+          viewport: {
+            width: 1480,
+            height: 1400,
+          },
+        }
+      : undefined,
+  );
+  await page.addInitScript(buildChromeMocks(), {
+    baseUrl: 'https://canvas.uw.edu/',
+    bffBaseUrl,
+    defaultProvider,
+    defaultModel,
+    uiLanguage,
+    browserLanguage,
+    screenshotMode,
+  });
+
+  await page.goto(sidepanelUrl);
+  const providerLabel = defaultProvider === 'gemini' ? 'Gemini' : 'OpenAI';
+  const providerReadySummary = page
+    .locator('.surface__status-intro')
+    .filter({ hasText: providerLabel })
+    .filter({ hasText: providerReadyStatusLabel })
+    .filter({ hasText: providerConfiguredReasonLabel })
+    .first();
+  if (!(await providerReadySummary.isVisible().catch(() => false))) {
+    await page.getByRole('button', { name: refreshProviderLabel }).click().catch(() => {});
+  }
+  await page.waitForFunction(
+    ({ providerLabel, providerReadyStatusLabel, providerConfiguredReasonLabel, assistantRouteModeLabel, assistantReadySummaryLabel }) => {
+      const text = document.body.innerText;
+      return (
+        (text.includes(providerLabel) &&
+          text.includes(providerReadyStatusLabel) &&
+          text.includes(providerConfiguredReasonLabel)) ||
+        (text.includes(assistantRouteModeLabel) && text.includes(assistantReadySummaryLabel))
+      );
+    },
+    {
+      providerLabel,
+      providerReadyStatusLabel,
+      providerConfiguredReasonLabel,
+      assistantRouteModeLabel,
+      assistantReadySummaryLabel,
+    },
+    { timeout: 20000 },
+  );
+  if (screenshotPath) {
+    await seedPublicScreenshotData(page);
+    await page.reload();
+    await page.waitForFunction(
+      ({ providerLabel, providerReadyStatusLabel, providerConfiguredReasonLabel, assistantRouteModeLabel, assistantReadySummaryLabel }) => {
+        const text = document.body.innerText;
+        return (
+          (text.includes(providerLabel) &&
+            text.includes(providerReadyStatusLabel) &&
+            text.includes(providerConfiguredReasonLabel)) ||
+          (text.includes(assistantRouteModeLabel) && text.includes(assistantReadySummaryLabel))
+        );
+      },
+      {
+        providerLabel,
+        providerReadyStatusLabel,
+        providerConfiguredReasonLabel,
+        assistantRouteModeLabel,
+        assistantReadySummaryLabel,
+      },
+      { timeout: 20000 },
+    );
+    mkdirSync(dirname(screenshotPath), { recursive: true });
+    await capturePublicProofScreenshot(page, screenshotPath);
+  }
+  await page.getByLabel(questionLabel).fill('Reply with the single word READY.');
+  await page.getByRole('button', { name: askAiLabel }).click();
+  await page.waitForFunction(
+    () => Boolean(document.querySelector('.surface__answer, .surface__feedback--error')),
+    { timeout: 45000 },
+  );
+
+  const answerLocator = page.locator('.surface__answer');
+  const uiErrorLocator = page.locator('.surface__feedback--error');
+  const citationsLocator = page.getByRole('heading', { name: /Citations|引用/ });
+  const answerText = (await answerLocator.count())
+    ? ((await answerLocator.textContent()) ?? '').trim()
+    : '';
+  const uiErrorText = (await uiErrorLocator.count())
+    ? ((await uiErrorLocator.first().textContent()) ?? '').trim()
+    : '';
+  if (!answerText && uiErrorText) {
+    throw new Error(`sidepanel_ai_error:${uiErrorText}`);
+  }
+  const citationsVisible = await citationsLocator.first().isVisible().catch(() => false);
+  if (!answerText) {
+    throw new Error('answer_text_missing');
+  }
+  if (!answerText.toUpperCase().includes('READY') && !citationsVisible) {
+    throw new Error(`answer_text_missing_ready:${answerText}`);
+  }
+  if (answerScreenshotPath) {
+    mkdirSync(dirname(answerScreenshotPath), { recursive: true });
+    await captureAskAiAnswerProofScreenshot(page, answerScreenshotPath);
+  }
+
+  console.log(
+    JSON.stringify(
+      {
+        status: 'ok',
+        provider: defaultProvider,
+        model: defaultModel,
+        answerText,
+        sidepanelUrl,
+        bffBaseUrl,
+        ...(screenshotPath ? { screenshotPath } : {}),
+        ...(answerScreenshotPath ? { answerScreenshotPath } : {}),
+      },
+      null,
+      2,
+    ),
+  );
+
+  await browser.close();
+  browser = undefined;
+  page = undefined;
+  await cleanup();
+} catch (error) {
+  const failureEvidence = await collectFailureEvidence().catch(() => ({}));
+  if (browser) {
+    await browser.close().catch(() => {});
+    browser = undefined;
+    page = undefined;
+  }
+  await cleanup().catch(() => {});
+  console.error(
+    JSON.stringify(
+      {
+        status: 'failed',
+        reason: error instanceof Error ? error.message : String(error),
+        ...failureEvidence,
+      },
+      null,
+      2,
+    ),
+  );
+  process.exit(1);
+}

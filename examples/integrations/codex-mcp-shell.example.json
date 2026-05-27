@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "opencampus": {
+      "command": "bash",
+      "args": [
+        "/absolute/path/to/opencampus/scripts/consumer/opencampus-mcp.sh"
+      ]
+    }
+  }
+}

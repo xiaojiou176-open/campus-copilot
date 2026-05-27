@@ -1,0 +1,482 @@
+openapi: 3.1.0
+info:
+  title: OpenCampus Local BFF
+  version: 0.1.0
+  summary: Thin local HTTP edge for formal provider calls and provider readiness.
+  description: >
+    This contract describes the current repo-local HTTP surface that ships in the
+    repository today. It is intended for local integration, testing, and
+    future read-only substrate work. It does not imply a hosted public API,
+    public auth flow, public MCP surface, or public SDK product.
+servers:
+  - url: http://127.0.0.1:8787
+    description: Default local BFF address
+tags:
+  - name: health
+    description: Local service readiness
+  - name: providers
+    description: Formal provider readiness and chat proxy routes
+  - name: ai
+    description: Student-facing AI consumer seam that preserves Campus semantics
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Return local BFF health
+      operationId: getHealth
+      responses:
+        '200':
+          description: Thin BFF is running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                requestId: 0e0a7acb-6d81-4744-a234-3460910c3e36
+                ok: true
+                service: opencampus-bff
+                mode: thin-bff
+  /api/providers/status:
+    get:
+      tags: [providers]
+      summary: Return formal provider readiness without exposing secret values
+      operationId: getProviderStatus
+      responses:
+        '200':
+          description: Provider readiness envelope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderStatusResponse'
+              example:
+                requestId: e9e506ad-c476-4592-be96-333f91df9739
+                ok: true
+                providers:
+                  openai:
+                    ready: false
+                    reason: missing_api_key
+                  gemini:
+                    ready: true
+                    reason: configured
+                  switchyard:
+                    ready: false
+                    reason: missing_runtime_url
+  /api/ai/ask:
+    post:
+      tags: [ai]
+      summary: Ask through the Campus consumer seam with switchyard-first compatibility
+      operationId: postAiAsk
+      description: >
+        This is the stable consumer-facing seam for OpenCampus builder tools.
+        It keeps Campus response semantics (`answerText`, optional `structuredAnswer`,
+        citations/trust-gaps/next-actions) while preferring the local Switchyard runtime
+        when the request and local configuration allow it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampusAiAskRequest'
+            example:
+              provider: gemini
+              model: gemini-2.5-flash
+              runtimeMode: switchyard_first
+              messages:
+                - role: user
+                  content: What should I do first this week, and why?
+      responses:
+        '200':
+          description: Campus consumer seam response with preserved product semantics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampusAiAskResponse'
+        '400':
+          description: Local provider/runtime path is not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Upstream provider/runtime request failed or returned invalid content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/providers/openai/chat:
+    post:
+      tags: [providers]
+      summary: Proxy a formal OpenAI API-key chat request
+      operationId: postOpenAiChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderChatRequest'
+            example:
+              provider: openai
+              model: gpt-4.1-mini
+              messages:
+                - role: user
+                  content: What should I do first today, and why?
+      responses:
+        '200':
+          description: Provider response forwarded through the thin BFF
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderChatResponse'
+        '400':
+          description: Provider is not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Upstream provider request failed or returned invalid content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/providers/gemini/chat:
+    post:
+      tags: [providers]
+      summary: Proxy a formal Gemini API-key chat request
+      operationId: postGeminiChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderChatRequest'
+            example:
+              provider: gemini
+              model: gemini-2.5-flash
+              messages:
+                - role: user
+                  content: What changed since the latest sync?
+      responses:
+        '200':
+          description: Provider response forwarded through the thin BFF
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderChatResponse'
+        '400':
+          description: Provider is not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Upstream provider request failed or returned invalid content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/providers/switchyard/chat:
+    post:
+      tags: [providers]
+      summary: Proxy a local Switchyard runtime request through one optional local service boundary
+      operationId: postSwitchyardChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwitchyardChatRequest'
+            example:
+              provider: chatgpt
+              model: gpt-5
+              lane: web
+              messages:
+                - role: user
+                  content: Summarize the current trust gaps.
+      responses:
+        '200':
+          description: Local runtime response forwarded through the thin BFF
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SwitchyardChatResponse'
+        '400':
+          description: Switchyard runtime is not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Local runtime request failed or returned invalid content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    RequestId:
+      type: string
+      format: uuid
+    ChatRole:
+      type: string
+      enum: [user, assistant, system]
+    ChatMessage:
+      type: object
+      additionalProperties: false
+      required: [role, content]
+      properties:
+        role:
+          $ref: '#/components/schemas/ChatRole'
+        content:
+          type: string
+    Citation:
+      type: object
+      additionalProperties: false
+      required: [entityId, kind, site, title]
+      properties:
+        entityId:
+          type: string
+        kind:
+          type: string
+        site:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+    StructuredAnswer:
+      type: object
+      additionalProperties: false
+      required: [summary, bullets, citations]
+      properties:
+        summary:
+          type: string
+        bullets:
+          type: array
+          items:
+            type: string
+        nextActions:
+          type: array
+          description: Concrete operator next steps derived from the structured workbench context.
+          items:
+            type: string
+        trustGaps:
+          type: array
+          description: Evidence gaps or blockers the user should verify before acting.
+          items:
+            type: string
+        citations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Citation'
+    CitationCoverage:
+      type: string
+      enum: [structured_citations, uncited_fallback, no_answer]
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required: [requestId, ok, service, mode]
+      properties:
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        ok:
+          type: boolean
+          const: true
+        service:
+          type: string
+          const: opencampus-bff
+        mode:
+          type: string
+          const: thin-bff
+    ProviderReadiness:
+      type: object
+      additionalProperties: false
+      required: [ready, reason]
+      properties:
+        ready:
+          type: boolean
+        reason:
+          type: string
+    ProviderStatusMap:
+      type: object
+      additionalProperties: false
+      required: [openai, gemini, switchyard]
+      properties:
+        openai:
+          $ref: '#/components/schemas/ProviderReadiness'
+        gemini:
+          $ref: '#/components/schemas/ProviderReadiness'
+        switchyard:
+          $ref: '#/components/schemas/ProviderReadiness'
+    ProviderStatusResponse:
+      type: object
+      additionalProperties: false
+      required: [requestId, ok, providers]
+      properties:
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        ok:
+          type: boolean
+        providers:
+          $ref: '#/components/schemas/ProviderStatusMap'
+    ProviderChatRequest:
+      type: object
+      additionalProperties: false
+      required: [provider, model, messages]
+      properties:
+        provider:
+          type: string
+          enum: [openai, gemini]
+        model:
+          type: string
+        messages:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+    RuntimeMode:
+      type: string
+      enum: [auto, switchyard_first, direct]
+    RuntimePath:
+      type: string
+      enum: [direct, switchyard]
+    SwitchyardChatRequest:
+      type: object
+      additionalProperties: false
+      required: [provider, model, messages]
+      properties:
+        provider:
+          type: string
+          enum: [chatgpt, gemini, claude, grok, qwen]
+        model:
+          type: string
+        lane:
+          type: string
+          enum: [web, byok]
+        messages:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+    CampusAiAskRequest:
+      type: object
+      additionalProperties: false
+      required: [provider, model, messages]
+      properties:
+        provider:
+          type: string
+          enum: [openai, gemini]
+        model:
+          type: string
+        runtimeMode:
+          $ref: '#/components/schemas/RuntimeMode'
+        switchyardProvider:
+          type: string
+          enum: [chatgpt, gemini, claude, grok, qwen]
+        lane:
+          type: string
+          enum: [web, byok]
+        messages:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+    ProviderChatResponse:
+      type: object
+      additionalProperties: false
+      required: [requestId, ok, provider, forwardedStatus]
+      properties:
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        ok:
+          type: boolean
+        provider:
+          type: string
+          enum: [openai, gemini]
+        runtimePath:
+          $ref: '#/components/schemas/RuntimePath'
+        forwardedStatus:
+          type: integer
+        answerText:
+          type: string
+        structuredAnswer:
+          $ref: '#/components/schemas/StructuredAnswer'
+        citationCoverage:
+          $ref: '#/components/schemas/CitationCoverage'
+        error:
+          type: string
+    SwitchyardChatResponse:
+      type: object
+      additionalProperties: false
+      required: [requestId, ok, provider, runtimeProvider, forwardedStatus]
+      properties:
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        ok:
+          type: boolean
+        provider:
+          type: string
+          const: switchyard
+        runtimePath:
+          $ref: '#/components/schemas/RuntimePath'
+        runtimeProvider:
+          type: string
+          enum: [chatgpt, gemini, claude, grok, qwen]
+        lane:
+          type: string
+          enum: [web, byok]
+        forwardedStatus:
+          type: integer
+        answerText:
+          type: string
+        structuredAnswer:
+          $ref: '#/components/schemas/StructuredAnswer'
+        citationCoverage:
+          $ref: '#/components/schemas/CitationCoverage'
+        error:
+          type: string
+    CampusAiAskResponse:
+      type: object
+      additionalProperties: false
+      required: [requestId, ok, provider, runtimePath]
+      properties:
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        ok:
+          type: boolean
+        provider:
+          type: string
+          enum: [openai, gemini, switchyard]
+        runtimePath:
+          $ref: '#/components/schemas/RuntimePath'
+        runtimeProvider:
+          type: string
+          enum: [chatgpt, gemini, claude, grok, qwen]
+        lane:
+          type: string
+          enum: [web, byok]
+        forwardedStatus:
+          type: integer
+        answerText:
+          type: string
+        structuredAnswer:
+          $ref: '#/components/schemas/StructuredAnswer'
+        citationCoverage:
+          $ref: '#/components/schemas/CitationCoverage'
+        error:
+          type: string
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      additionalProperties: true
+      required: [requestId, ok, error]
+      properties:
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: string
